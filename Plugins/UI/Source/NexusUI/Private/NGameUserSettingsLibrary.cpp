@@ -36,7 +36,7 @@ EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromString(const FStri
 
 EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromText(const FText& Selection)
 {
-#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX	
+#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 	if (Selection.EqualTo(DisplayModeTexts[2]))
 	{
 		return EWindowMode::Type::Windowed;
@@ -101,7 +101,7 @@ FString UNGameUserSettingsLibrary::GetSelectionStringFromWindowMode(const EWindo
 
 FText UNGameUserSettingsLibrary::GetSelectionTextFromWindowMode(EWindowMode::Type Mode)
 {
-#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX	
+#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 	switch(Mode)
 	{
 	case EWindowMode::WindowedFullscreen:
@@ -134,16 +134,16 @@ FString UNGameUserSettingsLibrary::GetSelectionFromDisplayResolution(const FIntP
 FIntPoint UNGameUserSettingsLibrary::GetDisplayResolutionFromSelection(const FString& Selection)
 {
 	TArray<FString> Resolution;
-	
+
 	// Parse
 	const int32 ElementCount = Selection.ParseIntoArray(Resolution, TEXT("x"), true);
-	
+
 	// Ensure we can convert to a FIntPoint (in-case the provided string isn't one we made)
 	if (ElementCount < 2)
 	{
 		return FIntPoint(-1,-1);
 	}
-	
+
 	// Return our value
 	return FIntPoint(
 		FCString::Atoi(*Resolution[0].TrimStartAndEnd()),

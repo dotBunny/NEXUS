@@ -18,7 +18,7 @@ UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Style Library")
 class UNStyleLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-	
+
 public:
 	/** @return The canonical warning accent color used by NEXUS UI treatments. */
 	UFUNCTION(BlueprintPure, DisplayName="Get Warning Color", Category = "NEXUS|User Interface|Style")

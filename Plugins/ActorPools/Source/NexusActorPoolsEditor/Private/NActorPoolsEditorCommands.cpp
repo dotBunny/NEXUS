@@ -61,7 +61,7 @@ void FNActorPoolsEditorCommands::AddMenuEntries()
 								NSLOCTEXT("NexusActorPools", "AddActorPoolMethods", "Add NActorPool Methods"),
 								NSLOCTEXT("NexusActorPools", "AddActorPoolMethods_Tooltip", "Adds optional Actor Pool methods to the Blueprint."),
 								FSlateIcon(FNActorPoolsEditorStyle::GetStyleSetName(), "ClassIcon.NActorPool"),
-								FUIAction(FExecuteAction::CreateStatic(&FNActorPoolsEditorCommands::AddActorPoolMethods, EditedObject), 
+								FUIAction(FExecuteAction::CreateStatic(&FNActorPoolsEditorCommands::AddActorPoolMethods, EditedObject),
 								FCanExecuteAction())
 							);
 				}
@@ -86,9 +86,9 @@ void FNActorPoolsEditorCommands::AddActorPoolMethods(const UObject* EditedObject
 
 	IAssetEditorInstance* EditorInstance = AssetEditorSubsystem->FindEditorForAsset(const_cast<UObject*>(EditedObject), false);
 	if (EditorInstance == nullptr) return;
-	
+
 	if (EditorInstance && EditorInstance->GetEditorName() == FName("BlueprintEditor"))
-	{	
+	{
 		FBlueprintEditor* BlueprintEditor = static_cast<FBlueprintEditor*>(EditorInstance);
 		UBlueprint* Blueprint = BlueprintEditor->GetBlueprintObj();
 
@@ -107,7 +107,7 @@ void FNActorPoolsEditorCommands::AddActorPoolMethods(const UObject* EditedObject
 		N_ACTOR_POOL_INVOKE_METHODS(OnSpawned, NEXUS::ActorPools::InvokeMethods::OnSpawnedFromActorPool, NEXUS::ActorPools::InvokeMethods::Category)
 		N_ACTOR_POOL_INVOKE_METHODS(OnReturn, NEXUS::ActorPools::InvokeMethods::OnReturnToActorPool, NEXUS::ActorPools::InvokeMethods::Category)
 		N_ACTOR_POOL_INVOKE_METHODS(OnReleased, NEXUS::ActorPools::InvokeMethods::OnReleasedFromActorPool, NEXUS::ActorPools::InvokeMethods::Category)
-		
+
 		FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
 	}
 }

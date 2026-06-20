@@ -26,7 +26,7 @@ public:
 		BoundsVertex = 2,
 		HullEdge = 3,
 	};
-	
+
 	//~FComponentVisualizer
 	virtual void DrawVisualization(const UActorComponent* Component, const FSceneView* View, FPrimitiveDrawInterface* PDI) override;
 	virtual void EndEditing() override;
@@ -37,7 +37,7 @@ public:
 
 	virtual bool VisProxyHandleClick(FEditorViewportClient* InViewportClient, HComponentVisProxy* VisProxy, const FViewportClick& Click) override;
 	//End FComponentVisualizer
-	
+
 	ENCellEditMode GetMode() const { return CurrentEditMode; }
 	/** @return true if a full hull edge (both endpoints) is currently selected. */
 	bool HasEdgeSelected() const { return EdgeStartIndex != -1 && EdgeEndIndex != -1; }
@@ -55,7 +55,7 @@ private:
 	const float PointSize = 12.0f;
 
 	bool EditHullEdge(UNCellRootComponent* Component, int32 IndexA, int32 IndexB);
-	
+
 	/** Apply a drag delta to the hull vertex at Index; returns true if the component was mutated. */
 	bool EditHullVertex(UNCellRootComponent* Component, int32 Index);
 

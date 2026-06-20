@@ -44,7 +44,7 @@ public:
 	/** When false, the organ is skipped entirely by the World Assembly pipeline. */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Inputs")
 	bool bActivated = true;
-	
+
 	/** When false, the organ can produce no results and still be considered a successful assembly operation. */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Inputs")
 	bool bRequired = true;
@@ -60,7 +60,7 @@ public:
 	/** Upper bound on the cell count placed in this organ; 0 means no maximum. */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Requirements", meta=(ClampMin=0))
 	int32 MaximumCellCount = 0;
-	
+
 	/** Context tags the finished organ must carry; enforced as RequiredContextTags during graph validation. */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Requirements")
 	FGameplayTagContainer ContextTags;
@@ -72,11 +72,11 @@ public:
 	/** Tissues (and transitively, cells) the organ may draw from during generation. */
 	UPROPERTY(EditAnywhere, Category = "Organ Component")
 	TArray<TSoftObjectPtr<UNTissue>> Tissues;
-	
+
 	/** Controls when the organ is allowed to generate (on-demand, begin-play). */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Organ Component|Operation", meta = (DisplayPriority = 200))
 	ENOrganGenerationTrigger GenerationTrigger = ENOrganGenerationTrigger::OnDemand;
-	
+
 	/** Deterministic seed mixed into the organ's generation decisions. */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Operation")
 	int32 Seed = -1;

@@ -22,7 +22,7 @@ class NEXUSWORLDASSEMBLY_API UNWorldAssemblyLibrary : public UBlueprintFunctionL
 	GENERATED_BODY()
 
 public:
-	
+
 	/**
 	 * Convert a junction's grid socket size into world units using the project's SocketSize/SocketDepth settings.
 	 * @param JunctionComponent The junction whose socket size to convert.
@@ -47,7 +47,7 @@ public:
 		}
 		return ReturnVector;
 	}
-	
+
 	/**
 	 * Variant of GetJunctionWorldSize that returns the size as (Depth, X, Y) — useful when the depth axis must lead.
 	 * @param JunctionComponent The junction whose socket size to convert.
@@ -64,11 +64,11 @@ public:
 		}
 		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
 		return FVector(
-			Settings->SocketDepth * Scale, 
-			(JunctionComponent->Details.SocketSize.X * Settings->SocketSize.X) * Scale, 
+			Settings->SocketDepth * Scale,
+			(JunctionComponent->Details.SocketSize.X * Settings->SocketSize.X) * Scale,
 			(JunctionComponent->Details.SocketSize.Y * Settings->SocketSize.Y) * Scale);
 	}
-	
+
 	/**
 	 * @param JunctionComponent The junction to query.
 	 * @param SocketSize Socket size (in grid units) to project the corners for.
@@ -84,12 +84,12 @@ public:
 		}
 		return JunctionComponent->GetWorldCornerPoints(SocketSize);
 	};
-	
-	
+
+
 	/** @return A freshly generated human-friendly seed string suitable for use as FNAssemblyOperationSettings::Seed. */
 	UFUNCTION(BlueprintPure, Category = "NEXUS|WorldAssembly", DisplayName="Get New Friendly Seed")
 	static FString GetNewFriendlySeed() { return FNSeedGenerator::RandomFriendlySeed(); }
-	
+
 	/**
 	 * @param LevelInstance The cell level instance to query.
 	 * @return The final context tags associated with the world assembly.
@@ -142,7 +142,7 @@ public:
 	{
 		return IsValid(LevelInstance) ? LevelInstance->GetNodeIdentifier() : INDEX_NONE;
 	}
-	
+
 	/**
 	 * @param LevelInstance The cell level instance to query.
 	 * @return The final TagCounter for the assembly operation.
@@ -206,7 +206,7 @@ public:
 	{
 		return IsValid(LevelInstance) && LevelInstance->IsHotPathShortest();
 	};
-	
+
 	/**
 	 * @param LevelInstance The cell level instance to query.
 	 * @return true if this cell lies on the shortest-path hot path (spokes from the start cell).
@@ -227,7 +227,7 @@ public:
 	{
 		return IsValid(LevelInstance) && LevelInstance->IsHotPathSequential();
 	};
-	
+
 	/**
 	 * @param LevelInstance The cell level instance to query.
 	 * @return true if this cell lies on the sequential hot path (nearest-first visiting chain).
@@ -238,7 +238,7 @@ public:
 	{
 		return IsValid(LevelInstance) && LevelInstance->IsHotPathSequential();
 	};
-	
+
 	/**
 	 * @param LevelInstance The cell level instance to query.
 	 * @param Tag Tag to look for.
@@ -359,7 +359,7 @@ public:
 	{
 		return FNWorldAssemblyContextCache::HasOperation(OperationTicket);
 	}
-	
+
 	/**
 	 * Exec-pin variant of Has Operation Context Cache; the result drives the True/False execution outputs in Blueprint.
 	 * @param OperationTicket Ticket identifying the assembly operation.
@@ -445,7 +445,7 @@ public:
 	{
 		return FNWorldAssemblyContextCache::HasContextTags(OperationTicket, TagContainer);
 	}
-	
+
 	/**
 	 * Exec-pin variant of Has Operation Context Tag(s); the result drives the True/False execution outputs in Blueprint.
 	 * @param OperationTicket Ticket identifying the assembly operation.

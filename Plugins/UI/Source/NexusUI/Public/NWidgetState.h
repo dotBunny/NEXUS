@@ -103,8 +103,8 @@ struct FNWidgetState
 				}
 			}
 		}
-		
-		
+
+
 		BooleanKeys.Add(Key);
 		BooleanValues.Add(bValue);
 		return BooleanValues.Num() - 1;
@@ -159,8 +159,8 @@ struct FNWidgetState
 				}
 			}
 		}
-		
-		
+
+
 		FloatKeys.Add(Key);
 		FloatValues.Add(Value);
 		return FloatValues.Num() - 1;

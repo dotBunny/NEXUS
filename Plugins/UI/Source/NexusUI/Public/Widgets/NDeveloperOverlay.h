@@ -47,13 +47,13 @@ public:
 	void UnbindAllCurrentWorlds();
 
 	/** Override to subscribe to a specific world's subsystems when the overlay is constructed or a world is added. */
-	virtual void BindWorld(UWorld* World) 
-	{ 
+	virtual void BindWorld(UWorld* World)
+	{
 		// To be defined by overlay implementation
 	}
 	/** Override to unsubscribe from a specific world's subsystems when the overlay is destroyed or a world is removed. */
 	virtual void UnbindWorld(const UWorld* World)
-	{ 
+	{
 		// To be defined by overlay implementation
 	}
 

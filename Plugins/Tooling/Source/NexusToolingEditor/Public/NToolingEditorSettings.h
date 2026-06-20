@@ -44,7 +44,7 @@ public:
 #if WITH_EDITOR
 	/** @return true if AssetPath matches ValidatorIgnoredAssets or starts with an entry in ValidatorIgnoredPrefixes. */
 	bool IsAssetIgnored(const FSoftObjectPath& AssetPath) const;
-	
+
 	//~UObject
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override
 	{
@@ -67,7 +67,7 @@ public:
 #endif // WITH_EDITOR
 
 #if WITH_EDITORONLY_DATA
-	
+
 	/** Override for the editor's Starship AppIcon (SVG or image); takes effect after an editor restart. */
 	UPROPERTY(EditAnywhere, config, Category = "Editor Icon", DisplayName = "AppIcon Path", meta=(ToolTip="Replaces the Starship AppIcon style, can be in SVG or image format. A restart of the editor is required for it to take effect."))
 	FString ProjectAppIconPath;
@@ -113,7 +113,7 @@ public:
 	/** When true, multiplayer-test authentication goes through the Online Subsystem. */
 	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test", meta = (DisplayName = "Use Online Subsystem", Tooltip = "Should authentication use the Online Subsystem?"))
 	bool bMultiplayerTestUseOnlineSubsystem = false;
-	
+
 	/**
 	 * Forwards the project-level multiplayer-test toggles onto the supplied play-session request.
 	 * @param Params The play-session request whose Online Subsystem behavior should be set.

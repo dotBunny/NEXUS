@@ -14,7 +14,7 @@ UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath,
 {
 	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
 	if (System == nullptr) return nullptr;
-	
+
 	if (Identifier != NAME_None && System->HasWidget(Identifier))
 	{
 		UNEditorUtilityWidget* Widget = System->GetWidget(Identifier);
@@ -29,22 +29,22 @@ UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath,
 		}
 		return System->GetWidget(Identifier);
 	}
-	
+
 	if(UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>())
 	{
-		const TObjectPtr<UEditorUtilityWidgetBlueprint> LoadedWidgetBlueprint = 
+		const TObjectPtr<UEditorUtilityWidgetBlueprint> LoadedWidgetBlueprint =
 			LoadObject<UEditorUtilityWidgetBlueprint>(GetTransientPackage(), ObjectPath);
-		
+
 		if (!IsValid(LoadedWidgetBlueprint))
 		{
 			UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to load(%s) when trying to SpawnTab from UNEditorUtilityWidget."), *ObjectPath)
 			return nullptr;
 		}
-		
+
 		// Use an internal system to spawn and register the widget
 		FName TabIdentifier;
 		UEditorUtilityWidget* SpawnedWidget = EditorUtilitySubsystem->SpawnAndRegisterTabAndGetID(LoadedWidgetBlueprint, TabIdentifier);
-		
+
 		// If its one of ours we will do some extra setup
 		UNEditorUtilityWidget* EditorUtilityWidget = Cast<UNEditorUtilityWidget>(SpawnedWidget);
 		if (EditorUtilityWidget)
@@ -60,20 +60,20 @@ UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath,
 void UNEditorUtilityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	
+
 	// Ensure that we have some sort of identifier
 	if (UniqueIdentifier == NAME_None)
 	{
 		UniqueIdentifier = FName(GetFName());
 	}
-	
+
 	// Bind our default behavior
 	if (OnTabClosedCallback.IsBound())
 	{
 		OnTabClosedCallback.Unbind();
 	}
 	OnTabClosedCallback.BindUObject(this, &UNEditorUtilityWidget::OnTabClosed);
-	
+
 	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
 	if (System != nullptr)
 	{
@@ -85,13 +85,13 @@ void UNEditorUtilityWidget::NativeConstruct()
 			CachedTabIdentifier = TabIdentifier;
 		}
 	}
-	
+
 	// If we have icon data set, we should create the icon
 	if (TabIconStyle != NAME_None && TabIconName != NAME_None)
 	{
 		TabIcon = FSlateIcon(TabIconStyle, FName(TabIconName));
 	}
-	
+
 	// We need to make a callback after the window has been constructed further to ensure we have a tab
 	DelayedTask = NewObject<UAsyncEditorDelay>(this, NAME_None, RF_Transient);
 	DelayedTask->RegisterWithGameInstance(this);
@@ -107,13 +107,13 @@ void UNEditorUtilityWidget::NativeDestruct()
 		DelayedTask->Complete.RemoveAll(this);
 		DelayedTask = nullptr;
 	}
-	
+
 	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
 	if (System != nullptr)
 	{
 		System->UnregisterWidget(this);
 	}
-	
+
 	Super::NativeDestruct();
 }
 
@@ -123,16 +123,16 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 {
 	const TSharedPtr<SDockTab> Tab = FNEditorSlateUtils::FindDockTab(
 		this->TakeWidget(), GetTabDisplayName(), GetTabIdentifier());
-	
+
 	if (Tab.IsValid())
 	{
 		Tab->SetLabel(GetTabDisplayName());
-		
+
 		if (TabIcon.IsSet())
 		{
 			Tab->SetTabIcon(TabIcon.GetIcon());
 		}
-		
+
 		// Bind tab closed callback
 		if (OnTabClosedCallback.IsBound())
 		{
@@ -147,13 +147,13 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 		{
 			FNEditorUtils::UpdateWorkspaceItem(Tab->GetLayoutIdentifier().TabType, GetTabDisplayName(), TabIcon);
 		}
-		
+
 	}
 	else
 	{
 		UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to update SDockTab as it could not be found."));
 	}
-	
+
 	// We need a render to happen so this can be updated; leave UnitScale at its default if the
 	// widget hasn't been laid out yet (collapsed tab, detached, never ticked), otherwise the
 	// component-wise division would produce NaN/inf.
@@ -176,8 +176,8 @@ void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab) const
 			if (!bHasPermanentState)
 			{
 				System->RemoveWidgetState(GetUniqueIdentifier());
-			}	
+			}
 		}
-		
+
 	}
 }

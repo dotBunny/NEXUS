@@ -27,7 +27,7 @@ public:
 
 	/** @return true when the server has answered the nearby-cells RPC at least once and no operations the client has been notified about are pending. */
 	bool IsReady();
-	
+
 	FIntVector2 GetRemainingStatus() const;
 
 	/**

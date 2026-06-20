@@ -16,7 +16,7 @@ public:
 	 * @param InWorld Which world to operate in.
 	 * @param String The string to draw out.
 	 * @param Position The world position to start drawing the string at.
-	 * @param Rotation The world rotation to apply to the drawing, the base orientation is backwards facing. 
+	 * @param Rotation The world rotation to apply to the drawing, the base orientation is backwards facing.
 	 * @param bPersistentLines Should the drawn lines be permanent?
 	 * @param LifeTime How long should the lines last if not permanent?
 	 * @param DepthPriority What priority should they be drawn at?
@@ -31,7 +31,7 @@ public:
 		const FRotator& Rotation, bool bPersistentLines = false, float LifeTime=-1.f, uint8 DepthPriority = SDPG_World,
 		FLinearColor ForegroundColor = FLinearColor::White, float Scale = 1, float LineHeight = 4.f,
 		float Thickness = 8.f, const bool bInvertLineFeed = false, const bool bDrawBelowPosition = true);
-	
+
 	/**
 	 * Draws a swept FCollisionShape from a start to an end position, dispatching to the correct shape helper.
 	 * @param InWorld Which world to operate in.
@@ -138,6 +138,6 @@ public:
 	static void DrawCollisionShape(const UWorld* InWorld, const FVector& Position, const FQuat& Quat,
 		const FCollisionShape& Shape, const FColor& Color, bool bPersistentLines = false, float LifeTime = -1.f,
 		uint8 DepthPriority = SDPG_World, float Thickness = 2.f);
-	
+
 // #SONARQUBE-ENABLE
 };

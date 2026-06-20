@@ -15,7 +15,7 @@ UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Cell")
 class NEXUSWORLDASSEMBLY_API UNCell : public UDataAsset
 {
 	friend class FNWorldAssemblyEditorUtils;
-	
+
 	GENERATED_BODY()
 
 public:
@@ -36,7 +36,7 @@ public:
 	 * @return The version captured when the data was last written; compare against the current schema to detect stale data.
 	 */
 	int32 GetVersion() const { return Version; }
-	
+
 private:
 	/** Schema version stored alongside the asset so older data can be upgraded after reloads. */
 	UPROPERTY(VisibleAnywhere)

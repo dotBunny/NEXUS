@@ -54,7 +54,7 @@ public:
 			NTestTimer.ManualStop();
 		}
 	}
-	
+
 	static void RandomSimple()
 	{
 		FNArcPickerParams Params;
@@ -72,7 +72,7 @@ public:
 			NTestTimer.ManualStop();
 		}
 	}
-	
+
 	static void Random()
 	{
 		FNArcPickerParams Params;
@@ -90,7 +90,7 @@ public:
 			NTestTimer.ManualStop();
 		}
 	}
-	
+
 	static void TrackedSimple()
 	{
 		FNArcPickerParams Params;
@@ -109,7 +109,7 @@ public:
 			NTestTimer.ManualStop();
 		}
 	}
-	
+
 	static void Tracked()
 	{
 		FNArcPickerParams Params;

@@ -49,16 +49,16 @@ public:
 	{
 		// It's being destroyed so don't even bother with it
 		if (Actor->IsPendingKillPending()) return false;
-		
+
 		// Check global ignore tag
 		if (Actor->ActorHasTag(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore)) return false;
-		
+
 		// We are going to outright ignore volumes as collision data
 		if (Actor->IsA<AVolume>()) return false;
-		
+
 		// Nor should any of our debug actors
 		if (Actor->IsA<ANDebugActor>()) return false;
-		
+
 		return true;
 	}
 

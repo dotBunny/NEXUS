@@ -59,7 +59,7 @@ public:
 	/** Organ component this bone contributes to; populated on registration. */
 	UPROPERTY()
 	TObjectPtr<UNOrganComponent> OrganComponent;
-	
+
 	/** Stable unique identifier for this bone, used to keep generation deterministic across runs. */
 	UPROPERTY(VisibleAnywhere, Category = "Bone Component")
 	FGuid Identifier = FGuid::NewGuid();
@@ -108,4 +108,3 @@ public:
 private:
 	N_WORLD_ICON_HEADER()
 };
-	

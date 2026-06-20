@@ -10,9 +10,9 @@
 void FNProcessVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
 	N_ASSEMBLY_ANALYTICS(ProcessVirtualWorldContextStart)
-	
+
 	const int32 MeshCount = VirtualWorldContextPtr->WorldCollisionMeshes.Num();
-		
+
 	// We are going to massage the data a bit at this point:
 	// - Apply each mesh's Transform scale against the vertices
 	// - Cache the location and the rotation
@@ -20,7 +20,7 @@ void FNProcessVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const 
 	{
 		// Unwind Transform
 		VirtualWorldContextPtr->WorldCollisionMeshes[i].ApplyTransform(VirtualWorldContextPtr->WorldCollisionTransforms[i]);
-		
+
 		// If the mesh is not convex were going to do it right here
 		if (!VirtualWorldContextPtr->WorldCollisionMeshes[i].IsConvex())
 		{
@@ -32,7 +32,7 @@ void FNProcessVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const 
 		// its first intersection query.
 		VirtualWorldContextPtr->WorldCollisionMeshes[i].EnsureCachedFacePlanes();
 	}
-	
+
 	// No point keeping this around
 	VirtualWorldContextPtr->WorldCollisionTransforms.Empty();
 

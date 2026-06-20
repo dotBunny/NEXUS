@@ -34,7 +34,7 @@ public:
 		FNTestUtils::Environment.World = UWorld::CreateWorld(EWorldType::Game, false, TEXT("NTestWorld"));
 		UWorld* World = FNTestUtils::Environment.World;
 		World->RemoveStreamingLevels(World->GetStreamingLevels());
-	
+
 		// Test world exists
 		Test->AddErrorIfFalse(World != nullptr, TEXT("World could not be created."));
 
@@ -52,7 +52,7 @@ public:
 		World->InitializeActorsForPlay(URL);
 		World->BeginPlay();
 		World->ClearStreamingLevels();
-	
+
 		return true;
 	}
 

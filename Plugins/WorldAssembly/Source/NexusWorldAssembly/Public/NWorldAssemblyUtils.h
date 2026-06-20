@@ -94,18 +94,18 @@ public:
 		const FVector tMax = FVector::Max(t1, t2);
 		const float tNear = FMath::Max3(tMin.X, tMin.Y, tMin.Z);
 		const float tFar = FMath::Min3(tMax.X, tMax.Y, tMax.Z);
-		
+
 		if (tNear > tFar || tFar < 0.0f)
 		{
 			return false;
 		}
-		
+
 		const float t = (tNear >= 0.0f) ? tNear : tFar;
 		OutIntersectionPoint = RayOrigin + RayDirection * t;
-	
+
 		return true;
 	}
-	
+
 	/** Number of sample points emitted by GetVoxelQueryPoints (face + edge + corner neighbours). */
 	constexpr static size_t VoxelQueryPointCount = 26;
 

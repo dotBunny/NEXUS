@@ -27,7 +27,7 @@
 FString UNCellJunctionComponent::GetJunctionName() const
 {
 	FString ReturnString = GetOwner()->GetActorLabel();
-	
+
 	TArray<USceneComponent*> ParentComponents;
 	GetParentComponents(ParentComponents);
 	for (const USceneComponent* Parent : ParentComponents)
@@ -39,7 +39,7 @@ FString UNCellJunctionComponent::GetJunctionName() const
 	// Get actual name of the component
 	ReturnString.Append(" > ");
 	ReturnString.Append(GetName());
-	
+
 	return ReturnString;
 }
 #endif // WITH_EDITOR
@@ -65,19 +65,19 @@ FVector UNCellJunctionComponent::GetOffsetLocation() const
 void UNCellJunctionComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	// Send out calls to anything linked to it
 	if (OnBeginPlayCallback.Num() > 0)
 	{
 		for (int i = 0; i < OnBeginPlayCallback.Num(); ++i)
 		{
 			if ( OnBeginPlayCallback[i] == nullptr ) continue;
-			
-			
+
+
 			AActor* Actor = OnBeginPlayCallback[i].Get();
 			if (Actor == nullptr) continue;
-			
-			
+
+
 			if (Actor->Implements<UNCellJunctionBeginPlay>())
 			{
 				INCellJunctionBeginPlay::Execute_OnJunctionBeginPlay(Actor, LinkDetails);
@@ -88,9 +88,9 @@ void UNCellJunctionComponent::BeginPlay()
 			}
 		}
 	}
-	
+
 	if (LinkDetails.bConnected) return;
-	
+
 	switch (Details.Requirements)
 	{
 	case ENCellJunctionRequirements::Required:
@@ -110,14 +110,14 @@ void UNCellJunctionComponent::BeginPlay()
 	case ENCellJunctionRequirements::AllowEmpty:
 		break;
 	}
-	
-	
+
+
 }
 
 void UNCellJunctionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	
+
 	// Cell was removed, and were still doing stuff so the filler should go too
 	if (EndPlayReason == EEndPlayReason::Type::Destroyed || EndPlayReason == EEndPlayReason::Type::RemovedFromWorld )
 	{
@@ -140,14 +140,14 @@ void UNCellJunctionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 				Actor->Destroy();
 				return;
 			}
-			
+
 			// If we still have it, be direct
 			UNWorldAssemblySubsystem::Get(World)->UnregisterOperationActorByTicket(Actor,
 				CellLevelInstance->GetAssemblyData().OperationTicket);
 			Actor->Destroy();
 		}
 	}
-	
+
 }
 
 
@@ -157,7 +157,7 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const b
 	const FVector ComponentLocation = GetComponentLocation();
 	const FRotator ComponentRotation = GetComponentRotation();
 	const ULevel* Level = GetComponentLevel();
-	
+
 	if (bShowDepth && Level != nullptr)
 	{
 		// Check Cell Root
@@ -167,9 +167,9 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const b
 			FNWorldAssemblyDebugDraw::DrawSocket(PDI, ComponentLocation, ComponentRotation, Details.SocketSize, Settings->SocketSize, Details.Type, GizmoColor);
 			return;
 		}
-		
+
 		const FNRawMesh& Hull = CellRoot->Details.Hull;
-		
+
 		TArray<FVector> CornerPoints = GetWorldCornerPoints(Settings->SocketSize);
 		float MaximumDepth = 0;
 		for (int i = 0; i < CornerPoints.Num(); i++)
@@ -180,12 +180,12 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const b
 				MaximumDepth = Depth;
 			}
 		}
-		
+
 		if (MaximumDepth > Settings->AssemblyJunctionMatchingCellHullPenetration)
 		{
 			GizmoColor = InvalidColor;
 		}
-		
+
 		// Draw the depth text
 		if (MaximumDepth != 0)
 		{
@@ -198,16 +198,16 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const b
 			{
 				LowestZ = FMath::Min(LowestZ, Corner.Z);
 			}
-			
+
 			const FVector TextPosition(ComponentLocation.X, ComponentLocation.Y, LowestZ - 4.0f);
 			const FRotator TextRotation(0.0, ComponentRotation.Yaw, 0.0);
 
-			FNPrimitiveFont::DrawPDI(PDI, FString::Printf(TEXT("%.1f"),MaximumDepth), 
-				TextPosition, TextRotation, GizmoColor,0.15f, 1.f, 1.f, 
+			FNPrimitiveFont::DrawPDI(PDI, FString::Printf(TEXT("%.1f"),MaximumDepth),
+				TextPosition, TextRotation, GizmoColor,0.15f, 1.f, 1.f,
 				false, true, SDPG_Foreground);
 		}
 	}
-	
+
 	FNWorldAssemblyDebugDraw::DrawSocket(PDI, ComponentLocation, ComponentRotation, Details.SocketSize, Settings->SocketSize, Details.Type, GizmoColor);
 }
 
@@ -217,14 +217,14 @@ void UNCellJunctionComponent::OnRegister()
 	// Ensure that undo system works
 	SetFlags(RF_Transactional);
 #endif
-	
+
 	// Is this part of a level instance?
 	ILevelInstanceInterface* Interface = FNLevelUtils::GetActorComponentLevelInstance(this);
 	if (Interface != nullptr)
 	{
 		LevelInstance = Cast<ALevelInstance>(Interface);
 	}
-	
+
 	const ULevel* Level = GetComponentLevel();
 	ANCellActor* Actor = FNWorldAssemblyUtils::GetCellActorFromLevel(Level);
 
@@ -254,7 +254,7 @@ void UNCellJunctionComponent::OnRegister()
 			}
 		}));
 	}
-	
+
 	if (Actor != nullptr && !Actor->WasSpawnedFromProxy())
 	{
 		// Whilst in the editor we want to make sure that we uniquely identify our junctions
@@ -274,9 +274,9 @@ void UNCellJunctionComponent::OnRegister()
 		}
 	}
 
-	
+
 #endif // WITH_EDITOR
-	
+
 	// Update details based on generation.
 	if (ALevelInstance* Instance = LevelInstance.Get();
 		Actor != nullptr && Actor->WasSpawnedFromProxy() && Instance != nullptr && Instance->IsA<ANCellLevelInstance>())
@@ -290,10 +290,10 @@ void UNCellJunctionComponent::OnRegister()
 
 			// Update the rotation so the thing draws nicely; this feels like a bug. The ALevelInstance is supposed
 			// to rotate the UWorlds content when it gets placed and loaded. The documentation around the methods seem to
-			// infer however that some of this might be editor time only. Not exactly sure what is happening here leading 
+			// infer however that some of this might be editor time only. Not exactly sure what is happening here leading
 			// to the world rotations needing to be updated manually to match the data-only version that we use during
 			// generating our FNAssemblyGraph.
-			
+
 			// There is some explicit logic around WorldPartition moving everything to a flat-structure when you add ALevelInstances,
 			// this logic doesn't appear to be as exercised in the old-school non-world partition way of building levels.
 			// It might be related --- I don't know --- hopefully this information might be useful in the future.
@@ -301,7 +301,7 @@ void UNCellJunctionComponent::OnRegister()
 		}
 		LinkDetails = CellLevelInstance->GetCellLinkDetails(Details.InstanceIdentifier);
 	}
-	
+
 	FNWorldAssemblyRegistry::RegisterCellJunctionComponent(this);
 	Super::OnRegister();
 }
@@ -326,7 +326,7 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 	if (CellActor != nullptr && !CellActor->WasSpawnedFromProxy())
 	{
 		bool bHasMadeChanges = false;
-		
+
 		// LOCATION
 		const FVector ComponentLocation = GetComponentLocation();
 		if (ComponentLocation != Details.WorldLocation)
@@ -367,8 +367,8 @@ TArray<FVector> UNCellJunctionComponent::GetWorldCornerPoints(const FVector2D& S
 {
 	const FQuat DisplayQuat = FQuat(GetComponentRotation()) * FQuat(FRotator(0.0f, 90.0f, 0.0f));
 	const FRotator DisplayRotation = DisplayQuat.Rotator();
-	
-	// TODO: Should this maybe be cached at spawning at runtime? 
+
+	// TODO: Should this maybe be cached at spawning at runtime?
 	const FVector2D Size = FNWorldAssemblyUtils::GetWorldSize2D(Details.SocketSize, SocketSize);
 
 	const TArray<FVector> UnrotatedCornerPoints = FNWorldAssemblyUtils::GetCenteredWorldCornerPoints2D(Size.X,Size.Y, ENAxis::Z);

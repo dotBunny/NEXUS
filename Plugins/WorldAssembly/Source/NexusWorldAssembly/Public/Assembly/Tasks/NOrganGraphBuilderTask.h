@@ -64,7 +64,7 @@ private:
 
 	/** Top-level task-graph context; used here to publish progress/status messages for UI. */
 	TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContextPtr;
-	
+
 	/** Seed the graph with the organ's bones and the root node. */
 	void StartGraph(FNMersenneTwister& Random);
 

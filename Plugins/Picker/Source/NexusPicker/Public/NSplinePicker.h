@@ -48,16 +48,16 @@ public:
 	 * @param Seed The random seed to start with, and update.
 	 * @param Params The parameters for the point generation.
 	 */
-	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNSplinePickerParams& Params);	
-	
+	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNSplinePickerParams& Params);
+
 	/**
-	 * Generates random points on a spline using a provided Mersenne Twister.	 
+	 * Generates random points on a spline using a provided Mersenne Twister.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Random The Mersenne Twister to query for random.
 	 * @param Params The parameters for the point generation.
 	 */
 	static void Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSplinePickerParams& Params);
-	
+
 	/**
 	 * Checks if a point is on a spline within a specified tolerance.
 	 * Uses NEXUS::Picker::SplinePointTolerance defined in NPickerMinimal.h for proximity checking.
@@ -76,7 +76,7 @@ public:
 		const float Distance = FVector::Distance(Point, ClosestLocationOnSpline);
 		return Distance <= NEXUS::Picker::SplinePointTolerance;
 	}
-	
+
 	/**
 	 * Checks if multiple points are on a spline within a specified tolerance.
 	 * @param Points The array of points to check.
@@ -87,7 +87,7 @@ public:
 	{
 		TArray<bool> OutResults;
 		OutResults.Reserve(Points.Num());
-		
+
 		for (const FVector& Point : Points)
 		{
 			OutResults.Add(IsPointOn(SplineComponent, Point));

@@ -24,7 +24,7 @@ class UNDeveloperLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	
+
 	/**
 	 * Is this a demo build?
 	 * @remark Requires a BuildTarget definition of IS_DEMO_BUILD=1
@@ -33,7 +33,7 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName = "Is Demo Build", Category = "NEXUS|Developer",
 		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#is-demo-build"))
 	static bool IsDemoBuild() { return FNDeveloperUtils::IsDemoBuild(); }
-	
+
 	/**
 	 * Is this a demo build?
 	 * @remark Requires a BuildTarget definition of IS_DEMO_BUILD=1
@@ -42,7 +42,7 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName = "Is Demo Build ?", Category = "NEXUS|Developer",
 		meta = (ExpandBoolAsExecs="ReturnValue", DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#is-demo-build"))
 	static bool IsDemoBuildExec() { return FNDeveloperUtils::IsDemoBuild(); }
-	
+
 	/**
 	 * Gets the current number of known UObjects by looking at the global UObject array and subtracting the number of available spots.
 	 * @return The number of objects.
@@ -95,11 +95,11 @@ public:
 	 * Get an output-friendly string that provides a more in-depth output detailing the contents of an FNObjectSnapshot.
 	 * @param Snapshot The snapshot to generate a detailed string from.
 	 * @return The output-friendly string.
-	 */	
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Get UObject Snapshot Detailed Summary", Category = "NEXUS|Developer",
 		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#get-uobject-snapshot-detailed-summary"))
 	static FString GetObjectSnapshotDetailedSummary(const FNObjectSnapshot& Snapshot) { return Snapshot.ToDetailedString(); }
-	
+
 	/**
 	 * Get an output-friendly string that summarizes the contents of an FNObjectSnapshotDiff.
 	 * @param Diff The FNObjectSnapshotDiff to generate a string from.
@@ -113,7 +113,7 @@ public:
 	 * Get an output-friendly string that provides a more in-depth output detailing the contents of an FNObjectSnapshotDiff.
 	 * @param Diff The FNObjectSnapshotDiff to generate a detailed string from.
 	 * @return The output-friendly string.
-	 */	
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Get UObject Snapshot Diff Detailed Summary", Category = "NEXUS|Developer",
 		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#get-uobject-snapshot-diff-detailed-summary"))
 	static FString GetObjectSnapshotDiffDetailedSummary(const FNObjectSnapshotDiff& Diff) { return Diff.ToDetailedString(); }
@@ -125,13 +125,13 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName = "Output Snapshot To Log", Category = "NEXUS|Developer",
 		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#output-snapshot-to-log"))
 	static void DumpSnapshotDiffToLog(const FNObjectSnapshotDiff& Diff) { Diff.DumpToLog(); }
-	
+
 	/**
 	 * Draw a string via ULineBatchComponent.
 	 * @param WorldContextObject Object that provides the context of which world to operate in.
 	 * @param String The string to draw out.
 	 * @param Position The world position to start drawing the string at.
-	 * @param Rotation The world rotation to apply to the drawing, the base orientation is backwards facing. 
+	 * @param Rotation The world rotation to apply to the drawing, the base orientation is backwards facing.
 	 * @param bPersistentLines Should the drawn lines be permanent?
 	 * @param LifeTime How long should the lines last if not permanent?
 	 * @param DepthPriority What priority should they be drawn at?
@@ -153,11 +153,11 @@ public:
 	{
 		const UWorld* InWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 		if (InWorld == nullptr) return;
-		
-		FNDrawDebugHelpers::DrawString(InWorld, String, Position, Rotation, bPersistentLines, LifeTime, 
-			DepthPriority, ForegroundColor, Scale, LineHeight, Thickness, bInvertLineFeed, bDrawBelowPosition);		
+
+		FNDrawDebugHelpers::DrawString(InWorld, String, Position, Rotation, bPersistentLines, LifeTime,
+			DepthPriority, ForegroundColor, Scale, LineHeight, Thickness, bInvertLineFeed, bDrawBelowPosition);
 	}
-	
+
 	/**
 	 * Create a Mersenne Twister object seeded from a string, outered to the world resolved from the context.
 	 * @param WorldContextObject Object used to resolve the owning UWorld.
@@ -172,7 +172,7 @@ public:
 
 		UNMersenneTwisterObject* TwisterObject = NewObject<UNMersenneTwisterObject>(InWorld);
 		TwisterObject->Seed(Seed);
-		
+
 		return TwisterObject;
 	};
 };

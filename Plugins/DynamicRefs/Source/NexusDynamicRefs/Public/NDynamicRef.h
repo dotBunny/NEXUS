@@ -23,7 +23,7 @@ enum ENDynamicRef : int32
 	NDR_Player							= 1 UMETA(DisplayName = "Player"),
 	NDR_Enemy							= 2 UMETA(DisplayName = "Enemy"),
 	NDR_NonPlayableCharacter			= 3 UMETA(DisplayName = "NPC"),
-	
+
 	// Locations
 	NDR_Location_A 						= 32 UMETA(DisplayName = "Location A"),
 	NDR_Location_B 						= 33 UMETA(DisplayName = "Location B"),
@@ -249,6 +249,6 @@ enum ENDynamicRef : int32
 	NDR_Item_Z 							= 239 UMETA(DisplayName = "Item Z"),
 
 	NDR_Max								= 240 UMETA(Hidden)
-	
+
 	// ReSharper restore CppUE4CodingStandardNamingViolationWarning
 };

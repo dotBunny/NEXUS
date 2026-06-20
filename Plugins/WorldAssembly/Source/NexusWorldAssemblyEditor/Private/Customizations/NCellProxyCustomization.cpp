@@ -20,7 +20,7 @@ void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 	IDetailCategoryBuilder& NexusCategory = DetailBuilder.EditCategory(TEXT("Cell Proxy"),
 		FText::FromString("Cell Proxy"), ECategoryPriority::Important);
 
-	// Figure out if we are editing multiple objects, in this case we don't want a special inspector if 
+	// Figure out if we are editing multiple objects, in this case we don't want a special inspector if
 	// more then one of the components is selected.
 	TArray<TWeakObjectPtr<UObject>> Objects;
 	DetailBuilder.GetObjectsBeingCustomized(Objects);
@@ -91,7 +91,7 @@ void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 		}
 		return FReply::Handled();
 	};
-	
+
 	NexusCategory.AddCustomRow(NSLOCTEXT("NexusWorldAssemblyEditor", "ProxyActionsRow", "ActionsRow"))
 		.NameContent()
 		[
@@ -162,6 +162,6 @@ void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 						//.IsEnabled_Lambda()
 					]
 				]
-			
+
 		];
 }

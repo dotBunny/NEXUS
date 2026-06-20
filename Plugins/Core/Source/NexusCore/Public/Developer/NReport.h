@@ -179,7 +179,7 @@ struct NEXUSCORE_API FNReport
 	}
 	void SetDesiredFileName(const FString& FileName) { DesiredFileName = FileName; }
 	FString& GetDesiredFileName() { return DesiredFileName; }
-	
+
 protected:
 	/** Look up the priority of a block by its ticket; returns 0 when the ticket is unknown. */
 	int32 GetPriority(const int32 Ticket);
@@ -222,7 +222,7 @@ private:
 
 	/** Storage for every table block in the report, keyed by block ticket. */
 	TMap<int32, FNReportTableBlock> TableBlocks;
-	
+
 	TMap<int32, FNReportListBlock> ListBlocks;
 
 	/** Storage for every collapsable block in the report, keyed by block ticket. */
@@ -233,12 +233,12 @@ private:
 
 	/** Parent ticket -> ordered child entries; the root's children live under key 0. */
 	TMap<int32, TArray<FChildEntry>> ChildrenMap;
-	
+
 	int32 ShortestReplaceToken = MAX_int32;
 	TMap<FString, FString> ReplaceTokens;
 
 	/** Monotonically increasing counter used to issue unique tickets to newly created blocks. */
 	int32 BlockTickets = 0;
-	
+
 	FString DesiredFileName;
 };

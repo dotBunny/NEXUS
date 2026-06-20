@@ -115,13 +115,13 @@ public:
 	static bool CellToggleBoundsCalculateOnSave_IsActionChecked();
 	/** Toggle whether the focused cell recalculates the hull automatically on world save. */
 	static void CellToggleHullCalculateOnSave();
-	
-	
+
+
 	/** @return checked state of the allow-non-convex-hull toggle for UI binding. */
 	static bool CellToggleHullAllowNonConvex_IsActionChecked();
 	/** Toggle whether the focused cell's hull is allowed to be non-convex. */
 	static void CellToggleHullAllowNonConvex();
-	
+
 	/** @return checked state of the hull-calculate-on-save toggle for UI binding. */
 	static bool CellToggleHullCalculateOnSave_IsActionChecked();
 	/** Toggle whether the focused cell recalculates voxel data automatically on world save. */
@@ -196,13 +196,13 @@ private:
 	TSharedPtr<FUICommandInfo> CommandInfo_CellResetCell;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellSaveCell;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellRemoveActor;
-	
+
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleBoundsCalculateOnSave;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleHullCalculateOnSave;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleHullAllowNonConvex;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleVoxelCalculateOnSave;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleVoxelData;
-	
+
 	TSharedPtr<FUICommandList> CommandList_Organ;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganGenerateProxies;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganGenerateAllProxies;
@@ -212,7 +212,7 @@ private:
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganCreateAllLevelInstances;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganUnloadLevelInstances;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganUnloadAllLevelInstances;
-	
+
 	TSharedPtr<FUICommandList> CommandList_CellJunction;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellJunctionAddComponent;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellJunctionSelectComponent;

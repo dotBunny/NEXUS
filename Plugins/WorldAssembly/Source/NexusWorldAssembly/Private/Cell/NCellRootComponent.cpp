@@ -67,7 +67,7 @@ void UNCellRootComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const uint8
 	// We need a version that has zero reliance on the EdMode tool
 	const FBox RotatedBounds = GetOffsetBounds();
 	const TArray<FVector> RotatedVertices = FNVectorUtils::RotateAndOffsetPoints(this->Details.Hull.Vertices, GetOffsetRotator(), GetOffsetLocation());
-	
+
 	DrawDebugPDI(PDI, RotatedBounds, BoundsColor, RotatedVertices, HullColor, DrawVoxelMode);
 }
 
@@ -75,13 +75,13 @@ void UNCellRootComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI,  const FBox
 {
 	// Bounds
 	DrawWireBox(PDI, WorldBoundsBox, BoundsColor, SDPG_World);
-	
+
 	// Hull
 	if (WorldHullVertices.Num() > 0)
 	{
 		FNWorldAssemblyDebugDraw::DrawDashedRawMesh(PDI, this->Details.Hull, WorldHullVertices, HullColor, 2, SDPG_World);
 	}
-	
+
 	// Voxel
 	if (DrawVoxelMode == 1)
 	{

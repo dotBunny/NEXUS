@@ -15,7 +15,7 @@ void FNEditorCommands::RegisterCommands()
 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.VisitCommunityHome"),
 	EUserInterfaceActionType::Button, FInputChord());
 	// ReSharper restore StringLiteralTypo
-	
+
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Issues,
 	"NCore.Help.OpenIssues",
 	NSLOCTEXT("NexusCoreEditor","Command_Help_OpenIssues", "Issues"),
@@ -29,7 +29,7 @@ void FNEditorCommands::RegisterCommands()
 	NSLOCTEXT("NexusCoreEditor","Command_Help_OpenDiscord_Desc", "Opens the Discord (dotBunny Support) invite link in your browser."),
 	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.OpenDiscordInviteLink"),
 	EUserInterfaceActionType::Button, FInputChord());
-	
+
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_BugReport,
 	"NCore.Help.OpenBugReport",
 	NSLOCTEXT("NexusCoreEditor","Command_Help_OpenBugReport", "Report a Bug"),
@@ -50,9 +50,9 @@ void FNEditorCommands::RegisterCommands()
 		NSLOCTEXT("NexusCoreEditor","Command_Help_OpenDocumentation_Desc", "Open the documentation in your browser."),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
 		EUserInterfaceActionType::Button, FInputChord());
-	
+
 	CommandList_Help = MakeShared<FUICommandList>();
-	
+
 	CommandList_Help->MapAction(CommandInfo_Help_Discord,
 	FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpDiscord),
 	FCanExecuteAction());

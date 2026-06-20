@@ -28,14 +28,14 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 	// Create our analytics object
 	N_ASSEMBLY_ANALYTICS_CREATE
 	N_ASSEMBLY_ANALYTICS(TaskGraphCreationStart)
-	
+
 	const FNAssemblyOperationSettings& OperationSettings = Context->GetOperationSettings();
-	
+
 	// Convert our friendly seed to something more appropriate
 	const uint64 BaseSeed = FNSeedGenerator::SeedFromFriendlySeed(OperationSettings.Seed);
 	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Converted friendly seed(%s) to uint64 seed(%llu)"), *OperationSettings.Seed, BaseSeed);
 	FNMersenneTwister BaseGenerator(BaseSeed);
-	
+
 	// We need something that each task can share context to others with
 	TaskGraphContextPtr = MakeShared<FNAssemblyTaskGraphContext, ESPMode::ThreadSafe>(
 		Context->GetTargetWorld(), Context->GetOperationTicket(), OperationSettings);
@@ -54,7 +54,7 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 	AllTasks.Add(CreateVirtualWorldTask);
 
 	// ----- STEP 1 - PROCESS WORLD CAPTURE ---------------------------------------------------------------------------------------------------------
-	
+
 	// Create associated data from our initial game-thread blocking task
 	FGraphEventRef ProcessVirtualWorldContextTask = TGraphTask<FNProcessVirtualWorldTask>::CreateTask(
 				&PreGameThreadTasks,
@@ -62,9 +62,9 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 				.ConstructAndHold(VirtualWorldContextPtr, TaskGraphContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
 	ProcessInitialGameThreadTasks.Add(ProcessVirtualWorldContextTask);
 	AllTasks.Add(ProcessVirtualWorldContextTask);
-	
+
 	// ----- STEP 2 - BUILD CELL GRAPHS FOR ORGANS --------------------------------------------------------------------------------------------------
-	
+
 	int32 PassCount = 0;
 
 	// Iterate over the different bespoke passes that can occur and create dependency-chained tasks
@@ -132,14 +132,14 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 		// Increment pass count for labeling
 		PassCount++;
 	};
-	
+
 	// TODO: Validate task to ensure generation is completable?
-	
+
 	const FNAssemblyOperationSettings& OperatingSettings = Context->GetOperationSettings();
-	
+
 	// Create our context of what we are going to need to spawn back on the game-thread
 	SpawnContextPtr = MakeShared<FNSpawnContext>(Context->GetTargetWorld(), Context->GetOperationTicket(),
-		OperatingSettings.bPreLoadLevelInstances, OperatingSettings.bCreateLevelInstances, 
+		OperatingSettings.bPreLoadLevelInstances, OperatingSettings.bCreateLevelInstances,
 		(OperatingSettings.CellSpawnTimeSlice * 0.001f)); // Convert to expected timescale
 
 	FGraphEventRef CreateSpawnsTask = TGraphTask<FNCreateSpawnsTask>::CreateTask(&CollectionTasks, FNCreateSpawnsTask::GetDesiredThread())
@@ -147,7 +147,7 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 	FinalizerTasks.Add(CreateSpawnsTask);
 	SpawnContextTasks.Add(CreateSpawnsTask);
 	AllTasks.Add(CreateSpawnsTask);
-	
+
 	// Create our dispatcher task that will time-slice spawning
 	FGraphEventRef SpawnCellProxiesTaskCompleted = FGraphEvent::CreateGraphEvent();
 	FGraphEventRef SpawnCellProxiesTask = TGraphTask<FNSpawnCellProxiesTask>::CreateTask(&SpawnContextTasks, FNSpawnCellProxiesTask::GetDesiredThread())
@@ -155,11 +155,11 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 	FinalizerTasks.Add(SpawnCellProxiesTask);
 	FinalizerTasks.Add(SpawnCellProxiesTaskCompleted); // This is what will actually trigger moving on post spawning
 	AllTasks.Add(SpawnCellProxiesTask);
-	
+
 	// Create our finalizer task on the main thread that will wait for all the other finalizers to complete and output analytics
 	FinalizeTask = TGraphTask<FNAssemblyFinalizeTask>::CreateTask(&FinalizerTasks, FNAssemblyFinalizeTask::GetDesiredThread()).ConstructAndHold(Operation, TaskGraphContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
 	AllTasks.Add(FinalizeTask);
-	
+
 	// Record end time
 	N_ASSEMBLY_ANALYTICS(TaskGraphCreationFinish)
 }
@@ -184,7 +184,7 @@ bool FNAssemblyTaskGraph::ConsumeChannelUpdates(TArray<FNStatusChannelUpdate>& O
 
 void FNAssemblyTaskGraph::Cancel()
 {
-	
+
 	if (SpawnContextPtr.IsValid())
 	{
 		SpawnContextPtr->bCancelled.Store(true);
@@ -248,9 +248,9 @@ void FNAssemblyTaskGraph::TearDownGraph()
 	TaskGraphContextPtr.Reset();
 	VirtualWorldContextPtr.Reset();
 	SpawnContextPtr.Reset();
-	
+
 	N_ASSEMBLY_ANALYTICS_DELETE
-	
+
 	// Reset flag
 	bTasksUnlocked = false;
 }

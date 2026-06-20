@@ -21,9 +21,9 @@ UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Cell Root", HideCategories=(Ac
 class NEXUSWORLDASSEMBLY_API UNCellRootComponent : public USceneComponent
 {
 	friend class ANCellActor;
-	
+
 	GENERATED_BODY()
-	
+
 	explicit UNCellRootComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get())
 		: LevelInstance(nullptr)
 	{

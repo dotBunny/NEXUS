@@ -33,7 +33,7 @@ struct NEXUSCORE_API FNRawMesh
 	/** The relative center of the mesh. */
 	UPROPERTY(VisibleAnywhere)
 	FVector Center = FVector::ZeroVector;
-	
+
 	/** Relative AABB **/
 	UPROPERTY(VisibleAnywhere)
 	FBox Bounds = FBox(ForceInit);
@@ -256,7 +256,7 @@ struct NEXUSCORE_API FNRawMesh
 		InvalidateCachedFacePlanes();
 		InvalidateValidation();
 	}
-	
+
 	/**
 	 * Bakes a full transform (translation, rotation, scale) into every vertex and the center, then
 	 * refreshes Bounds from the transformed vertices. No-op when Transform is the identity.
@@ -269,14 +269,14 @@ struct NEXUSCORE_API FNRawMesh
 		FBox NewBounds(ForceInit);
 		const int32 Count = Vertices.Num();
 		FVector CenterCalc(ForceInitToZero);
-		
+
 		for (int32 i = 0; i < Count; i++)
 		{
 			Vertices[i] = Transform.TransformPosition(Vertices[i]);
 			NewBounds += Vertices[i];
 			CenterCalc += Vertices[i];
 		}
-		
+
 		// Ensure that we never divide by zero
 		if (Vertices.Num() > 0)
 		{
@@ -286,7 +286,7 @@ struct NEXUSCORE_API FNRawMesh
 		{
 			Center = FVector::ZeroVector;
 		}
-		
+
 		Bounds = NewBounds;
 		bHasBounds = (Count > 0);
 		InvalidateCachedFacePlanes();
@@ -438,7 +438,7 @@ private:
 	 * InvalidateValidation() after touching Loops or Vertices.
 	 */
 	mutable bool bValidationDirty = false;
-	
+
 	/**
 	 * Editor-visible diagnostic flag intended to record that a world transform has been baked into Vertices.
 	 * Preserved across copies/assignment; currently informational only — no mutator sets it true.

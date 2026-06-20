@@ -531,7 +531,7 @@ FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh) const
 		}
 	}
 	DynamicMesh.EndUnsafeVerticesInsert();
-	
+
 	DynamicMesh.BeginUnsafeTrianglesInsert();
 	{
 		const int32 LoopCount = Loops.Num();
@@ -565,7 +565,7 @@ FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh) const
 				DynamicMesh.ReverseTriOrientation(TriangleID);
 			}
 		}
-    
+
 		// Recompute normals after reorientation
 		DynamicMesh.EnableVertexNormals(FVector3f::Zero());
 		FMeshNormals::QuickComputeVertexNormals(DynamicMesh);

@@ -22,7 +22,7 @@ class NEXUSACTORPOOLS_API ANPooledActorBase : public AActor, public INActorPoolI
 	{
 		ReturnToActorPool();
 	}
-	
+
 	virtual void OnCreatedByActorPool() override
 	{
 		INActorPoolItem::OnCreatedByActorPool();

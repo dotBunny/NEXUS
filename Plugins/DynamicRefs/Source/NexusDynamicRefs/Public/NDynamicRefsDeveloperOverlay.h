@@ -23,7 +23,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefsDeveloperOverlay : public UNDeveloperOve
 	GENERATED_BODY()
 
 public:
-	
+
 	/** Subscribe to the dynamic-ref subsystem hosted by World so its add/remove events drive this overlay. */
 	virtual void BindWorld(UWorld* World) override;
 	/** Drop the subscription to the dynamic-ref subsystem hosted by World. */

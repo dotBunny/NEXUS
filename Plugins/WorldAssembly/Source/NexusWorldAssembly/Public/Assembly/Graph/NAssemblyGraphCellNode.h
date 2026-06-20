@@ -64,7 +64,7 @@ public:
 	{
 		return WorldBounds.Intersect(Other->WorldBounds);
 	}
-	
+
 	/**
 	 * Walks linked neighbours up to MaxDepth looking for an existing node built from the same input data.
 	 * Used to enforce MinimumNodeDistance constraints.
@@ -130,7 +130,7 @@ public:
 	{
 		InputDataPtr = nullptr;
 	}
-	
+
 	/** Flag whether this cell lies on the shortest-path hot path variant (spokes from start). */
 	void SetHotPathShortest(bool bValue) { bHotPathShortest = bValue; }
 
@@ -153,7 +153,7 @@ public:
 	FNRawMesh& GetHull() { return Hull; }
 	/** @return A by-value copy of the cell's hull for callers that need an independent mesh. */
 	FNRawMesh GetHullCopy() { return Hull; }
-	
+
 private:
 	/** Non-owning pointer to the input data this cell was chosen from; only valid during builder phase. */
 	FNVirtualCellData* InputDataPtr;
@@ -166,13 +166,13 @@ private:
 
 	/** Cell junctions transformed into world space. */
 	TMap<int32, FNCellJunctionDetails> WorldJunctions;
-	
+
 	/** Set just before spawning (game thread): does this cell lie on the shortest-path hot path (spokes from start). */
 	bool bHotPathShortest = false;
 
 	/** Set just before spawning (game thread): does this cell lie on the sequential hot path (nearest-first visiting chain). */
 	bool bHotPathSequential = false;
-	
+
 	/** Generated just before spawning, before on main thread, traverses graph and generates useful additional data. */
 	TArray<FNCellLinkDetails> LinkDetails;
 

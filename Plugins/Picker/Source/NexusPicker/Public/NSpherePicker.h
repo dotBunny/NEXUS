@@ -7,7 +7,7 @@
 #include "NSpherePickerParams.h"
 #include "Math/NMersenneTwister.h"
 
-/** 
+/**
  * Provides various functions for generating points inside or on the surface of a sphere using different
  * random generation strategies (deterministic, non-deterministic, seeded).
  * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/">FNSpherePicker</a>
@@ -24,7 +24,7 @@ public:
 	 * @note Not thread-safe; all pickers share a single non-deterministic FRandomStream (FNRandom::GetNonDeterministic()). Only call from the Game-thread.
 	 */
 	static void Random(TArray<FVector>& OutLocations, const FNSpherePickerParams& Params);
-	
+
 
 	/**
 	 * Generate random points inside or on the surface of a sphere.
@@ -46,10 +46,10 @@ public:
 	 * @param Seed The random seed to start with, and update.
 	 * @param Params The parameters for the point generation.
 	 */
-	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNSpherePickerParams& Params);	
-	
+	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNSpherePickerParams& Params);
+
 	/**
-	 * Generate random points inside or on the surface of a sphere using a provided Mersenne Twister.	 
+	 * Generate random points inside or on the surface of a sphere using a provided Mersenne Twister.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Random The Mersenne Twister to query for random.
 	 * @param Params The parameters for the point generation.

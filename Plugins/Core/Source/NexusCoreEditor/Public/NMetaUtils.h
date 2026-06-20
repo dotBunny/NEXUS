@@ -60,13 +60,13 @@ public:
 	 * @return true/false if the key was found.
 	 */
 	static bool HasKey(UEdGraphNode* Node, const FName& Key);
-	
+
 	/**
 	 * Does the target struct have any meta-data for the defined key?
 	 * @param ScriptStruct Target UScriptStruct to evaluate for meta-details.
 	 * @param Key The key to look for in the meta-data.
 	 * @return true/false if the key was found.
-	 */	
+	 */
 	static bool HasKey(const UScriptStruct* ScriptStruct, const FName& Key);
 
 	/**
@@ -74,7 +74,7 @@ public:
 	 * @param Struct Target UStruct to evaluate for meta-details.
 	 * @param Key The key to look for in the meta-data.
 	 * @return true/false if the key was found.
-	 */	
+	 */
 	static bool HasKey(const UStruct* Struct, const FName& Key);
 
 	/**
@@ -98,7 +98,7 @@ public:
 	 * @param ScriptStruct Target UScriptStruct to evaluate for data based on the key.
 	 * @param Key The key to look for in the meta-data.
 	 * @return The meta-data for the provided key.
-	 */	
+	 */
 	static FString GetData(const UScriptStruct* ScriptStruct, const FName& Key);
 
 	/**
@@ -106,7 +106,7 @@ public:
 	 * @param Struct Target UStruct to evaluate for data based on the key.
 	 * @param Key The key to look for in the meta-data.
 	 * @return The meta-data for the provided key.
-	 */		
+	 */
 	static FString GetData(const UStruct* Struct, const FName& Key);
 
 	/**
@@ -114,9 +114,9 @@ public:
 	 * @param Class Target UClass to evaluate for data based on the key.
 	 * @param Key The key to look for in the meta-data.
 	 * @return The meta-data for the provided key.
-	 */		
+	 */
 	static FString GetData(const UClass* Class, const FName& Key);
-	
+
 	/**
 	 * Attempt to get the data for a specific key.
 	 * @param Node Target UEdGraphNode to evaluate for data based on the key.
@@ -157,7 +157,7 @@ public:
 	 * Get the data for a specific key without any safety checks.
 	 * @remark No checks for existence.
 	 * @param Node Target UEdGraphNode to evaluate for data based on the key.
-	 * @param Key The key to look for in the meta-data.	 
+	 * @param Key The key to look for in the meta-data.
 	 * @return The meta-data for the provided key.
 	 */
 	static FString GetDataUnsafe(UEdGraphNode* Node, const FName& Key);
@@ -166,7 +166,7 @@ public:
 	 * Get the data for a specific key without any safety checks.
 	 * @remark No checks for existence.
 	 * @param ScriptStruct Target UScriptStruct to evaluate for data based on the key.
-	 * @param Key The key to look for in the meta-data.	 
+	 * @param Key The key to look for in the meta-data.
 	 * @return The meta-data for the provided key.
 	 */
 	static FString GetDataUnsafe(const UScriptStruct* ScriptStruct, const FName& Key);
@@ -175,7 +175,7 @@ public:
 	 * Get the data for a specific key without any safety checks.
 	 * @remark No checks for existence.
 	 * @param Struct Target UStruct to evaluate for data based on the key.
-	 * @param Key The key to look for in the meta-data.	 
+	 * @param Key The key to look for in the meta-data.
 	 * @return The meta-data for the provided key.
 	 */
 	static FString GetDataUnsafe(const UStruct* Struct, const FName& Key);
@@ -184,7 +184,7 @@ public:
 	 * Get the data for a specific key without any safety checks.
 	 * @remark No checks for existence.
 	 * @param Class Target UClass to evaluate for data based on the key.
-	 * @param Key The key to look for in the meta-data.	 
+	 * @param Key The key to look for in the meta-data.
 	 * @return The meta-data for the provided key.
 	 */
 	static FString GetDataUnsafe(const UClass* Class, const FName& Key);

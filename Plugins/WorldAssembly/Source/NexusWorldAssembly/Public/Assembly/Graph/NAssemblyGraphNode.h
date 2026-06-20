@@ -62,10 +62,10 @@ public:
 
 	/** @return The node's stable identifier within its owning graph. */
 	int32 GetNodeIdentifier() const { return NodeIdentifier; }
-	
+
 	/** @return The shortest hop-count from the start node to this node. */
 	int32 GetNodeDepth() const { return NodeDepth; }
-	
+
 	bool IsHotPathFlagged() const
 	{
 		return AssemblyTags.HasTagExact(NWorldAssembly_Flag_Hotpath);
@@ -90,12 +90,12 @@ public:
 		DownstreamNode->NodeDepth = Candidate;
 		PropagateDepth(DownstreamNode);
 	}
-	
+
 	/** @return The assembly tags carried by this node. */
 	const FGameplayTagContainer& GetAssemblyTags() { return AssemblyTags; }
 	/** @return The context tags this node contributes to the generation context once placed. */
 	const FGameplayTagContainer& GetContextTagsAdded() { return ContextTagsAdded; }
-	
+
 	/** @return true if this cell node carries any assembly tags. */
 	bool HasAssemblyTags() const { return !AssemblyTags.IsEmpty(); }
 
@@ -113,10 +113,10 @@ public:
 
 	/** @return All nodes upstream of this node. */
 	const TArray<FNAssemblyGraphNode*>& GetUpstreamNodes() const { return UpstreamNodes; }
-	
+
 	/** @return The seed assigned to this node. */
 	uint64 GetSeed() const { return Seed; }
-	
+
 protected:
 	/** Subclass-only setter; the graph mutates transform during builder expansion. */
 	void SetWorldPosition(const FVector& Position);
@@ -132,7 +132,7 @@ protected:
 
 	TArray<FNAssemblyGraphNode*> UpstreamNodes;
 	TArray<FNAssemblyGraphNode*> DownstreamNodes;
-	
+
 	FGameplayTagContainer AssemblyTags;
 	FGameplayTagContainer ContextTagsAdded;
 
@@ -161,6 +161,6 @@ private:
 
 	/** World-space rotation. */
 	FRotator WorldRotation;
-	
+
 	uint64 Seed = 0;
 };

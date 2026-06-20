@@ -18,7 +18,7 @@ USTRUCT()
 struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 {
 	GENERATED_BODY()
-	
+
 	/** Tags used to define behavior during the assembly process. */
 	UPROPERTY(EditAnywhere, DisplayName="Assembly Tags", Category="Tagging",  meta = (Categories="NEXUS.WorldAssembly", ToolTip="Tags used to define behavior during the assembly process."))
 	FGameplayTagContainer AssemblyTags;
@@ -26,11 +26,11 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	/** Tags added to the Context Tags collection moving forward for the graph, and future phases. */
 	UPROPERTY(EditAnywhere, DisplayName="Added Context Tags", Category="Tagging", meta = (ToolTip="Tags added to the Context Tags collection moving forward for the graph, and future phases."))
 	FGameplayTagContainer AddedContextTags;
-	
+
 	/** Tags required to be found in Context Tags for allowance to place this cell. **/
 	UPROPERTY(EditAnywhere, DisplayName="Required Context Tags", Category="Tagging", meta = (ToolTip="Tags required to be found in Context Tags for allowance to place this cell."))
 	FGameplayTagContainer RequiredContextTags;
-	
+
 	/** TagCounter constraints that must pass for this cell to be eligible for selection (an absent tag compares as 0). */
 	UPROPERTY(EditAnywhere, DisplayName="Tag Counter Constraints", Category="Tagging", meta = (TitleProperty="{Tag}", ToolTip="TagCounter constraints that must pass for this cell to be included in cell selection. If a tag is constrained but not present in the current Tag Counter, a value of 0 is compared against."))
 	TArray<FNGameplayTagCounterConstraint> TagCounterConstraints;
@@ -38,7 +38,7 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	/** Operations applied to the TagCounter when this cell is placed/used. */
 	UPROPERTY(EditAnywhere, DisplayName="Tag Counter Operations", Category="Tagging", meta = (TitleProperty="{Tag}", ToolTip="Operations to apply to the TagCounter if the cell is placed/used."))
 	TArray<FNGameplayTagCounterOperation> TagCounterOperations;
-	
+
 	/**
 	 * A minimum number of times this cell must be used in the generated FNAssemblyGraph for the graph to validate.
 	 * Enforced in FNVirtualOrganContext::CheckGraph against the cell's placed instance count.
@@ -58,14 +58,14 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	 */
 	UPROPERTY(EditAnywhere, meta=(ClampMin=0, UIMin=0))
 	int32 MaximumCount = 0;
-	
+
 	/**
 	 * The minimum number of cell links away this cell must be to be used again.
 	 * @note A value of 0 indicates no constraint.
 	 */
 	UPROPERTY(EditAnywhere,meta=(ClampMin=0, UIMin=0))
 	int32 MinimumNodeDistance = 1;
-	
+
 	/**
 	* The minimum graph depth at which this cell may be used, as a 1-based NodeDepth.
 	* The start cell is depth 1, its direct neighbors depth 2, etc. A value of N first allows the cell at depth N.
@@ -97,14 +97,14 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	 */
 	UPROPERTY(EditAnywhere, meta=(EditCondition=bHasDirectionConstraint))
 	ENCardinalDirection DirectionConstraint = ENCardinalDirection::North;
-	
-	/** 
+
+	/**
 	 * Relative weight for random selection during generation.
 	 * @note Higher values increase the probability of this cell being chosen.
 	 */
 	UPROPERTY(EditAnywhere)
 	int32 Weighting = 1;
-	
+
 	/** The cell asset this entry refers to. */
 	UPROPERTY(EditAnywhere)
 	TSoftObjectPtr<UNCell> Cell;

@@ -37,17 +37,17 @@ void FNActorPoolsEditorModule::ShutdownModule()
 	UToolMenus::UnRegisterStartupCallback(this);
 	N_TOOLS_MENU_ENTRY_EUW_METHOD_UNREGISTER(EUW_NActorPools)();
 	FNActorPoolsEditorCommands::RemoveMenuEntries();
-	
+
 	// Teardown Placement
 	N_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
-	
+
 	FNActorPoolsEditorStyle::Shutdown();
 }
 
 void FNActorPoolsEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;
-	
+
 	FNActorPoolsEditorStyle::Initialize();
 
 	// Initialize Tool Menu
@@ -56,14 +56,14 @@ void FNActorPoolsEditorModule::OnPostEngineInit()
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(&N_TOOLS_MENU_ENTRY_EUW_METHOD_REGISTER(EUW_NActorPools)));
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(&FNActorPoolsEditorCommands::AddMenuEntries));
 	}
-	
+
 	if (GUnrealEd)
 	{
 		const TSharedPtr<FComponentVisualizer> ActorPoolSpawnerComponentVisualizer = MakeShared<FNActorPoolSpawnerComponentVisualizer>();
 		GUnrealEd->RegisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName(), ActorPoolSpawnerComponentVisualizer);
 		ActorPoolSpawnerComponentVisualizer->OnRegister();
 	}
-	
+
 	// Handle Placement Definitions
 	if (const FPlacementCategoryInfo* Info = FNEditorDefaults::GetPlacementCategory())
 	{
@@ -76,7 +76,7 @@ void FNActorPoolsEditorModule::OnPostEngineInit()
 		TOptional<int32>(),
 		NSLOCTEXT("NexusActorPoolsEditor", "Placement_NKillZoneActor", "KillZone Actor"))));
 	}
-	
+
 	// Inspector Category Filter
 	FNPropertySections::AddActorComponentCategory("Actor Pool Spawner");
 	FNPropertySections::AddActorComponentCategory("Kill Zone");

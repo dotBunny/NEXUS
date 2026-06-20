@@ -34,9 +34,9 @@ bool FNGetJunctionDataElement::ExecuteInternal(FPCGContext* Context) const
 {
 	const UNGetJunctionDataSettings* Settings = Context->GetInputSettings<UNGetJunctionDataSettings>();
 	N_PCG_JUNCTION_PREFIX
-	
+
 	const FName ComponentReferenceName = TEXT("ComponentReference");
-	
+
 	// Could have multiple pin inputs
 	for (const FPCGTaggedData& Input : Context->InputData.GetInputsByPin(PCGPinConstants::DefaultInputLabel))
 	{
@@ -45,9 +45,9 @@ bool FNGetJunctionDataElement::ExecuteInternal(FPCGContext* Context) const
 		{
 			for (int64 i = 0; i < ParamData->Metadata->GetItemCountForChild(); ++i)
 			{
-				const FPCGMetadataAttribute<FSoftObjectPath>* ComponentAttr = 
+				const FPCGMetadataAttribute<FSoftObjectPath>* ComponentAttr =
 					ParamData->Metadata->GetConstTypedAttribute<FSoftObjectPath>(ComponentReferenceName);
-				
+
 				FSoftObjectPath ComponentSoftObjectPath = ComponentAttr->GetValueFromItemKey(i);
 				if (ComponentSoftObjectPath.IsValid())
 				{
@@ -60,10 +60,10 @@ bool FNGetJunctionDataElement::ExecuteInternal(FPCGContext* Context) const
 			}
 		}
 	}
-	
+
 	FPCGTaggedData& TaggedData = Outputs.Emplace_GetRef();
 	TaggedData.Data = OutputData;
-	TaggedData.Pin = Settings->JunctionsAttribute; 
-	
+	TaggedData.Pin = Settings->JunctionsAttribute;
+
 	return true;
 }

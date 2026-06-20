@@ -417,18 +417,18 @@ TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, co
 		{
 			CombineMesh(BaseTransform, BaseMesh, Transforms[i], Meshes[i]);
 		}
-		
+
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Name = MakeUniqueObjectName(World, ANDebugActor::StaticClass(), FName("RawMeshVisualizer"));
-#if WITH_EDITOR	
+#if WITH_EDITOR
 		const FString Label = SpawnParams.Name.ToString();
 		SpawnParams.InitialActorLabel = Label;
 #endif // WITH_EDITOR
 		SpawnParams.ObjectFlags |= RF_Transient;
-		
+
 		ANDebugActor* DebugActor = World->SpawnActor<ANDebugActor>(ANDebugActor::StaticClass(), BaseTransform, SpawnParams);
 		if (DebugActor == nullptr) return DebugActors;
-		
+
 		DebugActor->OverrideWithDynamicMesh(BaseMesh.CreateDynamicMesh(bProcessMeshes), MaterialInterface);
 		DebugActors.Add(DebugActor);
 	}
@@ -481,7 +481,7 @@ FNRawMesh FNRawMeshUtils::ToConvexHull(const FNRawMesh& Mesh)
 	TArray<TArray<int32>> OutFaceIndices;
 	TArray<Chaos::FConvex::FVec3Type> OutVertices;
 	Chaos::FConvex::FAABB3Type OutLocalBounds;
-	Chaos::FConvexBuilder::Build(InputVertices, OutPlanes, OutFaceIndices, OutVertices, OutLocalBounds, 
+	Chaos::FConvexBuilder::Build(InputVertices, OutPlanes, OutFaceIndices, OutVertices, OutLocalBounds,
 		Chaos::FConvexBuilder::EBuildMethod::Original); // Use the original
 	const int32 VerticesCount = OutVertices.Num();
 	const int32 LoopCount = OutFaceIndices.Num();
@@ -743,7 +743,7 @@ bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FVe
 	{
 		RightVerticesWorld.Add(FNVectorUtils::TransformPoint(Vertex, RightOrigin, RightRotation));
 	}
-	
+
 	const int32 LeftLoopCount = LeftMesh.Loops.Num();
 	const int32 RightLoopCount = RightMesh.Loops.Num();
 

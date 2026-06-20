@@ -14,11 +14,11 @@ FNObjectSnapshot FNObjectSnapshotUtils::Snapshot()
 {
 	check(IsInGameThread());
 	FGCScopeGuard Guard;
-	
+
 	// Create our Snapshot struct
 	FNObjectSnapshot Snapshot(FNDeveloperUtils::GetCurrentObjectCount());
 	Snapshot.Ticket = TakeTicket();
-	
+
 	FChunkedFixedUObjectArray& Objects = GUObjectArray.GetObjectItemArrayUnsafe();
 	for (int32 i = 0; i < GUObjectArray.GetObjectArrayNum(); i++)
 	{
@@ -125,7 +125,7 @@ void FNObjectSnapshotUtils::RemoveKnownLeaks(FNObjectSnapshotDiff& Diff)
 			Diff.AddedCount--;
 		}
 	}
-	
+
 	// Keep the churn total consistent with the now-reduced added count.
 	Diff.ChangeCount = Diff.AddedCount + Diff.RemovedCount;
 }

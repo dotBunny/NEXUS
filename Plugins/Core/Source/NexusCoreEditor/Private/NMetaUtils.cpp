@@ -15,7 +15,7 @@ bool FNMetaUtils::HasKey(UEdGraphNode* Node, const FName& Key)
 	{
 		const UClass* ParentClass  = FunctionCall->FunctionReference.GetMemberParentClass();
 
-		if (ParentClass == nullptr)	
+		if (ParentClass == nullptr)
 		{
 			return false;
 		}
@@ -38,13 +38,13 @@ bool FNMetaUtils::HasKey(UEdGraphNode* Node, const FName& Key)
 bool FNMetaUtils::HasKey(const UScriptStruct* ScriptStruct, const FName& Key)
 {
 	if (ScriptStruct == nullptr) return false;
-	return ScriptStruct->HasMetaData(Key);	
+	return ScriptStruct->HasMetaData(Key);
 }
 
 bool FNMetaUtils::HasKey(const UStruct* Struct, const FName& Key)
 {
 	if (Struct == nullptr) return false;
-	return Struct->HasMetaData(Key);	
+	return Struct->HasMetaData(Key);
 }
 bool FNMetaUtils::HasKey(const UClass* Class, const FName& Key)
 {
@@ -59,7 +59,7 @@ FString FNMetaUtils::GetData(UEdGraphNode* Node, const FName& Key)
 	{
 
 		const UClass* ParentClass  = FunctionCall->FunctionReference.GetMemberParentClass();
-		if (ParentClass == nullptr)	
+		if (ParentClass == nullptr)
 		{
 			return EmptyString;
 		}
@@ -85,7 +85,7 @@ FString FNMetaUtils::GetData(UEdGraphNode* Node, const FName& Key)
 FString FNMetaUtils::GetData(const UScriptStruct* ScriptStruct, const FName& Key)
 {
 	if (ScriptStruct == nullptr) return EmptyString;
-	
+
 	if (ScriptStruct->HasMetaData(Key))
 	{
 		return ScriptStruct->GetMetaData(Key);
@@ -96,7 +96,7 @@ FString FNMetaUtils::GetData(const UScriptStruct* ScriptStruct, const FName& Key
 FString FNMetaUtils::GetData(const UStruct* Struct, const FName& Key)
 {
 	if (Struct == nullptr) return EmptyString;
-	
+
 	if (Struct->HasMetaData(Key))
 	{
 		return Struct->GetMetaData(Key);
@@ -106,7 +106,7 @@ FString FNMetaUtils::GetData(const UStruct* Struct, const FName& Key)
 FString FNMetaUtils::GetData(const UClass* Class, const FName& Key)
 {
 	if (Class == nullptr) return EmptyString;
-	
+
 	if (Class->HasMetaData(Key))
 	{
 		return Class->GetMetaData(Key);

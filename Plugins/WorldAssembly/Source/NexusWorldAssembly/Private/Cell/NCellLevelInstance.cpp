@@ -12,16 +12,16 @@
 ANCellLevelInstance::ANCellLevelInstance()
 {
 	bReplicates = true;
-	
+
 	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
-	
+
 	// Ensure that we are never less than what we consider nearby
 	const float SquaredNearbyRange = Settings->NetworkNearbyRange * Settings->NetworkNearbyRange;
 	if (GetNetCullDistanceSquared() < SquaredNearbyRange)
 	{
 		SetNetCullDistanceSquared(SquaredNearbyRange);
 	}
-	
+
 	if (Settings->NetworkingMode == ENWorldAssemblyNetworkMode::AlwaysRelevantLevelInstances)
 	{
 		bAlwaysRelevant = true;
@@ -46,7 +46,7 @@ void ANCellLevelInstance::OnLevelInstanceLoaded()
 void ANCellLevelInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
+
 	// Special
 	FDoRepLifetimeParams Params;
 	Params.Condition = COND_InitialOnly;
@@ -69,7 +69,7 @@ void ANCellLevelInstance::OnRep_AssemblyData()
 {
 	// This ensures that a cell gets registered on the clients
 	FNWorldAssemblyRegistry::RegisterCellLevelInstance(this);
-	
+
 	// Apply updates
 	UpdateFromAssemblyData();
 }
@@ -90,7 +90,7 @@ FNCellLinkDetails ANCellLevelInstance::GetCellLinkDetails(const int32 JunctionId
 		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Junction(%i) has requested link details prior to it being replicated."), JunctionIdentifier);
 		return FNCellLinkDetails();
 	}
-	
+
 	for (int32 i = 0; i < AssemblyData.LinkDetails.Num(); i++)
 	{
 		const FNCellLinkDetails& LinkDetails = AssemblyData.LinkDetails[i];
@@ -99,7 +99,7 @@ FNCellLinkDetails ANCellLevelInstance::GetCellLinkDetails(const int32 JunctionId
 			return LinkDetails;
 		}
 	}
-	
+
 	UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Junction(%i) has requested link details that couldn't be found."), JunctionIdentifier);
 	return FNCellLinkDetails();
 }

@@ -26,13 +26,13 @@ public:
 		// Cleanup world
 		UWorld* World = FNTestUtils::Environment.World;
 		UGameInstance* GameInstance = FNTestUtils::Environment.GameInstance;
-	
+
 		World->EndPlay(EEndPlayReason::Quit);
 		GEngine->DestroyWorldContext(World);
 		World->DestroyWorld(false);
 		GameInstance->MarkAsGarbage();
-	
-	
+
+
 		FNTestUtils::Environment.GameInstance = nullptr;
 		FNTestUtils::Environment.World = nullptr;
 		FNTestUtils::Environment.WorldContext = nullptr;

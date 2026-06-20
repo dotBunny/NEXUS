@@ -116,7 +116,7 @@ private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	UPROPERTY()
 	TArray<TObjectPtr<UNAssemblyOperation>> KnownOperations;
-	
+
 	/** Used to track potential operations that will cache data, so that we can clear it. **/
 	TArray<int32> CachedOperationTickets;
 

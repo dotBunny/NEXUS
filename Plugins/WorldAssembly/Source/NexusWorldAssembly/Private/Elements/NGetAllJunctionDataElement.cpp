@@ -17,9 +17,9 @@
 TArray<FPCGPinProperties> UNGetAllJunctionDataSettings::OutputPinProperties() const
 {
 	TArray<FPCGPinProperties> PinProperties;
-	
+
 	PinProperties.Emplace(JunctionsAttribute, EPCGDataType::Point);
-	
+
 	return PinProperties;
 }
 
@@ -45,18 +45,18 @@ void FNGetAllJunctionDataElement::GetDependenciesCrc(const FPCGGetDependenciesCr
 }
 
 bool FNGetAllJunctionDataElement::ExecuteInternal(FPCGContext* Context) const
-{	
+{
 	const UNGetAllJunctionDataSettings* Settings = Context->GetInputSettings<UNGetAllJunctionDataSettings>();
 	N_PCG_JUNCTION_PREFIX
 	for (const UNCellJunctionComponent* JunctionComponent :  FNWorldAssemblyRegistry::GetCellJunctionComponents())
 	{
 		N_PCG_JUNCTION_DATA
 	}
-	
+
 	FPCGTaggedData& TaggedData = Outputs.Emplace_GetRef();
 	TaggedData.Data = OutputData;
-	TaggedData.Pin = Settings->JunctionsAttribute; 
-	
+	TaggedData.Pin = Settings->JunctionsAttribute;
+
 	return true;
 }
 
@@ -66,11 +66,11 @@ void UNGetAllJunctionDataSettings::GetStaticTrackedKeys(FPCGSelectionKeyToSettin
 	TArray<TObjectPtr<const UPCGGraph>>& OutVisitedGraphs) const
 {
 	FPCGSettingsAndCulling SettingsAndCulling(TSoftObjectPtr<const UPCGSettings>(this), false);
-	
+
 	for (UNCellJunctionComponent* JunctionComponent : FNWorldAssemblyRegistry::GetCellJunctionComponents())
 	{
 		FPCGSelectionKey JunctionKey = FPCGSelectionKey::CreateFromObjectPtr(JunctionComponent);
-		
+
 		OutKeysToSettings.FindOrAdd(JunctionKey).AddUnique(SettingsAndCulling);
 	}
 }

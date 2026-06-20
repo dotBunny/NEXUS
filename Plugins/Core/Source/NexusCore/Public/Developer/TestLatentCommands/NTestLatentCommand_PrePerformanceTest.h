@@ -26,14 +26,14 @@ public:
 	{
 		// Ensure that stack walking is initialized prior to performance testing to avoid library loading, this happens once.
 		FNTestUtils::Environment.InitializeStackWalking();
-	
+
 		// Force garbage collection to ensure a clean slate for performance testing
 		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 
 		// Force the logs to be written to disk prior to the operation
 		GLog->Flush();
 		FVisualLogger::Get().Flush();
-		
+
 		// Ensure everything has been loaded
 		IStreamingManager::Get().StreamAllResources();
 		return true;

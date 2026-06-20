@@ -25,13 +25,13 @@ class NEXUSACTORPOOLS_API UNActorPoolListViewEntry : public UUserWidget, public 
 	GENERATED_BODY()
 
 public:
-	
+
 	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
 	{
 		OwnerListView = Owner;
 		Execute_OnSetOwnerListView(Widget, Owner);
 	}
-	
+
 	/** Refresh the widget's displayed fields from the current pool state. */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
 	void Refresh() const;
@@ -40,7 +40,7 @@ protected:
 	virtual void NativeConstruct() override
 	{
 		Super::NativeConstruct();
-		
+
 		// Will validate it here only to throw a message in log for someone to realize they haven't hooked up the widget correctly.
 		N_VALIDATE(LogNexusActorPools, TypeImage);
 		N_VALIDATE(LogNexusActorPools, ProgressBar);

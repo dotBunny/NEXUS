@@ -28,84 +28,84 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Params The parameters for the point generation.
 	 * @param TwisterObject The Mersenne Twister to query for random.
 	 * @param WorldContextObject Object that provides access to the world.
-	 * @returns An array of generated points.	 
+	 * @returns An array of generated points.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point", Category = "NEXUS|Picker|Sphere", 
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point", Category = "NEXUS|Picker|Sphere",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#next-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> NextPoint(UPARAM(ref) FNSpherePickerParams& Params, UNMersenneTwisterObject* TwisterObject, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
 		if (Params.CachedWorld == nullptr)
 		{
-			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 		}
 		FNSpherePicker::Next(ReturnLocations, TwisterObject->GetTwisterRef(), Params);
 		return ReturnLocations;
 	}
-	
+
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere.
 	 * Uses the non-deterministic random generator for true randomness.
 	 * @note Not thread-safe. Only call from the Game Thread; all pickers draw from one shared non-deterministic stream.
 	 * @param Params The parameters for the point generation.
 	 * @param WorldContextObject Object that provides access to the world.
-	 * @returns An array of generated points.	 
+	 * @returns An array of generated points.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point", Category = "NEXUS|Picker|Sphere", 
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point", Category = "NEXUS|Picker|Sphere",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#random-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> RandomPoint(UPARAM(ref) FNSpherePickerParams& Params, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
 		if (Params.CachedWorld == nullptr)
 		{
-			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 		}
 		FNSpherePicker::Random(ReturnLocations, Params);
 		return ReturnLocations;
 	}
-	
+
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere.
-	 * Updates the seed value to enable sequential random point generation.	 
+	 * Updates the seed value to enable sequential random point generation.
 	 * @param Params The parameters for the point generation.
-	 * @param Seed The random seed to start with, and update.	  
+	 * @param Seed The random seed to start with, and update.
 	 * @param WorldContextObject Object that provides access to the world.
-	 * @returns An array of generated points.	
+	 * @returns An array of generated points.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Tracked Point", Category = "NEXUS|Picker|Sphere", 
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Tracked Point", Category = "NEXUS|Picker|Sphere",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#tracked-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> TrackedPoint(UPARAM(ref) FNSpherePickerParams& Params, UPARAM(ref) int32& Seed, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
 		if (Params.CachedWorld == nullptr)
 		{
-			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 		}
 		FNSpherePicker::Tracked(ReturnLocations, Seed, Params);
 		return ReturnLocations;
 	}
-	
+
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere.
-	 * Useful for one-time random point generation with reproducible results. 
+	 * Useful for one-time random point generation with reproducible results.
 	 * @param Params The parameters for the point generation.
-	 * @param Seed The random seed to start with, and update.	  
+	 * @param Seed The random seed to start with, and update.
 	 * @param WorldContextObject Object that provides access to the world.
-	 * @returns An array of generated points.	
-	 */	
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: One-Shot Point", Category = "NEXUS|Picker|Sphere", 
+	 * @returns An array of generated points.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: One-Shot Point", Category = "NEXUS|Picker|Sphere",
 	meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#one-shot-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> OneShotPoint(UPARAM(ref) FNSpherePickerParams& Params, const int32 Seed, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
 		if (Params.CachedWorld == nullptr)
 		{
-			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 		}
 		FNSpherePicker::OneShot(ReturnLocations, Seed, Params);
 		return ReturnLocations;
 	}
-	
+
 	/**
 	 * Checks if a point is inside or on the surface of a sphere.
 	 * @param Origin The center point of the sphere.
@@ -118,7 +118,7 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	{
 		return FNSpherePicker::IsPointInsideOrOn(Origin, Radius, Point);
 	}
-	
+
 	/**
 	 * Checks if multiple points are inside or on the surface of a sphere
 	 * @param Points Array of points to check.

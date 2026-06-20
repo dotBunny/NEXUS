@@ -66,7 +66,7 @@ public:
 	/** Is the component going to Spawn enemies when ticked? */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	bool bSpawningEnabled = true;
-	
+
 	/** Should the spawner only spawn on servers, ignoring itself on client-only? */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	bool bServerAuthoritative = true;
@@ -86,7 +86,7 @@ public:
 	/** The dimensional input to the distribution method. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	FVector DistributionRange = FVector(1.f, 20.f, 20.f);
-	
+
 	/** The in-level component reference for usage with the Spline distribution method. */
 	UPROPERTY(EditAnywhere, meta = (UseComponentPicker, AllowedClasses = "/Script/Engine.SplineComponent", AllowAnyActor, EditCondition="Distribution == ENActorPoolSpawnerDistribution::Spline", EditConditionHides), Category="Actor Pool Spawner")
 	FComponentReference SplineLevelReference;
@@ -142,7 +142,7 @@ public:
 	{
 		bSpawningEnabled = true;
 	}
-	
+
 	/** @return The per-spawn origin offset from the component's world location. */
 	FORCEINLINE FVector GetOffset() const { return Offset; }
 	/** @return The spatial distribution used for picking spawn locations. */

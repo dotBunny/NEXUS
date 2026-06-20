@@ -33,7 +33,7 @@ public:
 		}
 	}
 	N_EDITOR_SETTINGS_BASE(UNWorldAssemblyEditorSettings, "World Assembly", "Editor side settings used in NWorldAssembly.");
-	
+
 	/** Default rotation constraints applied to newly-created cell roots. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Cell (Defaults)", DisplayName="Rotation Constraints",
 		meta=(ToolTip=""))
@@ -58,7 +58,7 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Cell (Defaults)", DisplayName="Proxy Color",
 		meta=(ToolTip=""))
 	FLinearColor CellProxyColor;
-	
+
 	/** Material applied to the world-collision visualizer's debug geometry. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "World Context", DisplayName="Collision Visualizer Material")
 	TSoftObjectPtr<UMaterialInterface> CollisionVisualizerMaterial;

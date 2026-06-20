@@ -18,6 +18,6 @@ EDataValidationResult UNActorPoolsEditorValidator::ValidateLoadedAsset_Implement
 	{
 		return UAssetDefinition_NActorPoolSet::ValidateAsset(InAssetData, InAsset, Context);
 	}
-	
+
 	return  EDataValidationResult::NotValidated;
 }

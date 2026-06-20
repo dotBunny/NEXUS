@@ -137,13 +137,13 @@ TArray<FString> FNReport::GetReportLines(const ENReportOutputFormat OutputFormat
 {
 	TArray<int32> ChildrenTickets;
 	GetOrderedBlocks(0, ChildrenTickets, false);
-	
+
 	TArray<FString> Output;
 	for (int32 i = 0; i < ChildrenTickets.Num(); i++)
 	{
 		RenderBlock(ChildrenTickets[i], Output, OutputFormat);
 	}
-	
+
 	// Early out since we don't have any tokens
 	if (ReplaceTokens.IsEmpty())
 	{

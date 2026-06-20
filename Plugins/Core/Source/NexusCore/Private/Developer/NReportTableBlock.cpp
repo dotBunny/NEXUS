@@ -11,7 +11,7 @@ void FNReportTableBlock::Initialize(const int32 Columns)
 	MaximumCellLengths.Empty();
 	HeaderCells.Empty();
 	Cells.Empty();
-	
+
 	for (int i = 0; i < ColumnCount; i++)
 	{
 		MaximumCellLengths.Add(0);
@@ -39,15 +39,15 @@ void FNReportTableBlock::AddRow(const TArray<FString>& Row)
 		UE_LOG(LogNexusCore, Error, TEXT("Unable to add data row as the FNReportTableBlock has not been initialized yet."));
 		return;
 	}
-	
+
 	int Columns = Row.Num();
 	if (Columns > ColumnCount)
 	{
 		UE_LOG(LogNexusCore, Warning, TEXT("Attempting to add data row exceeding number(%i) of initialized columns(%i), additional data will be discarded."), Row.Num(), ColumnCount);
 		Columns = ColumnCount;
 	}
-	
-	
+
+
 	TArray<FString>& NewRow = Cells.Add_GetRef(TArray<FString>());
 	for (int i = 0; i < Columns; i++)
 	{
@@ -64,7 +64,7 @@ void FNReportTableBlock::Render(FNReport& Report, TArray<FString>& Output, const
 {
 	RenderHeading(Output, OutputFormat);
 	RenderHeader(Output, OutputFormat);
-	
+
 
 	// Build Table
 	if (OutputFormat == ENReportOutputFormat::Markdown)
@@ -75,17 +75,17 @@ void FNReportTableBlock::Render(FNReport& Report, TArray<FString>& Output, const
 	{
 		RenderContentAsPlainText(Report, Output);
 	}
-	
+
 	// Children
 	TArray<int32> ChildrenTickets;
 	Report.GetOrderedBlocks(GetTicket(), ChildrenTickets, false);
-	
+
 	// Children
 	for (int32 i = 0; i < ChildrenTickets.Num(); i++)
 	{
 		Report.RenderBlock(ChildrenTickets[i], Output, OutputFormat);
 	}
-	
+
 	RenderFooter(Output, OutputFormat);
 }
 

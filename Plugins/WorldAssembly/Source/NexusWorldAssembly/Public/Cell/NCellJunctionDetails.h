@@ -43,7 +43,7 @@ USTRUCT(BlueprintType)
 struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 {
 	GENERATED_BODY()
-	
+
 	/** Directionality of this junction. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	ENCellJunctionType Type = ENCellJunctionType::TwoWaySocket;
@@ -51,7 +51,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 	/** Requirement satisfied during graph generation and spawning. */
 	UPROPERTY(EditInstanceOnly)
 	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::AllowBlocking;
-	
+
 	/** Size of the junction socket in grid units (width, height). */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	FIntVector2 SocketSize = FIntVector2(2, 4);
@@ -67,8 +67,8 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 	/** Allowed rotations for this junction when the owning cell is placed by the generator. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	FNRotationConstraints RotationConstraints;
-	
-	/** 
+
+	/**
 	 * Relative weight for preferred selection.
 	 * @note Higher values increase the probability of this junction being filled.
 	 */
@@ -78,7 +78,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 	/** Unique per-cell identifier; allocated by ANCellActor::GetCellJunctionNextIdentifier. */
 	UPROPERTY(VisibleAnywhere)
 	int32 InstanceIdentifier = -1;
-	
+
 	/**
 	 * Derived, non-serialized cache of WorldRotation.Quaternion().Inverse(), populated when the virtual cell data is
 	 * assembled in FNVirtualOrganContext. Lets the per-candidate junction-rotation gate skip the rotator->quat
@@ -100,11 +100,11 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 		return
 			InstanceIdentifier == Other.InstanceIdentifier
 			&& Weighting == Other.Weighting
-			
+
 			&& Requirements == Other.Requirements
 			&& Type == Other.Type
 			&& SocketSize == Other.SocketSize
-			
+
 			&& WorldLocation == Other.WorldLocation
 			&& WorldRotation == Other.WorldRotation
 			&& RotationConstraints.IsEqual(Other.RotationConstraints);

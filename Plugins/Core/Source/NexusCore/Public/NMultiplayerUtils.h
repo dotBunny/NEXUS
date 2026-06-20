@@ -210,11 +210,11 @@ public:
 		// All conditions checked should have a real ping to provide.
 		return PlayerController->PlayerState->ExactPing;
 	}
-	
+
 	/**
 	 * Is the current session created from the MultiplayerTest editor command?
 	 * @return true/false if it is.
-	 */	
+	 */
 	FORCEINLINE static bool IsMultiplayerTest()
 	{
 		return FParse::Param(FCommandLine::Get(), TEXT("NMultiplayerTest"));

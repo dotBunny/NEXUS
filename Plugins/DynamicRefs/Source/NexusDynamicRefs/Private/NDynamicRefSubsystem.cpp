@@ -11,7 +11,7 @@ void UNDynamicRefSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	// Pre-allocate space for enum based collection
 	FastCollection.AddZeroed(NDR_Max);
-	
+
 	Super::Initialize(Collection);
 }
 
@@ -19,7 +19,7 @@ void UNDynamicRefSubsystem::Deinitialize()
 {
 	FastCollection.Empty();
 	NamedCollection.Empty();
-	
+
 	Super::Deinitialize();
 }
 
@@ -30,7 +30,7 @@ void UNDynamicRefSubsystem::AddObject(const ENDynamicRef DynamicRef, UObject* In
 		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to add a null UObject, skipping."));
 		return;
 	}
-	
+
 	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
 		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to add UObject(%s) to NDR_None/NDR_Max, skipping."), *InObject->GetName());
@@ -52,7 +52,7 @@ void UNDynamicRefSubsystem::AddObjects(const ENDynamicRef DynamicRef, TArray<UOb
 		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to add UObjects to NDR_None/NDR_Max, skipping."));
 		return;
 	}
-	
+
 	for (UObject* Object : InObjects)
 	{
 		N_VALIDATE_CONTINUE(LogNexusDynamicRefs, Object);
@@ -63,7 +63,7 @@ void UNDynamicRefSubsystem::AddObjects(const ENDynamicRef DynamicRef, TArray<UOb
 void UNDynamicRefSubsystem::AddObjectByName(const FName Name, UObject* InObject)
 {
 	N_VALIDATE_RETURN_VOID(LogNexusDynamicRefs, InObject);
-	
+
 	FNDynamicRefCollection& Collection = NamedCollection.FindOrAdd(Name);
 	if (Collection.Add(InObject))
 	{
@@ -84,7 +84,7 @@ void UNDynamicRefSubsystem::AddObjectsByName(const FName Name, TArray<UObject*> 
 		}
 	}
 	if (!bHasObjects) return;
-	
+
 	// Go about adding
 	FNDynamicRefCollection& Collection = NamedCollection.FindOrAdd(Name);
 	for (UObject* Object : InObjects)
@@ -104,7 +104,7 @@ void UNDynamicRefSubsystem::RemoveObject(const ENDynamicRef DynamicRef, UObject*
 		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to remove a null UObject, skipping."));
 		return;
 	}
-	
+
 	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
 		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to remove UObject(%s) from NDR_None/NDR_Max, skipping."), *InObject->GetName());
@@ -124,7 +124,7 @@ void UNDynamicRefSubsystem::RemoveObjects(const ENDynamicRef DynamicRef, TArray<
 		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to remove UObjects from NDR_None/NDR_Max, skipping."));
 		return;
 	}
-	
+
 	for (UObject* Object : InObjects)
 	{
 		RemoveObject(DynamicRef, Object);
@@ -137,14 +137,14 @@ void UNDynamicRefSubsystem::RemoveObjectByName(const FName Name, UObject* InObje
 	if (Collection != nullptr && Collection->Remove(InObject))
 	{
 		OnRemovedByName.Broadcast(Name, InObject);
-		
+
 		// Remove empty collection
 		if (!Collection->HasObjects())
 		{
 			NamedCollection.Remove(Name);
 		}
 	}
-	
+
 }
 
 void UNDynamicRefSubsystem::RemoveObjectsByName(const FName Name, TArray<UObject*> InObjects)
@@ -156,10 +156,10 @@ void UNDynamicRefSubsystem::RemoveObjectsByName(const FName Name, TArray<UObject
 		{
 			if (Collection->Remove(Object))
 			{
-				OnRemovedByName.Broadcast(Name, Object);	
+				OnRemovedByName.Broadcast(Name, Object);
 			}
 		}
-		
+
 		if (!Collection->HasObjects())
 		{
 			NamedCollection.Remove(Name);
@@ -198,7 +198,7 @@ AActor* UNDynamicRefSubsystem::GetFirstActor(const ENDynamicRef DynamicRef)
 		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get first actor from NDR_None/NDR_Max, returning null."));
 		return nullptr;
 	}
-	
+
 	for (const TWeakObjectPtr<UObject>& ObjPtr : FastCollection[DynamicRef].Objects)
 	{
 		AActor* Actor = Cast<AActor>(ObjPtr.Get());
@@ -261,7 +261,7 @@ TArray<AActor*> UNDynamicRefSubsystem::GetActors(const ENDynamicRef DynamicRef)
 		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Requested AActors from NDR_None/NDR_Max, returning empty."));
 		return TArray<AActor*>();
 	}
-	
+
 	TArray<AActor*> Result;
 	for (UObject* Object : FastCollection[DynamicRef].GetObjectsCopy())
 	{
@@ -325,7 +325,7 @@ AActor* UNDynamicRefSubsystem::GetLastActor(const ENDynamicRef DynamicRef)
 		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Requested last AActor from NDR_None/NDR_Max, returning null."));
 		return nullptr;
 	}
-	
+
 	TArray<UObject*> Objects = GetObjects(DynamicRef);
 	const int32 ObjectsCount = Objects.Num();
 	for (int32 i = ObjectsCount - 1; i >= 0; i--)

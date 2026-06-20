@@ -34,7 +34,7 @@ void FNToolingEditorCommands::AddMenuEntries()
 				FSlateIcon(FNToolingEditorStyle::GetStyleSetName(), "Command.ProjectLevels")
 			);
 	}
-	
+
 	// Dynamic NEXUS Tools Menu
 	if (UToolMenu* ToolMenus = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools"))
 	{
@@ -49,11 +49,11 @@ void FNToolingEditorCommands::AddMenuEntries()
 		);
 		Entry.InsertPosition = FToolMenuInsert("FindInBlueprints", EToolMenuInsertType::After);
 		ToolsSection.AddEntry(Entry);
-		
+
 		// Initialize known menu entries
 		FNToolsMenuEntries::AddMenuEntries();
 	}
-	
+
 	// Dynamic Find & Fix Menu (Fixers)
 	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("ContentBrowser.FolderContextMenu"))
 	{
@@ -66,11 +66,11 @@ void FNToolingEditorCommands::AddMenuEntries()
 				false,
 				FSlateIcon(FNToolingEditorStyle::GetStyleSetName(), "Command.FindAndFix")
 			);
-		
+
 		// Initialize known menu entries
 		FNFixersMenuEntries::AddMenuEntries();
 	}
-	
+
 	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools.Debug"))
 	{
 		// Inject the Collision Visualizer into the Tools > Debug menu
@@ -83,7 +83,7 @@ void FNToolingEditorCommands::AddMenuEntries()
 		Entry.InsertPosition = FToolMenuInsert(NAME_None, EToolMenuInsertType::First);
 		Menu->AddMenuEntry("Debug", Entry);
 	}
-	
+
 	// Add in NetworkProfiler menu option if its present
 	if (HasToolsProfileNetworkProfiler())
 	{
@@ -91,7 +91,7 @@ void FNToolingEditorCommands::AddMenuEntries()
 		{
 			FToolMenuSection& ExternalMenu = ProfileMenu->FindOrAddSection("External");
 			ExternalMenu.Label = NSLOCTEXT("NexusToolingEditor", "NLevelEditorToolsExternal", "External");
-			
+
 			ExternalMenu.AddMenuEntry(
 			NEXUS::ToolingEditor::NetworkProfiler::Identifier,
 			NSLOCTEXT("NexusToolingEditor", "NetworkProfiler_Open", "Network Profiler"),
@@ -100,14 +100,14 @@ void FNToolingEditorCommands::AddMenuEntries()
 			FExecuteAction::CreateStatic(&FNToolingEditorCommands::OpenNetworkProfiler));
 		}
 	}
-	
+
 	// Add Multiplayer Test Bits
-	
+
 	// Support for DocsURL addition to nodes
 	if (UToolMenu* BlueprintNodeContextMenu = UToolMenus::Get()->ExtendMenu("GraphEditor.GraphNodeContextMenu.K2Node_CallFunction"))
 	{
 		FToolMenuSection& DocumentationSection = BlueprintNodeContextMenu->FindOrAddSection(FName("EdGraphSchemaDocumentation"));
-		
+
 		FToolMenuEntry& Entry = DocumentationSection.AddMenuEntry(
 			"NEXUS_ExternalDocumentation",
 			NSLOCTEXT("NexusToolingEditor", "ExternalDocumentation", "External Documentation"),
@@ -115,14 +115,14 @@ void FNToolingEditorCommands::AddMenuEntries()
 			FSlateIcon(FNToolingEditorStyle::GetStyleSetName(), "Icons.Documentation"),
 			FExecuteAction::CreateStatic(&FNToolingEditorCommands::OnNodeExternalDocumentation));
 		Entry.Visibility = FCanExecuteAction::CreateStatic(&FNToolingEditorCommands::NodeExternalDocumentation_CanExecute);
-		
+
 	}
 }
 
 void FNToolingEditorCommands::CreateCollisionVisualizerWindow()
 {
 	UNEditorUtilityWidget::SpawnTab(
-		NEXUS::ToolingEditor::CollisionVisualizer::Path, 
+		NEXUS::ToolingEditor::CollisionVisualizer::Path,
 		NEXUS::ToolingEditor::CollisionVisualizer::Identifier);
 }
 
@@ -162,7 +162,7 @@ void FNToolingEditorCommands::GenerateProjectLevelsSubMenu(UToolMenu* Menu)
 		{
 			continue;
 		}
-		
+
 		const FText DisplayName = FText::FromString(Path.GetAssetName());
 		const FText DisplayTooltip = FText::FromString(Path.GetAssetPathString());
 		const FName AssetName = Path.GetAssetFName();
@@ -189,7 +189,7 @@ void FNToolingEditorCommands::OnNodeExternalDocumentation()
 {
 	IAssetEditorInstance* AssetEditorInstance = FNEditorUtils::GetForegroundAssetEditor();
 	if (AssetEditorInstance == nullptr) return;
-	
+
 	if (!FNToolingEditorUtils::IsBlueprintEditorAssetType(AssetEditorInstance->GetEditingAssetTypeName()))
 	{
 		return;
@@ -211,7 +211,7 @@ bool FNToolingEditorCommands::NodeExternalDocumentation_CanExecute()
 {
 	IAssetEditorInstance* AssetEditorInstance = FNEditorUtils::GetForegroundAssetEditor();
 	if (AssetEditorInstance == nullptr) return false;
-	
+
 	if (!FNToolingEditorUtils::IsBlueprintEditorAssetType(AssetEditorInstance->GetEditingAssetTypeName()))
 	{
 		return false;
@@ -228,18 +228,18 @@ void FNToolingEditorCommands::RemoveMenuEntries()
 	if (Menu)
 	{
 		// Remove Collision Visualizer
-		Menu->RemoveEntry("LevelEditor.MainMenu.Tools.Debug", "Debug", 
+		Menu->RemoveEntry("LevelEditor.MainMenu.Tools.Debug", "Debug",
 			NEXUS::ToolingEditor::CollisionVisualizer::Identifier);
-		
+
 		Menu->RemoveEntry("LevelEditor.MainMenu.File", "FileOpen", "NEXUS_ProjectLevels");
-		
+
 		Menu->RemoveEntry("ContentBrowser.FolderContextMenu", "PathContextBulkOperations", "NEXUS_FindAndFix");
-		
+
 		Menu->RemoveEntry("LevelEditor.MainMenu.Tools", "Tools", "NEXUS");
-		
+
 		Menu->RemoveSection("LevelEditor.MainMenu.Tools.Profile", "External");
-		
-		Menu->RemoveEntry("GraphEditor.GraphNodeContextMenu.K2Node_CallFunction", 
+
+		Menu->RemoveEntry("GraphEditor.GraphNodeContextMenu.K2Node_CallFunction",
 			"EdGraphSchemaDocumentation", "NEXUS_ExternalDocumentation");
 	}
 }

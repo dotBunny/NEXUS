@@ -24,7 +24,7 @@ class UNCollectionsLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	
+
 	/**
 	 * Replace the contents of WeightedIntegerArray with the (value, weight) pairs.
 	 *
@@ -44,7 +44,7 @@ public:
 			WeightedIntegerArray.Add(Pair.X, Pair.Y);
 		}
 	}
-	
+
 	/**
 	 * Insert Weight copies of Value into the weighted array.
 	 * @param WeightedIntegerArray The target array, mutated in place.

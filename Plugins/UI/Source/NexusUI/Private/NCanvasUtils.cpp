@@ -30,18 +30,18 @@ void FNCanvasUtils::DrawCanvasTextBox(FNMultiLineTextBoxCanvasItem* TextBox, FCa
 		TextBox->Width + (Padding.X * 2.5f),
 		TextBox->Height + (Padding.Y * 2.0f)
 	);
-		
+
 	// Draw Background
 	FCanvasTileItem BackgroundTile(TopLeftPosition, BoxSize, TextBox->BackgroundColor);
 	BackgroundTile.BlendMode = SE_BLEND_Translucent;
 	Canvas->DrawItem(BackgroundTile);
-		
+
 	// Draw Border
 	FCanvasBoxItem BorderItem(TopLeftPosition, BoxSize);
 	BorderItem.LineThickness = 1.0f;
 	BorderItem.SetColor(TextBox->BorderColor);
 	Canvas->DrawItem(BorderItem);
-		
+
 	for (const auto& Line : TextBox->Lines)
 	{
 		const FVector2D TextPosition = TopLeftPosition + FVector2D(Padding.X, Line.Position);

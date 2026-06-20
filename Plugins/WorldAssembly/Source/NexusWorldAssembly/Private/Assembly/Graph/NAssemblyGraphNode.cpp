@@ -13,10 +13,10 @@ FNAssemblyGraphNode::FNAssemblyGraphNode(const uint64 NodeSeed, const FVector& P
 FNAssemblyGraphNode::FNAssemblyGraphNode(const FNAssemblyGraphNodeParams& Params)
 {
 	Seed = Params.Seed;
-	
+
 	WorldPosition = Params.WorldPosition;
 	WorldRotation = Params.WorldRotation;
-	
+
 	ContextTagsAdded = Params.ContextTagsAdded;
 	AssemblyTags = Params.AssemblyTags;
 }

@@ -23,10 +23,10 @@ public:
 	virtual FText GetNodeTooltipText() const override { return INVTEXT("Sorts points into a line using a nearest neighbor chain."); }
 	virtual FLinearColor GetNodeTitleColor() const override { return FNColor::SortElement; };
 #endif
-	
+
 	virtual TArray<FPCGPinProperties> InputPinProperties() const override;
 	virtual TArray<FPCGPinProperties> OutputPinProperties() const override;
-		
+
 	/** Treat the input as a closed loop, changing how the first and last points are evaluated. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Input", meta=(ToolTip="Can we assume this is a closed loop? This effects how the first/last point are evaluated."))
 	bool bIsLoop;
@@ -42,7 +42,7 @@ public:
 	/** When true, rotate each point to face its direction along the line. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Options", meta=(ToolTip="Should we rotate points to face their direction?", EditCondition="bBuildAdditionalMetadata", EditConditionHides))
 	bool bRotatePointToFaceDirection = false;
-	
+
 	/** Attribute name storing each point's grid direction to the next point on the line. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Next Grid Direction", Category = "Settings|Metadata (Attribute Names)", meta=(EditCondition="bBuildAdditionalMetadata", EditConditionHides, ToolTip="Name of the attribute storing each point's grid direction to the next point on the line."))
 	FName NextGridDirectionAttributeName = TEXT("NextGridDirection");

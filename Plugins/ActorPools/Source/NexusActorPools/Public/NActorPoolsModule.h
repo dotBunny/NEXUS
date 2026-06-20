@@ -11,7 +11,7 @@
  */
 class FNActorPoolsModule final : public IModuleInterface
 {
-public:	
+public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 	N_MODULE_BASE(FNActorPoolsModule, "NexusActorPools")

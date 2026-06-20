@@ -3,11 +3,11 @@
 
 #include "Assembly/Tasks/NProcessPassTask.h"
 
-FNProcessPassTask::FNProcessPassTask(const TSharedPtr<FNPassContext>& PassContextPtr, 
-                                     const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr, 
-                                     const TSharedPtr<FNAssemblyTaskGraphContext>& TaskGraphContextPtr 
-                                     N_ASSEMBLY_ANALYTICS_CONSTRUCTOR) 
-:	PassContextPtr(PassContextPtr.ToSharedRef()), WorldContextPtr(WorldContextPtr.ToSharedRef()), 
+FNProcessPassTask::FNProcessPassTask(const TSharedPtr<FNPassContext>& PassContextPtr,
+                                     const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr,
+                                     const TSharedPtr<FNAssemblyTaskGraphContext>& TaskGraphContextPtr
+                                     N_ASSEMBLY_ANALYTICS_CONSTRUCTOR)
+:	PassContextPtr(PassContextPtr.ToSharedRef()), WorldContextPtr(WorldContextPtr.ToSharedRef()),
 	TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef()) N_ASSEMBLY_ANALYTICS_INITIALIZER
 {
 	N_ASSEMBLY_ANALYTICS_INDEX_SET(CollectGenerationPassesCreate)
@@ -26,7 +26,7 @@ void FNProcessPassTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEv
 	}
 
 	TaskGraphContextPtr->SetStatusMessage(FString::Printf(TEXT("Collect Pass (%i)"), PassContextPtr->Graphs.Num()));
-	
+
 	for (TUniquePtr<FNAssemblyGraph>& Graph : PassContextPtr->Graphs)
 	{
 		// Copy our node collision data to the world
@@ -39,19 +39,19 @@ void FNProcessPassTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEv
 				WorldContextPtr->NodeCollisionMeshes.Add(CellNode->GetHullCopy());
 			}
 		}
-		
+
 		TaskGraphContextPtr->TakeGraph(MoveTemp(Graph));
 	}
-	
+
 	// Next pass access
 	WorldContextPtr->ContextTags.AppendTags(PassContextPtr->ContextTags);
 	WorldContextPtr->TagCounter.Combine(PassContextPtr->TagCounter);
-	
+
 	// Access on post
 	TaskGraphContextPtr->AddContextTags(PassContextPtr->ContextTags);
 	TaskGraphContextPtr->AddTagCounter(PassContextPtr->TagCounter);
-	
+
 	PassContextPtr->Graphs.Reset();
-	
+
 	N_ASSEMBLY_ANALYTICS_INDEX(CollectGenerationPassesFinish)
 }

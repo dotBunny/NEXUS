@@ -185,14 +185,14 @@ bool UAssetDefinition_NCell::GetThumbnailActionOverlay(const FAssetData& InAsset
 			ContentBrowser.Get().SyncBrowserToAssets({ WorldAssetData });
 			return FReply::Handled();
 		});
-	
+
 	return true;
 }
 
 FText UAssetDefinition_NCell::GetAssetDisplayName() const
 {
-	static const FText DisplayName = NSLOCTEXT("NexusWorldAssemblyEditor", "AssetTypeActions_NCell", "NCell"); 
-	return DisplayName; 
+	static const FText DisplayName = NSLOCTEXT("NexusWorldAssemblyEditor", "AssetTypeActions_NCell", "NCell");
+	return DisplayName;
 }
 
 UNCell* UAssetDefinition_NCell::GetOrCreatePackage(UWorld* World)
@@ -219,10 +219,10 @@ UNCell* UAssetDefinition_NCell::GetOrCreatePackage(UWorld* World)
 	}
 
 	Asset->World = TSoftObjectPtr<UWorld>(World);
-	
+
 	// Write to disk first
 	UEditorAssetLibrary::SaveLoadedAsset(Asset, false);
-	
+
 	FAssetRegistryModule::AssetCreated(Asset);
 	return Asset;
 }
@@ -276,7 +276,7 @@ void UAssetDefinition_NCell::OnPreSaveWorldWithContext(UWorld* World, FObjectPre
 
 	// We don't have a cell actor, get out of here!
 	if (CellActor == nullptr) return;
-	
+
 	// Ensure CellActor settings
 	FNWorldAssemblyEditorUtils::EnsureCellInitializedCallbackActors(World, CellActor);
 
@@ -308,7 +308,7 @@ EDataValidationResult UAssetDefinition_NCell::ValidateAsset(const FAssetData& In
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_HullNoVertices", "Cell {0} hull has no vertices."), FText::FromString(Cell->GetName())));
 	}
-	
+
 	if (!Cell->Root.HullSettings.bAllowNonConvex && !Cell->Root.Hull.IsConvex())
 	{
 		Result = EDataValidationResult::Invalid;
@@ -320,6 +320,6 @@ EDataValidationResult UAssetDefinition_NCell::ValidateAsset(const FAssetData& In
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_NoJunctions", "Cell {0} has no junctions."), FText::FromString(Cell->GetName())));
 	}
-	
+
 	return Result;
 }

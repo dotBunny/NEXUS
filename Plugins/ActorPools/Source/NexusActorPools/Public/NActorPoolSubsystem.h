@@ -26,7 +26,7 @@ class NEXUSACTORPOOLS_API UNActorPoolSubsystem : public UTickableWorldSubsystem
 	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNActorPoolSubsystem, true)
 
 	DECLARE_MULTICAST_DELEGATE_OneParam( OnActorPoolAddedDelegate, FNActorPool* );
-	
+
 public:
 
 	/**
@@ -63,7 +63,7 @@ public:
 		meta = (DeterminesOutputType = "ActorClass", DynamicOutputParam = "SpawnedActor",
 		DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#spawn-actor"))
 	bool SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation, AActor*& SpawnedActor);
-	
+
 	/**
 	 * Spawns an actor from a given pool, creating a pool as necessary, positioning it in the world and activating it.
 	 * @note Unlike GetActor, this places the actor at the supplied transform and triggers OnSpawnedFromActorPool on the returned actor.
@@ -92,7 +92,7 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName="Return All Actors", Category = "NEXUS|Actor Pools",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#return-all-actors"))
 	void ReturnAllActors();
-	
+
 	/**
 	 * Register a spawner component as tickable so the subsystem drives its periodic updates.
 	 * @param TargetComponent The spawner to register.
@@ -108,11 +108,11 @@ public:
 	//~UTickableWorldSubsystem
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 	virtual void OnWorldEndPlay(UWorld& InWorld) override;
-	
+
 	virtual bool IsTickable() const final override;
-	
+
 	N_TICKABLE_WORLD_SUBSYSTEM_GET_TICKABLE_TICK_TYPE(ETickableTickType::Conditional)
-	
+
 	virtual void Tick(float DeltaTime) final override;
 	//End UTickableWorldSubsystem
 
@@ -162,7 +162,7 @@ public:
 		}
 		return FIntVector2();
 	}
-	
+
 	/**
 	 * Get the pointer to the actor pool itself for a given Actor class.
 	 * @param ActorClass The class of the actor which you would like to access a pool for.
@@ -186,7 +186,7 @@ public:
 	 * @remark This is not meant to be used often and is more for debugging purposes.
 	 */
 	TArray<FNActorPool*> GetAllPools() const;
-	
+
 	/**
 	 * Adds default settings for a specific AActor class.
 	 * @param ActorClass The class of the AActor to add default settings for.
@@ -194,7 +194,7 @@ public:
 	 * @return True if default settings were added, false if settings already exist for the AActor class.
 	 */
 	bool AddDefaultSettings(TSubclassOf<AActor> ActorClass, const FNActorPoolSettings& Settings);
-	
+
 	/**
 	 * Updates default settings for a specific AActor class.
 	 * @param ActorClass The class of the AActor to update default settings for.
@@ -202,14 +202,14 @@ public:
 	 * @return True if default settings were updated, false if no settings were found for the AActor class.
 	 */
 	bool UpdateDefaultSettings(TSubclassOf<AActor> ActorClass, const FNActorPoolSettings& Settings);
-	
+
 	/**
 	 * Removes default settings for a specific AActor class.
 	 * @param ActorClass The class of the AActor to remove default settings for.
 	 * @return True if default settings were removed, false if no settings were found for the AActor class.
 	 */
 	bool RemoveDefaultSettings(TSubclassOf<AActor> ActorClass);
-	
+
 	/**
 	 * Checks if default settings are registered for a specific AActor class.
 	 * @param ActorClass The class of the AActor to check for default settings.

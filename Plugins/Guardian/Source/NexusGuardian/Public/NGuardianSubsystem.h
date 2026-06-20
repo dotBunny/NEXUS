@@ -25,10 +25,10 @@ class NEXUSGUARDIAN_API UNGuardianSubsystem : public UTickableWorldSubsystem
 
 public:
 	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(
-		UNGuardianSubsystem, 
-		(UNGuardianSettings::Get() != nullptr) ? 
+		UNGuardianSubsystem,
+		(UNGuardianSettings::Get() != nullptr) ?
 			FNBuildConfigurationAvailability::IsAvailableInBuild(
-				static_cast<ENBuildConfigurationAvailability>(UNGuardianSettings::Get()->BuildAvailability)) : 
+				static_cast<ENBuildConfigurationAvailability>(UNGuardianSettings::Get()->BuildAvailability)) :
 			false)
 
 	/**
@@ -38,7 +38,7 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName = "Set Baseline", Category = "NEXUS|Developer",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/guardian/types/guardian-subsystem/#setting-a-baseline"))
 	void SetBaseline();
-	
+
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 	virtual void OnWorldEndPlay(UWorld& InWorld) override;
@@ -57,7 +57,7 @@ public:
 		TickTimer = NewTickRate;
 		TickRate = NewTickRate;
 	}
-	
+
 	/** @return The last sampled total UObject count. */
 	int32 GetLastObjectCount() const { return LastObjectCount; }
 	/** @return The baseline UObject count set by SetBaseline. */
@@ -76,11 +76,11 @@ public:
 	bool HasPassedSnapshotThreshold() const { return bPassedObjectCountSnapshotThreshold; }
 	/** @return true if the compare threshold has been crossed since the baseline was set. */
 	bool HasPassedCompareThreshold() const { return bPassedObjectCountCompareThreshold; }
-	
+
 private:
 	static constexpr const TCHAR* ComparePrefix = TEXT("NEXUS_Compare");
 	static constexpr const TCHAR* SnapshotPrefix = TEXT("NEXUS_Snapshot");
-	
+
 	/** Latched true once the warning threshold has been crossed. */
 	bool bPassedObjectCountWarningThreshold = false;
 	/** Latched true once the snapshot threshold has been crossed. */
@@ -100,16 +100,16 @@ private:
 	int32 ObjectCountSnapshotThreshold = 0;
 	/** Resolved compare threshold (baseline + UNGuardianSettings::ObjectCountCompareThreshold). */
 	int32 ObjectCountCompareThreshold = 0;
-	/** Mirrors UNGuardianSettings::bObjectCountCaptureOutput; when true, snapshots are written to disk. 
+	/** Mirrors UNGuardianSettings::bObjectCountCaptureOutput; when true, snapshots are written to disk.
 	 * @note Cached when the baseline is set, to avoid polling during Tick. */
 	bool bShouldOutputSnapshot = false;
 
 	/** In-memory snapshot captured at the snapshot threshold and compared at the compare threshold. */
 	FNObjectSnapshot CapturedSnapshot;
-	
-	
+
+
 	FTimerHandle BaselineTimerHandle;
-	
+
 	float TickTimer = 0;
 	float TickRate = 1;
 };

@@ -16,7 +16,7 @@ enum class ENColor : uint8
 	NC_White = 1				UMETA(DisplayName = "White"),
 	NC_GreyLight = 2			UMETA(DisplayName = "Light Grey"),
 	NC_GreyDark = 3				UMETA(DisplayName = "Dark Grey"),
-	
+
 	NC_BlueLight = 5			UMETA(DisplayName = "Light Blue"),
 	NC_BlueMid = 6				UMETA(DisplayName = "Mid Blue"),
 	NC_BlueDark = 7				UMETA(DisplayName = "Dark Blue"),
@@ -30,7 +30,7 @@ enum class ENColor : uint8
 	NC_Yellow = 25				UMETA(DisplayName = "Yellow"),
 	NC_Green = 30				UMETA(DisplayName = "Green"),
 	NC_Pink	= 35				UMETA(DisplayName = "Pink"),
-	
+
 	NC_NexusDarkBlue = 100		UMETA(DisplayName = "NEXUS | Dark Blue"),
 	NC_NexusLightBlue = 101		UMETA(DisplayName = "NEXUS | Light Blue"),
 	NC_NexusBlack = 102			UMETA(DisplayName = "NEXUS | Black"),
@@ -38,7 +38,7 @@ enum class ENColor : uint8
 
 	NC_HalfBlack = 200			UMETA(DisplayName = "Half Black"),
 	NC_QuarterBlack = 201		UMETA(DisplayName = "Quarter Black"),
-	
+
 	NC_Transparent = 255		UMETA(DisplayName = "Transparent")
 };
 
@@ -65,7 +65,7 @@ public:
 	 * @return The FColor associated with the supplied palette entry.
 	 */
 	static FColor GetColor(const ENColor& Color);
-	
+
 	static constexpr FLinearColor BlueDark = FLinearColor(0.0352941176470588f, 0.0509803921568627f, 0.1450980392156863f, 1.0f);
 	static constexpr FLinearColor BlueMid = FLinearColor(0.1058823529411765f, 0.2745098039215686f, 0.6156862745098039f, 1.0f);
 	static constexpr FLinearColor BlueLight = FLinearColor(0.1019607843137255f, 0.8f, 0.9333333333333333f, 1.0f);
@@ -88,9 +88,9 @@ public:
 
 	static constexpr FLinearColor HalfBlack = FLinearColor(0.f,0.f,0.f, 0.5f);
 	static constexpr FLinearColor QuarterBlack = FLinearColor(0.f,0.f,0.f, 0.25f);
-	
+
 	static constexpr FLinearColor Transparent = FLinearColor(0.f,0.f,0.f, 0.0f);
-	
+
 	static constexpr FLinearColor SortElement = FLinearColor(0.4f,0.62f,1.f, 1.f);
 	static constexpr FLinearColor FilterElement = FLinearColor(0.24f,0.09f,0.85f, 1.f);
 	static constexpr FLinearColor GetElement = FLinearColor(1.0f,0.2f,1.0f, 1.f);

@@ -40,7 +40,7 @@ public:
 	virtual void UninitializeComponent() override;
 
 protected:
-	
+
 	/** Lifecycle phase at which this Actor registers/unregisters with the subsystem (BeginPlay vs InitializeComponent). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
 	ENActorComponentLifecycle Lifecycle = ENActorComponentLifecycle::BeginPlay;
@@ -52,11 +52,11 @@ protected:
 	/** The set of named identifiers this Actor will claim (map-backed lookup). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
 	TArray<FName> NamedReferences;
-	
+
 	/** The set of gameplay-tag identifiers this Actor will claim (tag-container lookup). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
 	FGameplayTagContainer TagReferences;
-	
+
 private:
 	/** Register this Actor with UNDynamicRefSubsystem under all configured references. */
 	void Register();

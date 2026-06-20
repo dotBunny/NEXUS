@@ -25,10 +25,10 @@ public:
 
 	/** @return Icon for the "toggle voxel-data overlay" action on the cell-actor toolbar. */
 	static FSlateIcon CellActorToggleDrawVoxelDataIcon();
-	
+
 	/** @return Icon for the "toggle world-collision visualizer" action on the World Assembly toolbar. */
 	static FSlateIcon CollisionVisualizerToggleIcon();
-	
+
 	/** @return Icon for the cell-ignore tagging action. */
 	static FSlateIcon CellIgnoreIcon();
 	/** @return Icon for the world-collision-ignore tagging action. */

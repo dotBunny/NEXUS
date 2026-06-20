@@ -8,18 +8,18 @@
 #include "NRectanglePickerParams.generated.h"
 
 /**
- * Parameters for the rectangle picker functionality, used to define boundaries for generating points within a 
+ * Parameters for the rectangle picker functionality, used to define boundaries for generating points within a
  * specified rectangle.
  */
 USTRUCT(BlueprintType)
 struct NEXUSPICKER_API FNRectanglePickerParams : public FNPickerParams
 {
 	GENERATED_BODY()
-	
+
 	/** The center point when attempting to generate new points. */
 	UPROPERTY(Category = "Rectangle", BlueprintReadWrite)
 	FVector Origin = FVector::ZeroVector;
-	
+
 	/** The inner dimensions of the rectangle (X = width, Y = height). */
 	UPROPERTY(Category = "Rectangle", BlueprintReadWrite)
 	FVector2D MinimumDimensions = FVector2D::ZeroVector;
@@ -27,11 +27,11 @@ struct NEXUSPICKER_API FNRectanglePickerParams : public FNPickerParams
 	/** The outer dimensions of the rectangle (X = width, Y = height). */
 	UPROPERTY(Category = "Rectangle", BlueprintReadWrite)
 	FVector2D MaximumDimensions = FVector2D(1.f,1.f);
-	
+
 	/** The rotation of the rectangle plane. */
 	UPROPERTY(Category = "Rectangle", BlueprintReadWrite)
 	FRotator Rotation = FRotator::ZeroRotator;
-	
+
 	/**
 	 * Gets the ranges which can be selected from.
 	 * @note This will appropriately cut out portions of available space when the MinimumDimensions are not fully enclosed by the MaximumDimensions.
@@ -46,7 +46,7 @@ struct NEXUSPICKER_API FNRectanglePickerParams : public FNPickerParams
 		// Z/W = Max
 		TArray<FVector4> ValidRanges;
 		const FVector2D HalfMaxDimensions = MaximumDimensions * 0.5f;
-		
+
 		if (MinimumDimensions.IsZero())
 		{
 			ValidRanges.Add( FVector4(

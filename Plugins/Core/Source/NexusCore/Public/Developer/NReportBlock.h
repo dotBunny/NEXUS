@@ -68,12 +68,12 @@ protected:
 	void RenderFooter(TArray<FString>& Output, const ENReportOutputFormat OutputFormat = ENReportOutputFormat::PlainText) const;
 
 private:
-	
+
 	/** Nesting depth, incremented when this block is created as a child. Drives heading style selection. */
 	int32 Level = 0;
 	/** Sort priority among siblings; lower values render first. */
 	int32 Priority = 0;
-	
+
 	/** Heading text rendered above the block; empty disables heading output. */
 	FString Heading;
 	/** Cached length of Heading, used to size the underline decoration in plain-text output. */

@@ -19,7 +19,7 @@ UNAssemblyOperation::UNAssemblyOperation(const FObjectInitializer& ObjectInitial
 		Ticket = NextTicket++;
 		Context = MakeUnique<FNAssemblyOperationContext>(Ticket);
 		this->AddToRoot();
-		
+
 		FNWorldAssemblyRegistry::RegisterOperation(this);
 	}
 }
@@ -56,7 +56,7 @@ UNAssemblyOperation* UNAssemblyOperation::CreateInstance(UNOrganComponent* BaseC
 	UNAssemblyOperation* Operation = NewObject<UNAssemblyOperation>();
 	Operation->ApplySettings(OperationSettings);
 	Operation->AddToContext(BaseComponent);
-	
+
 	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Created new UNAssemblyOperation(%s) with Ticket(%i) and Seed(%s)"),
 		*Operation->DisplayName.ToString(), Operation->GetTicket(), *OperationSettings.Seed);
 	return Operation;
@@ -76,13 +76,13 @@ void UNAssemblyOperation::TearDownOperation()
 	}
 	Owner = nullptr;
 	OwnerWeakRef.Reset();
-	
+
 	if (Context.IsValid())
 	{
 		Context->ResetContext();
 		Context.Reset();
 	}
-	
+
 	if (TaskGraph.IsValid())
 	{
 		TaskGraph->TearDownGraph();
@@ -103,10 +103,10 @@ void UNAssemblyOperation::ApplySettings(FNAssemblyOperationSettings& Settings)
 	{
 		Settings.DisplayName = FText::FromString(GetName());
 	}
-	
+
 	// Copy so it is detached
 	DisplayName = Settings.DisplayName;
-	
+
 	Context->SetOperationSettings(Settings);
 }
 
@@ -131,7 +131,7 @@ void UNAssemblyOperation::SetStatusMessage(FString NewStatusMessage)
 void UNAssemblyOperation::UpdateCachedResult()
 {
 	Result.Reset();
-	
+
 	// Early out cause it's still running
 	if (bIsRunning)
 	{
@@ -141,32 +141,32 @@ void UNAssemblyOperation::UpdateCachedResult()
 		Result.Message = FText::FromString("The Assembly Operation has not finished running.");
 		return;
 	}
-	
+
 	Result.Title = FText::FromString("Assembly Operation Finished");
-	
+
 	// Build our state map
 	TMap<FGuid, bool> OrganResults;
 	int32 CreatedCells = 0;
 	int32 AcceptableFails = 0;
-	
+
 	for (int i = 0; i < Context->InputComponents.Num(); i++)
 	{
 		UNOrganComponent* Organ = Context->InputComponents[i];
 		if (Organ == nullptr) continue;
-		
+
 		FGuid OrganIdentifier = Organ->Identifier;
-		
+
 		// Add default fail
 		OrganResults.Add(OrganIdentifier, false);
 		const bool bIsRequired = Organ->bRequired;
-		
+
 		// Check for cell counts
 		const TSharedRef<FNAssemblyTaskGraphContext> GraphContext = TaskGraph->GetContext();
 		if (GraphContext->OrganCellCount.Contains(OrganIdentifier))
 		{
 			int32 CellCountGenerated = GraphContext->OrganCellCount[OrganIdentifier];
 			CreatedCells += CellCountGenerated;
-			
+
 			if (CellCountGenerated == 0)
 			{
 				if (!bIsRequired)
@@ -176,7 +176,7 @@ void UNAssemblyOperation::UpdateCachedResult()
 				}
 				continue;
 			}
-			
+
 			if (Organ->MinimumCellCount > 0 && CellCountGenerated < Organ->MinimumCellCount)
 			{
 				if (!bIsRequired)
@@ -186,7 +186,7 @@ void UNAssemblyOperation::UpdateCachedResult()
 				}
 				continue;
 			}
-			
+
 			if (Organ->MaximumCellCount > 0 && CellCountGenerated > Organ->MaximumCellCount)
 			{
 				if (!bIsRequired)
@@ -196,13 +196,13 @@ void UNAssemblyOperation::UpdateCachedResult()
 				}
 				continue;
 			}
-			
+
 			// Made it through the gauntlet, it is a good assembly
 			OrganResults[OrganIdentifier] = true;
 		}
 		else
 		{
-			// Not in the graph 
+			// Not in the graph
 			if (!bIsRequired)
 			{
 				AcceptableFails++;
@@ -211,11 +211,11 @@ void UNAssemblyOperation::UpdateCachedResult()
 
 		}
 	}
-	
-	
+
+
 	// Give some number
 	Result.CreatedCells = CreatedCells;
-	
+
 	// Iterate for any fails
 	bool bAssemblySuccess = true;
 	for (auto Itr = OrganResults.CreateConstIterator(); Itr; ++Itr)
@@ -227,7 +227,7 @@ void UNAssemblyOperation::UpdateCachedResult()
 		}
 	}
 	Result.bSuccess = bAssemblySuccess;
-	
+
 #if !UE_BUILD_SHIPPING
 	Result.Duration = TaskGraph->N_ASSEMBLY_ANALYTICS_MEMBER_PTR->GetTotalDuration();
 	Result.Message = FText::FromString(FString::Printf(TEXT("%f ms / %i Cells / %i Skips"), Result.Duration, CreatedCells, AcceptableFails));
@@ -329,7 +329,7 @@ void UNAssemblyOperation::FinishBuild(const TSharedRef<FNAssemblyTaskGraphContex
 {
 	bIsRunning = false;
 	UpdateCachedResult();
-	
+
 	// Add one last update to subscribers for task updates
 	const FIntVector2 Status = TaskGraph->GetTaskStatus();
 	CachedCompletedTasks = Status.X;
@@ -348,17 +348,17 @@ void UNAssemblyOperation::FinishBuild(const TSharedRef<FNAssemblyTaskGraphContex
 
 	// Guarantee a terminal 100% even if the final task tick never routed through Tick().
 	BroadcastCombinedProgress();
-	
+
 	if (Owner != nullptr && OwnerWeakRef.IsValid())
 	{
 		Owner->OnOperationFinished(this, TaskGraphContext);
 	}
-	
+
 	for (const auto Component : Context->InputComponents)
 	{
 		Component->SetLastOperationTicket(GetTicket());
 	}
-	
+
 	// Were going to delete this object
 	TearDownOperation();
 }
@@ -371,7 +371,7 @@ void UNAssemblyOperation::StartBuild(INAssemblyOperationOwner* Caller, UObject* 
 	// Cache our caller
 	Owner = Caller;
 	OwnerWeakRef = CallerObject;
-	
+
 	// Ensure that we have locked context and done the preprocessing.
 	if (!Context->IsLocked())
 	{
@@ -389,20 +389,20 @@ void UNAssemblyOperation::StartBuild(INAssemblyOperationOwner* Caller, UObject* 
 
 #if !UE_BUILD_SHIPPING
 	Context->AddToReport(GetReport(), true);
-#endif // !UE_BUILD_SHIPPING	
-	
+#endif // !UE_BUILD_SHIPPING
+
 	// Build out our new graph
 	SetStatusMessage(NEXUS::WorldAssembly::StatusMessage::BuildingTaskGraph);
 	TaskGraph = MakeUnique<FNAssemblyTaskGraph>(this, Context.Get());
-	
+
 	// Add callback to tasks?
 	SetStatusMessage(NEXUS::WorldAssembly::StatusMessage::StartingTasks);
-	
+
 	bIsRunning = true;
 	TaskGraph->UnlockTasks();
-	
+
 	UpdateCachedResult();
-	
+
 }
 
 bool UNAssemblyOperation::AddToContext(UNOrganComponent* Component) const

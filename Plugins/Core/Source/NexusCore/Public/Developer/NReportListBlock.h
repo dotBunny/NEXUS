@@ -19,8 +19,8 @@ struct NEXUSCORE_API FNReportListBlock : FNReportBlock
 	virtual void Render(FNReport& Report, TArray<FString>& Output, const ENReportOutputFormat OutputFormat = ENReportOutputFormat::PlainText) override;
 private:
 	TArray<FString> Items;
-	
+
 	void RenderContentAsMarkdown(FNReport& Report, TArray<FString>& Output);
-	
+
 	void RenderContentAsPlainText(FNReport& Report, TArray<FString>& Output);
 };

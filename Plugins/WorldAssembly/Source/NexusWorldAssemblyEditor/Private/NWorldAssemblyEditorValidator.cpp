@@ -23,7 +23,7 @@ EDataValidationResult UNWorldAssemblyEditorValidator::ValidateLoadedAsset_Implem
 	{
 		return ValidateWorldAsset(InAssetData, InAsset, Context);
 	}
-	
+
 	if (InAsset->IsA<UNCell>())
 	{
 		return UAssetDefinition_NCell::ValidateAsset(InAssetData, InAsset, Context);
@@ -33,7 +33,7 @@ EDataValidationResult UNWorldAssemblyEditorValidator::ValidateLoadedAsset_Implem
 	{
 		return UAssetDefinition_NTissue::ValidateAsset(InAssetData, InAsset, Context);
 	}
-	
+
 	return  EDataValidationResult::NotValidated;
 }
 
@@ -41,7 +41,7 @@ EDataValidationResult UNWorldAssemblyEditorValidator::ValidateWorldAsset(const F
 {
 	UWorld* World = Cast<UWorld>(InAsset);
 	if (!World) return EDataValidationResult::NotValidated;
-	
+
 	EDataValidationResult Result = EDataValidationResult::Valid;
 
 	ANCellActor* CellActor = nullptr;
@@ -63,11 +63,11 @@ EDataValidationResult UNWorldAssemblyEditorValidator::ValidateWorldAsset(const F
 			}
 		}
 	}
-	
+
 	// TODO: Validate now that we have our CellActor
 	if(CellActor != nullptr)
 	{
-		
+
 	}
 	return Result;
 }

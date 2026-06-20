@@ -146,7 +146,7 @@ public:
 	void OrganGraphBuilder_SetFailure(int32 Index, int32 FinalCellNodeCount, const FString& Reason);
 
 	void OrganGraphBuilder_AddMessages(int32 Index, const TArray<FString>& Messages);
-	
+
 	/** Increment the AddNullNodes counter for the current iteration of the record at Index. */
 	void OrganGraphBuilder_AddNullNode(int32 Index);
 	/** Increment the AddCellNodes counter for the current iteration of the record at Index. */
@@ -165,7 +165,7 @@ public:
 	void OrganGraphBuilder_DiscardWorldCollidingCellNode(int32 Index);
 	/** Increment the cell-vs-existing-node collision discard counter for the record at Index. */
 	void OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode(int32 Index);
-	
+
 	/** Increment the discard-due-to-non-finisher-constraint counter for the current iteration of the record at Index. */
 	void OrganGraphBuilder_DiscardDueToNonFinisherConstraint(int32 Index);
 	/** Add Value to the capped-with-finisher counter for the current iteration of the record at Index. */
@@ -194,7 +194,7 @@ public:
 	void SpawnCellProxiesSpawned(int32 Index, FName Template);
 	/** Mark the finish time of the spawn-cell-proxies record at Index. */
 	void SpawnCellProxiesFinish(int32 Index);
-	
+
 	/** Append all collected analytics for this operation to the supplied report. */
 	void AddToReport(FNReport* Report);
 
@@ -202,7 +202,7 @@ public:
 	float GetTotalDuration();
 	/** @return The total number of cell proxies spawned across all spawn records. */
 	int GetSpawnedCellProxiesCount();
-	
+
 private:
 	/** Operation display name used as the heading in generated reports. */
 	FText DisplayName;

@@ -24,7 +24,7 @@ public:
 
 	/** The cell-root component visualizer registered by this module on startup. */
 	TSharedPtr<FNCellRootComponentVisualizer> RootComponentVisualizer;
-	
+
 private:
 	/** Custom undo handler that intercepts World Assembly-related transactions. */
 	TSharedPtr<FNWorldAssemblyEditorUndo> UndoHandler;
@@ -38,7 +38,7 @@ private:
 
 N_TOOLS_MENU_EUW_ENTRY(
 	"Developer Overlay", EUW_NWorldAssemblySystem,
-	NSLOCTEXT("NexusWorldAssemblyEditor", "Create_EUW_DisplayName", "World Assembly"), 
+	NSLOCTEXT("NexusWorldAssemblyEditor", "Create_EUW_DisplayName", "World Assembly"),
 	NSLOCTEXT("NexusWorldAssemblyEditor", "Create_EUW_Tooltip", "Opens the NWorldAssembly Developer Overlay inside of an editor tab."),
 	FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Icon.WorldAssembly"),
 	"/NexusWorldAssembly/EditorResources/EUW_NWorldAssembly.EUW_NWorldAssembly")

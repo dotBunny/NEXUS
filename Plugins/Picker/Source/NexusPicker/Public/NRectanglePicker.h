@@ -24,7 +24,7 @@ public:
 	 * @note Not thread-safe; all pickers share a single non-deterministic FRandomStream (FNRandom::GetNonDeterministic()). Only call from the Game-thread.
 	 */
 	static void Random(TArray<FVector>& OutLocations, const FNRectanglePickerParams& Params);
-	
+
 	/**
 	 * Generate random points inside or on the plane of a rectangle.
 	 * Useful for one-time random point generation with reproducible results.
@@ -37,7 +37,7 @@ public:
 		int32 DuplicateSeed = Seed;
 		Tracked(OutLocations, DuplicateSeed, Params);
 	}
-	
+
 	/**
 	 * Generate random points inside or on the plane of a rectangle.
 	 * Updates the seed value to enable sequential random point generation.
@@ -46,15 +46,15 @@ public:
 	 * @param Params The parameters for the point generation.
 	 */
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNRectanglePickerParams& Params);
-	
+
 	/**
-	 * Generate random points inside or on the plane of a rectangle using a provided Mersenne Twister.	 
+	 * Generate random points inside or on the plane of a rectangle using a provided Mersenne Twister.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Random The Mersenne Twister to query for random.
 	 * @param Params The parameters for the point generation.
 	 */
 	static void Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNRectanglePickerParams& Params);
-	
+
 	/**
 	 * Checks if a point is inside or on the plane of a rectangle.
 	 * Takes into account the rotation of the rectangle, if any.

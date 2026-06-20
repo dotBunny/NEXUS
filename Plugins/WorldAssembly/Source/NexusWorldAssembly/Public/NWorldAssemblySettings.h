@@ -26,7 +26,7 @@ UCLASS(ClassGroup = "NEXUS", DisplayName = "World Assembly Settings", Config=Nex
 class NEXUSWORLDASSEMBLY_API UNWorldAssemblySettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
-	
+
 	UNWorldAssemblySettings()
 	{
 		static ConstructorHelpers::FObjectFinder<UMaterialInterface> DefaultProxyAsset(TEXT("/NexusWorldAssembly/M_NCellProxy.M_NCellProxy"));
@@ -58,7 +58,7 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "General", DisplayName="Player Size",
 		meta=(ToolTip="What is the size of the player's collider?"))
 	FVector PlayerSize = FVector(72.f, 184.f, 72.f);
-	
+
 	/** How ANCellLevelInstances are replicated to clients: by relevancy (proximity) or as always-relevant. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Network", DisplayName="Mode",
 		meta=(ToolTip="How should ANCellLevelInstances be replicated to clients, either based on relevancy (proximity) or treated as always relevant."))
@@ -83,7 +83,7 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ", DisplayName="Automatic Bone Direction Offset",
 		meta=(ToolTip="Offset value applied to the direction provided by the enumeration."))
 	FVector OrganAutomaticBoneDirectionOffset = FVector::ZeroVector;
-	
+
 	/** Maximum number of full assembly attempts before a space is considered a complete failure. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="Retry Count",
 		meta=(ToolTip="The maximum amount of full attempts at assembling a space before it is considered a complete failure."))

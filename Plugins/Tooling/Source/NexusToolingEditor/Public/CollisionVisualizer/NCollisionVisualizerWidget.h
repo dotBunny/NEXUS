@@ -13,11 +13,11 @@
 
 /**
  * Used to test collision queries at design time in the editor.
- * @remarks The was originally started after watching George Prosser's UnrealFest 2023 talk "Collision Data in UE5". 
+ * @remarks The was originally started after watching George Prosser's UnrealFest 2023 talk "Collision Data in UE5".
  * I later found the public version of the tool and was amused at how similar they were. Credits to George and the
  * team at Studio Gobo for the great inspiration, there is just a slightly different spin on the implementation here.
  * @ref https://www.youtube.com/watch?v=xIQI6nXFygA
- * @ref https://github.com/StudioGobo/UECollisionQueryTools 
+ * @ref https://github.com/StudioGobo/UECollisionQueryTools
  */
 UCLASS(BlueprintType)
 class NEXUSTOOLINGEDITOR_API UNCollisionVisualizerWidget : public UNEditorUtilityWidget
@@ -39,7 +39,7 @@ public:
 	/** Push current widget Settings onto Actor so its transform/draw state matches. */
 	void PushSettings(ANCollisionVisualizerActor* Actor) const;
 
-	/** Pull Actor state back into the widget's Settings (used after viewport-driven moves). 
+	/** Pull Actor state back into the widget's Settings (used after viewport-driven moves).
 	 * Validates if a change actually has occured before an actual write is done. */
 	void UpdateSettings(const ANCollisionVisualizerActor* Actor);
 

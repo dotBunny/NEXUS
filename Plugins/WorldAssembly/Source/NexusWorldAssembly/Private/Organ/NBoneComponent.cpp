@@ -28,7 +28,7 @@ UNBoneComponent::UNBoneComponent(const FObjectInitializer& ObjectInitializer) : 
 #if WITH_EDITOR
 	TransformUpdated.AddUObject(this, &UNBoneComponent::OnTransformUpdated);
 #endif
-	
+
 	N_WORLD_ICON_SCENE_COMPONENT("/NexusWorldAssembly/EditorResources/S_NBoneComponent", this, false, 0.35f)
 }
 
@@ -39,10 +39,10 @@ void UNBoneComponent::OnRegister()
 #if WITH_EDITOR
 	// Ensure that undo system works
 	SetFlags(RF_Transactional);
-	
+
 	const ULevel* Level = GetComponentLevel();
 	TWeakObjectPtr WeakBoneComponent(this);
-	if (const UNCellRootComponent* RootComponent = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(Level); 
+	if (const UNCellRootComponent* RootComponent = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(Level);
 		RootComponent != nullptr)
 	{
 		UE_LOG(LogNexusWorldAssembly, Error, TEXT("You cannot place UNBoneComponent in a ULevel(%s) where an NCellRootComponent is defined; removing next update."), *Level->GetName());
@@ -50,7 +50,7 @@ void UNBoneComponent::OnRegister()
 		{
 			// Early out for dead ref
 			if (!WeakBoneComponent.IsValid()) return;
-			
+
 			if (AActor* Actor = WeakBoneComponent.Get()->GetOwner(); Actor != nullptr)
 			{
 				if (ANBoneActor* BoneActor = Cast<ANBoneActor>(Actor); BoneActor != nullptr)
@@ -62,7 +62,7 @@ void UNBoneComponent::OnRegister()
 			WeakBoneComponent.Get()->DestroyComponent();
 		}));
 	}
-#endif // WITH_EDITOR	
+#endif // WITH_EDITOR
 
 	FNWorldAssemblyRegistry::RegisterBoneComponent(this);
 	Super::OnRegister();
@@ -110,42 +110,42 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 void UNBoneComponent::SetAutomaticTransform()
 {
 	if (Mode != ENBoneMode::Automatic || OrganComponent == nullptr || !OrganComponent->IsVolumeBased()) return;
-	
+
 	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
 	if (Settings == nullptr) return;
-	
+
 	const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
 	const FVector BoneLocation = GetComponentLocation();
-		
+
 	const FVector OrganBoneDirection = FNDirection::GetVector(Settings->OrganAutomaticBoneDirection);
-	const FVector OutsidePoint = 
-		OrganVolume->GetBounds().Origin + 
+	const FVector OutsidePoint =
+		OrganVolume->GetBounds().Origin +
 		((OrganBoneDirection + Settings->OrganAutomaticBoneDirectionOffset).GetSafeNormal() * (OrganVolume->GetBounds().SphereRadius));
-		
+
 	UBrushComponent* BrushComponent = OrganVolume->GetBrushComponent();
 	if (BrushComponent == nullptr)
 	{
 		return;
 	}
-	
+
 	FVector HitLocation;
 	FVector HitNormal;
 	FName HitBone;
 	FHitResult HitResult;
-		
-	if (BrushComponent->K2_LineTraceComponent(OutsidePoint, OrganVolume->GetBounds().Origin, 
-		true, false, false, 
+
+	if (BrushComponent->K2_LineTraceComponent(OutsidePoint, OrganVolume->GetBounds().Origin,
+		true, false, false,
 		HitLocation, HitNormal, HitBone, HitResult))
 	{
 		const FRotator UpdatedRotator = OrganBoneDirection.ToOrientationRotator() + FRotator(0,-180,0);
 		if (GetComponentRotation() != UpdatedRotator)
 		{
-			SetWorldRotation(UpdatedRotator);	
-				
+			SetWorldRotation(UpdatedRotator);
+
 			// ReSharper disable once CppExpressionWithoutSideEffects
 			MarkPackageDirty();
 		}
-			
+
 		const FVector WorkingPosition = FindSafeLocation(HitLocation);
 		if (BoneLocation != WorkingPosition)
 		{
@@ -160,24 +160,24 @@ void UNBoneComponent::SetAutomaticTransform()
 FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 {
 	FVector WorkingLocation = WorldLocation;
-	
+
 	if (OrganComponent == nullptr || !OrganComponent->IsVolumeBased())
 	{
 		return WorldLocation;
 	}
-	
+
 	const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
 	const UBrushComponent* BrushComponent = OrganVolume->GetBrushComponent();
-	
+
 	if (BrushComponent == nullptr)
 	{
 		return WorldLocation;
 	}
-	
+
 	// We have a brush that we can use
 	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
 	TArray<FVector> CornerPoints = GetCornerPoints(Settings->SocketSize);
-	
+
 	int32 IterationCount = 12;
 	FVector ClosestLocation;
 	bool bDidAdjust = true;
@@ -188,22 +188,22 @@ FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 		{
 			const float Distance = BrushComponent->GetClosestPointOnCollision(
 				CornerPoints[i], ClosestLocation, NAME_None);
-			
+
 			if (Distance <= 0.f)
 			{
 				continue;
 			}
 			// Point is outside we need to now find the closest point and bring it in
 			const FVector Delta = ClosestLocation - CornerPoints[i];
-			
+
 			CornerPoints[0] += Delta;
 			CornerPoints[1] += Delta;
 			CornerPoints[2] += Delta;
 			CornerPoints[3] += Delta;
-			
+
 			WorkingLocation += Delta;
 			bDidAdjust = true;
-			
+
 		}
 		IterationCount--;
 	}
@@ -236,7 +236,7 @@ void UNBoneComponent::OnModeChanged(const ENBoneMode NewMode)
 			ToggleActive();
 		}
 		break;
-		
+
 	case Automatic:
 		SetAutomaticTransform();
 #if WITH_EDITORONLY_DATA
@@ -278,7 +278,7 @@ TArray<FVector> UNBoneComponent::GetCornerPoints(const FVector2D& SocketUnitSize
 	const FQuat DisplayQuat = FQuat(GetComponentRotation()) * FQuat(FRotator(0.0f, 90.0f, 0.0f));
 	const FRotator DisplayRotation = DisplayQuat.Rotator();
 	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, GetComponentLocation());
-	
+
 	return RotatedCornerPoints;
 }
 
@@ -299,10 +299,10 @@ void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearCo
 		// Were not drawing this
 		return;
 	}
-	
+
 	const FVector ComponentLocation = GetComponentLocation();
 	const FRotator ComponentRotation = GetComponentRotation();
-	
+
 	if (bShowDepth)
 	{
 		TArray<FVector> CornerPoints = GetWorldCornerPoints(Settings->SocketSize);
@@ -315,7 +315,7 @@ void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearCo
 		{
 			GizmoColor = InvalidColor;
 		}
-		
+
 		// Draw the depth text
 		if (MaximumDepth != 0)
 		{
@@ -328,12 +328,12 @@ void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearCo
 			{
 				LowestZ = FMath::Min(LowestZ, Corner.Z);
 			}
-			
+
 			const FVector TextPosition(ComponentLocation.X, ComponentLocation.Y, LowestZ - 4.0f);
 			const FRotator TextRotation(0.0, ComponentRotation.Yaw, 0.0);
 
-			FNPrimitiveFont::DrawPDI(PDI, FString::Printf(TEXT("%.1f"),MaximumDepth), 
-				TextPosition, TextRotation, GizmoColor,0.15f, 1.f, 1.f, 
+			FNPrimitiveFont::DrawPDI(PDI, FString::Printf(TEXT("%.1f"),MaximumDepth),
+				TextPosition, TextRotation, GizmoColor,0.15f, 1.f, 1.f,
 				false, true, SDPG_Foreground);
 		}
 	}
@@ -346,8 +346,8 @@ TArray<FVector> UNBoneComponent::GetWorldCornerPoints(const FVector2D& SettingSo
 {
 	const FQuat DisplayQuat = FQuat(GetComponentRotation()) * FQuat(FRotator(0.0f, 90.0f, 0.0f));
 	const FRotator DisplayRotation = DisplayQuat.Rotator();
-	
-	// TODO: Should this maybe be cached at spawning at runtime? 
+
+	// TODO: Should this maybe be cached at spawning at runtime?
 	const FVector2D Size = FNWorldAssemblyUtils::GetWorldSize2D(SocketSize, SettingSocketSize);
 
 	const TArray<FVector> UnrotatedCornerPoints = FNWorldAssemblyUtils::GetCenteredWorldCornerPoints2D(Size.X,Size.Y, ENAxis::Z);

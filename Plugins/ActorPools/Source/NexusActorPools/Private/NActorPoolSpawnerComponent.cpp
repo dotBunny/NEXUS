@@ -65,7 +65,7 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 		WeightedIndices.Add(i, Templates[i].Weight);
 	}
 
-	
+
 	if (TemplateCount > 0 && bRandomizeSeed)
 	{
 		Seed = FNRandom::GetNonDeterministic().RandHelper(MAX_int32);
@@ -100,7 +100,7 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 	if ((!bSpawningEnabled && !bIgnoreSpawningFlag) || !WeightedIndices.HasData()) return;
 
 	if (!Subsystem.IsValid()) { return; }
-	
+
 
 	TArray<FVector> OutLocations;
 	switch (Distribution)
@@ -166,11 +166,11 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 			OutLocations.Add(this->GetComponentLocation() + Offset);
 		}
 		break;
-	default: 
+	default:
 		UE_LOG(LogNexusActorPools, Error, TEXT("Unable to spawn actors as the distribution type is not valid."));
 		return;
 	}
-	
+
 	const FRotator SpawnRotator = this->GetComponentRotation();
 	const int32 OutCount = OutLocations.Num();
 	for (int32 i = 0; i < OutCount; i++)
@@ -214,7 +214,7 @@ void UNActorPoolSpawnerComponent::CacheSplineComponent()
 			}
 		}
 	}
-	
+
 	if (CachedSplineComponent == nullptr)
 	{
 		Distribution = ENActorPoolSpawnerDistribution::Point;

@@ -38,7 +38,7 @@ public:
 		int32 DuplicateSeed = Seed;
 		Tracked(OutLocations, DuplicateSeed, Params);
 	}
-	
+
 	/**
 	 * Generate random points inside or on the perimeter of a circle.
 	 * Updates the seed value to enable sequential random point generation.
@@ -47,17 +47,17 @@ public:
 	 * @param Params The parameters for the point generation.
 	 */
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNCirclePickerParams& Params);
-	
+
 	/**
-	 * Generate random points inside or on the perimeter of a circle using a provided Mersenne Twister.	 
+	 * Generate random points inside or on the perimeter of a circle using a provided Mersenne Twister.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Random The Mersenne Twister to query for random.
 	 * @param Params The parameters for the point generation.
 	 */
 	static void Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNCirclePickerParams& Params);
-	
+
 	/**
-	 * Checks if a point is inside or on the perimeter of a circle.	 
+	 * Checks if a point is inside or on the perimeter of a circle.
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
 	 * @param MaximumRadius The maximum radius of the circle (outer bound).
@@ -84,12 +84,12 @@ public:
 	 * @param MaximumRadius The maximum radius of the circle (outer bound).
 	 * @param Rotation The rotation of the circle plane.
 	 * @return An array of boolean values indicating if each point is inside or on the perimeter of a circle.
-	 */	
+	 */
 	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator& Rotation = FRotator::ZeroRotator)
 	{
 		TArray<bool> OutResults;
 		OutResults.Reserve(Points.Num());
-		
+
 		for (const FVector& Point : Points)
 		{
 			OutResults.Add(IsPointInsideOrOn(Origin, MinimumRadius, MaximumRadius, Rotation, Point));

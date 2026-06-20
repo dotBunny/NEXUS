@@ -75,10 +75,10 @@ void FNWorldAssemblyEditorModule::ShutdownModule()
 
 		PropertyModule.NotifyCustomizationModuleChanged();
 	}
-	
+
 	N_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
 	N_TOOLS_MENU_ENTRY_EUW_METHOD_UNREGISTER(EUW_NWorldAssemblySystem)();
-	
+
 	FNWorldAssemblyEditorToolMenu::RemoveMenuEntries();
 
 	// Mirror the Register() in OnPostEngineInit. RemoveMenuEntries() above has already detached the global
@@ -105,16 +105,16 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 	{
 		UndoHandler = MakeShared<FNWorldAssemblyEditorUndo>();
 	}
-	
+
 	// Configure Style
 	FNWorldAssemblyEditorStyle::Initialize();
-	
+
 	// Setup Asset Monitoring
 	const FAssetRegistryModule& AssetRegistryModule =
 		FModuleManager::LoadModuleChecked<FAssetRegistryModule>(FName("AssetRegistry"));
-	
+
 	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
-	
+
 	AssetRegistry.OnAssetRenamed().AddStatic(&UAssetDefinition_NCell::OnAssetRenamed);
 	AssetRegistry.OnAssetRemoved().AddStatic(&UAssetDefinition_NCell::OnAssetRemoved);
 
@@ -144,11 +144,11 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 		RootComponentVisualizer = MakeShared<FNCellRootComponentVisualizer>();
 		GUnrealEd->RegisterComponentVisualizer(UNCellRootComponent::StaticClass()->GetFName(), RootComponentVisualizer);
 		RootComponentVisualizer->OnRegister();
-	
+
 		const TSharedPtr<FComponentVisualizer> JunctionComponentVisualizer = MakeShared<FNCellJunctionComponentVisualizer>();
 		GUnrealEd->RegisterComponentVisualizer(UNCellJunctionComponent::StaticClass()->GetFName(), JunctionComponentVisualizer);
 		JunctionComponentVisualizer->OnRegister();
-		
+
 		const TSharedPtr<FComponentVisualizer> BoneComponentVisualizer = MakeShared<FNBoneComponentVisualizer>();
 		GUnrealEd->RegisterComponentVisualizer(UNBoneComponent::StaticClass()->GetFName(), BoneComponentVisualizer);
 		BoneComponentVisualizer->OnRegister();
@@ -156,7 +156,7 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 
 	// Register Customizations
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	
+
 	PropertyModule.RegisterCustomClassLayout(ANCellProxy::StaticClass()->GetFName(),
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNCellProxyCustomization::MakeInstance));
 
@@ -170,7 +170,7 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNWorldAssemblyEditorUserSettingsCustomization::MakeInstance));
 
 	PropertyModule.NotifyCustomizationModuleChanged();
-	
+
 	// Handle Placement Definitions
 	if (const FPlacementCategoryInfo* Info = FNEditorDefaults::GetPlacementCategory())
 	{
@@ -182,7 +182,7 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 		TOptional<FLinearColor>(),
 		TOptional<int32>(),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "NBoneActorPlacement", "Bone Actor"))));
-		
+
 		PlacementActors.Add(IPlacementModeModule::Get().RegisterPlaceableItem(Info->UniqueHandle, MakeShared<FPlaceableItem>(
 		*ANOrganVolume::StaticClass(),
 		FAssetData(ANOrganVolume::StaticClass()),
@@ -192,7 +192,7 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 		TOptional<int32>(),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "NOrganVolumePlacement", "Organ Volume"))));
 	}
-	
+
 	// Inspector Category Filter
 	FNPropertySections::AddActorCategory("Cell Actor");
 	FNPropertySections::AddActorCategory("Cell Proxy");
@@ -201,7 +201,7 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 	FNPropertySections::AddSceneComponentCategory("Cell Root");
 	FNPropertySections::AddSceneComponentCategory("Cell Junction");
 	FNPropertySections::AddSceneComponentCategory("Bone Component");
-	
+
 	// Cache stuff
 	FNWorldAssemblyEdMode::CacheUserSettings();
 }

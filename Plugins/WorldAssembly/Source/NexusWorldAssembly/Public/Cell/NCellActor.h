@@ -17,7 +17,7 @@ DECLARE_DELEGATE_OneParam(FOnInitializedFromProxy, ANCellLevelInstance* LevelIns
  * The persistent in-level representation of a cell.
  *
  * A cell actor is locked to its level's origin, hosts the UNCellRootComponent as its root, and owns the
- * map of junction components that define its connectivity. 
+ * map of junction components that define its connectivity.
  */
 UCLASS(NotPlaceable, HideDropdown, Hidden, ClassGroup = "NEXUS", DisplayName = "NEXUS | Cell Actor", HideCategories=(Tags, Activation, Cooking,
 	AssetUserData, Navigation, Actor, Input, LevelInstance, WorldPartition, DataLayers, Rendering, LOD, HLOD, Physics,
@@ -34,12 +34,12 @@ class NEXUSWORLDASSEMBLY_API ANCellActor : public AActor
 	friend class UNCellJunctionComponent;
 
 	GENERATED_BODY()
-	
+
 	explicit ANCellActor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get()) : Super(ObjectInitializer)
 	{
 		PrimaryActorTick.bCanEverTick = false;
 		PrimaryActorTick.bStartWithTickEnabled = false;
-		
+
 		// Add our root component
 		CellRoot = CreateDefaultSubobject<UNCellRootComponent>(TEXT("NCellRoot"));
 		SetRootComponent(CellRoot);
@@ -49,7 +49,7 @@ class NEXUSWORLDASSEMBLY_API ANCellActor : public AActor
 		SetLockLocation(true);
 		bCanPlayFromHere = 0;
 #endif // WITH_EDITOR
-		
+
 		RootComponent->Mobility = EComponentMobility::Static;
 	}
 public:
@@ -89,11 +89,11 @@ public:
 
 	/** Broadcast after InitializeFromProxy completes */
 	FOnInitializedFromProxy OnInitializedFromProxy;
-	
-	
+
+
 #if WITH_EDITOR
 	/** Purposely monitor for any sort of movement and reset it back to origin */
-	
+
 	virtual bool IsUserManaged() const override { return false; }
 	virtual void PostEditMove(bool bFinished) override;
 	virtual bool CanDeleteSelectedActor(FText& OutReason) const override;
@@ -107,15 +107,15 @@ public:
 
 	/** Recompute the cell's bounds from its level content and store the result on the root component. */
 	void CalculateBounds();
-	
+
 	/**
 	 * Splits the convex-hull edge between the two given vertex indices, inserting a new vertex.
 	 * @param IndexA First vertex index of the edge to split.
-	 * @param IndexB Second vertex index of the edge to split.	 
+	 * @param IndexB Second vertex index of the edge to split.
 	 */
 	void SplitHullEdge(int32 IndexA, int32 IndexB);
 	/**
-	 * Recompute the cell's convex hull from its level content.	 
+	 * Recompute the cell's convex hull from its level content.
 	 */
 	void CalculateHull();
 	/** Recompute the cell's voxel data using the current bounds/hull and project voxel settings. */
@@ -123,7 +123,7 @@ public:
 
 	/** @return The cell's root component. */
 	UNCellRootComponent* GetCellRoot() const { return CellRoot; }
-	
+
 	/**
 	 * @return true if the supplied actor is one of this cell's author-time actors.
 	 * @param Actor The actor to test for membership.

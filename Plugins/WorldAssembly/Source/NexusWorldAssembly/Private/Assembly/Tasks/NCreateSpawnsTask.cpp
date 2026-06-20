@@ -10,7 +10,7 @@
 #include "Assembly/Graph/NAssemblyGraph.h"
 
 FNCreateSpawnsTask::FNCreateSpawnsTask(
-	const TSharedPtr<FNSpawnContext>& SpawnCellsContextPtr, 
+	const TSharedPtr<FNSpawnContext>& SpawnCellsContextPtr,
 	const TSharedPtr<FNAssemblyTaskGraphContext>& TaskGraphContextPtr N_ASSEMBLY_ANALYTICS_CONSTRUCTOR)
 	: TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef()), SpawnCellsContextPtr(SpawnCellsContextPtr.ToSharedRef()) N_ASSEMBLY_ANALYTICS_INITIALIZER
 {
@@ -24,7 +24,7 @@ void FNCreateSpawnsTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphE
 		CompletionGraphEvent->Unlock();
 		return;
 	}
-		
+
 	N_ASSEMBLY_ANALYTICS(CreateSpawnCellsContextStart)
 
 	// We need to prepopulate some data elsewhere
@@ -46,16 +46,16 @@ void FNCreateSpawnsTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphE
 
 				// Build out the data we are going to use
 				CellNode->GenerateLinkDetails();
-				
+
 				// TODO: Figure out junction spawning details right here
 
 				SpawnCellsContextPtr->CellNodes.Add(CellNode);
 			}
 		}
 	}
-	
-	// TODO We want to precalculate what peice is going to spawn in fillers for junctions ahead of it getting spawned in the next task, 
-	// so that context can be passed to the cell and it just spawns on begin WITHOUT 
+
+	// TODO We want to precalculate what peice is going to spawn in fillers for junctions ahead of it getting spawned in the next task,
+	// so that context can be passed to the cell and it just spawns on begin WITHOUT
 	// having to deal with random.
 
 	// The spawn list is now complete, so we can report the full cell count as proxy spawning begins.

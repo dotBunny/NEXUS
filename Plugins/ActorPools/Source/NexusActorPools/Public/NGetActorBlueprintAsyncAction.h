@@ -31,7 +31,7 @@ public:
 	 * Gets an actor from a given pool asynchronously, creating a pool as necessary.
 	 * @note Primarily used to decouple hard references to Actors.
 	 * @param WorldContextObject Context used to resolve the Actor Pool subsystem.
-	 * @param ActorClass The soft class to load and then spawn from the pool.	
+	 * @param ActorClass The soft class to load and then spawn from the pool.
 	 * @return The async action instance that BP will attach its output pins to.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Actor Async", Category = "NEXUS|Actor Pools",
@@ -50,7 +50,7 @@ private:
 	TWeakObjectPtr<UObject> WorldContext;
 	TSoftClassPtr<AActor> ActorClass;
 	TSharedPtr<FStreamableHandle> StreamingHandle;
-	
+
 	void OnLoaded();
 	void OnHasPool(FNActorPool* ActorPool);
 };

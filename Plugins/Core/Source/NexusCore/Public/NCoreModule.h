@@ -16,10 +16,10 @@ public:
 	virtual void ShutdownModule() override;
 	N_MODULE_BASE(FNCoreModule, "NexusCore")
 
-#if WITH_EDITOR	
+#if WITH_EDITOR
 private:
 	/** Cached localized title used by the multiplayer test window. */
 	FText MultiplayerTestWindowTitle;
-	void OnPostEngineInit();	
-#endif // WITH_EDITOR	
+	void OnPostEngineInit();
+#endif // WITH_EDITOR
 };

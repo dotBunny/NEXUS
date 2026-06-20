@@ -33,19 +33,19 @@ public:
 	static void AddSceneComponentCategory(FName Category);
 	/** Adds a category to the Object property section, queueing it if registration has not yet occurred. */
 	static void AddObjectCategory(FName Category);
-	
+
 private:
 	static TSharedPtr<FPropertySection> ActorPropertySection;
 	static TSharedPtr<FPropertySection> ActorComponentPropertySection;
 	static TSharedPtr<FPropertySection> SceneComponentPropertySection;
 	static TSharedPtr<FPropertySection> ObjectPropertySection;
-	
+
 	static const FText DisplayName;
 	static const FName Identifier;
 	static const FName BaseCategory;
-	
+
 	static bool bHasRegistered;
-	
+
 	static TArray<FName> PendingActors;
 	static TArray<FName> PendingActorComponents;
 	static TArray<FName> PendingSceneComponents;

@@ -18,7 +18,7 @@ USTRUCT(BlueprintType)
 struct FNWeightedIntegerArray
 {
 	GENERATED_BODY()
-	
+
 	/**
 	 * Add a value to the array, duplicated according to its weight.
 	 * @param Value The integer value to add.
@@ -36,12 +36,12 @@ struct FNWeightedIntegerArray
 	}
 
 	/** Clears all entries from the array. */
-	void Empty()	
+	void Empty()
 	{
 		Data.Empty();
 		CachedMaxIndex = -1;
 	};
-	
+
 	void Reset()
 	{
 		Data.Reset();
@@ -196,7 +196,7 @@ struct FNWeightedIntegerArray
 	{
 		return CachedMaxIndex >= 0;
 	}
-	
+
 	/**
 	 * Does the array currently contain at least one copy of the supplied value?
 	 * @param Value The value to test for.

@@ -8,10 +8,10 @@
 void FNVolumeUtils::FillGeometryData(UModel* Model, FNVolumeGeometryData& OutData)
 {
     if (!Model) return;
-    
+
     OutData.Indices.Empty();
     OutData.Vertices.Empty();
-    
+
     int32 VertexOffset = 0;
     for (int32 NodeIndex = 0; NodeIndex < Model->Nodes.Num(); NodeIndex++)
     {

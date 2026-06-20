@@ -31,7 +31,7 @@ struct FNMultiLineTextBoxCanvasItem
 		Height = 0;
 		bDirty = false;
 	}
-	
+
 	/** Sets the current severity and updates the border color to match (Info/Message grey, Warning yellow, Error red, Fatal pink). */
 	void SetSeverity(const ENSeverity Severity)
 	{
@@ -39,7 +39,7 @@ struct FNMultiLineTextBoxCanvasItem
 		{
 			CurrentSeverity = Severity;
 		}
-		
+
 		switch (Severity)
 		{
 		case ENSeverity::Info:
@@ -91,7 +91,7 @@ struct FNMultiLineTextBoxCanvasItem
 	{
 		return bDirty;
 	}
-	
+
 private:
 
 	/** One text line plus the layout measured for it by Process(). */

@@ -193,16 +193,16 @@ void FNPrimitiveFont::DrawBatchString(ULineBatchComponent* LineBatch, const FStr
 void FNPrimitiveFont::Initialize()
 {
 	if (bIsInitialized) return;
-	
+
 	// A glyph is based off a 6(w)x8(h) bottom-left oriented grid.
 	// It should consist of paired points which will be used to draw the corresponding lines.
 	Glyphs.AddZeroed(127);
-	
+
 	// Replace null with unknown-character as we'll use it.
 	Glyphs[0] = TArray {
 		FNPrimitiveFontPoint(0, 0),
 		FNPrimitiveFontPoint(0, 8),
-		
+
 		FNPrimitiveFontPoint(0, 8),
 		FNPrimitiveFontPoint(6, 8),
 
@@ -259,7 +259,7 @@ void FNPrimitiveFont::Initialize()
 
 		FNPrimitiveFontPoint(4,7),
 		FNPrimitiveFontPoint(4,1),
-		
+
 		FNPrimitiveFontPoint(1,3),
 		FNPrimitiveFontPoint(5,3),
 
@@ -267,7 +267,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(5,5)
 	};
 
-	// $ 
+	// $
 	Glyphs[36] = TArray {
 		FNPrimitiveFontPoint(6,8),
 		FNPrimitiveFontPoint(0,8),
@@ -287,13 +287,13 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(3,0),
 		FNPrimitiveFontPoint(3,8)
 	};
-	
+
 	// %
 	Glyphs[37] = TArray {
 		FNPrimitiveFontPoint(0,0),
 		FNPrimitiveFontPoint(6,8),
 
-		
+
 		FNPrimitiveFontPoint(0,7),
 		FNPrimitiveFontPoint(1,8),
 
@@ -305,7 +305,7 @@ void FNPrimitiveFont::Initialize()
 
 		FNPrimitiveFontPoint(1,6),
 		FNPrimitiveFontPoint(0,7),
-		
+
 		FNPrimitiveFontPoint(4,1),
 		FNPrimitiveFontPoint(5,2),
 
@@ -357,13 +357,13 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(5,2),
 		FNPrimitiveFontPoint(5,3)
 	};
-	
+
 	// '
 	Glyphs[39] = TArray {
 		FNPrimitiveFontPoint(2,8),
 		FNPrimitiveFontPoint(2,6)
 	};
-	
+
 	// (
 	Glyphs[40] = TArray {
 		FNPrimitiveFontPoint(4,8),
@@ -401,7 +401,7 @@ void FNPrimitiveFont::Initialize()
 	};
 
 	// *
-	Glyphs[42] = TArray { 
+	Glyphs[42] = TArray {
 		FNPrimitiveFontPoint(1,2),
 		FNPrimitiveFontPoint(5,6),
 
@@ -411,12 +411,12 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(3,2),
 		FNPrimitiveFontPoint(3,6)
 	};
-	
+
 	// +
-	Glyphs[43] = TArray { 
+	Glyphs[43] = TArray {
 		FNPrimitiveFontPoint(0,4),
 		FNPrimitiveFontPoint(6,4),
-		
+
 		FNPrimitiveFontPoint(3,7),
 		FNPrimitiveFontPoint(3,1)
 	};
@@ -429,7 +429,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(1,0),
 		FNPrimitiveFontPoint(0,-1)
 	};
-		
+
 	// -
 	Glyphs[45] = TArray {
 		FNPrimitiveFontPoint(2,4),
@@ -456,12 +456,12 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(1,0),
 		FNPrimitiveFontPoint(7,8),
 	};
-	
+
 	// 0
 	Glyphs[48] = TArray {
 		FNPrimitiveFontPoint(0,0),
 		FNPrimitiveFontPoint(0, 8),
-		
+
 		FNPrimitiveFontPoint(0, 8),
 		FNPrimitiveFontPoint(6, 8),
 
@@ -479,7 +479,7 @@ void FNPrimitiveFont::Initialize()
 	Glyphs[49] = TArray {
 		FNPrimitiveFontPoint(0,0),
 		FNPrimitiveFontPoint(6,0),
-		
+
 		FNPrimitiveFontPoint(3,0),
 		FNPrimitiveFontPoint(3,8),
 
@@ -548,7 +548,7 @@ void FNPrimitiveFont::Initialize()
 
 		FNPrimitiveFontPoint(0,4),
 		FNPrimitiveFontPoint(0,8),
-		
+
 		FNPrimitiveFontPoint(0,8),
 		FNPrimitiveFontPoint(6,8)
 	};
@@ -647,13 +647,13 @@ void FNPrimitiveFont::Initialize()
 	};
 
 	// ;
-	Glyphs[59] = TArray { 
+	Glyphs[59] = TArray {
 		FNPrimitiveFontPoint(1,1),
 		FNPrimitiveFontPoint(1,0),
 
 		FNPrimitiveFontPoint(1,0),
 		FNPrimitiveFontPoint(0,-1),
-	
+
 		FNPrimitiveFontPoint(1,2),
 		FNPrimitiveFontPoint(2,3),
 
@@ -677,22 +677,22 @@ void FNPrimitiveFont::Initialize()
 	};
 
 	// =
-	Glyphs[61] = TArray { 
+	Glyphs[61] = TArray {
 		FNPrimitiveFontPoint(0,5),
 		FNPrimitiveFontPoint(6,5),
 
 		FNPrimitiveFontPoint(0,3),
 		FNPrimitiveFontPoint(6,3)
 	};
-	
+
 	// >
-	Glyphs[62] = TArray { 
+	Glyphs[62] = TArray {
 		FNPrimitiveFontPoint(1,7),
 		FNPrimitiveFontPoint(5,4),
-		
+
 		FNPrimitiveFontPoint(5,4),
 		FNPrimitiveFontPoint(1,1)
-	};	
+	};
 
 	// ?
 	Glyphs[63] = TArray {
@@ -707,28 +707,28 @@ void FNPrimitiveFont::Initialize()
 
 		FNPrimitiveFontPoint(2,1),
 		FNPrimitiveFontPoint(3,0),
-		
+
 		FNPrimitiveFontPoint(3,3),
 		FNPrimitiveFontPoint(3,4),
-		
+
 		FNPrimitiveFontPoint(3,4),
 		FNPrimitiveFontPoint(5,5),
-		
+
 		FNPrimitiveFontPoint(5,5),
 		FNPrimitiveFontPoint(5,6),
-		
+
 		FNPrimitiveFontPoint(5,6),
 		FNPrimitiveFontPoint(4,8),
-		
+
 		FNPrimitiveFontPoint(4,8),
 		FNPrimitiveFontPoint(2,8),
-		
+
 		FNPrimitiveFontPoint(2,8),
 		FNPrimitiveFontPoint(1,6)
 	};
-	
+
 	// @
-	Glyphs[64] = TArray { 
+	Glyphs[64] = TArray {
 		FNPrimitiveFontPoint(6,0),
 		FNPrimitiveFontPoint(0,0),
 
@@ -750,12 +750,12 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(2,6),
 		FNPrimitiveFontPoint(4,6)
 	};
-	
+
 	// A
 	Glyphs[65] = TArray {
 		FNPrimitiveFontPoint(0,0),
 		FNPrimitiveFontPoint(0, 8),
-		
+
 		FNPrimitiveFontPoint(0, 8),
 		FNPrimitiveFontPoint(6, 8),
 
@@ -765,7 +765,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(0, 4),
 		FNPrimitiveFontPoint(6, 4)
 	};
-	
+
 	// B
 	Glyphs[66] = TArray {
 		FNPrimitiveFontPoint(6,8),
@@ -782,13 +782,13 @@ void FNPrimitiveFont::Initialize()
 
 		FNPrimitiveFontPoint(4,4),
 		FNPrimitiveFontPoint(6,6),
-		
+
 		FNPrimitiveFontPoint(6,6),
 		FNPrimitiveFontPoint(6,8),
 
 		FNPrimitiveFontPoint(4,4),
 		FNPrimitiveFontPoint(6,2),
-		
+
 		FNPrimitiveFontPoint(6,2),
 		FNPrimitiveFontPoint(6,0)
 	};
@@ -875,7 +875,7 @@ void FNPrimitiveFont::Initialize()
 	Glyphs[72] = TArray {
 		FNPrimitiveFontPoint(0,8),
 		FNPrimitiveFontPoint(0,0),
-		
+
 		FNPrimitiveFontPoint(6,8),
 		FNPrimitiveFontPoint(6,0),
 
@@ -890,7 +890,7 @@ void FNPrimitiveFont::Initialize()
 
 		FNPrimitiveFontPoint(3, 8),
 		FNPrimitiveFontPoint(3, 0),
-		
+
 		FNPrimitiveFontPoint(0,0),
 		FNPrimitiveFontPoint(6,0),
 	};
@@ -926,7 +926,7 @@ void FNPrimitiveFont::Initialize()
 
 		FNPrimitiveFontPoint(6,6),
 		FNPrimitiveFontPoint(6,8),
-		
+
 		FNPrimitiveFontPoint(4,4),
 		FNPrimitiveFontPoint(6,2),
 
@@ -957,7 +957,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(6,8),
 		FNPrimitiveFontPoint(6,0)
 	};
-	
+
 	// N
 	Glyphs[78] = TArray {
 		FNPrimitiveFontPoint(0,0),
@@ -974,7 +974,7 @@ void FNPrimitiveFont::Initialize()
 	Glyphs[79] = TArray {
 		FNPrimitiveFontPoint(0,0),
 		FNPrimitiveFontPoint(0, 8),
-	
+
 		FNPrimitiveFontPoint(0, 8),
 		FNPrimitiveFontPoint(6, 8),
 
@@ -1004,7 +1004,7 @@ void FNPrimitiveFont::Initialize()
 	Glyphs[81] = TArray {
 		FNPrimitiveFontPoint(0,0),
 		FNPrimitiveFontPoint(0, 8),
-	
+
 		FNPrimitiveFontPoint(0, 8),
 		FNPrimitiveFontPoint(6, 8),
 
@@ -1161,12 +1161,12 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(6,0),
 		FNPrimitiveFontPoint(2,0)
 	};
-	
+
 	// ^
 	Glyphs[94] = TArray {
 		FNPrimitiveFontPoint(1,5),
 		FNPrimitiveFontPoint(3,8),
-		
+
 		FNPrimitiveFontPoint(3,8),
 		FNPrimitiveFontPoint(5,5),
 	};
@@ -1182,7 +1182,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(0,8),
 		FNPrimitiveFontPoint(1,6)
 	};
-	
+
 	// a
 	Glyphs[97] = TArray {
 		FNPrimitiveFontPoint(6,0),
@@ -1326,7 +1326,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(0,3),
 		FNPrimitiveFontPoint(3,3)
 	};
-	
+
 	// g
 	Glyphs[103] = TArray {
 		FNPrimitiveFontPoint(0,2),
@@ -1352,19 +1352,19 @@ void FNPrimitiveFont::Initialize()
 
 		FNPrimitiveFontPoint(6,4),
 		FNPrimitiveFontPoint(6,-3),
-		
+
 		FNPrimitiveFontPoint(6,-3),
 		FNPrimitiveFontPoint(2,-3),
 
 		FNPrimitiveFontPoint(2,-3),
 		FNPrimitiveFontPoint(0,-1),
 	};
-	
+
 	// h
 	Glyphs[104] = TArray {
 		FNPrimitiveFontPoint(0,0),
 		FNPrimitiveFontPoint(0,8),
-		
+
 		FNPrimitiveFontPoint(0,4),
 		FNPrimitiveFontPoint(2,6),
 
@@ -1377,7 +1377,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(6,4),
 		FNPrimitiveFontPoint(6,0)
 	};
-	
+
 	// i
 	Glyphs[105] = TArray {
 		FNPrimitiveFontPoint(3,7),
@@ -1395,7 +1395,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(3,4),
 		FNPrimitiveFontPoint(3,0)
 	};
-	
+
 	// j
 	Glyphs[106] = TArray {
 
@@ -1410,7 +1410,7 @@ void FNPrimitiveFont::Initialize()
 
 		FNPrimitiveFontPoint(2,6),
 		FNPrimitiveFontPoint(3,7),
-		
+
 		FNPrimitiveFontPoint(3,4),
 		FNPrimitiveFontPoint(3,-1),
 
@@ -1420,9 +1420,9 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(2,-2),
 		FNPrimitiveFontPoint(1,-2),
 
-		
+
 	};
-	
+
 	// k
 	Glyphs[107] = TArray {
 		FNPrimitiveFontPoint(0,8),
@@ -1445,11 +1445,11 @@ void FNPrimitiveFont::Initialize()
 	Glyphs[108] = TArray {
 		FNPrimitiveFontPoint(3,8),
 		FNPrimitiveFontPoint(3,1),
-				
+
 		FNPrimitiveFontPoint(3,1),
 		FNPrimitiveFontPoint(4,0)
 	};
-	
+
 	// m
 	Glyphs[109] = TArray {
 		FNPrimitiveFontPoint(0,0),
@@ -1470,7 +1470,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(6,4),
 		FNPrimitiveFontPoint(6,0)
 	};
-	
+
 	// n
 	Glyphs[110] = TArray {
 		FNPrimitiveFontPoint(0,0),
@@ -1488,7 +1488,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(6,4),
 		FNPrimitiveFontPoint(6,0)
 	};
-	
+
 	// o
 	Glyphs[111] = TArray {
 		FNPrimitiveFontPoint(0,2),
@@ -1515,7 +1515,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(0,4),
 		FNPrimitiveFontPoint(0,2)
 	};
-	
+
 	// p
 	Glyphs[112] = TArray {
 		FNPrimitiveFontPoint(0,2),
@@ -1542,7 +1542,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(0,4),
 		FNPrimitiveFontPoint(0,-2)
 	};
-	
+
 	// q
 	Glyphs[113] = TArray {
 		FNPrimitiveFontPoint(0,2),
@@ -1569,7 +1569,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(6,-2),
 		FNPrimitiveFontPoint(6,4)
 	};
-	
+
 	// r
 	Glyphs[114] = TArray {
 		FNPrimitiveFontPoint(0,0),
@@ -1584,7 +1584,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(4,6),
 		FNPrimitiveFontPoint(6,4)
 	};
-	
+
 	// s
 	Glyphs[115] = TArray {
 		FNPrimitiveFontPoint(0,0),
@@ -1598,7 +1598,7 @@ void FNPrimitiveFont::Initialize()
 
 		FNPrimitiveFontPoint(6,2),
 		FNPrimitiveFontPoint(6,3),
-		
+
 		FNPrimitiveFontPoint(6,3),
 		FNPrimitiveFontPoint(5,4),
 
@@ -1617,7 +1617,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(5,6),
 		FNPrimitiveFontPoint(6,5)
 	};
-	
+
 	// t
 	Glyphs[116] = TArray {
 		FNPrimitiveFontPoint(3,0),
@@ -1626,7 +1626,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(1,4),
 		FNPrimitiveFontPoint(5,4)
 	};
-	
+
 	// u
 	Glyphs[117] = TArray {
 		FNPrimitiveFontPoint(0,6),
@@ -1644,7 +1644,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(6,2),
 		FNPrimitiveFontPoint(6,6)
 	};
-	
+
 	// v
 	Glyphs[118] = TArray {
 		FNPrimitiveFontPoint(0,6),
@@ -1653,7 +1653,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(3,0),
 		FNPrimitiveFontPoint(6,6)
 	};
-	
+
 	// w
 	Glyphs[119] = TArray {
 		FNPrimitiveFontPoint(0,6),
@@ -1664,7 +1664,7 @@ void FNPrimitiveFont::Initialize()
 
 		FNPrimitiveFontPoint(2,0),
 		FNPrimitiveFontPoint(3,2),
-		
+
 		FNPrimitiveFontPoint(3,2),
 		FNPrimitiveFontPoint(4,0),
 
@@ -1674,7 +1674,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(6,0),
 		FNPrimitiveFontPoint(6,6),
 	};
-	
+
 	// x
 	Glyphs[120] = TArray {
 		FNPrimitiveFontPoint(0,6),
@@ -1683,7 +1683,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(0,0),
 		FNPrimitiveFontPoint(6,6)
 	};
-	
+
 	// y
 	Glyphs[121] = TArray {
 		FNPrimitiveFontPoint(0,6),
@@ -1707,7 +1707,7 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(3, -3),
 		FNPrimitiveFontPoint(0, -1)
 	};
-	
+
 	// z
 	Glyphs[122] = TArray {
 		FNPrimitiveFontPoint(0,6),
@@ -1724,25 +1724,25 @@ void FNPrimitiveFont::Initialize()
 	Glyphs[123] = TArray {
 		FNPrimitiveFontPoint(4,8),
 		FNPrimitiveFontPoint(2,8),
-		
+
 		FNPrimitiveFontPoint(2,8),
 		FNPrimitiveFontPoint(1,7),
-		
+
 		FNPrimitiveFontPoint(1,7),
 		FNPrimitiveFontPoint(1,5),
-		
+
 		FNPrimitiveFontPoint(1,5),
 		FNPrimitiveFontPoint(0,4),
-		
+
 		FNPrimitiveFontPoint(0,4),
 		FNPrimitiveFontPoint(1,3),
-		
+
 		FNPrimitiveFontPoint(1,3),
 		FNPrimitiveFontPoint(1,1),
-		
+
 		FNPrimitiveFontPoint(1,1),
 		FNPrimitiveFontPoint(2,0),
-		
+
 		FNPrimitiveFontPoint(2,0),
 		FNPrimitiveFontPoint(4,0)
 	};
@@ -1757,25 +1757,25 @@ void FNPrimitiveFont::Initialize()
 	Glyphs[125] = TArray {
 		FNPrimitiveFontPoint(2,8),
 		FNPrimitiveFontPoint(4,8),
-		
+
 		FNPrimitiveFontPoint(4,8),
 		FNPrimitiveFontPoint(5,7),
-		
+
 		FNPrimitiveFontPoint(5,7),
 		FNPrimitiveFontPoint(5,5),
-		
+
 		FNPrimitiveFontPoint(5,5),
 		FNPrimitiveFontPoint(6,4),
-		
+
 		FNPrimitiveFontPoint(6,4),
 		FNPrimitiveFontPoint(5,3),
-		
+
 		FNPrimitiveFontPoint(5,3),
 		FNPrimitiveFontPoint(5,1),
-		
+
 		FNPrimitiveFontPoint(5,1),
 		FNPrimitiveFontPoint(4,0),
-		
+
 		FNPrimitiveFontPoint(4,0),
 		FNPrimitiveFontPoint(2,0)
 	};
@@ -1784,26 +1784,26 @@ void FNPrimitiveFont::Initialize()
 	Glyphs[126] = TArray {
 		FNPrimitiveFontPoint(0,3),
 		FNPrimitiveFontPoint(0,4),
-		
+
 		FNPrimitiveFontPoint(0,4),
 		FNPrimitiveFontPoint(1, 5),
-		
+
 		FNPrimitiveFontPoint(1, 5),
 		FNPrimitiveFontPoint(2, 5),
-		
+
 		FNPrimitiveFontPoint(2, 5),
 		FNPrimitiveFontPoint(4, 3),
-		
+
 		FNPrimitiveFontPoint(4, 3),
 		FNPrimitiveFontPoint(5, 3),
-		
+
 		FNPrimitiveFontPoint(5, 3),
 		FNPrimitiveFontPoint(6, 4),
-		
+
 		FNPrimitiveFontPoint(6, 4),
 		FNPrimitiveFontPoint(6, 5)
 	};
-	
+
 	// Flag that we have generated at this point.
 	bIsInitialized = true;
 }

@@ -90,7 +90,7 @@ struct NEXUSCORE_API FNRotationConstraints
 			   Yaw   >= MinimumMatchingRotation.Yaw   - UE_KINDA_SMALL_NUMBER &&
 			   Yaw   <= MaximumMatchingRotation.Yaw   + UE_KINDA_SMALL_NUMBER;
 	}
-	
+
 	/**
 	 * Matching-interval overload that accepts already-normalized axis values, skipping the internal normalization step.
 	 * @param NormalizedRoll Normalized roll component (expected in [-180, 180)).
@@ -111,7 +111,7 @@ struct NEXUSCORE_API FNRotationConstraints
 			   NormalizedYaw   >= MinimumMatchingRotation.Yaw   - UE_KINDA_SMALL_NUMBER &&
 			   NormalizedYaw   <= MaximumMatchingRotation.Yaw   + UE_KINDA_SMALL_NUMBER;
 	}
-	
+
 	/**
 	 * Tests whether Rotation (treated as a delta between two rotations) lies within the difference interval.
 	 * @param Rotation Delta rotation to check (axes will be normalized internally).
@@ -134,7 +134,7 @@ struct NEXUSCORE_API FNRotationConstraints
 			   Yaw   >= MinimumDifferenceRotation.Yaw   - UE_KINDA_SMALL_NUMBER &&
 			   Yaw   <= MaximumDifferenceRotation.Yaw   + UE_KINDA_SMALL_NUMBER;
 	}
-	
+
 	/**
 	 * Difference-interval overload that accepts already-normalized axis values, skipping the internal normalization step.
 	 * @param NormalizedRoll Normalized roll component of the delta.

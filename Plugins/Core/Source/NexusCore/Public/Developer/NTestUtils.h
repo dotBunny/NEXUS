@@ -20,7 +20,7 @@ class NEXUSCORE_API FNTestUtils
 {
 public:
 	static FNTestEnvironment Environment;
-	
+
 	/**
 	 * Creates a throwaway UWorld, runs a test body against it, and tears everything down afterward.
 	 *
@@ -75,7 +75,7 @@ public:
 		World->DestroyWorld(bInformEngineOfWorld);
 		TestGameInstance->MarkAsGarbage();
 	}
-	
+
 	/**
 	 * Runs a world test and asserts that no UObjects leaked across the scope.
 	 *
@@ -93,10 +93,10 @@ public:
 	{
 		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 		const FNObjectSnapshot PreSnapshot = FNObjectSnapshotUtils::Snapshot();
-		
+
 		WorldTest(WorldType, TestFunctionality);
 		const FNObjectSnapshot PostSnapshot = FNObjectSnapshotUtils::Snapshot();
-		
+
 		if (bShouldGarbageCollect)
 		{
 			CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
@@ -121,12 +121,12 @@ public:
 					ADD_ERROR(FString::Printf(TEXT("Leaked %s"), *Diff.Added[i].ToString()));
 				}
 			}
-			
+
 			// Always cleanup after the check
 			CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 		}
 	}
-	
+
 	/**
 	 * Captures the current set of filenames in ProjectLogDir matching a wildcard pattern.
 	 *

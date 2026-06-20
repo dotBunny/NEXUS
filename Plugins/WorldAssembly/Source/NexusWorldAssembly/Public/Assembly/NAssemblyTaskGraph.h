@@ -70,13 +70,13 @@ public:
 
 	/** Block the calling thread until every stage finishes. */
 	void WaitForTasks();
-	
+
 	TSharedRef<FNAssemblyTaskGraphContext> GetContext() const { return TaskGraphContextPtr.ToSharedRef(); }
-	
+
 	N_ASSEMBLY_ANALYTICS_SHARED_PTR
-	
+
 private:
-	
+
 	/** True once UnlockTasks has dispatched the graph for execution. */
 	bool bTasksUnlocked = false;
 
@@ -88,7 +88,7 @@ private:
 
 	/** Pre-work on game thread tasks; kicks off before any per-organ work. */
 	FGraphEventArray PreGameThreadTasks;
-	
+
 	/** Post pre-work game-thread tasks; gates the graph-builder batches. */
 	FGraphEventArray ProcessInitialGameThreadTasks;
 

@@ -13,18 +13,18 @@
  */
 class FNGuardianEditorModule final : public IModuleInterface
 {
-public:	
+public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 	N_MODULE_BASE(FNGuardianEditorModule, "NexusGuardianEditor")
-	
-private:	
+
+private:
 	N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE()
 };
 
 N_TOOLS_MENU_EUW_ENTRY(
 	"Developer Overlay", EUW_NGuardian,
-	NSLOCTEXT("NexusGuardianEditor", "Create_EUW_DisplayName", "Guardian"), 
+	NSLOCTEXT("NexusGuardianEditor", "Create_EUW_DisplayName", "Guardian"),
 	NSLOCTEXT("NexusGuardianEditor", "Create_EUW_Tooltip", "Opens the NGuardian Developer Overlay inside of an editor tab."),
 	FSlateIcon(FNGuardianEditorStyle::GetStyleSetName(), "Icon.NGuardian"),
 	"/NexusGuardian/EditorResources/EUW_NGuardian.EUW_NGuardian")

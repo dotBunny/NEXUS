@@ -147,21 +147,21 @@ private:
 
 	/** Publish bGraphNavigationSpaceToPan and GraphNavigationPanSpeedMultiplier to the shared input processor. */
 	void ApplySpaceToPan() const;
-	
+
 	/**
 	 * Builds the concatenated command-line arguments passed to each client launched by the
 	 * multiplayer test session, encoding the simulation toggles plus any user-supplied ClientParameters.
 	 * @return A single space-separated argument string prefixed with -NMultiplayerTest.
 	 */
 	FString GetMultiplayerTestClientArguments() const;
-	
+
 	/**
 	 * Builds the command-line arguments passed to the server (dedicated or listen) launched
 	 * alongside the test session's clients.
 	 * @return The concatenated server-side argument string.
 	 */
 	FString GetMultiplayerTestServerArguments() const;
-	
+
 public:
 	/**
 	 * Copies the user-facing values from this settings object into the supplied FRequestPlaySessionParams

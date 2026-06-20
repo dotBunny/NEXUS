@@ -15,39 +15,39 @@ void UNCollisionVisualizerWidget::NativeConstruct()
 {
 	UniqueIdentifier = NEXUS::ToolingEditor::CollisionVisualizer::Identifier;
 	bIsPersistent = true;
-	
+
 	N_VALIDATE(LogNexusToolingEditor, SelectStartButton);
 	N_VALIDATE(LogNexusToolingEditor, SelectEndButton);
 	N_VALIDATE(LogNexusToolingEditor, ActorNameText);
 	N_VALIDATE(LogNexusToolingEditor, ObjectDetails);
-	
+
 	Super::NativeConstruct();
-	
+
 	RestoreState();
-	
+
 	// Bindings
 	SelectStartButton->OnClicked.AddDynamic(this,&UNCollisionVisualizerWidget::SelectStartPoint);
 	SelectEndButton->OnClicked.AddDynamic(this, &UNCollisionVisualizerWidget::SelectEndPoint);
-	
+
 	ObjectDetails->SetObject(this);
 	ObjectDetails->bExpandedInDesigner = true;
 	ObjectDetails->GetOnPropertyValueChangedRef()->AddDynamic(this, &UNCollisionVisualizerWidget::OnPropertyValueChanged);
-	
+
 	OnPIEStartedHandle = FWorldDelegates::OnPIEStarted.AddUObject(this, &UNCollisionVisualizerWidget::OnPIEStarted);
 	OnPIEReadyHandle = FWorldDelegates::OnPIEReady.AddUObject(this, &UNCollisionVisualizerWidget::OnPIEReady);
 	OnPIEEndedHandle = FWorldDelegates::OnPIEEnded.AddUObject(this, &UNCollisionVisualizerWidget::OnPIEEnded);
-	
+
 	CreateActor();
 }
 
 void UNCollisionVisualizerWidget::NativeDestruct()
-{	
+{
 	DestroyActor();
-	
+
 	FWorldDelegates::OnPIEStarted.Remove(OnPIEStartedHandle);
 	FWorldDelegates::OnPIEReady.Remove(OnPIEReadyHandle);
 	FWorldDelegates::OnPIEEnded.Remove(OnPIEEndedHandle);
-	
+
 	Super::NativeDestruct();
 }
 
@@ -65,7 +65,7 @@ void UNCollisionVisualizerWidget::OnWorldTick(const ANCollisionVisualizerActor* 
 {
 	// Update Settings (for the one we know about)
 	UpdateSettings(Actor);
-	
+
 	// Draw Actor w/ Settings
 	using enum ENCollisionVisualizerMethod;
 	if (Settings.Query.QueryMethod == LineTrace)
@@ -73,17 +73,17 @@ void UNCollisionVisualizerWidget::OnWorldTick(const ANCollisionVisualizerActor* 
 		using enum ENCollisionVisualizerPrefix;
 		if (Settings.Query.QueryPrefix == Single)
 		{
-			FNCollisionVisualizerUtils::LineTraceSingle(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::LineTraceSingle(Settings, Actor->GetWorld(),
 				Actor->GetStartPosition(), Actor->GetEndPosition());
 		}
 		else if (Settings.Query.QueryPrefix == Multi)
 		{
-			FNCollisionVisualizerUtils::LineTraceMulti(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::LineTraceMulti(Settings, Actor->GetWorld(),
 				Actor->GetStartPosition(), Actor->GetEndPosition());
 		}
 		else if (Settings.Query.QueryPrefix == Test)
 		{
-			FNCollisionVisualizerUtils::LineTraceTest(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::LineTraceTest(Settings, Actor->GetWorld(),
 				Actor->GetStartPosition(), Actor->GetEndPosition());
 		}
 	}
@@ -92,20 +92,20 @@ void UNCollisionVisualizerWidget::OnWorldTick(const ANCollisionVisualizerActor* 
 		using enum ENCollisionVisualizerPrefix;
 		if (Settings.Query.QueryPrefix == Single)
 		{
-			FNCollisionVisualizerUtils::SweepSingle(Settings, Actor->GetWorld(), 
-				Actor->GetStartPosition(), Actor->GetEndPosition(), 
+			FNCollisionVisualizerUtils::SweepSingle(Settings, Actor->GetWorld(),
+				Actor->GetStartPosition(), Actor->GetEndPosition(),
 				Actor->GetRotation());
 		}
 		else if (Settings.Query.QueryPrefix == Multi)
 		{
-			FNCollisionVisualizerUtils::SweepMulti(Settings, Actor->GetWorld(), 
-				Actor->GetStartPosition(), Actor->GetEndPosition(), 
+			FNCollisionVisualizerUtils::SweepMulti(Settings, Actor->GetWorld(),
+				Actor->GetStartPosition(), Actor->GetEndPosition(),
 				Actor->GetRotation());
 		}
 		else if (Settings.Query.QueryPrefix == Test)
 		{
-			FNCollisionVisualizerUtils::SweepTest(Settings, Actor->GetWorld(), 
-				Actor->GetStartPosition(), Actor->GetEndPosition(), 
+			FNCollisionVisualizerUtils::SweepTest(Settings, Actor->GetWorld(),
+				Actor->GetStartPosition(), Actor->GetEndPosition(),
 				Actor->GetRotation());
 		}
 	}
@@ -114,17 +114,17 @@ void UNCollisionVisualizerWidget::OnWorldTick(const ANCollisionVisualizerActor* 
 		using enum ENCollisionVisualizerOverlapBlocking;
 		if (Settings.Query.QueryOverlapBlocking == Blocking)
 		{
-			FNCollisionVisualizerUtils::OverlapBlocking(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::OverlapBlocking(Settings, Actor->GetWorld(),
 				Actor->GetStartPosition(), Actor->GetRotation());
 		}
 		else if (Settings.Query.QueryOverlapBlocking == Any)
 		{
-			FNCollisionVisualizerUtils::OverlapAny(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::OverlapAny(Settings, Actor->GetWorld(),
 				Actor->GetStartPosition(), Actor->GetRotation());
 		}
 		else if (Settings.Query.QueryOverlapBlocking == Multi)
 		{
-			FNCollisionVisualizerUtils::OverlapMulti(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::OverlapMulti(Settings, Actor->GetWorld(),
 				Actor->GetStartPosition(), Actor->GetRotation());
 		}
 	}
@@ -137,9 +137,9 @@ void UNCollisionVisualizerWidget::PushSettings(ANCollisionVisualizerActor* Actor
 		Actor->GetStartComponent()->SetWorldLocation(Settings.Points.StartPoint);
 		Actor->GetEndComponent()->SetRelativeLocation(Settings.Points.EndPoint);
 		Actor->GetStartComponent()->SetWorldRotation(Settings.Points.Rotation.Quaternion());
-		
+
 		Actor->SetActorTickInterval(Settings.Drawing.DrawTimer);
-		
+
 		Actor->SetTickInEditor(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ENCollisionVisualizerDrawMode::EditorOnly));
 		Actor->SetTickInGame(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ENCollisionVisualizerDrawMode::PlayInEditor));
 		Actor->SetTickInSimulation(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ENCollisionVisualizerDrawMode::SimulateInEditor));
@@ -165,7 +165,7 @@ void UNCollisionVisualizerWidget::UpdateSettings(const ANCollisionVisualizerActo
 			Settings.Points.EndPoint = ActorEnd;
 			bFoundChanged = true;
 		}
-		
+
 		const FRotator ActorRotation = Actor->GetRotation().Rotator();
 		if (Settings.Points.Rotation != ActorRotation)
 		{
@@ -203,11 +203,11 @@ void UNCollisionVisualizerWidget::SelectStartPoint()
 		USelection* ActorSelection = GEditor->GetSelectedActors();
 		ActorSelection->Modify();
 		ActorSelection->DeselectAll();
-		
+
 		USelection* ComponentSelection = GEditor->GetSelectedComponents();
 		ComponentSelection->Modify();
 		ComponentSelection->DeselectAll();
-		
+
 		GEditor->SelectComponent(QueryActor->GetStartComponent(), true, true, true);
 		GEditor->SelectActor(QueryActor, true, true, true, true);
 	}
@@ -220,11 +220,11 @@ void UNCollisionVisualizerWidget::SelectEndPoint()
 		USelection* ActorSelection = GEditor->GetSelectedActors();
 		ActorSelection->Modify();
 		ActorSelection->DeselectAll();
-		
+
 		USelection* ComponentSelection = GEditor->GetSelectedComponents();
 		ComponentSelection->Modify();
 		ComponentSelection->DeselectAll();
-		
+
 		GEditor->SelectComponent(QueryActor->GetEndComponent(), true, true, true);
 		GEditor->SelectActor(QueryActor, true, true, true, true);
 	}
@@ -253,7 +253,7 @@ void UNCollisionVisualizerWidget::SaveState() const
 		if (FJsonObjectConverter::UStructToJsonObjectString(Settings, JsonOutput, 0, 0, 0, nullptr, false))
 		{
 			FNWidgetState State;
-			State.AddString(TEXT("Settings"), JsonOutput);	
+			State.AddString(TEXT("Settings"), JsonOutput);
 			System->AddWidgetState(GetUniqueIdentifier(), State);
 		}
 	}
@@ -277,21 +277,21 @@ void UNCollisionVisualizerWidget::CreateActor(UWorld* TargetWorld)
 		SpawnParams.bDeferConstruction = false;
 		SpawnParams.InitialActorLabel = TEXT("NCollisionVisualizer");
 		SpawnParams.Name = MakeUniqueObjectName(World, ANCollisionVisualizerActor::StaticClass(), TEXT("NCollisionVisualizer"));
-		
+
 		QueryActor = World->SpawnActor<ANCollisionVisualizerActor>(
 			Settings.Points.StartPoint, Settings.Points.Rotation, SpawnParams);
-		
+
 		if (QueryActor == nullptr) return;
-		
+
 		QueryActor->SetFlags(RF_Transient);
-		
+
 		PushSettings(QueryActor);
-		
+
 		QueryActor->Widget = this;
 
 		const FString ActorLabel = FString::Printf(TEXT("%s / %s (%s)"), *QueryActor->GetActorLabel(), *QueryActor->GetName(), *QueryActor->GetWorld()->GetName());
 		ActorNameText->SetText(FText::FromString(ActorLabel));
-		
+
 		SelectStartPoint();
 	}
 }
@@ -301,11 +301,11 @@ void UNCollisionVisualizerWidget::DestroyActor()
 	if (QueryActor != nullptr)
 	{
 		QueryActor->Widget = nullptr;
-		
+
 		USelection* ComponentSelection = GEditor->GetSelectedComponents();
 		ComponentSelection->Deselect(QueryActor->GetStartComponent());
 		ComponentSelection->Deselect(QueryActor->GetEndComponent());
-		
+
 		GEditor->GetSelectedActors()->Deselect(QueryActor);
 
 		QueryActor->Destroy(true, false);
@@ -316,9 +316,9 @@ void UNCollisionVisualizerWidget::DestroyActor()
 bool UNCollisionVisualizerWidget::DoesPropertyAffectActor(FName Name)
 {
 	return	Name == TEXT("X") || Name == TEXT("Y") || Name == TEXT("Z") ||
-			Name == TEXT("Pitch") || Name == TEXT("Yaw") || Name == TEXT("Roll") || 
-			Name == TEXT("Rotation") || 
-			Name == TEXT("StartPoint") || Name == TEXT("EndPoint") || Name == TEXT("Points") || 
+			Name == TEXT("Pitch") || Name == TEXT("Yaw") || Name == TEXT("Roll") ||
+			Name == TEXT("Rotation") ||
+			Name == TEXT("StartPoint") || Name == TEXT("EndPoint") || Name == TEXT("Points") ||
 			Name == TEXT("Drawing") || Name == TEXT("DrawMode") || Name == TEXT("DrawTimer") ||
 			Name == TEXT("Settings");
 }

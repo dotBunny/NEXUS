@@ -20,12 +20,12 @@ public:
 	static bool HasSection();
 
 private:
-	
+
 	/** Adds the MultiplayerTest entry/section to the LevelEditorToolBar. */
 	static void AddMenuEntry();
 	/** Removes the MultiplayerTest entry/section from the LevelEditorToolBar. */
 	static void RemoveMenuEntry();
-	
+
 	/** @return true if the multiplayer test entry is currently enabled (e.g. not already running an incompatible mode). */
 	static bool MultiplayerTest_CanExecute();
 	/** @return Localized tooltip for the multiplayer test entry, reflecting current running state. */
@@ -47,7 +47,7 @@ private:
 	static FDelegateHandle OnTestStartedHandle;
 	/** Handle for the ended delegate binding, held so it can be removed on Unregister. */
 	static FDelegateHandle OnTestEndedHandle;
-	
+
 	/** Named section used by the Multiplayer Test toggle button. */
 	static FName MultiplayerTestSectionName;
 };

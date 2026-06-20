@@ -18,7 +18,7 @@ void FNActorPoolSpawnerComponentVisualizer::DrawVisualization(const UActorCompon
 	const FVector Origin = SpawnerComponent->GetComponentLocation() + SpawnerComponent->GetOffset();
 	const FRotator Rotator = SpawnerComponent->GetComponentRotation();
 	const UNToolingEditorUserSettings* Settings = UNToolingEditorUserSettings::Get();
-	
+
 	switch (SpawnerComponent->GetDistribution())
 	{
 		using enum ENActorPoolSpawnerDistribution;

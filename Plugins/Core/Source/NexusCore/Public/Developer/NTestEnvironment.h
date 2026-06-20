@@ -11,9 +11,9 @@ struct NEXUSCORE_API FNTestEnvironment
 	UWorld* World = nullptr;
 	FWorldContext* WorldContext = nullptr;
 	UGameInstance* GameInstance = nullptr;
-	
+
 	bool bHasInitializedStackWalking = false;
-	
+
 	void InitializeStackWalking()
 	{
 		if (!bHasInitializedStackWalking)

@@ -33,24 +33,24 @@ bool FNSetPositionZElement::ExecuteInternal(FPCGContext* Context) const
 	{
 		const UPCGPointData* OriginalData = Cast<UPCGPointData>(Input.Data);
 		if (!OriginalData || OriginalData->GetNumPoints() == 0) continue;
-		
+
 		const TArray<FPCGPoint>& Points = OriginalData->GetPoints();
-		
+
 		UPCGPointData* OutputData = NewObject<UPCGPointData>();
 		OutputData->InitializeFromData(OriginalData);
 		TArray<FPCGPoint>& MutablePoints = OutputData->GetMutablePoints();
-		
+
 		for (const FPCGPoint& Point : Points)
 		{
 			FPCGPoint NewPoint(Point);
-			
+
 			FVector Pos = NewPoint.Transform.GetLocation();
 			Pos.Z = Settings->SetParams.ZValue;
 			NewPoint.Transform.SetLocation(Pos);
-			
+
 			MutablePoints.Add(NewPoint);
 		}
-		
+
 		FPCGTaggedData& TaggedData = Context->OutputData.TaggedData.Emplace_GetRef();
 		TaggedData.Pin = PCGPinConstants::DefaultOutputLabel;
 		TaggedData.Data = OutputData;

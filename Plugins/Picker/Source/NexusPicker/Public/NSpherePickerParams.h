@@ -7,7 +7,7 @@
 #include "NSpherePickerParams.generated.h"
 
 /**
- * Parameters for the sphere picker functionality, used to define boundaries for generating points within a 
+ * Parameters for the sphere picker functionality, used to define boundaries for generating points within a
  * specified sphere.
  */
 USTRUCT(BlueprintType)
@@ -18,7 +18,7 @@ struct NEXUSPICKER_API FNSpherePickerParams : public FNPickerParams
 	/** The center point when attempting to generate new points. */
 	UPROPERTY(Category = "Sphere", BlueprintReadWrite)
 	FVector Origin = FVector::ZeroVector;
-	
+
 	/** The minimum radius of the sphere (inner bound). */
 	UPROPERTY(Category = "Sphere", BlueprintReadWrite)
 	float MinimumRadius = 0.f;

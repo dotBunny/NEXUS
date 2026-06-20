@@ -28,10 +28,10 @@ void FNGuardianEditorModule::ShutdownModule()
 void FNGuardianEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;
-	
+
 	// Configure Style
 	FNGuardianEditorStyle::Initialize();
-	
+
 	// Initialize Tool Menu
 	if (FSlateApplication::IsInitialized())
 	{

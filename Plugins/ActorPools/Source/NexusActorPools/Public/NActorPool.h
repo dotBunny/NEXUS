@@ -16,7 +16,7 @@ namespace NEXUS::ActorPools::InvokeMethods
 	inline const FName OnReleasedFromActorPool = TEXT("OnReleasedFromActorPool");
 	inline const FName OnReturnToActorPool = TEXT("OnReturnToActorPool");
 	inline const FName OnSpawnedFromActorPool = TEXT("OnSpawnedFromActorPool");
-	
+
 }
 
 /**
@@ -27,12 +27,12 @@ class NEXUSACTORPOOLS_API FNActorPool
 {
 	// Allow to test w/ deep access
 	friend class UNActorPoolObject;
-#if WITH_TESTS	
+#if WITH_TESTS
 	friend class FNActorPoolTests_Return_StorageLocation;
 	friend class FNActorPoolTests_Create_ActorsAreNotRooted;
 	friend class FNActorPoolTests_Clear_ForceDestroyOnRootedActor_WarnsAndSkips;
-#endif // WITH_TESTS	
-	
+#endif // WITH_TESTS
+
 public:
 	/**
 	 * Create an ActorPool.
@@ -141,7 +141,7 @@ public:
 	 * @remark Intended for debugging and developer overlays; the format is not stable and should not be parsed.
 	 */
 	FText GetDescription() const;
-	
+
 private:
 
 	void PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorClass);
@@ -153,7 +153,7 @@ private:
 	TArray<TObjectPtr<AActor>> OutActors;
 
 	TSubclassOf<AActor> Template;
-	
+
 	bool bStubMode = false;
 
 	bool ApplyStrategy();
@@ -182,7 +182,7 @@ private:
 	FORCEINLINE void ReserveForPoolSize(const int32 PoolSize);
 
 	FORCEINLINE bool CreateActor(const FActorSpawnParameters& SpawnInfo);
-	
+
 	void ReleaseActor(TObjectPtr<AActor> Actor, bool bForceDestroy) const;
 
 	FORCEINLINE void ApplySpawnState(AActor* Actor, const FVector& InPosition, const FRotator& InRotation) const;
@@ -201,7 +201,7 @@ private:
 #endif // WITH_EDITOR
 	bool bImplementsPoolItemInterface = false;
 
-	
+
 	ENToggle SpawnPhysicsSimulation = ENToggle::Default;
 	ECollisionEnabled::Type SpawnPhysicsCollisionSettings;
 };

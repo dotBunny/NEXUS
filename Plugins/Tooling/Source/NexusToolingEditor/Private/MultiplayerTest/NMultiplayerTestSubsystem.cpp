@@ -16,7 +16,7 @@ void UNMultiplayerTestSubsystem::Tick(float DeltaTime)
 		return;
 	}
 	DeltaAccumulator = 0.f;
-	
+
 	bool bAnyProcessAlive = false;
 	for (FProcHandle& Handle : ProcessHandles)
 	{
@@ -43,7 +43,7 @@ void UNMultiplayerTestSubsystem::StartMultiplayerTest()
 	LocalProcessDelegateHandle = FEditorDelegates::BeginStandaloneLocalPlay.AddUObject(this, &UNMultiplayerTestSubsystem::AddLocalProcess);
 
 	const FNToolingEditorModule& Module = FNToolingEditorModule::Get();
-	
+
 	FRequestPlaySessionParams PlaySessionRequest;
 	PlaySessionRequest.SessionDestination = EPlaySessionDestinationType::NewProcess;
 
@@ -53,19 +53,19 @@ void UNMultiplayerTestSubsystem::StartMultiplayerTest()
 	PlaySessionRequest.EditorPlaySettings = CastChecked<ULevelEditorPlaySettings>(StaticDuplicateObjectEx(DuplicationParams));
 
 #if WITH_EDITORONLY_DATA
-	const UNToolingEditorSettings* Settings = UNToolingEditorSettings::Get();	
+	const UNToolingEditorSettings* Settings = UNToolingEditorSettings::Get();
 	const UNToolingEditorUserSettings* UserSettings = UNToolingEditorUserSettings::Get();
-	
+
 	Settings->ApplySettings(PlaySessionRequest);
-	
+
 	if (UserSettings->bClearLogsFolder)
 	{
 		FNEditorUtils::CleanLogsFolder();
 	}
 	UserSettings->ApplySettings(PlaySessionRequest);
-		
+
 #endif // WITH_EDITORONLY_DATA
-		
+
 	// Are there any additional parameters that a binding has provided?
 	if (Module.OnMultiplayerTestParameters.IsBound())
 	{
@@ -82,7 +82,7 @@ void UNMultiplayerTestSubsystem::StartMultiplayerTest()
 	// Start!
 	GUnrealEd->RequestPlaySession(PlaySessionRequest);
 	Module.OnMultiplayerTestStarted.Broadcast();
-	
+
 	bIsMultiplayerTestRunning = true;
 }
 
@@ -92,7 +92,7 @@ void UNMultiplayerTestSubsystem::StopMultiplayerTest()
 	{
 		return;
 	}
-	
+
 	// Some analysis says that we could receive this call via Deinitialize which *could* have the editor already torn down, so were going to
 	// be explicit about the in editor callbacks.
 	if (GUnrealEd && !IsEngineExitRequested())

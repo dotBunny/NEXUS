@@ -13,18 +13,18 @@
  */
 class FNDynamicRefsEditorModule final : public IModuleInterface
 {
-public:	
+public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 	N_MODULE_BASE(FNDynamicRefsEditorModule, "NexusDynamicRefsEditor")
-	
-private:	
+
+private:
 	N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE()
 };
 
 N_TOOLS_MENU_EUW_ENTRY(
 	"Developer Overlay", EUW_NDynamicRefs,
-	NSLOCTEXT("NexusDynamicRefsEditor", "Create_EUW_DisplayName", "Dynamic References"), 
+	NSLOCTEXT("NexusDynamicRefsEditor", "Create_EUW_DisplayName", "Dynamic References"),
 	NSLOCTEXT("NexusDynamicRefsEditor", "Create_EUW_Tooltip", "Opens the NDynamicRefs Developer Overlay inside of an editor tab."),
 	FSlateIcon(FNDynamicRefsEditorStyle::GetStyleSetName(), "ClassIcon.NDynamicRefComponent"),
 	"/NexusDynamicRefs/EditorResources/EUW_NDynamicRefs.EUW_NDynamicRefs")

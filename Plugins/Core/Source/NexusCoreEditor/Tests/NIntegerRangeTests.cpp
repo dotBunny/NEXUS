@@ -68,7 +68,7 @@ N_TEST_HIGH(FNIntegerRangeTests_NextValueInSubRange_Clamping, "NEXUS::UnitTests:
 	FNIntegerRange Range;
 	Range.Minimum = 10;
 	Range.Maximum = 50;
-	
+
 	FNMersenneTwister Random = FNMersenneTwister(42);
 	for (int32 i = 0; i < 100; ++i)
 	{

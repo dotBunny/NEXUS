@@ -79,7 +79,7 @@ struct FNGameplayTagCounter
 	{
 		Add(Tag, 1);
 	}
-	
+
 	/**
 	 * Decreases the count for a tag by one, adding the tag (then decrementing to -1) if it is not already tracked.
 	 * @param Tag The tag whose count should be decremented.
@@ -88,7 +88,7 @@ struct FNGameplayTagCounter
 	{
 		Subtract(Tag, 1);
 	}
-	
+
 	/**
 	 * Adds a value to the count for a tag, adding the tag (starting from zero) if it is not already tracked.
 	 * @param Tag The tag whose count should be increased.
@@ -108,7 +108,7 @@ struct FNGameplayTagCounter
 	{
 		GameplayTags.FindOrAdd(Tag) -= Value;
 	}
-	
+
 	/**
 	 * Applies a declarative operation to the count for its target tag.
 	 * @param Operation The tag, arithmetic operation, and value to apply.
@@ -125,7 +125,7 @@ struct FNGameplayTagCounter
 			break;
 		}
 	}
-	
+
 	/**
 	 * Applies the inverse of a declarative operation to the count for its target tag, undoing a prior
 	 * ApplyOperation call (an Add is subtracted and a Subtract is added).
@@ -157,7 +157,7 @@ struct FNGameplayTagCounter
 		}
 		return 0;
 	}
-	
+
 	/**
 	 * Attempts to read the current value for a tag without treating an absent tag as zero.
 	 * @param Tag The tag to query.
@@ -184,7 +184,7 @@ struct FNGameplayTagCounter
 	{
 		return GameplayTags.Contains(Tag);
 	}
-	
+
 	/**
 	 * Builds a flat array of tag/count pairs from the tracked counts.
 	 * @return An array containing one entry per tracked tag, in unspecified order.
@@ -201,7 +201,7 @@ struct FNGameplayTagCounter
 		}
 		return ReturnArray;
 	}
-	
+
 	/**
 	 * Builds a counter holding the signed difference of this counter minus another.
 	 *

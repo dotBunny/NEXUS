@@ -51,7 +51,7 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellDataSummary
 
 /**
  * Represents input configuration data for a procedural generation cell.
- * 
+ *
  * This structure holds all the parameters and constraints that define how a cell
  * can be used during procedural generation, including placement rules, usage limits,
  * and junction connection points.
@@ -66,9 +66,9 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 
 	/** Context tags this cell contributes/adds to the overall assembly operation / phase ContextTags once it is placed. */
 	FGameplayTagContainer ContextTagsAdded;
-	
+
 	TArray<FNGameplayTagCounterConstraint> TagCounterConstraints;
-	
+
 	TArray<FNGameplayTagCounterOperation> TagCounterOperations;
 
 	/**
@@ -90,7 +90,7 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	 * @note A value of 0 indicates no constraint.
 	 */
 	int32 MinimumNodeDistance = 1;
-	
+
 	/**
 	 * The minimum graph depth at which this cell may be used, as a 1-based NodeDepth (the start cell is depth 1,
 	 * its direct neighbours depth 2, and so on). A cell with MinimumNodeDepth = N first becomes eligible at
@@ -122,8 +122,8 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	 *         NFilterCellInputDataTests.cpp.
 	 */
 	ENCardinalDirection DirectionConstraint = ENCardinalDirection::North;
-	
-	/** 
+
+	/**
 	 * Relative weight for random selection during generation.
 	 * @note Higher values increase the probability of this cell being chosen.
 	 */
@@ -135,14 +135,14 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	/** Root-level details and properties of this cell. */
 	FNCellRootDetails CellDetails;
 
-	/** 
+	/**
 	 * Map of junction connection points on this cell.
 	 * Key: Junction identifier (int32)
 	 * Value: Details about the junction including position, rotation, and socket size.
 	 */
 	TMap<int32, FNCellJunctionDetails> Junctions;
 
-	/** 
+	/**
 	 * Reference to the cell template asset.
 	 * @warning GameThread access ONLY!
 	 * @remark This is used later when assembling on the game-thread and is copied to output.
@@ -207,9 +207,9 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 		}
 		return false;
 	}
-	
+
 	// TODO: Implement Required/etc to junctions here and in the cell node version
-	
+
 	/**
 	 * Gets all junction keys that match a specific socket size.
 	 * @param SocketSize The socket size to filter by.

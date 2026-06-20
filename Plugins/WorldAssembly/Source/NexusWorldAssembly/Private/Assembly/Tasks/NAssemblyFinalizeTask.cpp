@@ -6,11 +6,11 @@
 #include "Containers/Ticker.h"
 
 
-FNAssemblyFinalizeTask::FNAssemblyFinalizeTask(UNAssemblyOperation* TargetOperation, 
+FNAssemblyFinalizeTask::FNAssemblyFinalizeTask(UNAssemblyOperation* TargetOperation,
                                                          const TSharedPtr<FNAssemblyTaskGraphContext>& TaskGraphContextPtr N_ASSEMBLY_ANALYTICS_CONSTRUCTOR)
 	: Operation(TargetOperation), TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef()) N_ASSEMBLY_ANALYTICS_INITIALIZER
 {
-	
+
 }
 
 void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
@@ -38,7 +38,7 @@ void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	{
 		ContextTagsContentBlock->AddItem(Tag.ToString());
 	}
-	
+
 	// Add our Tag Counter to report
 	const int32 TagCounterContentTicket = ResolvedOperation->GetReport()->CreateTableBlock(OutputContentTicket);
 	FNReportTableBlock* TagCounterTableBlock = ResolvedOperation->GetReport()->GetTableBlock(TagCounterContentTicket);

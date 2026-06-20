@@ -28,7 +28,7 @@ int32 UNUpdateCellDataCommandlet::Main(const FString& Params)
 	ParseCommandLine(*Params, Tokens, Switches, ParamMap);
 
 	return Execute(
-		Switches.Contains(TEXT("ErrorOnChanges")), 
+		Switches.Contains(TEXT("ErrorOnChanges")),
 			Switches.Contains(TEXT("CommitChanges")));
 }
 
@@ -39,7 +39,7 @@ int32 UNUpdateCellDataCommandlet::Execute(bool bShouldErrorOnChanges, bool bShou
 	UEditorAssetSubsystem* EditorAssetSubsystem = GEditor->GetEditorSubsystem<UEditorAssetSubsystem>();
 	TArray<FString> CommitPaths;
 	int32 ReturnCode = 0;
-	
+
 	// Process Cell Assets
 	for (auto AssetData : CellAssetData)
 	{
@@ -48,17 +48,17 @@ int32 UNUpdateCellDataCommandlet::Execute(bool bShouldErrorOnChanges, bool bShou
 			UE_LOG(LogNexusWorldAssemblyEditor, Error, TEXT("NCell(%s) @ %s is invalid."),* AssetData.AssetName.ToString(),  *AssetData.GetObjectPathString());
 			continue;
 		}
-		
+
 		UObject* LoadedAsset = EditorAssetSubsystem->LoadAsset(AssetData.GetObjectPathString());
 		if (IsValid(LoadedAsset))
 		{
 			UNCell* Cell = Cast<UNCell>(LoadedAsset);
-		
+
 			if (Cell == nullptr) continue;
-			
+
 			int32 PreviousVersion = Cell->GetVersion();
 			FString WorldPath = Cell->World.GetLongPackageName();
-			
+
 			if (FEditorFileUtils::LoadMap(WorldPath))
 			{
 				FNWorldAssemblyEditorUtils::SaveCell(FNEditorUtils::GetCurrentWorld());
@@ -66,7 +66,7 @@ int32 UNUpdateCellDataCommandlet::Execute(bool bShouldErrorOnChanges, bool bShou
 				{
 					FString FullPath = FNEditorUtils::GetAssetPathOnDisk(Cell);
 					CommitPaths.Add(FullPath);
-					
+
 					if (bShouldErrorOnChanges)
 					{
 						UE_LOG(LogNexusWorldAssemblyEditor, Error, TEXT("NCell(%s) is not up-to-date @ %s"),*Cell->GetName(), *FullPath);
@@ -86,29 +86,29 @@ int32 UNUpdateCellDataCommandlet::Execute(bool bShouldErrorOnChanges, bool bShou
 			LoadedAsset->MarkAsGarbage();
 		}
 	}
-	
+
 	// Should we use UE's VCS settings to commit changes (CI/CD)
 	if (bShouldCommitChanges && CommitPaths.Num() > 0)
 	{
 		ISourceControlModule& SourceControlModule = ISourceControlModule::Get();
-    
+
 		if (!SourceControlModule.IsEnabled())
 		{
 			UE_LOG(LogNexusWorldAssemblyEditor, Error, TEXT("Source control is not enabled in this project, cannot commit changes."));
 			return 1;
 		}
-		
+
 		ISourceControlProvider& SourceControlProvider = SourceControlModule.GetProvider();
 		SourceControlProvider.Init();
 		TSharedRef<FCheckIn, ESPMode::ThreadSafe> CheckInOperation = ISourceControlOperation::Create<FCheckIn>();
-		
+
 		FText ChangelistDescription = FText::FromString(FString::Printf(TEXT("#NEXUS #AUTOMATION UNUpdateCellDataCommandlet: Updating %i Cells"), CommitPaths.Num()));
 		CheckInOperation->SetDescription(ChangelistDescription);
 
 		UE_LOG(LogNexusWorldAssemblyEditor, Log, TEXT("Submitting %d file(s) to version control..."), CommitPaths.Num());
-		
+
 		ECommandResult::Type Result = SourceControlProvider.Execute(CheckInOperation, CommitPaths, EConcurrency::Synchronous);
-		
+
 		if (Result == ECommandResult::Succeeded)
 		{
 			UE_LOG(LogNexusWorldAssemblyEditor, Log, TEXT("Successfully submitted changes to version control!"));
@@ -119,11 +119,11 @@ int32 UNUpdateCellDataCommandlet::Execute(bool bShouldErrorOnChanges, bool bShou
 			UE_LOG(LogNexusWorldAssemblyEditor, Warning, TEXT("Source control submission was cancelled."));
 			return 1;
 		}
-    
+
 		UE_LOG(LogNexusWorldAssemblyEditor, Error, TEXT("Failed to submit changes to version control. Check log for details."));
 		return 1;
 	}
-	
+
 	return ReturnCode;
 }
 

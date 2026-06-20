@@ -12,7 +12,7 @@
 // ReSharper disable once CppUE4CodingStandardNamingViolationWarning
 class FNDynamicRefsModule final : public IModuleInterface
 {
-public:	
+public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 	N_MODULE_BASE(FNDynamicRefsModule, "NexusDynamicRefs")

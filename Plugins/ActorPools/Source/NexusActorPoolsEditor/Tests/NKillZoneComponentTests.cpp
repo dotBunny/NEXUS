@@ -343,7 +343,7 @@ N_TEST_MEDIUM(UNKillZoneComponentTests_OnOverlapBegin_UnknownBehaviorApplyFellOu
 
 		RootedActor->AddToRoot();
 		UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
-		
+
 		AddExpectedMessage(TEXT("UNKillZoneComponent unable to apply FellOutOfWorld to rooted unknown AActor"), ELogVerbosity::Warning);
 		KillZone->OnOverlapBegin(KillZone, RootedActor, nullptr, 0, false, FHitResult());
 		CHECK_EQUALS("A pool should not be made for the unknown rooted actor.", System->GetAllPools().Num(), 0)

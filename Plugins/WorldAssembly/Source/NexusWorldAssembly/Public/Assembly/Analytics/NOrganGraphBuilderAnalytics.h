@@ -66,13 +66,13 @@ struct FNOrganGraphBuilderAnalytics
 
 	/** Candidate cell nodes rejected because they collided with another organ's existing nodes. */
 	FNIterationCounter DiscardExistingNodeWorldCollidingCellNode;
-	
+
 	/** Candidate cell nodes rejected because the finisher constraint required a finisher cell and this candidate was not one. */
 	FNIterationCounter DiscardDueToNonFinisherConstraint;
 
 	/** Number of graph branches closed off by placing a finisher cell. */
 	FNIterationCounter CappedWithFinisher;
-	
+
 	TMap<int32, TArray<FString>> IterationMessages = {
 		{ 0, TArray<FString>() }
 	};
@@ -83,8 +83,8 @@ struct FNOrganGraphBuilderAnalytics
 		Iterations++;
 		IterationsIndex++;
 		IterationMessages.Add(IterationsIndex, TArray<FString>());
-		
-		
+
+
 		AddNullNodes.NextIteration();
 		AddCellNodes.NextIteration();
 

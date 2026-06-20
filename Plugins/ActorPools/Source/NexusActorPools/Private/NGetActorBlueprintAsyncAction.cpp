@@ -64,7 +64,7 @@ void UNGetActorBlueprintAsyncAction::OnLoaded()
 		SetReadyToDestroy();
 		return;
 	}
-	
+
 	UClass* ActorLoaded = ActorClass.Get();
 	if (ActorLoaded == nullptr)
 	{
@@ -83,7 +83,7 @@ void UNGetActorBlueprintAsyncAction::OnLoaded()
 		OnHasPool(ActorPoolSubsystem->GetActorPool(ActorLoaded));
 		return;
 	}
-	
+
 	// Setup callback for when pool is added.
 	OnCreatedPoolHandle = ActorPoolSubsystem->OnActorPoolAdded.AddUObject(this, &UNGetActorBlueprintAsyncAction::OnHasPool);
 	ActorPoolSubsystem->CreateActorPool(ActorLoaded, ActorPoolSubsystem->GetDefaultSettings(ActorLoaded));
@@ -93,7 +93,7 @@ void UNGetActorBlueprintAsyncAction::OnHasPool(FNActorPool* ActorPool)
 {
 	// Not for me!
 	if (ActorPool == nullptr || ActorPool->GetTemplate() != ActorClass.Get()) return;
-	
+
 	// Unregister callback
 	if (OnCreatedPoolHandle.IsValid())
 	{
@@ -106,7 +106,7 @@ void UNGetActorBlueprintAsyncAction::OnHasPool(FNActorPool* ActorPool)
 		}
 		OnCreatedPoolHandle.Reset();
 	}
-	
+
 	AActor* SpawnedActor = nullptr;
 	if (const TSubclassOf<AActor> Class = ActorClass.Get(); Class && WorldContext.IsValid() && ActorPool != nullptr)
 	{

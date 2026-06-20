@@ -11,7 +11,7 @@
 
 ANCollisionVisualizerActor::ANCollisionVisualizerActor(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	// Setting the USceneComponents or AActor to bIsEditorOnlyActor will only cause warnings to throw in the editor when 
+	// Setting the USceneComponents or AActor to bIsEditorOnlyActor will only cause warnings to throw in the editor when
 	// existing simulation / play mode.
 
 	// Tick everywhere!
@@ -19,17 +19,17 @@ ANCollisionVisualizerActor::ANCollisionVisualizerActor(const FObjectInitializer&
 	PrimaryActorTick.bStartWithTickEnabled = true;
 	AActor::SetActorTickEnabled(true);
 	SetTickableWhenPaused(true);
-	
+
 	// Extra setup for Actor
 	bActorSeamlessTraveled = true;
 	SetCanBeDamaged(false);
 	SetActorEnableCollision(false);
-		
+
 	// Setup Start
 	StartPointComponent = CreateDefaultSubobject<UNCollisionVisualizerSceneComponent>(TEXT("Start Point"));
 	StartPointComponent->TransformUpdated.AddUObject(this, &ANCollisionVisualizerActor::OnTransformChanged);
 	RootComponent = StartPointComponent;
-		
+
 	// Setup End
 	EndPointComponent = CreateDefaultSubobject<UNCollisionVisualizerSceneComponent>(TEXT("End Point"));
 	EndPointComponent->bIsEnd = true;
@@ -52,14 +52,14 @@ void ANCollisionVisualizerActor::Tick(float DeltaTime)
 		{
 			return;
 		}
-		
+
 		// #MAYBE This could be a bug, but we could add !World->HasBegunPlay()
 		if (World->WorldType == EWorldType::Editor && !bTickInEditor)
 		{
 			return;
 		}
 	}
-	
+
 	if (Widget != nullptr)
 	{
 		Widget->OnWorldTick(this);
@@ -73,7 +73,7 @@ void ANCollisionVisualizerActor::BeginDestroy()
 	{
 		Widget->QueryActor = nullptr;
 	}
-	
+
 	Super::BeginDestroy();
 }
 

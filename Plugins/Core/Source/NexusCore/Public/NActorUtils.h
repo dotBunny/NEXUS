@@ -36,7 +36,7 @@ struct NEXUSCORE_API FNWorldActorFilterSettings
  * The FNActorUtils class provides static utility functions for common Actor-related
  * operations in Unreal Engine. These functions are designed to simplify working
  * with Actor instances, particularly focusing on component access and manipulation.
- * Unlike UNActorLibrary, these utilities are only accessible from C++ code and not 
+ * Unlike UNActorLibrary, these utilities are only accessible from C++ code and not
  * exposed to Blueprints.
  */
 class NEXUSCORE_API FNActorUtils

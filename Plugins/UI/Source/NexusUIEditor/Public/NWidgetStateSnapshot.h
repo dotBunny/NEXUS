@@ -151,7 +151,7 @@ struct FNWidgetStateSnapshot
 	FNWidgetState& GetWidgetState(const FName& Identifier)
 	{
 		const int32 WorkingIndex = GetIdentifierIndex(Identifier);
-		
+
 		// Handle bad index / state / runtime
 		if (WorkingIndex == INDEX_NONE)
 		{

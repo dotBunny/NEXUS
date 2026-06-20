@@ -8,7 +8,7 @@
 FText UAssetDefinition_NTissue::GetAssetDisplayName() const
 {
 	static const FText DisplayName = NSLOCTEXT("NexusWorldAssemblyEditor", "AssetTypeActions_NTissue", "NTissue");
-	return DisplayName; 
+	return DisplayName;
 }
 
 TConstArrayView<FAssetCategoryPath> UAssetDefinition_NTissue::GetAssetCategories() const

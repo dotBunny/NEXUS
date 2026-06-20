@@ -61,12 +61,12 @@ void UNTextRenderComponent::SetFromName(const FName& NewValue)
 	if (FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
 	{
 		FString NewString = NewValue.ToString();
-		
+
 		if (CachedValue.Equals(NewString))
 		{
 			return;
 		}
-		
+
 		CachedValue = NewString;
 		MARK_PROPERTY_DIRTY_FROM_NAME(UNTextRenderComponent, CachedValue, this);
 

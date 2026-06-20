@@ -29,7 +29,7 @@ public:
 	};
 	virtual const TCHAR* GetDebugName() const override { return TEXT("FNEditorInputProcessor"); }
 	//End IInputProcessor
-	
+
 	bool IsMouseEventLastSyntheticEvent(const FPointerEvent& MouseEvent);
 
 	/**
@@ -47,7 +47,7 @@ public:
 	/**
 	 * Is either shift-key pressed?
 	 * @return true/false either key is pressed on the keyboard.
-	 */	
+	 */
 	bool IsShiftDown() const;
 
 	/**
@@ -59,43 +59,43 @@ public:
 	/**
 	 * Is the right control-key pressed?
 	 * @return true/false the key is pressed on the keyboard.
-	 */	
+	 */
 	bool IsRightControlDown() const;
 
 	/**
 	 * Is either shift-key pressed?
 	 * @return true/false either key is pressed on the keyboard.
-	 */	
+	 */
 	bool IsControlDown() const;
 
 	/**
 	 * Is the space bar pressed?
 	 * @return true/false the key is pressed on the keyboard.
-	 */		
+	 */
 	bool IsSpaceBarDown() const;
 
 	/**
 	 * Is the left mouse-button pressed?
 	 * @return true/false the mouse-button is pressed.
-	 */	
+	 */
 	bool IsLeftMouseButtonDown() const;
 
 	/**
 	 * Is the right mouse-button pressed?
 	 * @return true/false the mouse-button is pressed.
-	 */		
+	 */
 	bool IsRightMouseButtonDown() const;
 
 	/**
 	 * Is the middle mouse-button pressed?
 	 * @return true/false the mouse-button is pressed.
-	 */	
+	 */
 	bool IsMiddleMouseButtonDown() const;
 
 	/**
 	 * Is any mouse-button pressed?
 	 * @return true/false any of the three mouse-buttons are pressed.
-	 */	
+	 */
 	bool IsAnyMouseButtonDown() const;
 
 	/** Cached UNToolingEditorUserSettings::bGraphNavigationSpaceToPan, pushed here on settings change. */

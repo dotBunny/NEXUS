@@ -60,11 +60,11 @@ bool FNWorldAssemblyEditorUndo::MatchesContext(const FTransactionContext& InCont
 		if (const UActorComponent* Component = Cast<UActorComponent>(Pair.Key);
 			Component != nullptr)
 		{
-			
+
 			if (FNWorldAssemblyEditorUtils::EffectsGeneratedData(Component)) return true;
 			if (FNWorldAssemblyEditorUtils::EffectsGeneratedData(Component->GetOwner())) return true;
 		}
 	}
-	
+
 	return false;
 }

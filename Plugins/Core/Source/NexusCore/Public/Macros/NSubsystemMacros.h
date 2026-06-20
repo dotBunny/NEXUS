@@ -141,5 +141,5 @@
 				} \
 			} \
 			return true; \
-		}		
+		}
 #endif // WITH_EDITOR

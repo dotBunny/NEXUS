@@ -34,13 +34,13 @@ public:
 		const float denom = dot00 * dot11 - dot01 * dot01;
 		if (FMath::Abs(denom) < SMALL_NUMBER) return false;
 		const float invDenom = 1.0f / denom;
-		
+
 		const float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
 		const float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
 		return (u >= 0.0f) && (v >= 0.0f) && (u + v <= 1.0f);
 	}
-	
+
 	/**
 	 * Triangle-triangle intersection test using the full Möller 1997 algorithm.
 	 *

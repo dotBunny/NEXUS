@@ -19,13 +19,13 @@ class FNToolingEditorModule final : public IModuleInterface
 public:
 	/** Invoked when assembling the multiplayer test command line; listeners return a parameter fragment to append. */
 	FMultiplayerTestParametersDelegate OnMultiplayerTestParameters;
-	
+
 	/** Broadcast after a multiplayer test session has successfully started. */
 	FSimpleMulticastDelegate OnMultiplayerTestStarted;
 
 	/** Broadcast after a multiplayer test session has ended (either user-requested or due to process exit). */
 	FSimpleMulticastDelegate OnMultiplayerTestEnded;
-	
+
 	//~IModuleInterface
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;

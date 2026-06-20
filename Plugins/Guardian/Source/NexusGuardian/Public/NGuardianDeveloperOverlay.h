@@ -20,12 +20,12 @@ class NEXUSGUARDIAN_API UNGuardianDeveloperOverlay : public UNDeveloperOverlay
 	GENERATED_BODY()
 
 public:
-	
+
 	/** Subscribe to the Guardian subsystem hosted by World so its counters feed this overlay. */
 	virtual void BindWorld(UWorld* World) override;
 	/** Drop the subscription to the Guardian subsystem hosted by World. */
 	virtual void UnbindWorld(const UWorld* World) override;
-	
+
 protected:
 	//~UUserWidget
 	virtual void NativeConstruct() override;

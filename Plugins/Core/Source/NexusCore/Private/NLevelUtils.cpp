@@ -53,24 +53,24 @@ void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray
 {
 	// Ensure we have a valid level
 	if (!IsValid(InLevel)) return;
-	
+
 	const int32 NumActors = InLevel->Actors.Num();
-	
-#if WITH_EDITOR			
+
+#if WITH_EDITOR
 	FScopedSlowTask BoundsTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusCore", "Task_DetermineLevelBounds", "Determine Level Bounds"));
 	BoundsTask.MakeDialog(false);
-#endif // WITH_EDITOR	
-	
+#endif // WITH_EDITOR
+
 	// Initialize our empty box
 	OutBounds = FBox(ForceInit);
-	
+
 	for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
 	{
 		const AActor* Actor = InLevel->Actors[ActorIndex];
-#if WITH_EDITOR			
+#if WITH_EDITOR
 		BoundsTask.EnterProgressFrame(1);
 #endif // WITH_EDITOR
-		
+
 		// We do not want to have any bad actors at play
 		if (!IsValid(Actor))
 		{
@@ -82,31 +82,31 @@ void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray
 		{
 			continue;
 		}
-		
+
 		if (Actor && Actor->IsLevelBoundsRelevant())
 		{
-			
+
 			// Ignore Tags
 			if (FNArrayUtils::ContainsAny(Actor->Tags, ActorIgnoreTags))
 			{
 				OutIgnoredActors.Add(Actor);
 				continue;
 			}
-			
+
 			// Don't include transient actors
 			if (!bIncludeTransientActors && Actor->HasAnyFlags(RF_Transient))
 			{
 				OutIgnoredActors.Add(Actor);
 				continue;
 			}
-			
+
 			// Check Editor Only
 			if (Actor->IsEditorOnly() && !bIncludeEditorOnly)
 			{
 				OutIgnoredActors.Add(Actor);
 				continue;
 			}
-				
+
 			const FBox ActorBox = Actor->GetComponentsBoundingBox(bIncludeNonColliding);
 			if (ActorBox.IsValid)
 			{

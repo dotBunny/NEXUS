@@ -7,7 +7,7 @@
 
 #include "Developer/NTestScopeTimer.h"
 
-// We're going to include our 
+// We're going to include our
 #include "Developer/TestLatentCommands/NTestLatentCommand.h"
 #include "Developer/TestLatentCommands/NTestLatentCommand_CleanupWorld.h"
 #include "Developer/TestLatentCommands/NTestLatentCommand_CreateWorld.h"
@@ -171,6 +171,6 @@ namespace NEXUS::Testing::LatentCommands
 
 #define N_TESTS_PERF_FINISH_LATENT_TEST_WORLD \
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_CleanupWorld) \
-	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_PostPerformanceTest) 
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_PostPerformanceTest)
 
 

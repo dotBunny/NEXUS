@@ -17,7 +17,7 @@ UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Game Layer Library")
 class UNGameLayerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-	
+
 public:
 	/**
 	 * Changes a layer's visibility from the GameLayerManager.

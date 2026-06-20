@@ -83,13 +83,13 @@ void UNToolingEditorUserSettings::ApplySpaceToPan() const
 FString UNToolingEditorUserSettings::GetMultiplayerTestClientArguments() const
 {
 	FString ClientArguments = TEXT("-") + NEXUS::Tooling::MultiplayerTest::Argument;
-		
+
 	if (bClientGenerateNetworkProfile)
 	{
 		// ReSharper disable once StringLiteralTypo
 		ClientArguments.Append(" networkprofiler=true");
 	}
-		
+
 	if (bClientDisableSound)
 	{
 		// ReSharper disable once StringLiteralTypo
@@ -103,49 +103,49 @@ FString UNToolingEditorUserSettings::GetMultiplayerTestClientArguments() const
 	{
 		ClientArguments.Append(" -PktLagMin=0");
 	}
-		
+
 	if (ClientSimulateLagMaximum > 0)
 	{
 		ClientArguments.Append(FString::Printf(TEXT(" -PktLagMax=%i"), FMath::FloorToInt(ClientSimulateLagMaximum * 0.5f)));
 	}
-		
+
 	if (ClientSimulatePacketLoss > 0)
 	{
 		ClientArguments.Append(FString::Printf(TEXT(" -PktLoss=%i"), ClientSimulatePacketLoss));
 	}
-		
+
 	if (ClientSimulatePacketDuplication > 0)
 	{
 		ClientArguments.Append(FString::Printf(TEXT(" -PktDup=%i"), ClientSimulatePacketDuplication));
 	}
-	
+
 	if (ClientSimulatePacketJitter > 0)
 	{
 		ClientArguments.Append(FString::Printf(TEXT(" -PktJitter=%i"), ClientSimulatePacketJitter));
 	}
-		
+
 	if (bClientSimulateReceiveOutOfOrderPackets)
 	{
 		ClientArguments.Append(" -PktOrder=1");
 	}
-		
+
 	ClientArguments.Append(FString::Printf(TEXT(" %s"), *ClientParameters.TrimStartAndEnd()));
-		
+
 	return ClientArguments;
 }
 
 FString UNToolingEditorUserSettings::GetMultiplayerTestServerArguments() const
 {
 	FString ServerAdditionalArguments = TEXT("");
-		
+
 	if (bServerGenerateNetworkProfile)
 	{
 		// ReSharper disable once StringLiteralTypo
 		ServerAdditionalArguments.Append(" networkprofiler=true");
 	}
-		
+
 	ServerAdditionalArguments.Append(FString::Printf(TEXT(" %s"), *ServerParameters.TrimStartAndEnd()));
-		
+
 	return ServerAdditionalArguments;
 }
 
@@ -153,16 +153,16 @@ void UNToolingEditorUserSettings::ApplySettings(FRequestPlaySessionParams& Param
 {
 	// Set window sized
 	Params.EditorPlaySettings->SetClientWindowSize(ClientWindowSize);
-		
+
 	// Build out SERVER parameters
 	Params.EditorPlaySettings->AdditionalServerLaunchParameters = GetMultiplayerTestServerArguments();
-		
+
 	// Build out CLIENT parameters
 	Params.EditorPlaySettings->AdditionalLaunchParameters = GetMultiplayerTestClientArguments();
-		
+
 	// Set the number of clients
 	Params.EditorPlaySettings->SetPlayNumberOfClients(ClientCount);
-		
+
 	// Setup server mode
 	if (bUseDedicatedServer || ServerParameters.Len() > 0)
 	{

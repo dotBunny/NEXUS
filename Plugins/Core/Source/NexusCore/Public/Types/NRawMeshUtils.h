@@ -51,9 +51,9 @@ public:
 	static bool DoesIntersect(
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
-	
+
 	static bool DoesIntersect(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
-	
+
 	static bool DoesIntersect(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh);
 
 	/**
@@ -96,14 +96,14 @@ public:
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation,
 		float EarlyExitDepth = MAX_flt);
-	
+
 	static float GetIntersectDepth(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation, float EarlyExitDepth = MAX_flt);
-	
+
 	static float GetIntersectDepth(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, float EarlyExitDepth = MAX_flt);
-	
-	
+
+
 	static float GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation, const FVector& WorldPosition);
-	
+
 	static float GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& WorldPosition);
 
 

@@ -29,9 +29,9 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	const int32 StatusChannel = TaskGraphContextPtr->OpenStatusChannel(OrganContextPtr->GetName());
 
 	N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderStart)
-	N_ASSEMBLY_ANALYTICS_FIVE_PARAM(OrganGraphBuilder_Init, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, OrganContextPtr->GetName(), 
+	N_ASSEMBLY_ANALYTICS_FIVE_PARAM(OrganGraphBuilder_Init, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, OrganContextPtr->GetName(),
 		OrganContextPtr->MinimumCellCount, OrganContextPtr->MaximumCellCount, OrganContextPtr->MaximumRetryCount)
-	
+
 	// The context was not validated during creation, so we cannot process it
 	if (!OrganContextPtr->IsValid())
 	{
@@ -43,7 +43,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
 		return;
 	}
-	
+
 	// Cooperative cancellation — the operation may have been cancelled before this organ's build started.
 	if (TaskGraphContextPtr->IsCancelled())
 	{
@@ -58,19 +58,19 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 
 	// Create our deterministic random for the task which will get passed byref to sub-methods
 	FNMersenneTwister Random(OrganContextPtr->GetSeed());
-	
+
 	// World-collision hulls are baked (and face-plane cached) by FNProcessVirtualWorldTask and immutable after, so they
 	// are read straight from the shared context instead of copied per organ (FNRawMesh copies drop the face-plane cache).
 	// The node hulls grow between passes, so snapshot how many exist now; entries below the count never mutate, and
 	// FNProcessPassTask's appends never overlap a builder thanks to the pass dependency chain.
 	ExistingNodeCollisionMeshCount = WorldContextPtr->NodeCollisionMeshes.Num();
-	
+
 	// Capture our context tags, base that we cant avoid, and our working copy
 	OrganContextPtr->BaseContextTags = WorldContextPtr->ContextTags;
 	OrganContextPtr->BaseTagCounter = WorldContextPtr->TagCounter;
 	OrganContextPtr->TagCounter = OrganContextPtr->BaseTagCounter;
 	OrganContextPtr->ContextTags = OrganContextPtr->BaseContextTags;
-	
+
 	while (!OrganContextPtr->IsSuccessful())
 	{
 		// Cooperative cancellation — stop retrying and fall through to the unsuccessful teardown below.
@@ -80,7 +80,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		}
 
 		TaskGraphContextPtr->SetChannelStatus(StatusChannel, FString::Printf(TEXT("Iteration %i/%i"), OrganContextPtr->GetRetryCount(), OrganContextPtr->MaximumRetryCount));
-		
+
 		// Coarse attempt-based progress for the per-organ channel; success drives it to 100% below.
 		const int32 MaxRetries = FMath::Max(OrganContextPtr->MaximumRetryCount, 1);
 		TaskGraphContextPtr->SetChannelStatus(StatusChannel,
@@ -89,7 +89,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 
 		// Find the bone and build our starting cell
 		StartGraph(Random);
-	
+
 		// Check for start placement and that it was a node too
 		if (OrganContextPtr->CellGraph == nullptr)
 		{
@@ -126,7 +126,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
 			return;
 		}
-		
+
 		const int32 MinCellCount = FMath::Max(OrganContextPtr->MinimumCellCount, 1);
 		const int32 MaxCellCount = OrganContextPtr->MaximumCellCount;
 		// MaximumCellCount <= 0 means "no upper limit": BFS expands unbounded and the target degrades to a floor
@@ -217,13 +217,13 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetResult, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, true, OrganContextPtr->CellGraph->GetCellNodeCount())
 		}
 	}
-	
+
 	// Clean up graph of pointers that can't be kept
 	if (OrganContextPtr->CellGraph != nullptr)
 	{
 		OrganContextPtr->CellGraph->CleanupBuilderReferences();
 	}
-	
+
 	// Only hand off graph and the context tag collection if it's good
 	// TODO: Would we do something here if we wanted required to apply ACROSS organs?
 	if (OrganContextPtr->IsSuccessful())
@@ -235,7 +235,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 
 		// Report findings for later
 		TaskGraphContextPtr->SetOrganCellCount(OrganContextPtr->GetIdentifier(), OrganContextPtr->CellGraph->GetCellNodeCount());
-		
+
 		// Hand off only this organ's contribution. The working TagCounter was seeded with BaseTagCounter so
 		// constraints could gate against absolute counts, but the base already lives in the world/task-graph
 		// counter the pass Combines into; differencing it out leaves just this organ's delta to avoid
@@ -271,7 +271,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 {
 	// TODO: We haven't resolved yet how we might join multiple generation points yet so we are just going to use the first bone.
 	FNVirtualBoneData& BoneData = OrganContextPtr->BoneInputData[0];
-	
+
 	FNCellInputDataFilter PreFilter;
 	PreFilter.NodeDepth = 0;
 	PreFilter.SocketSize = BoneData.SocketSize;
@@ -282,15 +282,15 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 	FNWeightedIntegerArray WeightedStartIndices;
 	TMap<int32, TArray<int32>> ValidJunctions;
 	OrganContextPtr->FilterCellInputData(PreFilter, WeightedStartIndices, ValidJunctions);
-	
+
 	// Unable to generate
 	if (WeightedStartIndices.WeightedCount() == 0)
 	{
 		UE_LOG(LogNexusWorldAssembly, Error, TEXT("Unable to place starting cell, due to no valid cells available."));
 		return;
 	}
-	
-	
+
+
 	// Our starting placement has to happen
 	do
 	{
@@ -343,8 +343,8 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 			NodeParams.WorldPosition = CellWorldPosition;
 			NodeParams.WorldRotation = CellWorldRotation;
 			FNAssemblyGraphCellNode* StartNode = FNAssemblyGraphNodeFactory::CreateCellNode(NodeParams, StartCellInputData, OrganContextPtr->VoxelSize);
-			
-			
+
+
 			if (DoesWorldCollide(StartNode))
 			{
 				delete StartNode;
@@ -511,13 +511,13 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		}
 	}
 	const int32 OpenJunctionCount = OpenJunctions.Num();
-	
+
 	TArray<FNAssemblyGraphNode*> NewNodes;
-	
+
 	FNWeightedIntegerArray CellInputWeightedIndices;
 	TMap<int32, TArray<int32>> ValidJunctions;
-	
-	
+
+
 	for (int32 i = 0; i < OpenJunctionCount; ++i)
 	{
 		if (OrganContextPtr->MaximumCellCount > 0 &&
@@ -532,7 +532,7 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 
 		// We're going to need the desired target rotation so that when we generate our possible list we account for the rotational allowance
 		FQuat SourceJunctionWorldQuat = SourceJunctionValue->WorldRotation.Quaternion();
-		
+
 		// Build our possible list of cells (and cache out the valid junctions)
 		FNCellInputDataFilter NodeFilter;
 		NodeFilter.NodeDepth = SourceCellNode->GetNodeDepth();
@@ -547,45 +547,45 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		NodeFilter.bIsEndNode = bIsEndNode;
 
 		OrganContextPtr->FilterCellInputData(NodeFilter, CellInputWeightedIndices, ValidJunctions);
-		
+
 		// We don't have any cell input data able OR junctions to fill this spot, so we have to null it out. We will add a NullNode to the graph and connect it up.
 		if (CellInputWeightedIndices.WeightedCount() == 0 || ValidJunctions.IsEmpty())
 		{
 			// TODO: We will later go back and fill this with something.
 			FNAssemblyGraphNullNode* NullNode = FNAssemblyGraphNodeFactory::CreateNullNode(SourceJunctionValue->WorldLocation, SourceJunctionValue->WorldRotation);
-			
+
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_AddNullNode)
-			
+
 			OrganContextPtr->CellGraph->RegisterNode(NullNode);
 			SourceCellNode->LinkJunction(SourceJunctionKey, NullNode);
 			NullNode->Link(SourceCellNode);
 			SourceCellNode->Connect(NullNode);
 			continue;
 		}
-		
+
 		// Pick our cell to use to spawn
 		const int32 CellInputIndex = CellInputWeightedIndices.TwistedValue(Random);
 		FNVirtualCellData* CellInputData = &OrganContextPtr->CellInputData[CellInputIndex];
-		
+
 		// Pick the junction of the cell we are going to use
 		TArray<int32>& ValidJunctionIndices = ValidJunctions[CellInputIndex];
 		if (ValidJunctionIndices.IsEmpty())
 		{
 			UE_LOG(LogNexusWorldAssembly, Error, TEXT("Cell input index produced no valid junctions. Adding null node?"));
-			
+
 			// TODO: We will later go back and fill this with something.
 			FNAssemblyGraphNullNode* NullNode = FNAssemblyGraphNodeFactory::CreateNullNode(SourceJunctionValue->WorldLocation, SourceJunctionValue->WorldRotation);
-			
+
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_AddNullNode)
-			
+
 			OrganContextPtr->CellGraph->RegisterNode(NullNode);
 			SourceCellNode->LinkJunction(SourceJunctionKey, NullNode);
 			NullNode->Link(SourceCellNode);
 			SourceCellNode->Connect(NullNode);
 			continue;
-			
+
 		}
-		
+
 		// Resolve geometry, run spatial validation, and link the chosen candidate. Shared with the finisher-minimum
 		// guarantee pass so both placement paths apply identical rotation/bounds/collision rules.
 		FNAssemblyGraphCellNode* TargetCellNode = TryAttachCellToJunction(
@@ -734,16 +734,16 @@ void FNOrganGraphBuilderTask::CapBranchesWithFinishers(FNMersenneTwister& Random
 #endif // !UE_BUILD_SHIPPING
 	for (int32 j = 0; j < OpenNodes.Num(); j++)
 	{
-#if !UE_BUILD_SHIPPING		
+#if !UE_BUILD_SHIPPING
 		CapNum += ProcessNode(Random, OpenNodes[j], true).Num();
 #else
 		ProcessNode(Random, OpenNodes[j], true);
-#endif // !UE_BUILD_SHIPPING		
+#endif // !UE_BUILD_SHIPPING
 	}
 #if !UE_BUILD_SHIPPING
 	N_ASSEMBLY_ANALYTICS_TWO_PARAM(OrganGraphBuilder_CappedWithFinisher, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, CapNum);
 #endif // !UE_BUILD_SHIPPING
-	
+
 }
 
 void FNOrganGraphBuilderTask::EnsureFinisherMinimums(FNMersenneTwister& Random) const
@@ -870,7 +870,7 @@ void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) 
 			delete NullNode;
 		}
 	}
-	
+
 	// Reverse unique-tag tracking so the cell template becomes eligible again
 	FNVirtualCellData* InputData = CellNode->GetInputDataPtr();
 	if (InputData != nullptr && InputData->AssemblyTags.HasAnyExact(OrganContextPtr->CellInputDataSummary.GroupTags.UniqueTags))
@@ -921,7 +921,7 @@ void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) 
 			OrganContextPtr->ContextTags.RemoveTags(UncoveredContextTags);
 		}
 	}
-	
+
 	// Undo this cell's counter operations in reverse author order, mirroring the apply in ProcessCellNode.
 	// Valid only because operations are restricted to Add/Subtract, which are exact inverses; per-cell
 	// reversal of Multiply/Divide would not restore the prior value.

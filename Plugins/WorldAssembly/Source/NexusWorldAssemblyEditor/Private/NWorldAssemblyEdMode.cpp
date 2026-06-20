@@ -217,10 +217,10 @@ void FNWorldAssemblyEdMode::OnUndoRedo()
 void FNWorldAssemblyEdMode::CacheUserSettings()
 {
 	const UNWorldAssemblyEditorUserSettings* Settings = UNWorldAssemblyEditorUserSettings::Get();
-	
+
 	CachedCellHullColor = Settings->CellHullColor;
 	CachedCellBoundsColor = Settings->CellBoundsColor;
-	
+
 	CachedJunctionUnfilledColor = Settings->JunctionsUnfilledColor;
 	CachedJunctionValidColor = Settings->JunctionsValidColor;
 	CachedJunctionInvalidColor = Settings->JunctionsInvalidColor;
@@ -279,18 +279,18 @@ void FNWorldAssemblyEdMode::Enter()
 	CachedVoxelData = FNCellVoxelData();
 	CachedBoundsVertices.Empty();
 	RenderMode = ENWorldAssemblyEdModeRenderMode::All;
-	
+
 	CacheUserSettings();
-	
+
 	bCanTick = true;
 
 	// Create our temp organ generator to use with any selections
 	OrganGenerator = NewObject<UNAssemblyOperation>(GetTransientPackage(), NEXUS::WorldAssembly::Operations::EditorMode);
 	OrganGenerator->DisplayName = FText::FromName(NEXUS::WorldAssembly::Operations::EditorMode);
 	OrganGenerator->AddToRoot();
-	
+
 	OnLevelActorDeletedHandle = GEngine->OnLevelActorDeleted().AddStatic(&FNWorldAssemblyEdMode::OnActorDeleted);
-	
+
 	FEdMode::Enter();
 }
 
@@ -298,9 +298,9 @@ void FNWorldAssemblyEdMode::Exit()
 {
 	CellActor = nullptr;
 	bCanTick = false;
-	
+
 	GEngine->OnLevelActorDeleted().Remove(OnLevelActorDeletedHandle);
-	
+
 	// Destroy any visualizer kicking around
 	DestroyCollisionVisualizer();
 
@@ -310,7 +310,7 @@ void FNWorldAssemblyEdMode::Exit()
 		OrganGenerator->TearDownOperation();
 		OrganGenerator = nullptr;
 	}
-	
+
 	FEdMode::Exit();
 }
 
@@ -365,23 +365,23 @@ void FNWorldAssemblyEdMode::Tick(FEditorViewportClient* ViewportClient, float De
 			bAutoVoxelDisabled = (!RootComponent->Details.VoxelSettings.bCalculateOnSave && RootComponent->Details.VoxelSettings.bUseVoxelData);
 		}
 	}
-	
+
 	FEdMode::Tick(ViewportClient, DeltaTime);
 }
 
 void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI)
 {
 	bHasDirtyActors = false;
-	
+
 	// We don't have anything to do in play mode - maybe in the future.
-	if (FNEditorUtils::IsPlayInEditor() || 
+	if (FNEditorUtils::IsPlayInEditor() ||
 		RenderMode == ENWorldAssemblyEdModeRenderMode::None ||
 		RenderMode == ENWorldAssemblyEdModeRenderMode::LevelScreenshot)
 	{
 		FEdMode::Render(View, Viewport, PDI);
 		return;
 	}
-	
+
 	// Iterate all roots and draw their bounds
 	if (FNWorldAssemblyRegistry::HasRootComponents())
 	{
@@ -397,16 +397,16 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 				{
 					continue;
 				}
-				
+
 				// Notice ON Dirty
 				if (Actor->IsActorDirty())
 				{
 					bHasDirtyActors = true;
 				}
 			}
-			
+
 			// Draw debug information
-			RootComponent->DrawDebugPDI(PDI, static_cast<uint8>(GetCellVoxelMode()), GetCachedCellBoundsColor(), GetCachedCellHullColor()); 
+			RootComponent->DrawDebugPDI(PDI, static_cast<uint8>(GetCellVoxelMode()), GetCachedCellBoundsColor(), GetCachedCellHullColor());
 			// We can't use caching because we are drawing ALL of the possible roots
 		}
 	}
@@ -417,26 +417,26 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 		for (const auto JunctionComponent : FNWorldAssemblyRegistry::GetCellJunctionComponents())
 		{
 			if (JunctionComponent == nullptr) continue;
-			
+
 			// Runtime
 			if (JunctionComponent->LinkDetails.JunctionInstanceIdentifier != -1 && !JunctionComponent->LinkDetails.bConnected)
 			{
 				if (WorldAssemblyEditorUserSettings->bDebugWorldDrawUnfilledJunctions)
 				{
-					JunctionComponent->DrawDebugPDI(PDI, true, 
+					JunctionComponent->DrawDebugPDI(PDI, true,
 						WorldAssemblyEditorUserSettings->JunctionsUnfilledColor,
-						WorldAssemblyEditorUserSettings->JunctionsUnfilledColor, 
+						WorldAssemblyEditorUserSettings->JunctionsUnfilledColor,
 						WorldAssemblySettings);
 				}
 			}
 			else
 			{
-				JunctionComponent->DrawDebugPDI(PDI, true, 
+				JunctionComponent->DrawDebugPDI(PDI, true,
 					WorldAssemblyEditorUserSettings->JunctionsValidColor,
-					WorldAssemblyEditorUserSettings->JunctionsInvalidColor, 
+					WorldAssemblyEditorUserSettings->JunctionsInvalidColor,
 					WorldAssemblySettings);
 			}
-		}	
+		}
 	}
 
 	// Selection-specific drawing options
@@ -446,7 +446,7 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 		TArray<ANOrganVolume*> SelectedOrganVolumes = FNWorldAssemblyEditorUtils::GetSelectedOrganVolumes();
 
 		// Ensure we only process organ selection when it has changed.
-		if (const uint32 NewSelectedOrganHash = FNArrayUtils::GetPointersHash(SelectedOrganVolumes); 
+		if (const uint32 NewSelectedOrganHash = FNArrayUtils::GetPointersHash(SelectedOrganVolumes);
 			NewSelectedOrganHash != PreviousSelectedOrganHash)
 		{
 			OrganGenerator->Reset();
@@ -455,10 +455,10 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 				OrganGenerator->AddToContext(OrganVolume->GetOrganComponent());
 			}
 			OrganGenerator->LockContext(FNEditorUtils::GetCurrentWorld()); // We need the context locked to figure out the actual ordering
-			
+
 			PreviousSelectedOrganHash = NewSelectedOrganHash;
 		}
-		
+
 		if (OrganGenerator->IsLocked())
 		{
 			TArray<TArray<TObjectPtr<UNOrganComponent>>>& Order = OrganGenerator->GetGenerationOrder();
@@ -468,7 +468,7 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 				for (int32 p = 0; p < Order[i].Num(); p++)
 				{
 					Order[i][p]->DrawDebugPDI(PDI);
-					
+
 					FString Label = FString::Printf(TEXT(" %i:%i %s"), i, p, *Order[i][p]->GetDebugLabel());
 
 					FNPositionRotation LabelOrientation = Order[i][p]->GetDebugLabelPositionRotation();
@@ -484,22 +484,22 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 		OrganGenerator->Reset();
 		PreviousSelectedOrganHash = 0;
 	}
-	
+
 	FEdMode::Render(View, Viewport, PDI);
 }
 
 void FNWorldAssemblyEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FViewport* Viewport, const FSceneView* View, FCanvas* Canvas)
 {
 	// Messages disabled
-	if (!UNWorldAssemblyEditorUserSettings::Get()->bCellDisplayViewportMessages || FNEditorUtils::IsPlayInEditor() || 
+	if (!UNWorldAssemblyEditorUserSettings::Get()->bCellDisplayViewportMessages || FNEditorUtils::IsPlayInEditor() ||
 		RenderMode != ENWorldAssemblyEdModeRenderMode::All)
 	{
 		FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);
 		return;
 	}
-	
+
 	CanvasMessageBox.Clear();
-	
+
 	if (bHasDirtyActors)
 	{
 		CanvasMessageBox.AddSeverity(ENSeverity::Warning);
@@ -522,11 +522,11 @@ void FNWorldAssemblyEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FView
 	{
 		CanvasMessageBox.AddSmallLine(AutoVoxelMessage);
 	}
-	
+
 	if (CanvasMessageBox.HasContent())
 	{
 		FNCanvasUtils::DrawCanvasTextBox(&CanvasMessageBox, Canvas, FVector2D(10,10));
 	}
-	
+
 	FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);
 }

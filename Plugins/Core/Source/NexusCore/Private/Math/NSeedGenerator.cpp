@@ -66,7 +66,7 @@ bool FNSeedGenerator::IsValidHexSeed(const FString& InHexSeed)
 	// Sanitize
 	const FString ParsedSeed = SanitizeHexSeed(InHexSeed);
 	const int32 SeedLength = ParsedSeed.Len();
-	
+
 	if (SeedLength == 0)
 	{
 		return false;
@@ -91,7 +91,7 @@ uint64 FNSeedGenerator::RandomSeed()
 FString FNSeedGenerator::RandomFriendlySeed()
 {
 	FString ReturnSeed;
-	
+
 	TArray<uint8> Digits;
 	Digits.Reserve(23); // Max possible
 	uint64 TempSeed = RandomSeed();;
@@ -100,13 +100,13 @@ FString FNSeedGenerator::RandomFriendlySeed()
 		Digits.Insert(TempSeed % 10, 0);  // Insert at front to maintain order
 		TempSeed /= 10;
 	} while (TempSeed > 0);
-	
+
 	// Front pad digits
 	while (Digits.Num() < 20)
 	{
-		Digits.Insert(0, 0); 
+		Digits.Insert(0, 0);
 	}
-	
+
 	for (uint32 i = 0; i < 20; i++)
 	{
 		ReturnSeed.AppendChar(97 + Digits[i]);
@@ -135,7 +135,7 @@ FString FNSeedGenerator::SanitizeHexSeed(const FString& InHexSeed)
 	{
 		Builder = Builder.Mid(0, 16);
 	}
-	
+
 	if (Builder.Len() == 1)
 	{
 		Builder.InsertAt(0, "0");
@@ -244,7 +244,7 @@ FString FNSeedGenerator::HexFromSeed(const uint64 Seed)
 			FancySeed.AppendChar(':');
 		}
 	}
-	
+
 	if (FancySeed.Len() == 0)
 	{
 		return TEXT("0");

@@ -13,7 +13,7 @@ class UNOrganComponent;
  *
  * Holds topological relationships (intersecting/contained organs), the bones that fall inside
  * this organ, and retry budget for the graph-builder stage.
- * 
+ *
  * @remarks Unsafe to interact with off of the game-thread.
  */
 struct NEXUSWORLDASSEMBLY_API FNWorldOrganData
@@ -27,7 +27,7 @@ struct NEXUSWORLDASSEMBLY_API FNWorldOrganData
 	/** Organs whose bounds are entirely inside this one. */
 	TArray<TObjectPtr<UNOrganComponent>> ContainedComponents = TArray<TObjectPtr<UNOrganComponent>>();
 
-	/** Bones whose transforms fall inside this organ's volume. 
+	/** Bones whose transforms fall inside this organ's volume.
 	 * @note If NAssemblyOperationContext's TMap BoneData changes these pointers will dangle. */
 	TArray<FNWorldBoneData*> ContainedBones = TArray<FNWorldBoneData*>();
 
@@ -42,13 +42,13 @@ struct NEXUSWORLDASSEMBLY_API FNWorldOrganData
 
 	/** Maximum absolute degree deviation (+/-) from a cell's DirectionConstraint heading that still permits placement. */
 	float AssemblyDirectionTolerance = 15.f;
-	
+
 	/** World-space size of a single voxel, cached from UNWorldAssemblySettings for the graph builder. */
 	FVector VoxelSize = FVector(100.f, 100.f, 100.f);
 
 	/** Spatial bounds of the SourceComponent unless bUnbounded. */
 	FBoxSphereBounds Bounds;
-	
+
 	/** World origin of the SourceComponent's actor. */
 	FVector Origin;
 };

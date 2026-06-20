@@ -12,7 +12,7 @@ const FPlacementCategoryInfo* FNEditorDefaults::GetPlacementCategory()
 	const IPlacementModeModule& PlacementModeModule = IPlacementModeModule::Get();
 	const FName PlacementModeCategoryHandle = TEXT("NEXUS");
 
-	if (const FPlacementCategoryInfo* RegisteredInfo = 
+	if (const FPlacementCategoryInfo* RegisteredInfo =
 		PlacementModeModule.GetRegisteredPlacementCategory(PlacementModeCategoryHandle))
 	{
 		return RegisteredInfo;
@@ -20,7 +20,7 @@ const FPlacementCategoryInfo* FNEditorDefaults::GetPlacementCategory()
 
 	// Ensure we are initialized
 	FNEditorStyle::Initialize();
-	
+
 	FPlacementCategoryInfo Info(
 			NSLOCTEXT("NexusCoreEditor", "PlacementCategoryName", "NEXUS"),
 			FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon"),

@@ -34,7 +34,7 @@ public:
 		if (GEditor->GetSelectedActorCount() == 0) return false;
 		return true;
 	}
-	
+
 	/** Get the current editor map name. */
 	FORCEINLINE static FString GetCurrentMapName()
 	{
@@ -67,7 +67,7 @@ public:
 		const UWorld* PlayWorld = GEditor->PlayWorld;
 		return PlayWorld != nullptr && !PlayWorld->bDebugPauseExecution;
 	}
-	
+
 	/**
 	 * Is the editor controlled by a user?
 	 * @note Attempts to represent if it is safe to do things that need a fully initialized editor.
@@ -103,7 +103,7 @@ public:
 	 * @return A pointer to the newly created Blueprint asset.
 	 */
 	static UBlueprint* CreateBlueprint(const FString& InPath, const TSubclassOf<UObject>& InParentClass);
-	
+
 	/**
 	 * Returns the active editor viewport's client.
 	 * @return The viewport client cast to FEditorViewportClient.
@@ -154,7 +154,7 @@ public:
 	 * @return A de-duplicated list of asset path roots.
 	 */
 	static TArray<FString> GetSelectedContentBrowserPaths();
-	
+
 	/** Marks Config so it will not be bundled with staged/packaged builds (undoes AllowConfigFileForStaging). */
 	static void DisallowConfigFileFromStaging(const FString& Config);
 
@@ -200,12 +200,12 @@ public:
 
 	/** Deletes the contents of the project's Saved/Logs folder. */
 	static void CleanLogsFolder();
-	
+
 	/**
 	 * Resolves the absolute path to the package file backing Asset on disk.
 	 * @param Asset Asset whose owning package to locate; may be null.
 	 * @return The full, absolute path to the package file, or an empty string if Asset is null or no file exists.
 	 */
 	static FString GetAssetPathOnDisk(const UObject* Asset);
-	
+
 };

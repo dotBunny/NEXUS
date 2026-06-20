@@ -101,7 +101,7 @@
  *
  * @param Type        The settings class itself (used to infer template args for GetDefault/GetMutableDefault).
  * @param Container   String literal settings container name, most likely this is going to be "Project".
- * @param Category    String literal used as the category in the editor's Project Settings tree. 
+ * @param Category    String literal used as the category in the editor's Project Settings tree.
  * @param Title       String literal shown as the settings section title in the editor's Project Settings tree.
  * @param Description String literal shown as the section description / tooltip in the editor's Project Settings tree.
  */

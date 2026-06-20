@@ -79,7 +79,7 @@ public:
 	 * @return An array of ANCellLevelInstance pointers.
 	 */
 	static TArray<ANCellLevelInstance*> GetCellLevelInstancesInRange(const FVector& Location, double Range, bool bIsLevelLoaded = true, int32 OperationTicket = 0);
-	
+
 	/** @return true if any bone components are currently registered. */
 	static bool HasBoneComponents();
 	/** @return true if any cell root components are currently registered. */
@@ -97,13 +97,13 @@ public:
 	 * @param bIsLevelLoaded Consider only level instances whose underlying level has finished loading.
 	 */
 	static bool HasCellLevelInstances(int32 OperationTicket = 0, bool bIsLevelLoaded = true);
-	
+
 	/** Query whether every locator in the supplied set is currently registered. */
 	static bool HasCellLevelInstances(const TArray<FNCellLevelInstanceLocator>& LevelInstances, bool bIsLevelLoaded = true);
 
 	/** Returns an array of FNCellLevelInstanceLocator that have not been sync/registered yet. */
 	static TArray<FNCellLevelInstanceLocator> GetRemainingCellLevelInstancesToSync(const TArray<FNCellLevelInstanceLocator>& LevelInstances, bool bIsLevelLoaded = true);
-	
+
 	/** Query whether a specific (operation, spawn GUID) level instance is registered. */
 	static bool HasCellLevelInstance(int32 OperationTicket, FGuid LevelInstanceSpawnGuid, bool bIsLevelLoaded = true);
 
@@ -135,9 +135,9 @@ public:
 
 	/** @return All currently tracked operations. */
 	static TArray<UNAssemblyOperation*>& GetOperations() { return Operations; }
-	
-	/** 
-	 * Scrub any registry entries still associated with World that were not properly unregistered during teardown. 
+
+	/**
+	 * Scrub any registry entries still associated with World that were not properly unregistered during teardown.
 	 * Bound to FWorldDelegates::OnPostWorldCleanup. */
 	static void OnPostWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources);
 
@@ -155,7 +155,7 @@ private:
 	static TArray<UNCellJunctionComponent*> CellJunctions;
 	static TArray<UNOrganComponent*> Organs;
 	static TArray<UNAssemblyOperation*> Operations;
-	
+
 	/** Level instances keyed by operation ticket; ticket 0 denotes "any operation" in query helpers. */
 	static TMap<int32, TArray<ANCellLevelInstance*>> CellLevelInstances;
 };

@@ -30,7 +30,7 @@ public:
 	 */
 	static const FVector& GetVector(const ENDirection& Direction)
 	{
-		switch (Direction) 
+		switch (Direction)
 		{
 			using enum ENDirection;
 		case Up:
@@ -41,13 +41,13 @@ public:
 
 		case Forward:
 			return FVector::ForwardVector;
-		
+
 		case Backward:
 			return FVector::BackwardVector;
-		
+
 		case Right:
 			return FVector::RightVector;
-		
+
 		case Left:
 			return FVector::LeftVector;
 		}

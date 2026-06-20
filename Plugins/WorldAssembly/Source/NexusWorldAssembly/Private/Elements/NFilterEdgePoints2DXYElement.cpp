@@ -85,11 +85,11 @@ bool FNFilterEdgePoints2DXYElement::ExecuteInternal(FPCGContext* Context) const
                 OutsideData->GetMutablePoints().Add(Points[i]);
             }
         }
-        
+
         FPCGTaggedData& InsideOutput = Context->OutputData.TaggedData.Emplace_GetRef();
         InsideOutput.Data = InsideData;
         InsideOutput.Pin = PCGPinConstants::DefaultInFilterLabel;
-        
+
         FPCGTaggedData& OutsideOutput = Context->OutputData.TaggedData.Emplace_GetRef();
         OutsideOutput.Data = OutsideData;
         OutsideOutput.Pin = PCGPinConstants::DefaultOutFilterLabel;

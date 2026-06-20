@@ -37,12 +37,12 @@ namespace NEXUS::WorldAssembly::ConsoleCommands
 					UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to regenerate the world, as the world was NULL."));
 					return;
 				}
-				
+
 				if (FNMultiplayerUtils::HasWorldAuthority(World))
 				{
 					UNWorldAssemblySubsystem* System = UNWorldAssemblySubsystem::Get(World);
 					System->Clear();
-					
+
 					FNAssemblyOperationSettings Settings = FNAssemblyOperationSettings::GetDefaultSettings();
 					System->Generate(Settings);
 				}
@@ -64,7 +64,7 @@ namespace NEXUS::WorldAssembly::ConsoleCommands
 					UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to clear the world, as the world was NULL."));
 					return;
 				}
-				
+
 				if (FNMultiplayerUtils::HasWorldAuthority(World))
 				{
 					UNWorldAssemblySubsystem* System = UNWorldAssemblySubsystem::Get(World);
@@ -89,7 +89,7 @@ void UNWorldAssemblySubsystem::Generate(FNAssemblyOperationSettings& Settings)
 void UNWorldAssemblySubsystem::Clear()
 {
 	UWorld* World = GetWorld();
-	
+
 	for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
 	{
 		if (KnownOperations[i]->IsRunning())
@@ -116,7 +116,7 @@ void UNWorldAssemblySubsystem::Clear()
 		Proxy->DestroyLevelInstance(true, true);
 		Proxy->Destroy();
 	}
-	
+
 	// Handle our track for cleanup — destroy every operation's tracked actors, then drop all buckets.
 	for (const TPair<int32, TArray<TWeakObjectPtr<AActor>>>& Pair : TrackedOperationActors)
 	{
@@ -135,16 +135,16 @@ bool UNWorldAssemblySubsystem::IsReady(const bool bWaitOnStreaming)
 	{
 		return false;
 	}
-	
+
 	// Server always has stuff replicated
 	if (FNMultiplayerUtils::HasWorldAuthority(World))
 	{
 		return KnownOperations.IsEmpty();
 	}
-	
+
 	// Client hasn't spawned the goodness yet
 	if (LocalRelay == nullptr) return false;
-	
+
 	// Client properly checking
 	return LocalRelay->IsReady();
 }
@@ -155,7 +155,7 @@ FIntVector2 UNWorldAssemblySubsystem::GetRemainingStatus()
 	{
 		return FIntVector2::ZeroValue;
 	}
-	
+
 	return LocalRelay->GetRemainingStatus();
 }
 
@@ -221,7 +221,7 @@ void UNWorldAssemblySubsystem::Tick(float DeltaTime)
 	{
 		EnsurePlayerControllerRelays(GetWorld());
 	}
-	
+
 	if (KnownOperations.Num() > 0)
 	{
 		for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
@@ -229,7 +229,7 @@ void UNWorldAssemblySubsystem::Tick(float DeltaTime)
 			KnownOperations[i]->Tick();
 		}
 	}
-	
+
 	// If we have anything queued for generation, lets get it going
 	if (QueuedOrgansForAssembly.Num() > 0)
 	{
@@ -244,12 +244,12 @@ void UNWorldAssemblySubsystem::Tick(float DeltaTime)
 			UNAssemblyOperation* InstanceOperation = UNAssemblyOperation::CreateInstance(QueuedOrgansForAssembly, Settings);
 
 			StartOperation(InstanceOperation);
-		
+
 			// We issue the generation and then clear the queue.
 			QueuedOrgansForAssembly.Empty();
 		}
 	}
-	
+
 	// Handle spawning / filling junctions, time-sliced so a large backlog
 	// drains across multiple ticks instead of stalling one frame.
 	if (QueuedCellJunctionsToFill.Num() > 0)
@@ -283,11 +283,11 @@ bool UNWorldAssemblySubsystem::IsTickable() const
 void UNWorldAssemblySubsystem::StartOperation(UNAssemblyOperation* Operation)
 {
 	if (Operation == nullptr) return;
-	
+
 	KnownOperations.AddUnique(Operation);
 	OnOperationStarted.Broadcast();
 	CachedOperationTickets.Add(Operation->GetTicket());
-	
+
 	Operation->StartBuild(this, this);
 
 	// Snapshot to guard against reentrant mutation of RelayMap during the broadcast.
@@ -357,7 +357,7 @@ void UNWorldAssemblySubsystem::UnregisterLocalRelay(const ANWorldAssemblyRelay* 
 
 void UNWorldAssemblySubsystem::RegisterOrganForAssembly(TObjectPtr<UNOrganComponent> Organ)
 {
-	
+
 	if (!FNMultiplayerUtils::HasWorldAuthority(GetWorld())) return;
 	QueuedOrgansForAssembly.AddUnique(Organ);
 }
@@ -374,7 +374,7 @@ void UNWorldAssemblySubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
 	bCachedSeamlessTravelMonitor = Settings->bSupportSeamlessTravel;
 	CachedCellJunctionTimeSlice = Settings->AssemblySpawningDelayedJunctionSpawningTimeSlice * 0.001f;
-	
+
 	if (FNMultiplayerUtils::HasWorldAuthority(InWorld) && !bCachedSeamlessTravelMonitor)
 	{
 		OnLoginHandle = FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &UNWorldAssemblySubsystem::OnPostLogin);
@@ -389,7 +389,7 @@ void UNWorldAssemblySubsystem::OnWorldEndPlay(UWorld& InWorld)
 	RelayMap.Reset();
 	TrackedOperationActors.Empty();
 	LocalRelay = nullptr;
-	
+
 	// Stop all known operations
 	for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
 	{
@@ -403,14 +403,14 @@ void UNWorldAssemblySubsystem::OnWorldEndPlay(UWorld& InWorld)
 			Operation->TearDownOperation();
 		}
 	}
-	
+
 	// Clear cached persistent operation data
 	if (CachedOperationTickets.Num() > 0)
 	{
 		FNWorldAssemblyContextCache::ClearContext(CachedOperationTickets);
 		CachedOperationTickets.Empty();
 	}
-	
+
 	if (OnLoginHandle.IsValid())
 	{
 		FGameModeEvents::GameModePostLoginEvent.Remove(OnLoginHandle);
@@ -421,7 +421,7 @@ void UNWorldAssemblySubsystem::OnWorldEndPlay(UWorld& InWorld)
 		FGameModeEvents::GameModeLogoutEvent.Remove(OnLogoutHandle);
 		OnLogoutHandle.Reset();
 	}
-	
+
 	Super::OnWorldEndPlay(InWorld);
 }
 

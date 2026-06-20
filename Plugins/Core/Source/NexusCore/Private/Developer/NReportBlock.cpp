@@ -8,25 +8,25 @@ void FNReportBlock::Render(FNReport& Report, TArray<FString>& Output, const ENRe
 {
 	RenderHeading(Output, OutputFormat);
 	RenderHeader(Output, OutputFormat);
-	
+
 	// Children
 	TArray<int32> ChildrenTickets;
 	Report.GetOrderedBlocks(GetTicket(), ChildrenTickets, false);
-	
+
 	// Children
 	for (int32 i = 0; i < ChildrenTickets.Num(); i++)
 	{
 		Report.RenderBlock(ChildrenTickets[i], Output, OutputFormat);
 	}
-	
-	
+
+
 	RenderFooter(Output, OutputFormat);
 }
 
 void FNReportBlock::RenderHeading(TArray<FString>& Output, const ENReportOutputFormat OutputFormat) const
 {
 	if (HeadingLength <= 0) return;
-	
+
 	if (OutputFormat == ENReportOutputFormat::Markdown)
 	{
 		Output.Add(TEXT(""));
@@ -46,7 +46,7 @@ void FNReportBlock::RenderHeading(TArray<FString>& Output, const ENReportOutputF
 				break;;
 			case 5:
 				Output.Add(TEXT("##### ") + Heading);
-				break;;			
+				break;;
 			default:
 				Output.Add(Heading);
 				break;
@@ -54,7 +54,7 @@ void FNReportBlock::RenderHeading(TArray<FString>& Output, const ENReportOutputF
 		Output.Add(TEXT(""));
 		return;
 	}
-	
+
 	FStringBuilderBase Builder;
 	Output.Add(TEXT(" "));
 	switch (Level)
@@ -88,7 +88,7 @@ void FNReportBlock::RenderHeading(TArray<FString>& Output, const ENReportOutputF
 		return;
 	case 5:
 		Output.Add("===" + Heading + "===");
-		return;			
+		return;
 	default:
 		Output.Add("---" + Heading + "---");
 	}
@@ -97,7 +97,7 @@ void FNReportBlock::RenderHeading(TArray<FString>& Output, const ENReportOutputF
 void FNReportBlock::RenderHeader(TArray<FString>& Output, const ENReportOutputFormat OutputFormat) const
 {
 	if (Header.IsEmpty()) return;
-	
+
 	if (OutputFormat == ENReportOutputFormat::Markdown)
 	{
 		Output.Add(TEXT(""));
@@ -111,7 +111,7 @@ void FNReportBlock::RenderHeader(TArray<FString>& Output, const ENReportOutputFo
 void FNReportBlock::RenderFooter(TArray<FString>& Output, const ENReportOutputFormat OutputFormat) const
 {
 	if (Footer.IsEmpty()) return;
-	
+
 	if (OutputFormat == ENReportOutputFormat::Markdown)
 	{
 		Output.Add(TEXT(""));

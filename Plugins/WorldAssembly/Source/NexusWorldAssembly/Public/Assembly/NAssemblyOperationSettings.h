@@ -39,11 +39,11 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 	/** When true, level instances are created for generated cells; when false, only cell proxies exist. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Level Instances")
 	bool bCreateLevelInstances = true;
-	
+
 	/** Maximum absolute degree deviation (+/-) from a cell's DirectionConstraint heading that still permits placement. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Directions")
 	float AssemblyDirectionTolerance = 15.f;
-	
+
 	/** Context tags applied to the operation and propagated into the generation context. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Tagging")
 	FGameplayTagContainer ContextTags;
@@ -55,19 +55,19 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 	/** Per-frame time budget for spawning cell proxies during this operation, in milliseconds. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Spawning")
 	float CellSpawnTimeSlice = 2.f;
-	
+
 	/** @return Default runtime-generation settings with a freshly generated friendly seed. */
 	static FNAssemblyOperationSettings GetDefaultSettings()
 	{
 		const UNWorldAssemblySettings* AssemblySettings = UNWorldAssemblySettings::Get();
 		FNAssemblyOperationSettings Settings;
-		
+
 		Settings.Seed = FNSeedGenerator::RandomFriendlySeed();
 		Settings.AssemblyDirectionTolerance = AssemblySettings->AssemblyDirectionTolerance;
 		Settings.ContextTags.AppendTags(AssemblySettings->AssemblyContextTags);
 		Settings.CellSpawnTimeSlice = AssemblySettings->AssemblySpawningCellProxiesTimeSlice;
 		Settings.TagCounters = FNGameplayTagCounter(AssemblySettings->AssemblyTagCounters);
-		
+
 		return Settings;
 	}
 
@@ -77,13 +77,13 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		const UNWorldAssemblySettings* AssemblySettings = UNWorldAssemblySettings::Get();
 		FNAssemblyOperationSettings Settings;
 		Settings.bCreateLevelInstances = false;
-		
+
 		Settings.Seed = FNSeedGenerator::RandomFriendlySeed();
 		Settings.AssemblyDirectionTolerance = AssemblySettings->AssemblyDirectionTolerance;
 		Settings.ContextTags.AppendTags(AssemblySettings->AssemblyContextTags);
 		Settings.CellSpawnTimeSlice = AssemblySettings->AssemblySpawningCellProxiesTimeSlice;
 		Settings.TagCounters = FNGameplayTagCounter(AssemblySettings->AssemblyTagCounters);
-		
+
 		return Settings;
 	}
 };

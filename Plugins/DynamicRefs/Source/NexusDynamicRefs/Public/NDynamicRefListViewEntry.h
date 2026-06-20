@@ -25,13 +25,13 @@ class NEXUSDYNAMICREFS_API UNDynamicRefListViewEntry : public UUserWidget, publi
 
 
 public:
-	
+
 	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
 	{
 		OwnerListView = Owner;
 		Execute_OnSetOwnerListView(Widget, Owner);
 	}
-	
+
 	/**
 	 * Button handler used by nested list rows to focus/select the referenced object.
 	 * @param TargetObject The object clicked.
@@ -56,11 +56,11 @@ protected:
 	/** Nested list view of objects currently claiming the reference. */
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr<UNListView> References;
-	
+
 	virtual void NativeConstruct() override
 	{
 		Super::NativeConstruct();
-		
+
 		// Will validate it here only to throw a message in log for someone to realize they haven't hooked up the widget correctly.
 		N_VALIDATE(LogNexusDynamicRefs, Reference);
 		N_VALIDATE(LogNexusDynamicRefs, References);

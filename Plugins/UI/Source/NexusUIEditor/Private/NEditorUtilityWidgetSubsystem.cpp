@@ -46,7 +46,7 @@ void UNEditorUtilityWidgetSubsystem::RegisterWidget(UNEditorUtilityWidget* Widge
 	}
 	else
 	{
-		UE_LOG(LogNexusUIEditor, Warning, 
+		UE_LOG(LogNexusUIEditor, Warning,
 			TEXT("Widget(%s) already registered with UNEditorUtilityWidgetSubsystem. This can be an indicator of an object leak."), *Widget->GetUniqueIdentifier().ToString())
 	}
 }

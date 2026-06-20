@@ -93,7 +93,7 @@ USTRUCT()
 struct FNCollisionVisualizerPoints
 {
 	GENERATED_BODY()
-	
+
 	/** Absolute world location the query starts from. */
 	UPROPERTY(EditAnywhere, DisplayName="Start Point", meta=(Tooltip="The ABSOLUTE world location to start the query from."))
 	FVector StartPoint = FVector(0,0,0);
@@ -114,7 +114,7 @@ USTRUCT()
 struct FNCollisionVisualizerQuery
 {
 	GENERATED_BODY()
-	
+
 	/** Kind of collision query to perform (line trace, sweep, or overlap). */
 	UPROPERTY(EditAnywhere, DisplayName="Method", meta=(Tooltip="The kind of collision query to perform (line trace, sweep, or overlap)."))
 	ENCollisionVisualizerMethod QueryMethod = ENCollisionVisualizerMethod::LineTrace;
@@ -178,7 +178,7 @@ struct FNCollisionVisualizerQuery
 	UPROPERTY(EditAnywhere, DisplayName="Collision Responses",
 	meta=(EditCondition="QueryBy==ENCollisionVisualizerBy::Channel", EditConditionHides, Tooltip="Per-channel collision responses applied when querying by channel."))
 	FCollisionResponseContainer CollisionResponses;
-	
+
 	/** @return An FCollisionResponseParams populated from CollisionResponses for use with channel-based queries. */
 	FCollisionResponseParams GetCollisionResponseParams() const
 	{
@@ -234,7 +234,7 @@ USTRUCT()
 struct FNCollisionVisualizerOptions
 {
 	GENERATED_BODY()
-	
+
 	/** Trace against complex (per-poly) collision instead of simple collision. */
 	UPROPERTY(EditAnywhere, DisplayName="Trace Complex", meta=(Tooltip="Trace against complex (per-poly) collision instead of simple collision."))
 	bool bTraceComplex = false;
@@ -258,9 +258,9 @@ struct FNCollisionVisualizerOptions
 	/** Restrict results to actors of the given mobility. */
 	UPROPERTY(EditAnywhere, DisplayName="Mobility Type", meta=(Tooltip="Restrict results to actors of the given mobility."))
 	ENCollisionVisualizerMobility QueryMobility = ENCollisionVisualizerMobility::Any;
-	
-	
-	
+
+
+
 	/** @return A FCollisionQueryParams populated from the boolean toggles and mobility filter on this struct. */
 	FCollisionQueryParams GetCollisionQueryParams() const
 	{

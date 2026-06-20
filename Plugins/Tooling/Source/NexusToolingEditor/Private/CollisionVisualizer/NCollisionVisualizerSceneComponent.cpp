@@ -32,7 +32,7 @@ void UNCollisionVisualizerSceneComponent::CreateCustomSpriteComponent()
 		{
 			EditorSpriteTexture = LoadObject<UTexture2D>(nullptr,StartSpritePath);
 		}
-	
+
 	}
 
 	if (EditorSpriteTexture)
@@ -46,7 +46,7 @@ void UNCollisionVisualizerSceneComponent::CreateCustomSpriteComponent()
 		{
 			CreateSpriteComponent(EditorSpriteTexture);
 		}
-		
+
 	}
 
 	if (SpriteComponent)

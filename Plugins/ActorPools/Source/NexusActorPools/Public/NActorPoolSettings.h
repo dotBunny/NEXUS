@@ -72,11 +72,11 @@ ENUM_CLASS_FLAGS(ENActorPoolSupportFlags)
 
 namespace NEXUS::ActorPools
 {
-	constexpr uint8 DefaultFlags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage) | 
-								  static_cast<uint8>(ENActorPoolFlags::DeferConstruction) | 
-								  static_cast<uint8>(ENActorPoolFlags::ServerOnly) | 
+	constexpr uint8 DefaultFlags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage) |
+								  static_cast<uint8>(ENActorPoolFlags::DeferConstruction) |
+								  static_cast<uint8>(ENActorPoolFlags::ServerOnly) |
 								  static_cast<uint8>(ENActorPoolFlags::SetNetDormancy);
-	
+
 	constexpr uint8 DefaultSupportFlags = 0;
 }
 
@@ -90,7 +90,7 @@ struct NEXUSACTORPOOLS_API FNActorPoolSettings
 	GENERATED_BODY()
 
 public:
-	
+
 	/** @return true if the ReturnAll support flag is set. */
 	FORCEINLINE bool HasSupportFlag_ReturnAll() const
 	{
@@ -133,7 +133,7 @@ public:
 	{
 		return N_FLAGS_HAS_UINT8(Flags, ENActorPoolFlags::InvokeUFunctions);
 	}
-	
+
 	/** When the pool is being filled during creation, what is the number of prewarmed Actor`s that should be created, either synchronously or divided across a number of frames. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta = (ClampMin="0", UIMin="0", SliderExponent = 1))
 	int32 MinimumActorCount = 10;
@@ -149,19 +149,19 @@ public:
 	/** Determines the approach taken when the pool does not have any Actors remaining in the "in" pool and needs to create one (or reuse) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
 	ENActorPoolStrategy Strategy = ENActorPoolStrategy::Create;
-	
+
 	/** The behavioral flags to evaluate when doing operations with this pool. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta=(Bitmask,BitmaskEnum="/Script/NexusActorPools.ENActorPoolFlags"))
 	uint8 Flags = NEXUS::ActorPools::DefaultFlags;
-	
+
 	/** Flags outling what features this pool supports. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta=(Bitmask,BitmaskEnum="/Script/NexusActorPools.ENActorPoolSupportFlags"))
 	uint8 SupportFlags = NEXUS::ActorPools::DefaultSupportFlags;
-	
+
 	/** The default applied transform when creating an actor, as well as where and how an actor is stored. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
 	FTransform StorageTransform = FTransform(FRotator::ZeroRotator, FVector::Zero(), FVector::One());
-	
+
 	/** The base transform applied when spawning an actor. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
 	FTransform SpawnedTransform = FTransform(FRotator::ZeroRotator, FVector::Zero(), FVector::One());

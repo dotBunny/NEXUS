@@ -23,7 +23,7 @@ namespace NEXUS::ActorPools::ConsoleCommands
 void UNActorPoolsDeveloperOverlay::NativeConstruct()
 {
 	Super::NativeConstruct();
-	
+
 	N_VALIDATE(LogNexusActorPools, ActorPoolList);
 
 	UpdateTimer = NEXUS::ActorPools::ConsoleCommands::DeveloperOverlayUpdateRate;
@@ -45,10 +45,10 @@ void UNActorPoolsDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, float
 	{
 		return;
 	}
-	
+
 	// Reset timer
 	UpdateTimer = NEXUS::ActorPools::ConsoleCommands::DeveloperOverlayUpdateRate;
-	
+
 	for (const auto Item : ActorPoolList->GetDisplayedEntryWidgets())
 	{
 		const UNActorPoolListViewEntry* Entry = Cast<UNActorPoolListViewEntry>(Item);
@@ -63,13 +63,13 @@ void UNActorPoolsDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, float
 void UNActorPoolsDeveloperOverlay::BindWorld(UWorld* World)
 {
 	if (World == nullptr) return;
-	
+
 	UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
 	if (System == nullptr)
 	{
 		return; // System-less world
 	}
-	
+
 	// Build out known list
 	TArray<FNActorPool*> KnownPools = System->GetAllPools();
 	for (const auto Pool : KnownPools)
@@ -79,7 +79,7 @@ void UNActorPoolsDeveloperOverlay::BindWorld(UWorld* World)
 
 	// We've bound a world check it
 	UpdateBanner();
-	
+
 	// Add delegate for future pools
 	OnActorPoolAddedDelegates.Add(World,System->OnActorPoolAdded.AddLambda([this] (FNActorPool* ActorPool)
 	{
@@ -91,15 +91,15 @@ void UNActorPoolsDeveloperOverlay::BindWorld(UWorld* World)
 void UNActorPoolsDeveloperOverlay::UnbindWorld(const UWorld* World)
 {
 	if (World == nullptr) return;
-	
+
 	UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
-	
+
 	if (OnActorPoolAddedDelegates.Contains(World) && System != nullptr)
 	{
 		System->OnActorPoolAdded.Remove(OnActorPoolAddedDelegates[World]);
 	}
-	
-	
+
+
 	if (IsValid(ActorPoolList))
 	{
 		TArray<UObject*> Items = ActorPoolList->GetListItems();
@@ -108,11 +108,11 @@ void UNActorPoolsDeveloperOverlay::UnbindWorld(const UWorld* World)
 		{
 			UNActorPoolObject* Object = Cast<UNActorPoolObject>(Items[i]);
 			if (!IsValid(Object)) continue;
-			
+
 			if (Object->GetPoolWorld() == World)
 			{
 				ActorPoolList->RemoveItem(Object);
-				
+
 				// Remove our created object
 				Object->MarkAsGarbage();
 			}
@@ -130,7 +130,7 @@ void UNActorPoolsDeveloperOverlay::UpdateBanner() const
 	else
 	{
 		ShowContainerBanner(NoActorPoolsFoundText,
-			UNStyleLibrary::GetInfoForegroundColor(), 
+			UNStyleLibrary::GetInfoForegroundColor(),
 			UNStyleLibrary::GetInfoBackgroundColor());
 	}
 }

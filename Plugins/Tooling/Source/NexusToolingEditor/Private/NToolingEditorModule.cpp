@@ -20,7 +20,7 @@ void FNToolingEditorModule::StartupModule()
 {
 	N_UPDATE_UPLUGIN("NexusTooling")
 	N_MODULE_POST_ENGINE_INIT(FNToolingEditorModule, OnPostEngineInit);
-	
+
 	if (!IsRunningCommandlet() && InputProcessor == nullptr)
 	{
 		InputProcessor = MakeShared<FNEditorInputProcessor>();
@@ -40,10 +40,10 @@ void FNToolingEditorModule::ShutdownModule()
 	{
 		GEngine->OnPostEditorTick().Remove(WindowIconDelegateHandle);
 	}
-	
+
 	FNToolingEditorCommands::RemoveMenuEntries();
 	FNMultiplayerTestToolbarSection::RemoveSection();
-	
+
 	if (InputProcessor.IsValid())
 	{
 		if (FSlateApplication::IsInitialized()) // Still around
@@ -52,36 +52,36 @@ void FNToolingEditorModule::ShutdownModule()
 		}
 		InputProcessor.Reset();
 	}
-	
+
 	FNToolingEditorStyle::Shutdown();
 }
 
 void FNToolingEditorModule::OnPostEngineInit()
 {
 	FNToolingEditorUtils::SetBlueprintEditorAssetTypes();
-	
+
 	if (!FNEditorUtils::IsUserControlled()) return;
-	
+
 	FNToolingEditorStyle::Initialize();
-	
+
 	UNToolingEditorUserSettings::OnPostEngineInit();
-	
+
 	// Initialize Tool Menu
 	if (FSlateApplication::IsInitialized())
 	{
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNToolingEditorCommands::AddMenuEntries));
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNMultiplayerTestToolbarSection::AddSection));
-		
+
 		const UNToolingEditorSettings* Settings = UNToolingEditorSettings::Get();
-	
+
 		// Apply Starship style override of AppIcon
 		ApplyAppIcon(Settings->ProjectAppIconPath);
-	
+
 		// Apply OS level icon to the editor's application window
 		ApplyWindowIcon(Settings->ProjectWindowIconPath);
 	}
-	
-	
+
+
 }
 
 void FNToolingEditorModule::ApplyAppIcon(const FString& IconPath)
@@ -91,7 +91,7 @@ void FNToolingEditorModule::ApplyAppIcon(const FString& IconPath)
 	{
 		return;
 	}
-	
+
 	// Size set in StarshipCoreStyle
 	const FVector2D IconSize(45.0f, 45.0f);
 	const FString FullPath = FString::Printf(TEXT("%s%s"), *FPaths::ConvertRelativePathToFull(FPaths::ProjectDir()), *IconPath);

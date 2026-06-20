@@ -19,86 +19,86 @@ UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | OrientedBox Picker Library")
 class NEXUSPICKER_API UNOrientedBoxPickerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-	
+
 	/**
 	 * Generates a deterministic point inside or on the boundary of a FOrientedBox.
 	 * Uses the provided Mersenne Twister to ensure reproducible results.
 	 * @param Params The parameters for the point generation.
 	 * @param TwisterObject The Mersenne Twister to query for random.
 	 * @param WorldContextObject Object that provides access to the world.
-	 * @returns An array of generated points.	 
+	 * @returns An array of generated points.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "OrientedBox: Next Point", Category = "NEXUS|Picker|OrientedBox", 
+	UFUNCTION(BlueprintCallable, DisplayName = "OrientedBox: Next Point", Category = "NEXUS|Picker|OrientedBox",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/oriented-box/#next-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> NextPoint(UPARAM(ref) FNOrientedBoxPickerParams& Params, UNMersenneTwisterObject* TwisterObject, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
 		if (Params.CachedWorld == nullptr)
 		{
-			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 		}
 		FNOrientedBoxPicker::Next(ReturnLocations, TwisterObject->GetTwisterRef(), Params);
 		return ReturnLocations;
 	}
-	
+
 	/**
 	 * Generates a deterministic point inside or on the boundary of a FOrientedBox.
 	 * Uses the non-deterministic random generator for true randomness.
 	 * @note Not thread-safe. Only call from the Game Thread; all pickers draw from one shared non-deterministic stream.
 	 * @param Params The parameters for the point generation.
 	 * @param WorldContextObject Object that provides access to the world.
-	 * @returns An array of generated points.	 
+	 * @returns An array of generated points.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "OrientedBox: Random Point", Category = "NEXUS|Picker|OrientedBox", 
+	UFUNCTION(BlueprintCallable, DisplayName = "OrientedBox: Random Point", Category = "NEXUS|Picker|OrientedBox",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/oriented-box/#random-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> RandomPoint(UPARAM(ref) FNOrientedBoxPickerParams& Params, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
 		if (Params.CachedWorld == nullptr)
 		{
-			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 		}
 		FNOrientedBoxPicker::Random(ReturnLocations, Params);
 		return ReturnLocations;
 	}
-	
+
 	/**
 	 * Generates a deterministic point inside or on the boundary of a FOrientedBox.
-	 * Updates the seed value to enable sequential random point generation.	 
+	 * Updates the seed value to enable sequential random point generation.
 	 * @param Params The parameters for the point generation.
-	 * @param Seed The random seed to start with, and update.	  
+	 * @param Seed The random seed to start with, and update.
 	 * @param WorldContextObject Object that provides access to the world.
-	 * @returns An array of generated points.	
+	 * @returns An array of generated points.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "OrientedBox: Tracked Point", Category = "NEXUS|Picker|OrientedBox", 
+	UFUNCTION(BlueprintCallable, DisplayName = "OrientedBox: Tracked Point", Category = "NEXUS|Picker|OrientedBox",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/oriented-box/#tracked-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> TrackedPoint(UPARAM(ref) FNOrientedBoxPickerParams& Params, UPARAM(ref) int32& Seed, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
 		if (Params.CachedWorld == nullptr)
 		{
-			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 		}
 		FNOrientedBoxPicker::Tracked(ReturnLocations, Seed, Params);
 		return ReturnLocations;
 	}
-	
+
 	/**
 	 * Generates a deterministic point inside or on the boundary of a FOrientedBox.
-	 * Useful for one-time random point generation with reproducible results. 
+	 * Useful for one-time random point generation with reproducible results.
 	 * @param Params The parameters for the point generation.
-	 * @param Seed The random seed to start with, and update.	  
+	 * @param Seed The random seed to start with, and update.
 	 * @param WorldContextObject Object that provides access to the world.
-	 * @returns An array of generated points.	
-	 */	
-	UFUNCTION(BlueprintCallable, DisplayName = "OrientedBox: One-Shot Point", Category = "NEXUS|Picker|OrientedBox", 
+	 * @returns An array of generated points.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName = "OrientedBox: One-Shot Point", Category = "NEXUS|Picker|OrientedBox",
 	meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/oriented-box/#one-shot-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> OneShotPoint(UPARAM(ref) FNOrientedBoxPickerParams& Params, const int32 Seed, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
 		if (Params.CachedWorld == nullptr)
 		{
-			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 		}
 		FNOrientedBoxPicker::OneShot(ReturnLocations, Seed, Params);
 		return ReturnLocations;
@@ -117,7 +117,7 @@ class NEXUSPICKER_API UNOrientedBoxPickerLibrary : public UBlueprintFunctionLibr
 	{
 		return FNOrientedBoxPicker::IsPointInsideOrOn(Origin, Dimensions, Rotation, Point);
 	}
-	
+
 	/**
 	 * Checks if multiple points are inside or on the boundary of a FOrientedBox.
 	 * @param Points Array of points to check.

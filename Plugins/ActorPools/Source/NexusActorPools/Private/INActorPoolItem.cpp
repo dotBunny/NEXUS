@@ -32,14 +32,14 @@ bool INActorPoolItem::ReturnToActorPool()
 			UE_LOG(LogNexusActorPools, Warning, TEXT("No owning pool for returned actor, and the Actor provided an invalid world. Ignoring."));
 			return false;
 		}
-		
+
 		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
 		if (Subsystem == nullptr)
 		{
 			UE_LOG(LogNexusActorPools, Warning, TEXT("No owning pool for returned actor, and the Actor's world has no UNActorPoolSubsystem. Ignoring."));
 			return false;
 		}
-		
+
 		return Subsystem->ReturnActor(Actor);
 	}
 	UE_LOG(LogNexusActorPools, Warning, TEXT("Attempted to return a NULL or non-AActor to an FNActorPool."));
@@ -52,10 +52,10 @@ bool INActorPoolItem::SetActorOperationalState(const ENActorOperationalState New
 	{
 		return false;
 	}
-	
+
 	PreviousActorOperationalState = CurrentActorOperationalState;
 	CurrentActorOperationalState = NewState;
-	
+
 	OnActorOperationalStateChanged.Broadcast(PreviousActorOperationalState, CurrentActorOperationalState);
 	return true;
 }

@@ -19,7 +19,7 @@
  * INFO() and, if MaxDurationMs is exceeded, the enclosing test is failed with ADD_ERROR(). When
  * enabled, a FPlatformMisc named event is emitted so the region is visible in profilers such as
  * Unreal Insights.
- * 
+ *
  * @note When ran on a build machine (env.IsBuildMachine=1) a warning is NOT thrown, instead we print an INFO statement.
  *		 Telemetry will capture the time and bubble it up.
  */
@@ -81,7 +81,7 @@ public:
 			}
 		}
 #endif
-		
+
 		if (DurationMs > MaxDuration)
 		{
 			if(FPlatformMisc::GetEnvironmentVariable(TEXT("IsBuildMachine")) != TEXT("1"))

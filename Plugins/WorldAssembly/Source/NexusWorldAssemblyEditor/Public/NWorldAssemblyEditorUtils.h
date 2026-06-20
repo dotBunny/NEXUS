@@ -62,20 +62,20 @@ public:
 
 		return false;
 	}
-	
+
 	/** @return true if the component is a cell-root or junction component. */
 	FORCEINLINE static bool EffectsGeneratedData(const UActorComponent* ContextActorComponent)
 	{
 		if (ContextActorComponent == nullptr) return false;
 		return ContextActorComponent->IsA<UNCellRootComponent>() || ContextActorComponent->IsA<UNCellJunctionComponent>();
 	}
-	
+
 	/** @return First ANCellActor found in the currently-edited world, or nullptr. */
 	static ANCellActor* GetCellActorFromCurrentWorld();
-	
+
 	/** @return Every ANCellActor in the current editor selection. */
 	static TArray<ANCellActor*> GetSelectedCellActors();
-	
+
 	/**
 	 * @param bSorted When true, results are returned in a stable sort order suitable for deterministic traversal.
 	 * @return Every UNOrganComponent from the current editor selection (volumes and standalone components).
@@ -96,7 +96,7 @@ public:
 
 	/** @return true if any selected actor corresponds to a generated cell proxy. */
 	static bool HasSelectedGeneratedCellProxies();
-	
+
 	/** @return true if the currently-edited world contains at least one ANCellActor. */
 	static bool IsCellActorPresentInCurrentWorld();
 

@@ -13,12 +13,12 @@ class UNAssemblyOperation;
 class FNWorldAssemblyEditorToolMenu
 {
 public:
-	
+
 	/** Name of the global tool-menu section World Assembly entries are added to. */
 	static const FName MenuSectionGlobal;
 	/** Name of the World Assembly-specific tool-menu section. */
 	static const FName MenuSection;
-	
+
 	/** Register all World Assembly entries with the global tool-menu system. */
 	static void AddMenuEntries();
 
@@ -45,14 +45,14 @@ public:
 	 * FNWorldAssemblyEdMode::CreateCollisionVisualizer when none is alive, otherwise destroys the existing one.
 	 */
 	static void CollisionVisualizerToggle();
-	
+
 	/**
 	 * Adds or removes the cell-ignore tag on the current actor selection. The direction is decided by
 	 * GetIgnoreSelectedActorsToggleMode: if no actor in the selection is tagged the tag is added to all,
 	 * otherwise the tag is removed from all.
 	 */
 	static void TagSelectedActors_CellIgnore();
-	
+
 	/** @return true if the cell-ignore tagging action should be shown for the current selection. */
 	static bool TagSelectedActors_CellIgnore_CanShow();
 
@@ -76,7 +76,7 @@ public:
 	static void Hull_SplitEdge();
 	/** @return true if the hull split-edge action should be shown (an editable hull edge is selected). */
 	static bool Hull_SplitEdge_CanShow();
-	
+
 	static bool ShowQuickAssembly();
 	static bool HasValidQuickAssemblyOrgan();
 	static TSharedRef<SWidget> CreateQuickAssemblyComboBox();

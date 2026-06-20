@@ -31,7 +31,7 @@ public:
 	/** When true, BeginPlay verifies the owning actor is replicated and logs an error if it is not. Disable to silence the check on owners that are intentionally non-replicated. */
 	UPROPERTY(EditAnywhere, Category = "Text Render Component")
 	bool bShouldCheckReplication = true;
-	
+
 	UPROPERTY(EditAnywhere, Category = "Text Render Component")
 	bool bForceOwnerReplication = true;
 
@@ -45,7 +45,7 @@ public:
 	/**
 	 * Set the value of the text component from an FName.
 	 * @param NewValue The desired text value.
-	 */	
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Set From Name", Category = "NEXUS|User Interface",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/text-render-component/#set-from-name"))
 	void SetFromName(const FName& NewValue);
@@ -53,7 +53,7 @@ public:
 	/**
 	 * Set the value of the text component from an FString.
 	 * @param NewValue The desired text value.
-	 */		
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Set From String", Category = "NEXUS|User Interface",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/text-render-component/#set-from-string"))
 	void SetFromString(const FString& NewValue);
@@ -61,12 +61,12 @@ public:
 	/**
 	 * Set the value of the text component from an FText.
 	 * @param NewValue The desired text value.
-	 */	
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Set From Text",  Category = "NEXUS|User Interface",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/text-render-component/#set-from-text"))
 	void SetFromText(const FText& NewValue);
 
 	/** Delegate fired when the text is changed via any of the provided methods. */
 	UPROPERTY(BlueprintAssignable)
-	FOnTextChanged OnTextChanged;	
+	FOnTextChanged OnTextChanged;
 };

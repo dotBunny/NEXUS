@@ -25,7 +25,7 @@ bool FNPropertySections::bHasRegistered = false;
 void FNPropertySections::Register()
 {
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	
+
 	ActorPropertySection = PropertyModule.FindOrCreateSection(FName("Actor"), Identifier, DisplayName);
 	ActorPropertySection->AddCategory(BaseCategory);
 	if (!PendingActors.IsEmpty())
@@ -39,7 +39,7 @@ void FNPropertySections::Register()
 		}
 		PendingActors.Empty();
 	}
-	
+
 	ActorComponentPropertySection = PropertyModule.FindOrCreateSection(FName("ActorComponent"), Identifier, DisplayName);
 	ActorComponentPropertySection->AddCategory(BaseCategory);
 	if (!PendingActorComponents.IsEmpty())
@@ -53,7 +53,7 @@ void FNPropertySections::Register()
 		}
 		PendingActorComponents.Empty();
 	}
-	
+
 	SceneComponentPropertySection = PropertyModule.FindOrCreateSection(FName("SceneComponent"), Identifier, DisplayName);
 	SceneComponentPropertySection->AddCategory(BaseCategory);
 	if (!PendingSceneComponents.IsEmpty())
@@ -67,7 +67,7 @@ void FNPropertySections::Register()
 		}
 		PendingSceneComponents.Empty();
 	}
-	
+
 	ObjectPropertySection = PropertyModule.FindOrCreateSection(FName("Object"), Identifier, DisplayName);
 	ObjectPropertySection->AddCategory(BaseCategory);
 	if (!PendingObjectComponents.IsEmpty())
@@ -81,7 +81,7 @@ void FNPropertySections::Register()
 		}
 		PendingObjectComponents.Empty();
 	}
-	
+
 	bHasRegistered = true;
 }
 
@@ -118,7 +118,7 @@ void FNPropertySections::AddActorCategory(const FName Category)
 		PendingActors.AddUnique(Category);
 		return;
 	}
-	
+
 	if (!ActorPropertySection->HasAddedCategory(Category))
 	{
 		ActorPropertySection->AddCategory(Category);
@@ -132,7 +132,7 @@ void FNPropertySections::AddActorComponentCategory(const FName Category)
 		PendingActorComponents.AddUnique(Category);
 		return;
 	}
-	
+
 	if (!ActorComponentPropertySection->HasAddedCategory(Category))
 	{
 		ActorComponentPropertySection->AddCategory(Category);
@@ -146,7 +146,7 @@ void FNPropertySections::AddSceneComponentCategory(const FName Category)
 		PendingSceneComponents.AddUnique(Category);
 		return;
 	}
-	
+
 	if (!SceneComponentPropertySection->HasAddedCategory(Category))
 	{
 		SceneComponentPropertySection->AddCategory(Category);
@@ -160,7 +160,7 @@ void FNPropertySections::AddObjectCategory(FName Category)
 		PendingObjectComponents.AddUnique(Category);
 		return;
 	}
-	
+
 	if (!ObjectPropertySection->HasAddedCategory(Category))
 	{
 		ObjectPropertySection->AddCategory(Category);

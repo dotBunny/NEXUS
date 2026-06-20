@@ -32,14 +32,14 @@ public:
 	 * @param OutTagGroups Accumulated tag groups from all visited tissues.
 	 * @param OutProcessedSets Tracks tissue assets already visited so cycles do not cause infinite recursion.
 	 */
-	static void BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutCellMap, 
-		FNTissueTagGroups& OutTagGroups, 
+	static void BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutCellMap,
+		FNTissueTagGroups& OutTagGroups,
 		TArray<UNTissue*>& OutProcessedSets);
-	
+
 	/** Tag groups that drive placement behavior for this tissue's cells. */
 	UPROPERTY(EditAnywhere, DisplayName="Assembly Tag Groups")
 	FNTissueTagGroups TagGroups = FNTissueTagGroups();
-	
+
 	/** The cells that directly belong to this tissue, along with per-cell generation constraints. */
 	UPROPERTY(EditAnywhere, meta=(TitleProperty="{Cell}"))
 	TArray<FNTissueEntry> Cells;

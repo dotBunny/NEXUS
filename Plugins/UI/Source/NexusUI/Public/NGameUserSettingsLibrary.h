@@ -68,7 +68,7 @@ public:
 	/**
 	 * Get the cached selection text from a EWindowMode::Type.
 	 * @param Mode the EWindowMode::Type to find the associated FText for.
-	 * @return The cached FText representing the target EWindowMode::Type. 
+	 * @return The cached FText representing the target EWindowMode::Type.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Selection From WindowMode (Text)", Category = "NEXUS|User Interface|Game User Settings|Video",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-selection-from-windowmode-text"))
@@ -101,7 +101,7 @@ public:
 	/**
 	 * Get the selection string from the current display resolution.
 	 * @return A FString representing the resolution.
-	 */	
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Selection From Display Resolution", Category = "NEXUS|User Interface|Game User Settings|Video",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-selection-from-display-resolution"))
 	static FString GetSelectionFromDisplayResolution(FIntPoint Resolution);
@@ -124,7 +124,7 @@ public:
 	static TArray<FString> GetSupportedDisplayResolutions();
 
 	/**
-	 * Clears and populates a NComboBoxString with the selectable WindowMode types. 
+	 * Clears and populates a NComboBoxString with the selectable WindowMode types.
 	 * @param ComboBox Target combobox to fill and setup.
 	 * @param bSelectCurrent Should the currently used WindowMode be selected?
 	 */
@@ -133,7 +133,7 @@ public:
 	static void InitializeWindowModeComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent = true);
 
 	/**
-	* Clears and populates a NComboBoxString with the selectable Display Resolutions. 
+	* Clears and populates a NComboBoxString with the selectable Display Resolutions.
 	* @param ComboBox Target combobox to fill and setup.
 	* @param bSelectCurrent Should the current display resolution be selected?
 	*/

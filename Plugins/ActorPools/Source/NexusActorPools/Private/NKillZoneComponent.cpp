@@ -20,7 +20,7 @@ UNKillZoneComponent::UNKillZoneComponent(const FObjectInitializer& ObjectInitial
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 
 	SetIsReplicatedByDefault(false);
-	
+
 	SetRelativeLocation(NEXUS::ActorPools::KillZone::DefaultRelativeLocation, false);
 	SetRelativeScale3D(NEXUS::ActorPools::KillZone::DefaultRelativeScale);
 	InitBoxExtent(NEXUS::ActorPools::KillZone::DefaultBoxExtents);
@@ -56,10 +56,10 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 {
 	// Check the other actor matters
 	if (!IsValid(OtherActor)) return;
-	
+
 	// If there's no root object it's not moving so were considering it static
 	if (bIgnoreStaticActors && (OtherActor->GetRootComponent() == nullptr || !OtherActor->IsRootComponentMovable())) return;
-	
+
 	// Check if in an actor pool, return to the pool
 	INActorPoolItem* ActorItem = Cast<INActorPoolItem>(OtherActor);
 	if (ActorItem != nullptr)
@@ -88,15 +88,15 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 	}
 
 	// Check if we have a pool for this Actor, but it just doesn't implement the interface
-	if (ActorPoolSubsystem != nullptr && 
+	if (ActorPoolSubsystem != nullptr &&
 		ActorPoolSubsystem->HasActorPool(OtherActor->GetClass()))
 	{
 		ActorPoolSubsystem->ReturnActor(OtherActor);
 		KillCount++;
-		return; 
+		return;
 	}
 
-	
+
 	switch (UnknownBehaviour)
 	{
 	case ENKillZoneBehavior::Ignore:

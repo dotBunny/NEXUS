@@ -16,7 +16,7 @@ USTRUCT(BlueprintType)
 struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 {
 	GENERATED_BODY()
-	
+
 	/** The center point when attempting to generate new points. */
 	UPROPERTY(Category = "OrientedBox", BlueprintReadWrite)
 	FVector Origin = FVector::ZeroVector;
@@ -26,11 +26,11 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 	 */
 	UPROPERTY(Category = "OrientedBox", BlueprintReadWrite)
 	FVector MinimumDimensions = FVector::ZeroVector;
-	
+
 	/** The maximum dimensions to use when generating a point. */
 	UPROPERTY(Category = "OrientedBox", BlueprintReadWrite)
 	FVector MaximumDimensions = FVector::OneVector;
-	
+
 	/** The rotation of the OrientedBox. */
 	UPROPERTY(Category = "OrientedBox", BlueprintReadWrite)
 	FRotator Rotation = FRotator::ZeroRotator;
@@ -49,7 +49,7 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 		// Dimensions are local-space (Rotation is applied on top), so use the extents directly
 		MaximumDimensions = FVector(OrientedBox.ExtentX, OrientedBox.ExtentY, OrientedBox.ExtentZ) * 2.0f;
 	}
-	
+
 	/** @return An origin-centered, axis-aligned box sized from MinimumDimensions, or an empty box when MinimumDimensions is zero. */
 	FBox GetMinimumAlignedBox() const
 	{
@@ -60,7 +60,7 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 		const FVector Half = MinimumDimensions * 0.5f;
 		return FBox(- Half,  Half);
 	}
-	
+
 	/** @return An origin-centered, axis-aligned box sized from MaximumDimensions, or an empty box when MaximumDimensions is zero. */
 	FBox GetMaximumAlignedBox() const
 	{
@@ -71,7 +71,7 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 		const FVector Half = MaximumDimensions * 0.5f;
 		return FBox( -Half,  Half);
 	}
-	
+
 	/**
 	 * Builds the axis-aligned regions valid for point generation, in box-local space (before Rotation is applied).
 	 * @return The maximum box alone when no valid minimum is set (or the minimum exceeds the maximum on any axis); otherwise the six side regions of the shell between the minimum and maximum boxes.
@@ -82,7 +82,7 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 	{
 		const FBox MinimumBox = GetMinimumAlignedBox();
 		const FBox MaximumBox = GetMaximumAlignedBox();
-		
+
 		TArray<FBox> Boxes;
 		if (MinimumBox.IsValid == 0)
 		{
@@ -97,36 +97,36 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 		{
 			// Reserve the number of possible sides just because
 			Boxes.Reserve(6);
-			
+
 			// Left
 			Boxes.Add(FBox(
 				FVector(MaximumBox.Min.X, MaximumBox.Min.Y, MaximumBox.Min.Z),
 				FVector(MinimumBox.Min.X, MaximumBox.Max.Y, MaximumBox.Max.Z)
 			));
-			
+
 			// Right
 			Boxes.Add(FBox(
 			FVector(MinimumBox.Max.X, MaximumBox.Min.Y, MaximumBox.Min.Z),
 			FVector(MaximumBox.Max.X, MaximumBox.Max.Y, MaximumBox.Max.Z)));
-		
+
 			// Front
 			Boxes.Add(FBox(
 				FVector(MinimumBox.Min.X, MaximumBox.Min.Y, MaximumBox.Min.Z),
 				FVector(MinimumBox.Max.X, MinimumBox.Min.Y, MinimumBox.Max.Z)
 			));
-		
+
 			// Back
 			Boxes.Add(FBox(
 				FVector(MinimumBox.Min.X, MinimumBox.Max.Y, MinimumBox.Min.Z),
 				FVector(MinimumBox.Max.X, MaximumBox.Max.Y, MaximumBox.Max.Z)
 			));
-			
+
 			// Bottom
 			Boxes.Add(FBox(
 				FVector(MinimumBox.Min.X, MinimumBox.Min.Y, MaximumBox.Min.Z),
 				FVector(MinimumBox.Max.X, MaximumBox.Max.Y, MinimumBox.Min.Z)
 			));
-			
+
 			// Top
 			Boxes.Add(FBox(
 				FVector(MinimumBox.Min.X, MaximumBox.Min.Y, MinimumBox.Max.Z),

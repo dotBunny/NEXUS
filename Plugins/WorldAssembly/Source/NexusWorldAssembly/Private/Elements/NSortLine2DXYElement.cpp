@@ -88,7 +88,7 @@ bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
     TArray<FPCGTaggedData> Inputs = Context->InputData.GetInputsByPin(PCGPinConstants::DefaultInputLabel);
     TArray<FPCGTaggedData>& Outputs = Context->OutputData.TaggedData;
 
-    for (const FPCGTaggedData& Input : Inputs) 
+    for (const FPCGTaggedData& Input : Inputs)
     {
         const UPCGPointData* PointData = Cast<UPCGPointData>(Input.Data);
         if (!PointData) continue;
@@ -103,7 +103,7 @@ bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
         TArray<bool> Visited;
         Visited.Init(false, UnsortedPoints.Num());
         int32 CurrentIndex = 0;
-        
+
         // Find starting point for consistency
         if (Settings->bLeftMostStartingPoint)
         {
@@ -118,7 +118,7 @@ bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
 
         // Build Sorted Points (Nearest Neighbor)
     	// It seems that the grid fill always ends up in a clockwise-wind.
-        while (CurrentIndex != INDEX_NONE) 
+        while (CurrentIndex != INDEX_NONE)
         {
             Visited[CurrentIndex] = true;
             SortedPoints.Add(UnsortedPoints[CurrentIndex]);
@@ -126,7 +126,7 @@ bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
             int32 NextIndex = INDEX_NONE;
             float ClosestDistanceSquared = TNumericLimits<float>::Max();
 
-            for (int32 i = 0; i < UnsortedPoints.Num(); ++i) 
+            for (int32 i = 0; i < UnsortedPoints.Num(); ++i)
             {
                 if (Visited[i])
                 {
@@ -134,7 +134,7 @@ bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
                 }
 
                 const float DistanceSquared = FVector::DistSquared(UnsortedPoints[CurrentIndex].Transform.GetLocation(), UnsortedPoints[i].Transform.GetLocation());
-                if (DistanceSquared < ClosestDistanceSquared) 
+                if (DistanceSquared < ClosestDistanceSquared)
                 {
                     ClosestDistanceSquared = DistanceSquared;
                     NextIndex = i;
@@ -148,41 +148,41 @@ bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
         OutputData->InitializeFromData(PointData);
         TArray<FPCGPoint>& OutPoints = OutputData->GetMutablePoints();
         OutPoints = SortedPoints;
-        
+
         const int32 NumPoints = OutPoints.Num();
         const int32 NumPointsMinusOne = NumPoints - 1;
-      
-    	
+
+
         // Should we figure out the next direction?
         if (Settings->bBuildAdditionalMetadata)
         {
         	float TurnDirectionTotal = 0;
         	TArray CachedTurnValues { 0.f };
         	CachedTurnValues.Reserve(NumPoints);
-        	
+
             FPCGMetadataAttribute<FVector2D>* NextGridDirectionAttr = OutputData->Metadata->FindOrCreateAttribute<FVector2D>(Settings->NextGridDirectionAttributeName, FVector2D::ZeroVector, false, true);
             FPCGMetadataAttribute<float>* TurnDirectionAttr = OutputData->Metadata->FindOrCreateAttribute<float>(Settings->TurnDirectionAttributeName, 0.f, false, true);
-            
+
             FVector PreviousNextGridDirection;
             for (int32 i = 0; i < NumPoints; ++i) {
-                
+
                 // Ensure metadata existence
                 if (OutPoints[i].MetadataEntry == -1)
                 {
                     OutputData->Metadata->InitializeOnSet(OutPoints[i].MetadataEntry);
                 }
-                
+
                 // Direction to "next" point
                 FVector NextGridDirection = FVector::ZeroVector;
                 if (i < NumPointsMinusOne)  // Not the last point
                 {
                     NextGridDirection = (OutPoints[i+1].Transform.GetLocation() - OutPoints[i].Transform.GetLocation()).GetSafeNormal();
-                } 
+                }
                 else if (Settings->bIsLoop) // Is last point and loop
                 {
                     NextGridDirection = (OutPoints[0].Transform.GetLocation() - OutPoints[i].Transform.GetLocation()).GetSafeNormal();
                 }
-            	
+
                 // Turn detection
                 if (i > 0)
                 {
@@ -194,11 +194,11 @@ bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
                 	CachedTurnValues.Add(TurnValue);
                 	TurnDirectionTotal += TurnValue;
                 }
-            	
+
                 NextGridDirectionAttr->SetValue(OutPoints[i].MetadataEntry, NextGridDirection);
                 PreviousNextGridDirection = NextGridDirection;
             }
-            
+
             // Handle loop back to point 0
             if (Settings->bIsLoop)
             {
@@ -209,18 +209,18 @@ bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
             	CachedTurnValues[0] = TurnDirectionValue;
             	TurnDirectionTotal += TurnDirectionValue;
             }
-        	
+
         	// We're going to use this to figure out what way to rotate to face walls
         	bool IsClockwise = TurnDirectionTotal > 0.f;
-        	
+
         	// Classify every point and resolve its segment bookkeeping (see FNSortLine2DXYElement::ClassifyLine).
         	TArray<FNSortLinePointInfo> PointInfos;
         	ClassifyLine(CachedTurnValues, NEXUS::WorldAssembly::SortLine::TurnDeadzone, PointInfos);
-        	
+
         	FPCGMetadataAttribute<int32>* SegmentIndexAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SegmentIndexAttributeName, 0, false, true);
         	FPCGMetadataAttribute<int32>* SubsegmentIndexAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SubsegmentIndexAttributeName, 0, false, true);
         	FPCGMetadataAttribute<FName>* PartNameAttr = OutputData->Metadata->FindOrCreateAttribute<FName>(Settings->PointNameAttributeName, Settings->DefaultPointName, false, true);
-        	
+
         	for (int32 i = 0; i < NumPoints; ++i)
         	{
         		const FNSortLinePointInfo& Info = PointInfos[i];
@@ -239,24 +239,24 @@ bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
         		SegmentIndexAttr->SetValue(OutPoints[i].MetadataEntry, Info.SegmentIndex);
         		SubsegmentIndexAttr->SetValue(OutPoints[i].MetadataEntry, Info.SubsegmentIndex);
         	}
-        	
+
         	// Pass to write out finalized data
         	FPCGMetadataAttribute<int32>* SegmentLengthAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SegmentLengthAttributeName, 0, false, true);
         	FPCGMetadataAttribute<float>* FacingRotationAttr = OutputData->Metadata->FindOrCreateAttribute<float>(Settings->FacingRotationAttributeName, 0, false, true);
         	FPCGMetadataAttribute<FName>* FacingCardinalAttr = OutputData->Metadata->FindOrCreateAttribute<FName>(Settings->FacingCardinalAttributeName, Settings->DefaultCardinalName, false, true);
         	FPCGMetadataAttribute<int32>* FacingCardinalIndexAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->FacingCardinalIndexAttributeName, 0, false, true);
-        	
-        	
+
+
         	FRotator FaceRotation = FRotator(0, 90, 0);
         	if (!IsClockwise)
         	{
         		FaceRotation = FaceRotation * -1.f;
         	}
-        	
+
         	for (int32 i = 0; i < NumPoints; ++i)
         	{
         		SegmentLengthAttr->SetValue(OutPoints[i].MetadataEntry, PointInfos[i].SegmentLength);
-        		
+
         		// Corners will get rotated to "Next Direction" where walls get turned to next direction + face rotation based on winding
         		FVector2D Position2D = NextGridDirectionAttr->GetValue(OutPoints[i].MetadataEntry);
         		FVector Position = FVector(Position2D.X, Position2D.Y, 0);
@@ -278,15 +278,15 @@ bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
         				break;
         			case 2:
 	        			FacingCardinalAttr->SetValue(OutPoints[i].MetadataEntry, Settings->SouthCardinalName);
-        				break;  
+        				break;
         			case 3:
         				FacingCardinalAttr->SetValue(OutPoints[i].MetadataEntry, Settings->WestCardinalName);
-        				break;  
+        				break;
         			default:
         				FacingCardinalAttr->SetValue(OutPoints[i].MetadataEntry, Settings->DefaultCardinalName);
         				break;
         		}
-        		
+
         		if (Settings->bRotatePointToFaceDirection)
         		{
         			OutPoints[i].Transform.SetRotation(Rotation.Quaternion());

@@ -25,7 +25,7 @@ bool ANCellActor::CanDeleteSelectedActor(FText& OutReason) const
 {
 	static FText NoDeleteReason = FText::FromString("Unable to manually delete NCellActor. Please use the NCell menu to remove it.");
 	OutReason = NoDeleteReason;
-	return false;	
+	return false;
 }
 
 void ANCellActor::PostRegisterAllComponents()
@@ -45,19 +45,19 @@ void ANCellActor::PostRegisterAllComponents()
 bool ANCellActor::HasDifferencesFromSidecar() const
 {
 	// If we don't have a side-car, we are naturally dirty.
-	if (Sidecar == nullptr) 
+	if (Sidecar == nullptr)
 	{
 		return true;
 	}
-	
+
 	if (CellRoot == nullptr) return false;
-	
+
 	// Check Cell Root First
 	if (!CellRoot->Details.IsEqual(Sidecar->Root))
 	{
 		return true;
 	}
-	
+
 	// Junctions Check
 	if (Sidecar->Junctions.Num() != CellJunctions.Num())
 	{
@@ -67,11 +67,11 @@ bool ANCellActor::HasDifferencesFromSidecar() const
 	{
 		// Check keys first
 		if (!Sidecar->Junctions.Contains(Pair.Key)) return true;
-		
+
 		// Same junction data
 		if (!Sidecar->Junctions[Pair.Key].IsEqual(Pair.Value.Get()->Details)) return true;
 	}
-				
+
 	return false;
 }
 #endif // WITH_EDITOR
@@ -79,7 +79,7 @@ bool ANCellActor::HasDifferencesFromSidecar() const
 void ANCellActor::InitializeFromProxy(ANCellLevelInstance* LevelInstance)
 {
 	bSpawnedFromProxy = true;
-	
+
 	// Disable all actors flagged for editor only
 	for (auto Actor : AuthorTimeActors)
 	{
@@ -88,7 +88,7 @@ void ANCellActor::InitializeFromProxy(ANCellLevelInstance* LevelInstance)
 
 	// Code-callback
 	OnInitializedFromProxy.ExecuteIfBound(LevelInstance);
-	
+
 	// Level-based callback
 	for (const auto& Actor : InitializeCallbackActors)
 	{
@@ -99,7 +99,7 @@ void ANCellActor::InitializeFromProxy(ANCellLevelInstance* LevelInstance)
 void ANCellActor::CalculateBounds()
 {
 	CellRoot->Modify();
-	
+
 	CellRoot->Details.Bounds = FNWorldAssemblyUtils::CalculatePlayableBounds(GetLevel(), CellRoot->Details.BoundsSettings);
 
 	const FVector UnitSize = UNWorldAssemblySettings::Get()->VoxelSize;
@@ -107,13 +107,13 @@ void ANCellActor::CalculateBounds()
 	CellRoot->Details.UnitBounds = FBox(
 				FNVectorUtils::GetFurthestGridIntersection(CellRoot->Details.Bounds.Min, UnitSize),
 				FNVectorUtils::GetFurthestGridIntersection(CellRoot->Details.Bounds.Max, UnitSize));
-	
+
 	const FVector UnitBoundsSize = CellRoot->Details.UnitBounds.GetSize();
 	CellRoot->Details.UnitSize = FVector(
 		FMath::RoundToInt(UnitBoundsSize.X),
 		FMath::RoundToInt(UnitBoundsSize.Y),
 		FMath::RoundToInt(UnitBoundsSize.Z));
-	
+
 	SetActorDirty();
 }
 
@@ -121,7 +121,7 @@ void ANCellActor::SplitHullEdge(const int32 IndexA, const int32 IndexB)
 {
 	CellRoot->Modify();
 	CellRoot->Details.Hull.SplitEdge(IndexA, IndexB);
-	
+
 	SetActorDirty();
 }
 
@@ -129,7 +129,7 @@ void ANCellActor::CalculateHull()
 {
 	CellRoot->Modify();
 	CellRoot->Details.Hull = FNWorldAssemblyUtils::CalculateConvexHull(GetLevel(), CellRoot->Details.HullSettings);
-	
+
 	SetActorDirty();
 }
 
@@ -145,7 +145,7 @@ void ANCellActor::CalculateVoxelData()
 		}
 		return;
 	}
-	
+
 	CellRoot->Modify();
 	CellRoot->Details.VoxelData = FNWorldAssemblyUtils::CalculateVoxelData(GetLevel(), CellRoot->Details.VoxelSettings);
 	SetActorDirty();

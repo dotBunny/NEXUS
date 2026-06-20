@@ -50,7 +50,7 @@ struct FNCellInputDataFilter
 
 	/** Orientation applied to the candidate's junction to match the source. */
 	FQuat SourceQuat = FQuat();
-	
+
 	FVector WorldPosition;
 };
 
@@ -66,9 +66,9 @@ class FNVirtualOrganContext
 	friend struct FNOrganGeneratorBuildGraphTask;
 
 public:
-	
+
 	FGuid Identifier;
-	
+
 	/** Allowed penetration, in world units, between adjacent cell hulls before they are treated as overlapping. */
 	float CellHullPenetration = 10.f;
 
@@ -76,13 +76,13 @@ public:
 	float WorldHullPenetration = 1.f;
 
 	float AssemblyDirectionTolerance = 15.f;
-	
+
 	/** World-space size of a single voxel, cached from UNWorldAssemblySettings so placed cells re-voxelize without re-reading settings. */
 	FVector VoxelSize = FVector(100.f, 100.f, 100.f);
 
 	/** When false, the organ can produce no results and still be considered a successful assembly operation. */
 	bool bRequired = true;
-	
+
 	/** Lower bound on cell count; 0 disables the check. */
 	int32 MinimumCellCount = 0;
 
@@ -91,9 +91,9 @@ public:
 
 	/** Number of retries this organ is allowed before giving up. */
 	int32 MaximumRetryCount = 0;
-	
+
 	FGameplayTagContainer RequiredContextTags;
-	
+
 	TArray<FNGameplayTagCounterConstraint> RequiredTagCounters;
 
 	/** When true, the graph may extend past Bounds. */
@@ -110,13 +110,13 @@ public:
 
 	/** Context tags present at the start of organ build, used to ensure we do not lose context as cells get removed. */
 	FGameplayTagContainer BaseContextTags;
-	
+
 	/** Context tags currently active, updated as cells are placed into the graph. */
 	FGameplayTagContainer ContextTags;
-	
+
 	/** TagCounter present at the start of organ build, used to ensure we can reset our state. */
 	FNGameplayTagCounter BaseTagCounter;
-	
+
 	/** TagCounter values currently in-flight of this attempt. */
 	FNGameplayTagCounter TagCounter;
 
@@ -125,7 +125,7 @@ public:
 
 	/** Candidate cells the builder may pull from. */
 	TArray<FNVirtualCellData> CellInputData;
-	
+
 	/** Cached classification summary of CellInputData (starter/finisher availability and tag groups). */
 	FNVirtualCellDataSummary CellInputDataSummary;
 
@@ -150,16 +150,16 @@ public:
 	uint64 GetSeed() const { return Seed; };
 #if !UE_BUILD_SHIPPING
 	const TArray<FString>& GetMessages() const { return Messages; }
-#endif	
+#endif
 
 	/** @return Human-readable task name for logs/debug. */
 	const FString& GetName() { return Name; };
-	
+
 	const FGuid& GetIdentifier() const { return Identifier; };
 
 	/** @return true once the builder has produced a valid graph (cell count within bounds, etc.). */
 	bool IsSuccessful() const { return bSuccessful; };
-	
+
 	bool IsRequired() const { return bRequired; };
 
 	/** @return true if the context is set up well enough to attempt a build. */
@@ -324,7 +324,7 @@ public:
 
 	/** @return The world-space point candidate bearings are measured from for the directional constraint. */
 	FVector GetDirectionTargetPosition() const { return DirectionTargetPosition; }
-	
+
 	int32 GetRetryCount() const { return RetryCount; }
 private:
 	/** Number of retries consumed so far. */
@@ -346,5 +346,5 @@ private:
 	FString Name;
 #if !UE_BUILD_SHIPPING
 	TArray<FString> Messages;
-#endif	
+#endif
 };

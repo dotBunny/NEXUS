@@ -10,12 +10,12 @@ bool UNLevelBlueprintValidator::CanValidateAsset_Implementation(const FAssetData
                                                                 FDataValidationContext& InContext) const
 {
 	const UNToolingEditorSettings* Settings = UNToolingEditorSettings::Get();
-	if (Settings->ValidatorLevelBlueprint == ENValidatorSeverity::Disable || 
+	if (Settings->ValidatorLevelBlueprint == ENValidatorSeverity::Disable ||
 		Settings->IsAssetIgnored(InAssetData.GetSoftObjectPath()))
 	{
 		return false;
 	}
-	
+
 	return InObject && InObject->IsA<UWorld>();
 }
 
@@ -24,10 +24,10 @@ EDataValidationResult UNLevelBlueprintValidator::ValidateLoadedAsset_Implementat
 {
 	const UWorld* World = Cast<UWorld>(InAsset);
 	if (World == nullptr) return EDataValidationResult::NotValidated;
-	
+
 	const TArray<ULevel*> Levels = World->GetLevels();
 	if (Levels.Num() <= 0) return EDataValidationResult::Valid;
-	
+
 	const UNToolingEditorSettings* Settings = UNToolingEditorSettings::Get();
 	EDataValidationResult Result = EDataValidationResult::Valid;
 	for (const ULevel* Level : Levels)
@@ -47,14 +47,14 @@ EDataValidationResult UNLevelBlueprintValidator::ValidateLoadedAsset_Implementat
 					NodeCount++;
 				}
 			}
-			
+
 			if (NodeCount > 0)
 			{
 				FNToolingEditorUtils::AddDataValidationResponse(Context, Settings->ValidatorLevelBlueprint,
-				FText::FormatOrdered(TextFormat, 
+				FText::FormatOrdered(TextFormat,
 					FText::FromString(FString::FromInt(NodeCount)),
 					FText::FromString(Level->GetName())));
-						
+
 				Result = FNToolingEditorUtils::GetDataValidationResult(Settings->ValidatorLevelBlueprint);
 			}
 		}

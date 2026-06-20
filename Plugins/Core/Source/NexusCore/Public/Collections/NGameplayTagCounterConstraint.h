@@ -64,7 +64,7 @@ struct FNGameplayTagCounterConstraint
 		case ENComparisonResult::NotEqual:
 			return Current != Value;
 		}
-		
+
 		return false;
 	}
 

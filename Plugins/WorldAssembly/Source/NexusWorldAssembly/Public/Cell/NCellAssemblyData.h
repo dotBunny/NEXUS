@@ -45,15 +45,15 @@ struct FNCellAssemblyData
 	/** The final ContextTags for the Assembly Operation. */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	FGameplayTagContainer ContextTags;
-	
+
 	/** The ContextTags this cell added. */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	FGameplayTagContainer ContextTagsAdded;
-	
+
 	/** The final TagCounter */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	TArray<FNGameplayTagCount> TagCounter;
-	
+
 	/** World-space details for every junction on this cell, captured from the source graph node. */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	TArray<FNCellJunctionDetails> JunctionDetails;

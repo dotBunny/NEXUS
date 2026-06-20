@@ -28,7 +28,7 @@ public:
 	 * @param Seed The seed to initialize the engine with.
 	 */
 	void Initialize(const uint64 Seed);
-	
+
 	/**
 	 * Returns a pseudo random bool value based on chance (0-1 roll), if the result is included.
 	 * @param Chance The 0-1 percent chance of success
@@ -75,7 +75,7 @@ public:
 	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
 	void Double(TArray<double>& OutArray, const int32 Count, const int32 StartIndex = 0);
-	
+
 	/**
 	 * Generate a random double between minimum and maximum.
 	 * @param MinimumValue The lowest possible value.
@@ -99,7 +99,7 @@ public:
 	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
 	void DoubleRange(TArray<double>& OutArray, const int32 Count, const double MinimumValue = -MIN_dbl, const double MaximumValue = MAX_dbl, const int32 StartIndex = 0);
-	
+
 	/**
 	 * Returns a pseudo random float between 0 and 1.
 	 * @return a pseudo random float.
@@ -194,7 +194,7 @@ public:
 	 * @return The random FVector.
 	 */
 	FVector Vector(const float MinimumRange = -MIN_flt, const float MaximumRange = MAX_flt);
-	
+
 	/**
 	 * Generate a pseudo random normalized FVector.
 	 * @return A normalized random FVector.
@@ -214,7 +214,7 @@ public:
 		while(L > 1.0f || L < UE_KINDA_SMALL_NUMBER);
 		return Result * (1.0f / FGenericPlatformMath::Sqrt(L));
 	}
-	
+
 	/**
 	 * Returns the number of times the FMersenneTwister has been called since the seed has been set.
 	 * @return the number of times the FMersenneTwister has been called.
@@ -243,7 +243,7 @@ public:
 		this->CallCounter++;
 		return this->Engine();
 	}
-	
+
 	/**
 	 * Returns the seed that was last set as a hexadecimal FString.
 	 * @return the last set seed.

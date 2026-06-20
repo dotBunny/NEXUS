@@ -271,23 +271,23 @@ N_TEST(FNActorPoolTests_Return_StorageLocation,
 		// Create our USceneComponent-based actor pool
 		FNActorPool SceneRootComponentActorPool = FNActorPool(World, ANTestPooledActor::StaticClass(), ActorPoolSettings);
 		SceneRootComponentActorPool.Fill();
-		
+
 		// Check storage location
 		for (int32 i = 0; i < 3; i++)
 		{
 			CHECK_EQUALS("Expected USceneComponent Root Component-based AActor location to match the defined storage location.", SceneRootComponentActorPool.InActors[i]->GetActorLocation(), StorageLocation)
 		}
-		
+
 		// Create our UStaticMeshComponent-based actor pool
 		FNActorPool StaticMeshRootComponentActorPool = FNActorPool(World, ANDebugActor::StaticClass(), ActorPoolSettings);
 		StaticMeshRootComponentActorPool.Fill();
-		
+
 		// Check storage location
 		for (int32 i = 0; i < 3; i++)
 		{
 			CHECK_EQUALS("Expected UStaticMeshComponent Root Component-based AActor location to match the defined storage location.", StaticMeshRootComponentActorPool.InActors[i]->GetActorLocation(), StorageLocation)
 		}
-		
+
 		SceneRootComponentActorPool.Clear();
 		StaticMeshRootComponentActorPool.Clear();
 	});
@@ -339,17 +339,17 @@ N_TEST(FNActorPoolTests_SpawnState_ActorAtRequestedLocation,
 		ActorPoolSettings.Strategy = ENActorPoolStrategy::Fixed;
 		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction);
 
-		
+
 		// Create our USceneComponent-based actor pool
 		FNActorPool SceneRootComponentActorPool = FNActorPool(World, ANTestPooledActor::StaticClass(), ActorPoolSettings);
 		SceneRootComponentActorPool.Fill();
-		
+
 		// Create our UStaticMeshComponent-based actor pool
 		FNActorPool StaticMeshRootComponentActorPool = FNActorPool(World, ANDebugActor::StaticClass(), ActorPoolSettings);
 		StaticMeshRootComponentActorPool.Fill();
-		
+
 		const FVector SpawnPos(100.0f, 200.0f, 300.0f);
-		
+
 		// Check SceneComponent Root based
 		AActor* SceneRootActor = SceneRootComponentActorPool.Spawn(SpawnPos, FRotator::ZeroRotator);
 		if (SceneRootActor == nullptr)
@@ -366,7 +366,7 @@ N_TEST(FNActorPoolTests_SpawnState_ActorAtRequestedLocation,
 				*SceneRootActualPos.ToString(), *SpawnPos.ToString()));
 		}
 		SceneRootComponentActorPool.Clear();
-		
+
 		// Check SceneComponent Root based
 		AActor* StaticMeshRootActor = StaticMeshRootComponentActorPool.Spawn(SpawnPos, FRotator::ZeroRotator);
 		if (StaticMeshRootActor == nullptr)

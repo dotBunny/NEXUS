@@ -101,7 +101,7 @@ N_TEST_HIGH(FNReportTableBlockTests_AddRow_DiscardsExtraCells,
 		return;
 	}
 	Block->Initialize(2);
-	
+
 	AddExpectedMessage(TEXT("Attempting to add data row exceeding"), ELogVerbosity::Warning);
 	Block->AddRow({ TEXT("a"), TEXT("b"), TEXT("c") });
 

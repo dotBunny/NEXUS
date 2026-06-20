@@ -53,7 +53,7 @@ private:
 	FVector Position = FVector::ZeroVector;
 	FRotator Rotation = FRotator::ZeroRotator;
 	TSharedPtr<FStreamableHandle> StreamingHandle;
-	
+
 	void OnLoaded();
 	void OnHasPool(FNActorPool* ActorPool);
 };

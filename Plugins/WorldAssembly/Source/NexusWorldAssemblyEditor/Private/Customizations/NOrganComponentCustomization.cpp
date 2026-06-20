@@ -49,7 +49,7 @@ FText::FromString("Organ Component"), ECategoryPriority::Important);
 	CustomizedObjects = ObjectsBeingCustomized;
 
 	FDetailWidgetRow& NewRow = NexusCategory.AddCustomRow(FText::FromString("Actions"));
-	
+
 	NewRow.NameContent()
 		[
 			SNew(STextBlock)
@@ -135,7 +135,7 @@ FReply FNOrganComponentCustomization::OnClearClicked(TArray<TWeakObjectPtr<UObje
 	{
 		UNWorldAssemblyEditorSubsystem::Get()->ClearGenerated(OperationTicket);
 	}
-	
+
 	return FReply::Handled();
 }
 

@@ -12,20 +12,20 @@
 void UNWorldAssemblyDeveloperOverlay::NativeConstruct()
 {
 	Super::NativeConstruct();
-	
+
 	N_VALIDATE(LogNexusWorldAssembly, OperationsList);
-	
+
 	// Bind to Registry
-	for (TArray<UNAssemblyOperation*>& Operations = FNWorldAssemblyRegistry::GetOperations(); 
+	for (TArray<UNAssemblyOperation*>& Operations = FNWorldAssemblyRegistry::GetOperations();
 		UNAssemblyOperation* Operation : Operations)
 	{
 		// Do not show EditorMode stuff
 		if (!ShouldShowOperation(Operation->GetFName())) continue;
 		OperationsList->AddItem(Cast<UObject>(Operation));
 	}
-	
+
 	UpdateBanner();
-	
+
 	OperationsStatusChangedDelegateHandle = FNWorldAssemblyRegistry::OnOperationStateChanged.AddUObject(
 		this, &UNWorldAssemblyDeveloperOverlay::OnOperationStatusChanged);
 
@@ -39,7 +39,7 @@ void UNWorldAssemblyDeveloperOverlay::NativeDestruct()
 	{
 		OperationsList->ClearListItems();
 	}
-	
+
 	FNWorldAssemblyRegistry::OnOperationStateChanged.Remove(OperationsStatusChangedDelegateHandle);
 	FNWorldAssemblyRegistry::OnOperationChannelsChanged.Remove(OperationChannelsChangedDelegateHandle);
 
@@ -50,7 +50,7 @@ void UNWorldAssemblyDeveloperOverlay::OnOperationStatusChanged(UNAssemblyOperati
                                                                const ENWorldAssemblyOperationState NewState)
 {
 	if (!ShouldShowOperation(Operation->GetFName())) return;
-	
+
 	switch (NewState)
 	{
 		using enum ENWorldAssemblyOperationState;
@@ -96,7 +96,7 @@ void UNWorldAssemblyDeveloperOverlay::UpdateBanner() const
 	else
 	{
 		ShowContainerBanner(NoOperationsFoundText,
-			UNStyleLibrary::GetInfoForegroundColor(), 
+			UNStyleLibrary::GetInfoForegroundColor(),
 			UNStyleLibrary::GetInfoBackgroundColor());
 	}
 }

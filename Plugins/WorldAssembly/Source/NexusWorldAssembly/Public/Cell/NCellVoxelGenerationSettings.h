@@ -42,7 +42,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellVoxelGenerationSettings
 	/** @return true if all fields match structurally; used when diffing live vs. side-car cell data. */
 	bool Equals(const FNCellVoxelGenerationSettings& Other) const
 	{
-		return bUseVoxelData == Other.bUseVoxelData 
+		return bUseVoxelData == Other.bUseVoxelData
 		&& bCalculateOnSave == Other.bCalculateOnSave
 		&& bIncludeNonColliding == Other.bIncludeNonColliding
 		&& bIncludeEditorOnly == Other.bIncludeEditorOnly

@@ -36,7 +36,7 @@ public:
 		OwnerListView = Owner;
 		Execute_OnSetOwnerListView(Widget, Owner);
 	}
-	
+
 	/** Clear all text fields and the progress bar — used between operations and on destruct. */
 	void Reset() const;
 
@@ -51,7 +51,7 @@ protected:
 	virtual void NativeConstruct() override
 	{
 		Super::NativeConstruct();
-		
+
 		// Will validate it here only to throw a message in log for someone to realize they haven't hooked up the widget correctly.
 		N_VALIDATE(LogNexusWorldAssembly, ChildProgressListView);
 		N_VALIDATE(LogNexusWorldAssembly, ProgressBar);
@@ -59,7 +59,7 @@ protected:
 		N_VALIDATE(LogNexusWorldAssembly, CenterText);
 		N_VALIDATE(LogNexusWorldAssembly, RightText);
 		N_VALIDATE(LogNexusWorldAssembly, CancelButton);
-		
+
 		if (IsValid(CancelButton))
 		{
 			CancelButton->OnClicked.AddDynamic(this, &UNAssemblyOperationListViewEntry::OnCancelButtonClicked);
@@ -67,7 +67,7 @@ protected:
 	}
 	virtual void NativeDestruct() override;
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
-	
+
 	/** The list view that owns this row. */
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UNListView> OwnerListView;
@@ -91,7 +91,7 @@ protected:
 	/** Right-aligned label (task counts / percentage). */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonTextBlock> RightText;
-	
+
 	/** Left-aligned label (operation display name). */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UButton> CancelButton;

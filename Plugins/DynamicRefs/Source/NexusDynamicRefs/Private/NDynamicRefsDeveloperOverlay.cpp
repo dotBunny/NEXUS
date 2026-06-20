@@ -12,7 +12,7 @@
 void UNDynamicRefsDeveloperOverlay::NativeConstruct()
 {
 	Super::NativeConstruct();
-	
+
 	N_VALIDATE(LogNexusDynamicRefs, DynamicReferencesHeader);
 	N_VALIDATE(LogNexusDynamicRefs, DynamicReferences);
 	N_VALIDATE(LogNexusDynamicRefs, NamedReferencesHeader);
@@ -61,14 +61,14 @@ void UNDynamicRefsDeveloperOverlay::ReconcileStaleEntries()
 void UNDynamicRefsDeveloperOverlay::BindWorld(UWorld* World)
 {
 	if (World == nullptr) return;
-	
+
 	UNDynamicRefSubsystem* System = UNDynamicRefSubsystem::Get(World);
 	if (System == nullptr)
 	{
 		UpdateBanner();
 		return; // System-less world
 	}
-	
+
 	// Get this worlds used references currently
 	TArray<ENDynamicRef> DynamicRefs = System->GetDynamicRefs();
 	for (ENDynamicRef DynamicRef : DynamicRefs)
@@ -82,7 +82,7 @@ void UNDynamicRefsDeveloperOverlay::BindWorld(UWorld* World)
 			DynamicRefObjects[DynamicRef]->AddObject(Object);
 		}
 	}
-	
+
 	TArray<FName> Names = System->GetNames();
 	for (FName Name : Names)
 	{
@@ -95,10 +95,10 @@ void UNDynamicRefsDeveloperOverlay::BindWorld(UWorld* World)
 			NamedObjects[Name]->AddObject(Object);
 		}
 	}
-	
+
 	// We've bound a world check it
 	UpdateBanner();
-	
+
 
 	// Add delegate for future pools
 	OnAddedDelegates.Add(World,System->OnAdded.AddLambda([this] (ENDynamicRef DynamicRef, UObject* Object)
@@ -128,9 +128,9 @@ void UNDynamicRefsDeveloperOverlay::BindWorld(UWorld* World)
 void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 {
 	if (World == nullptr) return;
-	
+
 	UNDynamicRefSubsystem* System = UNDynamicRefSubsystem::Get(World);
-	
+
 	// OnAddedDelegates
 	if (OnAddedDelegates.Contains(World))
 	{
@@ -140,7 +140,7 @@ void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 		}
 		OnAddedDelegates.Remove(World);
 	}
-	
+
 	// OnAddedByNameDelegates
 	if (OnAddedByNameDelegates.Contains(World))
 	{
@@ -150,7 +150,7 @@ void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 		}
 		OnAddedByNameDelegates.Remove(World);
 	}
-	
+
 	// OnRemovedDelegates
 	if (OnRemovedDelegates.Contains(World))
 	{
@@ -160,7 +160,7 @@ void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 		}
 		OnRemovedDelegates.Remove(World);
 	}
-	
+
 	// OnRemovedByNameDelegates
 	if (OnRemovedByNameDelegates.Contains(World))
 	{
@@ -170,7 +170,7 @@ void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 		}
 		OnRemovedByNameDelegates.Remove(World);
 	}
-	
+
 	if (System != nullptr)
 	{
 		TArray<ENDynamicRef> DynamicRefs = System->GetDynamicRefs();
@@ -181,7 +181,7 @@ void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 				RemoveListItem(DynamicRef, Object);
 			}
 		}
-	
+
 		TArray<FName> Names = System->GetNames();
 		for (FName Name : Names)
 		{
@@ -191,7 +191,7 @@ void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 			}
 		}
 	}
-	
+
 	UpdateBanner();
 }
 
@@ -201,12 +201,12 @@ void UNDynamicRefsDeveloperOverlay::UpdateBanner() const
 		NamedReferences->GetNumItems() > 0);
 	const bool bDynamicReferences = (IsValid(DynamicReferences) &&
 		DynamicReferences->GetNumItems() > 0);
-		
+
 	if (bNamedReferences || bDynamicReferences)
 	{
 		// add check
 		HideContainerBanner();
-		
+
 		if (bNamedReferences)
 		{
 			NamedReferencesHeader->SetVisibility(ESlateVisibility::Visible);
@@ -226,9 +226,9 @@ void UNDynamicRefsDeveloperOverlay::UpdateBanner() const
 		{
 			NamedReferencesHeader->SetVisibility(ESlateVisibility::Collapsed);
 		}
-		
+
 		ShowContainerBanner(NoReferencesFoundText,
-	UNStyleLibrary::GetInfoForegroundColor(), 
+	UNStyleLibrary::GetInfoForegroundColor(),
 	UNStyleLibrary::GetInfoBackgroundColor());
 	}
 }

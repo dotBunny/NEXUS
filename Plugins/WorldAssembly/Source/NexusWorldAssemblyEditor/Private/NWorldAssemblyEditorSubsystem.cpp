@@ -30,7 +30,7 @@ void UNWorldAssemblyEditorSubsystem::Deinitialize()
 		FNWorldAssemblyContextCache::ClearContext(CachedOperationTickets);
 		CachedOperationTickets.Empty();
 	}
-	
+
 	if (HasGeneratedCellProxies())
 	{
 		ClearAllProxies();
@@ -41,14 +41,14 @@ void UNWorldAssemblyEditorSubsystem::Deinitialize()
 		FEditorDelegates::OnMapLoad.Remove(OnMapLoadHandle);
 		OnMapLoadHandle.Reset();
 	}
-	
+
 	if (PreBeginPIEHandle.IsValid())
 	{
 		FEditorDelegates::PreBeginPIE.Remove(PreBeginPIEHandle);
 		PreBeginPIEHandle.Reset();
 	}
-	
-	
+
+
 	// Stop all known operations
 	for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
 	{
@@ -62,7 +62,7 @@ void UNWorldAssemblyEditorSubsystem::Deinitialize()
 			Operation->TearDownOperation();
 		}
 	}
-	
+
 	Super::Deinitialize();
 }
 
@@ -105,7 +105,7 @@ void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Op
 	{
 		KnownProxies.Add(Proxy);
 	}
-	
+
 	// Make our own map to the created proxies tied to the operation ticket
 	ProxyMap.Add(Operation->GetTicket(), TArray<TObjectPtr<ANCellProxy>>(TaskGraphContext->CreatedProxies));
 	KnownOperations.Remove(Operation);
@@ -116,7 +116,7 @@ void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Op
 	Info.SubText = Results.Message;
 	Info.ExpireDuration = 5.0f;
 	Info.bFireAndForget = true;
-	
+
 	// Create Report Link
 	if (!TaskGraphContext->ReportFilePath.IsEmpty())
 	{
@@ -127,7 +127,7 @@ void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Op
 			FPlatformProcess::LaunchFileInDefaultExternalApplication(*FPaths::ConvertRelativePathToFull(FilePath));
 		});
 	}
-	
+
 	if (Results.bWarning)
 	{
 		Info.Image = FAppStyle::GetBrush("Icons.WarningWithColor");

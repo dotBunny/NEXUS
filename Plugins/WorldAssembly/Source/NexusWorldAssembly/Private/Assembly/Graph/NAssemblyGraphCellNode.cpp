@@ -6,15 +6,15 @@
 #include "NWorldAssemblyMinimal.h"
 #include "Math/NVectorUtils.h"
 
-FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(const FNAssemblyGraphNodeParams& Params, FNVirtualCellData* InputData, const FVector& VoxelSize) 
+FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(const FNAssemblyGraphNodeParams& Params, FNVirtualCellData* InputData, const FVector& VoxelSize)
 : FNAssemblyGraphNode(Params)
 {
 	// Copy InputData to disconnect from reference
 	InputDataPtr = InputData;
 	TemplatePtr = InputDataPtr->Template; // Might not need in future
 	FreeJunctionKeys = InputDataPtr->GetJunctionKeys();
-	
-	// Create a new WorldBounds reflecting the rotation in the world, this will make an AABB that will exceed the actual space, 
+
+	// Create a new WorldBounds reflecting the rotation in the world, this will make an AABB that will exceed the actual space,
 	// but will follow the defined bounds previously defined at author-time, but rotated.
 	TStaticArray<FVector, 8> Corners;
 	InputData->CellDetails.Bounds.GetVertices(Corners.Elements);
@@ -23,25 +23,25 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(const FNAssemblyGraphNodeParams
 	{
 		WorldBounds += Params.WorldRotation.RotateVector(Corner) + Params.WorldPosition;
 	}
-	
+
 	// Copy our hull data and rotate it into its new world-space position/rotation
 	Hull = InputData->CellDetails.Hull;
-	
+
 	// Bake the hull position
 	FTransform WorldTransform(Params.WorldRotation, Params.WorldPosition);
 	Hull.ApplyTransform(WorldTransform);
-	
+
 	// Cache optimized collision data for convex hulls ahead of any checks
 	if (Hull.IsConvex())
 	{
 		Hull.EnsureCachedFacePlanes();
 	}
-	
+
 	// Copy our voxel data and rotate it into its new world-space position/rotation
 	// TODO: Right now we dont actually use the VoxelData for anything so lets not pay for the rotation until we need it, not assigning the data to cause an error later so we know.
 	//WorldVoxel = InputData->CellDetails.VoxelData;
 	//WorldVoxel.RotateAroundPivot(Position, Rotation, VoxelSize);
-	
+
 	// We need to copy all the template junction data into our own local copy of the details that we will manipulate
 	for (int32 i = 0; i < FreeJunctionKeys.Num(); i++)
 	{
@@ -50,7 +50,7 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(const FNAssemblyGraphNodeParams
 
 		// Compose with quaternions - (was adding the Rotation previously, but this better?)
 		Details.WorldRotation = (Params.WorldRotation.Quaternion() * Details.WorldRotation.Quaternion()).Rotator();
-		Details.WorldLocation = FNVectorUtils::RotatedAroundPivot(Details.WorldLocation + Params.WorldPosition, 
+		Details.WorldLocation = FNVectorUtils::RotatedAroundPivot(Details.WorldLocation + Params.WorldPosition,
 			Params.WorldPosition, Params.WorldRotation);
 	}
 }
@@ -178,15 +178,15 @@ void FNAssemblyGraphCellNode::GenerateLinkDetails()
 		Details.ConnectedNodeIdentifier = LinkedNode->GetNodeIdentifier();
 
 		if (LinkedNode->GetNodeType() == ENAssemblyGraphNodeType::Null) continue;
-		
+
 		// Connected means its connected to a cell or a bone, not a null object and shouldnt be filled
 		Details.bConnected = true;
-		
+
 		// Only cell nodes carry junctions; resolve the junction on the far cell that links back to us.
 		if (LinkedNode->GetNodeType() != ENAssemblyGraphNodeType::Cell) continue;
 
 
-		
+
 		FNAssemblyGraphCellNode* LinkedCellNode = static_cast<FNAssemblyGraphCellNode*>(LinkedNode);
 		const int32 ConnectedJunctionKey = LinkedCellNode->FindJunctionKeyLinkedTo(this);
 		if (const FNCellJunctionDetails* ConnectedJunction = LinkedCellNode->GetJunctionDetails(ConnectedJunctionKey))
@@ -207,7 +207,7 @@ void FNAssemblyGraphCellNode::LinkJunction(const int32 JunctionKey, FNAssemblyGr
 		UE_LOG(LogNexusWorldAssembly, Error, TEXT("Cannot link junction key %d to node, key is not free"), JunctionKey);
 		return;
 	}
-	
+
 	FreeJunctionKeys.Remove(JunctionKey);
 	Links.Add(JunctionKey, Node);
 }
@@ -231,7 +231,7 @@ void FNAssemblyGraphCellNode::UnlinkJunction(const int32 JunctionKey)
 		UE_LOG(LogNexusWorldAssembly, Error, TEXT("Cannot unlink junction key %d from node, key is not linked"), JunctionKey);
 		return;
 	}
-	
+
 	Links.Remove(JunctionKey);
 	FreeJunctionKeys.Add(JunctionKey);
 }

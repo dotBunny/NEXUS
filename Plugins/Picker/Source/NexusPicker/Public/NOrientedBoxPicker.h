@@ -24,7 +24,7 @@ public:
 	 * @note Not thread-safe; all pickers share a single non-deterministic FRandomStream (FNRandom::GetNonDeterministic()). Only call from the Game-thread.
 	 */
 	static void Random(TArray<FVector>& OutLocations, const FNOrientedBoxPickerParams& Params);
-	
+
 	/**
 	 * Generate random points in relation to an FOrientedBox.
 	 * Useful for one-time random point generation with reproducible results.
@@ -37,7 +37,7 @@ public:
 		int32 DuplicateSeed = Seed;
 	 	Tracked(OutLocations, DuplicateSeed, Params);
 	}
-	
+
 	/**
 	 * Generate random points in relation to an FOrientedBox.
 	 * Updates the seed value to enable sequential random point generation.
@@ -46,15 +46,15 @@ public:
 	 * @param Params The parameters for the point generation.
 	 */
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNOrientedBoxPickerParams& Params);
-	
+
 	/**
-	 * Generate random points in relation to an FOrientedBox using a provided Mersenne Twister.	 
+	 * Generate random points in relation to an FOrientedBox using a provided Mersenne Twister.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Random The Mersenne Twister to query for random.
 	 * @param Params The parameters for the point generation.
 	 */
 	static void Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNOrientedBoxPickerParams& Params);
-	
+
 	/**
 	 * Checks if a point is inside or on the surface of the FOrientedBox.
 	 * @param Origin The center point of the FOrientedBox.

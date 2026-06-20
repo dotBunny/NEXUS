@@ -29,16 +29,16 @@ void FNDynamicRefsEditorModule::ShutdownModule()
 void FNDynamicRefsEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;
-	
+
 	// Configure Style
 	FNDynamicRefsEditorStyle::Initialize();
-	
+
 	// Initialize Tool Menu
 	if (FSlateApplication::IsInitialized())
 	{
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(&N_TOOLS_MENU_ENTRY_EUW_METHOD_REGISTER(EUW_NDynamicRefs)));
 	}
-	
+
 	// Inspector Category Filter
 	FNPropertySections::AddActorComponentCategory("DynamicRef");
 }

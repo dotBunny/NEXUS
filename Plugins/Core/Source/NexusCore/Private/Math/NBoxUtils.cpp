@@ -13,7 +13,7 @@ TArray<FVector> FNBoxUtils::GetVertices(const FBox& Box)
 	Vertices.Add(FVector(Min.X, Min.Y, Max.Z));
 	Vertices.Add(FVector(Max.X, Min.Y, Max.Z));
 	Vertices.Add(FVector(Max.X, Min.Y, Min.Z));
-	
+
 	Vertices.Add(FVector(Min.X, Max.Y, Min.Z));
 	Vertices.Add(FVector(Min.X, Max.Y, Max.Z));
 	Vertices.Add(FVector(Max.X, Max.Y, Max.Z));

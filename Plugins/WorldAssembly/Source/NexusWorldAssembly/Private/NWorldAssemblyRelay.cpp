@@ -36,7 +36,7 @@ bool ANWorldAssemblyRelay::HasNearbyCellLevelInstances()
 	// Early out the best we can
 	if (bHasNearbyCellLevelInstances) return true;
 	//if (CachedNearbyCellLevelInstances.IsEmpty())  return false;
-	
+
 	// If we haven't got them lets reupdate and respond accordingly
 	bHasNearbyCellLevelInstances = FNWorldAssemblyRegistry::HasCellLevelInstances(CachedNearbyCellLevelInstances);
 	return bHasNearbyCellLevelInstances;
@@ -131,9 +131,9 @@ void ANWorldAssemblyRelay::UpdateNearbyCells(bool bIsLevelLoaded)
 
 void ANWorldAssemblyRelay::Client_OperationFinished_Implementation(const int32 OperationTicket)
 {
-	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Received finished notification for operation(%i)."), OperationTicket);	
+	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Received finished notification for operation(%i)."), OperationTicket);
 	KnownOperations.RemoveSwap(OperationTicket);
-	
+
 	UpdateNearbyCells(true);
 }
 
@@ -154,7 +154,7 @@ void ANWorldAssemblyRelay::Server_RequestNearbyCells_Implementation(const FVecto
 {
 	// Find our instances
 	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
-	
+
 	// The server often will get this call before the levels have streamed, thus we need to flag that the search is not looking to see if they are
 	// loaded when we send it back to the player, but instead just that they are there in place.
 	const TArray<ANCellLevelInstance*> Instances = FNWorldAssemblyRegistry::GetCellLevelInstancesInRange(Location, Settings->NetworkNearbyRange, false, OperationTicket);

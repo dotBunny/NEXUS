@@ -20,7 +20,7 @@
 class NEXUSCORE_API FNRawMeshFactory
 {
 public:
-	
+
 	/**
 	 * Walks each supplied actor's registered UPrimitiveComponents and extracts their simple-collision
 	 * representation as FNRawMesh entries, along with parallel world-space transforms.
@@ -39,7 +39,7 @@ public:
 	 */
 	static void FromActorsInBounds(const TArray<AActor*>& Actors, const TArray<FBoxSphereBounds>& ContainingBounds,
 		TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms);
-	
+
 	/**
 	 * Emits an FKBoxElem as an 8-vertex / 12-triangle FNRawMesh. The element's Center and Rotation are
 	 * folded into the emitted transform; the mesh itself is box-half-extent-local.
@@ -113,7 +113,7 @@ public:
 	 * @return true when a mesh was appended; false when StaticMesh has no usable render data.
 	 */
 	static bool FromStaticMesh(const UStaticMesh* StaticMesh, FNRawMesh& OutMesh);
-	
+
 private:
 	/**
 	 * Dispatches an FKAggregateGeom's convex/box/sphere/capsule elements through the per-element appenders.
@@ -124,7 +124,7 @@ private:
 	 */
 	static void AppendChaosAggregateGeometry(const FKAggregateGeom& Agg, const FTransform& BaseToWorld,
 		TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms);
-	
+
 	/**
 	 * Class-name heuristic to skip landscape primitives without taking a hard Landscape-module dependency.
 	 * @param Prim Primitive component to inspect.

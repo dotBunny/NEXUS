@@ -36,18 +36,18 @@ public:
 	virtual void OnLevelInstanceLoaded() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	//End ALevelInstance
-	
+
 	FNCellAssemblyData& GetAssemblyData()
 	{
 		return AssemblyData;
 	}
-	
+
 	/** @return Mutable access to the context tags recorded on this cell's assembly data. */
 	FGameplayTagContainer& GetContextTags()
 	{
 		return AssemblyData.ContextTags;
 	}
-	
+
 	FGameplayTagContainer& GetContextTagsAdded()
 	{
 		return AssemblyData.ContextTagsAdded;
@@ -57,12 +57,12 @@ public:
 	{
 		return AssemblyData.TagCounter;
 	}
-	
+
 	TMap<FGameplayTag, int32> GetTagCounter() const
 	{
 		return FNGameplayTagCounter(AssemblyData.TagCounter).GameplayTags;
 	}
-	
+
 	bool IsHotPath() const
 	{
 		return AssemblyData.bHotPathShortest || AssemblyData.bHotPathSequential;
@@ -95,7 +95,7 @@ public:
 	{
 		return AssemblyData.NodeIdentifier;
 	}
-	
+
 #if WITH_EDITOR
 	virtual bool IsUserManaged() const override { return false; }
 	virtual bool CanEnterEdit(FText* OutReason = nullptr) const override
@@ -112,16 +112,16 @@ public:
 
 	/** @return The World Assembly operation ticket this level instance belongs to. */
 	int32 GetOperationTicket() const { return AssemblyData.OperationTicket; }
-	
+
 	/** @return Spawn GUID used to uniquely identify this level instance within its operation. */
 	FGuid& GetLevelInstanceSpawnGuid() { return LevelInstanceSpawnGuid; }
-		
+
 	void UpdateFromAssemblyData();
-	
+
 	FNCellLinkDetails GetCellLinkDetails(int32 JunctionIdentifier);
-	
+
 protected:
-	
+
 	/** Replicated post-assembly data for this cell instance; applied on clients via OnRep_AssemblyData. */
 	UPROPERTY(Replicated, ReplicatedUsing=OnRep_AssemblyData)
 	FNCellAssemblyData AssemblyData;

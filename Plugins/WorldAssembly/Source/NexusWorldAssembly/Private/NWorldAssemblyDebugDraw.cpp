@@ -9,7 +9,7 @@
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMesh.h"
 
-void FNWorldAssemblyDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FVector& Location, const FRotator& Rotation, 
+void FNWorldAssemblyDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FVector& Location, const FRotator& Rotation,
 	const FIntVector2& UnitSize, const FVector2D& SocketSize, const ENCellJunctionType& SocketType, const FLinearColor& Color)
 {
 	// Compose: yaw-align the local XZ-plane corners into the YZ-plane (rect normal becomes +X),
@@ -26,35 +26,35 @@ void FNWorldAssemblyDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FV
 	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, Location);
 	const TArray<FVector2D> UnrotatedSocketPoints = FNWorldAssemblyUtils::GetSocketPoints2D(UnitSize, SocketSize);
 	const int32 SocketPointsCount = UnrotatedSocketPoints.Num();
-	
+
 	const FVector DirectionEndPoint = Location + (FacingRotation * 50.f);
 	const FVector DirectionTop = Location + (FVector::UpVector * 5.f);
 	const FVector DirectionTopPoint = DirectionTop + (FacingRotation * 35.f);
-	
+
 	const FVector DirectionBottom = Location - (FVector::UpVector * 5.f);
 	const FVector DirectionBottomPoint = DirectionBottom + (FacingRotation * 35.f);
-	
+
 	// Estimate of lines: Rectangle(4) + Corner Lines(4) + Direction Arrow(3)
 	const int32 ReserveLineCount = 11 + (SocketPointsCount*32);
 	PDI->AddReserveLines(SDPG_Foreground, ReserveLineCount, false, false);
-	
+
 	// Draw Rectangle
 	PDI->DrawLine(RotatedCornerPoints[1], RotatedCornerPoints[2], Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
 	PDI->DrawLine(RotatedCornerPoints[2], RotatedCornerPoints[3], Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
 	PDI->DrawLine(RotatedCornerPoints[3], RotatedCornerPoints[0], Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
 	PDI->DrawLine(RotatedCornerPoints[0], RotatedCornerPoints[1], Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
-	
+
 	// Draw Socket Points
 	for (int32 i = 0; i < SocketPointsCount; i++)
 	{
-		FVector RotatedNubPoint = FNVectorUtils::RotatedAroundPivot(Location + 
+		FVector RotatedNubPoint = FNVectorUtils::RotatedAroundPivot(Location +
 			FVector(UnrotatedSocketPoints[i].X, 0.0f, UnrotatedSocketPoints[i].Y), Location, DisplayRotation);
-		
-		DrawCircle(PDI, RotatedNubPoint, 
-			FRotationMatrix(DisplayRotation).GetScaledAxis(EAxis::X), FRotationMatrix(DisplayRotation).GetScaledAxis(EAxis::Z), 
+
+		DrawCircle(PDI, RotatedNubPoint,
+			FRotationMatrix(DisplayRotation).GetScaledAxis(EAxis::X), FRotationMatrix(DisplayRotation).GetScaledAxis(EAxis::Z),
 			Color, 10.f, 32, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
 	}
-	
+
 	// Draw Corner Lines
 	for (int32 i = 0; i < 4; i++)
 	{
@@ -66,22 +66,22 @@ void FNWorldAssemblyDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FV
 			const FVector TwoWayPointB = RotatedCornerPoints[i] + (FacingRotation * -LineLength);
 			PDI->DrawLine(TwoWayPointA, TwoWayPointB, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
 			break;
-		
+
 		case InOnlySocket:
 			const FVector InOnlySocketPoint = RotatedCornerPoints[i] + (FacingRotation * -LineLength);
 			PDI->DrawLine(RotatedCornerPoints[i], InOnlySocketPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
-			break;	
-		
+			break;
+
 		case OutOnlySocket:
 			const FVector OutOnlySocketPoint = RotatedCornerPoints[i] + (FacingRotation * LineLength);
 			PDI->DrawLine(RotatedCornerPoints[i], OutOnlySocketPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
-			break;		
+			break;
 
 		case OneWaySocket:
 			break;
 		}
 	}
-	
+
 	// Draw Direction
 	PDI->DrawLine(Location, DirectionEndPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
 	PDI->DrawLine(DirectionEndPoint, DirectionTopPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
@@ -104,7 +104,7 @@ void FNWorldAssemblyDebugDraw::DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, c
 		const FNRawMeshLoop& Loop = Loops[i];
 		const int32 Stride = Loop.Indices.Num();
 		const int32 StrideShort = Stride - 1;
-		
+
 		for (int32 j = 0; j < StrideShort; j++)
 		{
 			DrawDashedLine(PDI, WorldVertices[Loop.Indices[j]] ,WorldVertices[Loop.Indices[j+1]], Color, DashSize, Priority);
@@ -117,24 +117,24 @@ void FNWorldAssemblyDebugDraw::DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, c
 {
 	const size_t PointCount = VoxelData.GetCount();
 	if (PointCount == 0) return;
-	
+
 	const UNWorldAssemblySettings* Settings = GetDefault<UNWorldAssemblySettings>();
 	const FVector UnitSize = Settings->VoxelSize;
 	const FVector HalfUnitSize = UnitSize * 0.5f;
 	const FVector BaseOffset = VoxelData.Origin + Offset;
-		
+
 	for (int32 i = 0; i < PointCount; i++)
 	{
 		auto [x,y,z] = VoxelData.GetInverseIndex(i);
 		const FVector VoxelCenter = BaseOffset + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
-			
+
 		// TODO: #ROTATE-VOXELS Rotation needs to actually rotated to the nearest grid???
 		const FVector VoxelMin = VoxelCenter - HalfUnitSize;
 		const FVector VoxelMax = VoxelCenter + HalfUnitSize;
-		
+
 		if (N_FLAGS_HAS(VoxelData.GetData(i), static_cast<uint8>(ENCellVoxel::Occupied)))
 		{
-			
+
 			DrawWireBox(PDI, FBox(VoxelMin, VoxelMax), FColor::Blue, SDPG_World );
 		}
 	}
@@ -143,19 +143,19 @@ void FNWorldAssemblyDebugDraw::DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, c
 void FNWorldAssemblyDebugDraw::DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation)
 {
 	if (!VoxelData.IsValid()) return;
-	
+
 	const size_t PointCount = VoxelData.GetCount();
 	if (PointCount == 0) return;
-	
+
 	const UNWorldAssemblySettings* Settings = GetDefault<UNWorldAssemblySettings>();
 	const FVector UnitSize = Settings->VoxelSize;
 	const FVector HalfUnitSize = UnitSize * 0.5f;
 	const FVector BaseOffset = VoxelData.Origin + Offset;
-	
+
 	for (int32 i = 0; i < PointCount; i++)
 	{
 		auto [x,y,z] = VoxelData.GetInverseIndex(i);
-		
+
 		// TODO: #ROTATE-VOXELS Rotation needs to actually rotated to the nearest grid???
 		FVector VoxelCenter = BaseOffset + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
 

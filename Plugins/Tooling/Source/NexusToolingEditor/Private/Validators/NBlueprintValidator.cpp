@@ -85,6 +85,6 @@ bool UNBlueprintValidator::IsMultiPinPureNode(UK2Node* PureNode)
 			PinConnectionCount++;
 		}
 	}
-	
+
 	return PinConnectionCount > 1;
 }

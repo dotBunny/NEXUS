@@ -48,7 +48,7 @@ public:
 	 *       above the uint64 maximum wrap mod 2^64.
 	 */
 	static uint64 SeedFromFriendlySeed(const FString& InSeed);
-	
+
 	/**
 	 * Returns a <i>valid</i> numeric seed to be used with the FNMersenneTwister.
 	 * @param InHexSeed - The desired hexadecimal FString to parse
@@ -78,5 +78,5 @@ private:
 	 * @return a cleaned-up version of the provided seed
 	 */
 	static FString SanitizeHexSeed(const FString& InHexSeed);
-	
+
 };

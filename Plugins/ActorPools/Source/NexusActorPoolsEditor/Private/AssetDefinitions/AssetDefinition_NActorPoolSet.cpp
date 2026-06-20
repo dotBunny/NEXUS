@@ -8,7 +8,7 @@
 
 FText UAssetDefinition_NActorPoolSet::GetAssetDisplayName() const
 {
-	static const FText DisplayName = NSLOCTEXT("NexusActorPoolsEditor", "AssetTypeActions_NActorPoolSet", "NActorPool Set"); 
+	static const FText DisplayName = NSLOCTEXT("NexusActorPoolsEditor", "AssetTypeActions_NActorPoolSet", "NActorPool Set");
 	return DisplayName;
 }
 

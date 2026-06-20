@@ -12,7 +12,7 @@
 void UNGuardianDeveloperOverlay::NativeConstruct()
 {
 	Super::NativeConstruct();
-	
+
 	N_VALIDATE(LogNexusGuardian, ObjectCountBox);
 	N_VALIDATE(LogNexusGuardian, ObjectCountNumber);
 	N_VALIDATE(LogNexusGuardian, BaseCountNumber);
@@ -22,7 +22,7 @@ void UNGuardianDeveloperOverlay::NativeConstruct()
 void UNGuardianDeveloperOverlay::BindWorld(UWorld* World)
 {
 	if (World == nullptr) return;
-	
+
 	if (World->WorldType == EWorldType::PIE || World->WorldType == EWorldType::Game)
 	{
 		UNGuardianSubsystem* System = UNGuardianSubsystem::Get(World);
@@ -37,7 +37,7 @@ void UNGuardianDeveloperOverlay::BindWorld(UWorld* World)
 void UNGuardianDeveloperOverlay::UnbindWorld(const UWorld* World)
 {
 	if (World == nullptr) return;
-	
+
 	if (World->WorldType == EWorldType::PIE || World->WorldType == EWorldType::Game)
 	{
 		// Remove the world's subsystem if it still resolves, then purge any slots GC has nulled so a
@@ -56,9 +56,9 @@ void UNGuardianDeveloperOverlay::UpdateBanner() const
 	if (Subsystems.IsEmpty())
 	{
 		ShowContainerBanner(RuntimeOnlyText,
-				UNStyleLibrary::GetInfoForegroundColor(), 
+				UNStyleLibrary::GetInfoForegroundColor(),
 				UNStyleLibrary::GetInfoBackgroundColor());
-		
+
 		if (ObjectCountBox != nullptr)
 		{
 			ObjectCountBox->SetVisibility(ESlateVisibility::Hidden);
@@ -67,7 +67,7 @@ void UNGuardianDeveloperOverlay::UpdateBanner() const
 	else
 	{
 		HideContainerBanner();
-		
+
 		if (ObjectCountBox != nullptr)
 		{
 			ObjectCountBox->SetVisibility(ESlateVisibility::Visible);
@@ -93,38 +93,38 @@ void UNGuardianDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, float I
 		}
 	}
 	if (System == nullptr) return;
-	
+
 	ObjectCountNumber->SetCurrentValue(System->GetLastObjectCount());
 	BaseCountNumber->SetCurrentValue(System->GetBaseObjectCount());
-	
+
 	if (System->HasPassedCompareThreshold())
 	{
 		ObjectCountNumber->SetColorAndOpacity(FLinearColor::Blue);
-		
+
 		ObjectCountNextNumber->SetCurrentValue(0);
 		ObjectCountNextNumber->SetColorAndOpacity(FLinearColor::Blue);
 	}
 	else if (System->HasPassedSnapshotThreshold())
 	{
 		ObjectCountNumber->SetColorAndOpacity(FLinearColor::Red);
-		
+
 		ObjectCountNextNumber->SetCurrentValue(System->GetObjectCountCompareThreshold());
 		ObjectCountNextNumber->SetColorAndOpacity(FLinearColor::Red);
 	}
 	else if (System->HasPassedWarningThreshold())
 	{
 		ObjectCountNumber->SetColorAndOpacity(FLinearColor::Yellow);
-		
+
 		ObjectCountNextNumber->SetCurrentValue(System->GetObjectCountSnapshotThreshold());
 		ObjectCountNextNumber->SetColorAndOpacity(FLinearColor::Yellow);
 	}
 	else
 	{
 		ObjectCountNumber->SetColorAndOpacity(FLinearColor::White);
-		
+
 		ObjectCountNextNumber->SetCurrentValue(System->GetObjectCountWarningThreshold());
 		ObjectCountNextNumber->SetColorAndOpacity(FLinearColor::White);
 	}
-	
+
 	Super::NativeTick(MyGeometry, InDeltaTime);
 }

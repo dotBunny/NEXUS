@@ -23,11 +23,11 @@ USTRUCT(BlueprintType)
 struct NEXUSPICKER_API FNPickerParams
 {
 	GENERATED_BODY()
-	
+
 	/** The number of points to generate in a single pass. */
 	UPROPERTY(Category = "Base", BlueprintReadWrite, meta=(ClampMin=1))
 	int32 Count = 1;
-	
+
 	/** The world for line tracing and drawing. */
 	UPROPERTY(Category = "Base", BlueprintReadOnly, VisibleInstanceOnly)
 	TWeakObjectPtr<UWorld> CachedWorld = nullptr;

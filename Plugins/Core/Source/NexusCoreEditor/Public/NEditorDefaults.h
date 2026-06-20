@@ -30,7 +30,7 @@ public:
 	}
 
 	/**
-	 * 
+	 *
 	 * Gets the placement category for NEXUS related AActors.
 	 * @return The qualified placement category for NEXUS related AActors.
 	 */

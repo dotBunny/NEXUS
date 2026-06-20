@@ -11,11 +11,11 @@ namespace NEXUS::WorldAssembly
 	namespace ActorTags
 	{
 		inline const FName CellIgnore = FName("NCell_Ignore");
-		
+
 		inline const FName CellBoundsIgnore = FName("NCell_BoundsIgnore");
 		inline const FName CellHullIgnore = FName("NCell_HullIgnore");
 		inline const FName CellVoxelIgnore = FName("NCell_VoxelIgnore");
-		
+
 		inline const FName WorldCollisionIgnore = FName("NWorldCollision_Ignore");
 	}
 	/**

@@ -40,6 +40,6 @@ private:
 
 	/** Top-level task-graph context containing the produced graphs and spawned proxies. */
 	TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContextPtr;
-	
+
 	N_ASSEMBLY_ANALYTICS_SHARED_REF
 };

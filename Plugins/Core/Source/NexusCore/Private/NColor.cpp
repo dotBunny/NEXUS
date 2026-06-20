@@ -23,7 +23,7 @@ FLinearColor FNColor::GetLinearColor(const ENColor& Color)
 	case NC_GreenMid:
 		return GreenMid;
 	case NC_GreenDark:
-		return GreenDark;		
+		return GreenDark;
 	case NC_Red:
 		return FLinearColor::Red;
 	case NC_Green:

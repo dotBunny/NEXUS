@@ -129,18 +129,18 @@ public:
 	 * @return The previous state.
 	 */
 	ENActorOperationalState GetPreviousActorOperationalState() const { return PreviousActorOperationalState; };
-	
+
 
 	/**
 	 * Delegate fired after a transition has occurred in the operational state.
 	 * @note Multicast delegates are heavy and should only be used when necessary.
 	 */
 	FOnActorOperationalStateChangedDelegate OnActorOperationalStateChanged;
-	
+
 private:
 	/** Was this actor created by an ActorPool? */
 	bool bIsAttachedToActorPool = false;
-	
+
 	/** A reference to the ActorPool that created the Actor. */
 	FNActorPool* OwningActorPool = nullptr;
 

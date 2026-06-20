@@ -26,7 +26,7 @@ class NEXUSCORE_API UNMersenneTwisterObject : public UObject
 	{
 		Twister.Reset();
 	}
-	
+
 public:
 
 	/** Re-seeds the owned twister from a human-friendly seed string. */
@@ -35,7 +35,7 @@ public:
 	{
 		Twister.Get()->Initialize(FNSeedGenerator::SeedFromFriendlySeed(Seed));
 	}
-	
+
 	/** Returns a pseudo random uniformly distributed bool value. */
 	UFUNCTION(BlueprintCallable, DisplayName="Random Bool", Category = "NEXUS|Core|Random")
 	bool Bool()
@@ -52,26 +52,26 @@ public:
 		Twister->Bool(Result, Count, 0);
 		return Result;
 	}
-	
+
 	/** Generates a pseudo random integer between MinimumValue and MaximumValue (inclusive). */
 	UFUNCTION(BlueprintCallable, DisplayName="Random Integer In Range", Category = "NEXUS|Core|Random")
 	int32 Integer(int32 MinimumValue, int32 MaximumValue)
 	{
 		return Twister.Get()->IntegerRange(MinimumValue, MaximumValue);
 	}
-	
+
 	/** Returns a raw pointer to the owned twister. @remark Native code only; do not cache past this object's lifetime. */
 	FNMersenneTwister* GetTwister() const
 	{
 		return Twister.Get();
 	}
-	
+
 	/** Returns a reference to the owned twister. @remark Native code only; do not cache past this object's lifetime. */
 	FNMersenneTwister& GetTwisterRef() const
 	{
 		return *Twister.Get();
 	}
-	
+
 private:
 	/** The owned twister backing all sampling on this object. */
 	TSharedPtr<FNMersenneTwister> Twister;

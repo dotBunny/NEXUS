@@ -13,7 +13,7 @@ UCLASS(BlueprintType, ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Pool Ob
 class NEXUSACTORPOOLS_API UNActorPoolObject : public UObject
 {
 	friend class FNActorPool;
-	
+
 	GENERATED_BODY()
 
 public:
@@ -150,7 +150,7 @@ public:
 		if (Pool == nullptr) return FText::FromString("Pool == nullptr");
 		return Pool->GetDescription();
 	}
-	
+
 	/**
 	 * @return true if this wrapper is still linked to a live native FNActorPool.
 	 * @note Returns false once the pool's destructor has cleared the back-pointer (e.g. after world teardown), so callers can safely skip work that would otherwise dereference a destroyed pool.

@@ -61,13 +61,13 @@ public:
 		FScopeLock Lock(&ContextTagMutex);
 		ContextTags.AppendTags(NewContextTags);
 	}
-	
+
 	void AddTagCounter(const FNGameplayTagCounter& NewTagCounter)
 	{
 		FScopeLock Lock(&TagCounterMutex);
 		TagCounter.Combine(NewTagCounter);
 	}
-	
+
 	void SetOrganCellCount(const FGuid& OrganIdentifier, const int32 NewCount)
 	{
 		FScopeLock Lock(&OrganCellMutex);
@@ -222,9 +222,9 @@ public:
 
 	/** Context tags accumulated across the graphs built into this context. */
 	FGameplayTagContainer ContextTags;
-	
+
 	FNGameplayTagCounter TagCounter;
-	
+
 	TMap<FGuid, int> OrganCellCount;
 
 	/**
@@ -234,7 +234,7 @@ public:
 	 */
 	NEXUSWORLDASSEMBLY_API explicit FNAssemblyTaskGraphContext(UWorld* OutputWorld, const int32& OperationTicket, const FNAssemblyOperationSettings& Settings);
 
-	
+
 	/** Path the operation's report is written to, when report output is enabled. */
 	FString ReportFilePath;
 
@@ -249,7 +249,7 @@ private:
 
 	/** Guards PendingDisplayMessage against concurrent writes from task threads. */
 	FCriticalSection DisplayMessageMutex;
-	
+
 	/** Most recent display message written by a task; coalesced (latest wins). */
 	FString PendingDisplayMessage;
 	/** Bumped on every SetDisplayMessage so the game-thread reader can cheaply detect changes without locking. */

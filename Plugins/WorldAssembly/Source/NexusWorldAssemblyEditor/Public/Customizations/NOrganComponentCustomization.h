@@ -40,7 +40,7 @@ private:
 
 	/** @return Visible when the selected organ component(s)' last operation still has proxies that could be cleared. */
 	EVisibility ClearButtonVisible() const;
-	
+
 	EVisibility GenerateButtonVisible() const;
 
 	/**

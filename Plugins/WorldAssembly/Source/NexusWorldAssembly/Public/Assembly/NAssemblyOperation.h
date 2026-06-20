@@ -51,7 +51,7 @@ struct FNAssemblyOperationResult
 	float Duration = 0.0f;
 	/** Number of cells created during the operation. */
 	int32 CreatedCells = 0;
-	
+
 	void Reset()
 	{
 		bSuccess = false;
@@ -103,7 +103,7 @@ public:
 		FString OutputFile = FPaths::Combine(FPaths::ProjectLogDir(),
 					FString::Printf(TEXT("NEXUS_WorldAssembly_%s.md"), *Timestamp));
 		TArray<FString> Output = Report.GetReportLines(ENReportOutputFormat::Markdown);
-		
+
 		Async(EAsyncExecution::TaskGraph,
 			[Output = MoveTemp(Output), OutputFile]()
 			{
@@ -126,7 +126,7 @@ public:
 	FNReport* GetReport() { return &Report; }
 
 #endif // !UE_BUILD_SHIPPING
-	
+
 	/**
 	 * Convert an operation state enum into the stable string used by logs and the developer overlay.
 	 * @param State The state to convert.
@@ -149,11 +149,11 @@ public:
 			return NEXUS::WorldAssembly::States::Unregistered;
 		default:
 			return NEXUS::WorldAssembly::States::None;
-		}		
+		}
 	}
-	
+
 	/**
-	 * Build an operation from an explicit set of organ components.	 
+	 * Build an operation from an explicit set of organ components.
 	 * @param Components Components participating in the generation context. It is important that these have been presorted by Identifier to ensure determinism.
 	 * @param OperationSettings Per-operation settings to apply (seed, level-instance behavior).
 	 * @return The configured operation ready to be registered with a World Assembly subsystem.
@@ -247,15 +247,15 @@ public:
 	FIntVector2 GetCachedTaskStatusCounts() const { return FIntVector2(CachedCompletedTasks, CachedTotalTasks); }
 	/** @return The unique 32-bit identifier assigned to this operation at creation time. */
 	int32 GetTicket() const { return Ticket; }
-	
+
 	void UpdateCachedResult();
 
 	/** Requests cancellation of the in-flight build. */
 	void Cancel();
-	
+
 	/** @return A snapshot of the operation's outcome (success/warning flags, title, message, duration, and created-cell count). */
 	const FNAssemblyOperationResult& GetResult() const { return Result; }
-	
+
 protected:
 	void Tick();
 	void FinishBuild(TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContext);
@@ -291,7 +291,7 @@ private:
 
 	/** Human-friendly label for UI. */
 	FText DisplayName;
-	
+
 	/** Current progress message for UI. */
 	FString StatusMessage;
 
@@ -311,6 +311,6 @@ private:
 #if !UE_BUILD_SHIPPING
 	FNReport Report;
 #endif // !UE_BUILD_SHIPPING
-	
+
 	FNAssemblyOperationResult Result;
 };

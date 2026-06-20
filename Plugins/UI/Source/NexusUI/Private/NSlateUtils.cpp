@@ -12,12 +12,12 @@ TSharedPtr<SWidget> FNSlateUtils::FindFirstWidgetByType(const TSharedPtr<SWidget
 	{
 		return nullptr;
 	}
-	
+
 	if (ParentWidget->GetType() == WidgetType)
 	{
 		return ParentWidget;
 	}
-	
+
 	FChildren* Children = ParentWidget->GetChildren();
 	for (int32 i = 0; i < Children->Num(); ++i)
 	{
@@ -27,7 +27,7 @@ TSharedPtr<SWidget> FNSlateUtils::FindFirstWidgetByType(const TSharedPtr<SWidget
 			return Found;
 		}
 	}
-	
+
 	return nullptr;
 }
 
@@ -37,13 +37,13 @@ void FNSlateUtils::FindWidgetsByType(TArray<TSharedPtr<SWidget>>& OutWidgets, co
 	{
 		return;
 	}
-	
+
 	if (ParentWidget->GetType() == WidgetType)
 	{
 		OutWidgets.Add(ParentWidget);
 		return;
 	}
-	
+
 	FChildren* Children = ParentWidget->GetChildren();
 	for (int32 i = 0; i < Children->Num(); ++i)
 	{
@@ -77,11 +77,11 @@ TSharedPtr<SDockTab> FNSlateUtils::FindDockTabWithLabel(const TSharedPtr<SWidget
 					}
 				}
 			}
-			
+
 			// Not going to go up at this point cause we already hit the container above me
 			return nullptr;
 		}
-		
+
 		// Floating Tab
 		if (Widget->GetType() == SDockTabName)
 		{
@@ -93,11 +93,11 @@ TSharedPtr<SDockTab> FNSlateUtils::FindDockTabWithLabel(const TSharedPtr<SWidget
 			// Reached our containing tab and it isn't the target; let the caller fall back to identifier lookup.
 			return nullptr;
 		}
-		
+
 		// Goes up
 		Widget = Widget->GetParentWidget();
 	}
-	
+
 	// So if we've reached here, we are probably not actually a visible tab.
 	return nullptr;
 }

@@ -23,7 +23,7 @@ UCLASS(NotPlaceable, HideDropdown, Hidden, Transient, ClassGroup = "NEXUS", Disp
 class NEXUSWORLDASSEMBLY_API ANCellProxy : public AActor
 {
 	friend class UNCellActorFactory;
-	
+
 	GENERATED_BODY()
 
 	explicit ANCellProxy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
@@ -51,21 +51,21 @@ public:
 	 * @param bTagActorsToIgnore When true, tag the level instance's actors so they are skipped during subsequent operations.
 	 */
 	void DestroyLevelInstance(bool bUnregisterCellLevelInstance = false, bool bTagActorsToIgnore = false);
-	
+
 protected:
 	/** Applies the freshly-streamed proxy material to DynamicMaterial once its async load completes. */
 	void OnProxyMaterialLoaded();
 	/** Configure the proxy from a UNCell asset (mesh preview, junction details, etc.). */
 	void InitializeFromNCell(UNCell* InCell);
-	
+
 private:
 
 	/** Reveal the proxy's preview mesh and enable its visualization components. */
 	void Show() const;
-	
+
 	/** Hide the proxy's preview mesh — used once the paired level instance is fully loaded. */
 	void Hide() const;
-	
+
 	/** Mark all actors owned by the paired level instance so they are skipped during subsequent operations. */
 	void TagActorsToIgnore() const;
 

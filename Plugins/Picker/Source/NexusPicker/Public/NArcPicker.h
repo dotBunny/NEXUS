@@ -37,7 +37,7 @@ public:
 		int32 DuplicateSeed = Seed;
 	 	Tracked(OutLocations, DuplicateSeed, Params);
 	}
-	
+
 	/**
 	 * Generate random points as part of an arc.
 	 * Updates the seed value to enable sequential random point generation.
@@ -46,15 +46,15 @@ public:
 	 * @param Params The parameters for the point generation.
 	 */
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNArcPickerParams& Params);
-	
+
 	/**
-	 * Generate random points as part of an arc using a provided Mersenne Twister.	 
+	 * Generate random points as part of an arc using a provided Mersenne Twister.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Random The Mersenne Twister to query for random.
 	 * @param Params The parameters for the point generation.
 	 */
 	static void Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNArcPickerParams& Params);
-	
+
 	/**
 	 * Checks if a point is inside or on the arc.
 	 * @param Origin The center point of the arc.
@@ -70,16 +70,16 @@ public:
 	{
 		const FVector Direction = Point - Origin;
 		const float DistanceSquared = Direction.SizeSquared();
-		if (DistanceSquared > (MaximumDistance * MaximumDistance) || 
-			DistanceSquared < (MinimumDistance * MinimumDistance)) 
+		if (DistanceSquared > (MaximumDistance * MaximumDistance) ||
+			DistanceSquared < (MinimumDistance * MinimumDistance))
 		{
 			return false;
 		}
-		
+
 		const float DotProduct = FVector::DotProduct(Rotation.Vector(), Direction.GetSafeNormal());
 		const float AngleRadians = FMath::Acos(DotProduct);
 		const float AngleDegrees = FMath::RadiansToDegrees(AngleRadians);
-    
+
 		return AngleDegrees <= (Degrees * 0.5f);
 	}
 
@@ -97,7 +97,7 @@ public:
 	{
 		TArray<bool> OutResults;
 		OutResults.Reserve(Points.Num());
-		
+
 		for (const FVector& Point : Points)
 		{
 			OutResults.Add(IsPointInsideOrOn(Origin, Rotation, Degrees, MinimumDistance, MaximumDistance, Point));

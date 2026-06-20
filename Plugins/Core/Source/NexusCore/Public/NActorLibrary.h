@@ -11,7 +11,7 @@
  * A utility class providing core functions and operations for Actors.
  *
  * The UNActorLibrary class serves as a collection of static utility functions
- * for working with Actors in Unreal Engine. These functions are designed to be 
+ * for working with Actors in Unreal Engine. These functions are designed to be
  * callable from both C++ and Blueprint contexts, providing common operations
  * related to Actor manipulation, comparison, and management.
  */

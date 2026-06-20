@@ -26,7 +26,7 @@ void FNUIEditorModule::ShutdownModule()
 void FNUIEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;
-	
+
 	FNUIEditorStyle::Initialize();
 	FNPropertySections::AddSceneComponentCategory("Text Render Component");
 }

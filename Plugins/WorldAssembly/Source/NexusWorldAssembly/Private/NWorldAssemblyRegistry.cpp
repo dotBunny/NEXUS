@@ -49,7 +49,7 @@ TArray<UNCellJunctionComponent*> FNWorldAssemblyRegistry::GetCellJunctionsCompon
 			return A.Details.InstanceIdentifier < B.Details.InstanceIdentifier;
 		});
 	}
-	
+
 	return JunctionComponents;
 }
 
@@ -68,14 +68,14 @@ TArray<UNOrganComponent*> FNWorldAssemblyRegistry::GetOrganComponentsFromLevel(c
 			OrganComponents.Add(Organ);
 		}
 	}
-	
+
 	if (bSorted)
 	{
 		OrganComponents.Sort([](const UNOrganComponent& A, const UNOrganComponent& B) {
 			return A.Identifier < B.Identifier;
 		});
 	}
-	
+
 
 	return OrganComponents;
 }
@@ -95,7 +95,7 @@ TArray<UNBoneComponent*> FNWorldAssemblyRegistry::GetBoneComponentsFromLevel(con
 			BoneComponents.Add(Bone);
 		}
 	}
-	
+
 	if (bSorted)
 	{
 		BoneComponents.Sort([](const UNBoneComponent& A, const UNBoneComponent& B) {
@@ -149,7 +149,7 @@ bool FNWorldAssemblyRegistry::HasOrganComponentsInWorld(const UWorld* World)
 
 bool FNWorldAssemblyRegistry::HasOperations()
 {
-#if WITH_EDITOR	
+#if WITH_EDITOR
 	if (Operations.Num() == 1 && Operations[0]->GetName() == NEXUS::WorldAssembly::Operations::EditorMode)
 	{
 		return false;
@@ -190,7 +190,7 @@ TArray<ANCellLevelInstance*> FNWorldAssemblyRegistry::GetCellLevelInstancesInRan
 {
 	TArray<ANCellLevelInstance*> Results;
 	if (CellLevelInstances.IsEmpty()) return Results;
-	
+
 	const double RangeSquared = Range * Range;
 
 	// Distance check method
@@ -326,7 +326,7 @@ bool FNWorldAssemblyRegistry::RegisterOperation(UNAssemblyOperation* Operation)
 	}
 
 	Operations.Add(Operation);
-	
+
 	NotifyOfStateChange(Operation, ENWorldAssemblyOperationState::Registered);
 	return true;
 }
@@ -425,7 +425,7 @@ bool FNWorldAssemblyRegistry::UnregisterCellLevelInstance(ANCellLevelInstance* C
 		{
 			LevelInstances->RemoveSwap(CellLevelInstance);
 			CellLevelInstance->bRegistered = false;
-	
+
 			if (LevelInstances->IsEmpty())
 			{
 				CellLevelInstances.Remove(OperationTicket);
@@ -449,7 +449,7 @@ void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnd
 {
 	// We're not going to handle Operations here, it will be handled elsewhere.
 	if (IsEngineExitRequested()) return;
-	
+
 	// Scrub Bones
 	for (int i = Bones.Num() - 1; i >= 0; --i)
 	{
@@ -459,21 +459,21 @@ void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnd
 			Bones.RemoveAt(i);
 		}
 	}
-	
+
 	// Scrub Cell Junctions
 	for (int i = CellJunctions.Num() - 1; i >= 0; --i)
 	{
 		if (CellJunctions[i]->GetWorld() == World)
 		{
-#if WITH_EDITOR			
+#if WITH_EDITOR
 			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Found uncleaned CellJunctions(%s), scrubbing."), *CellJunctions[i]->GetJunctionName());
 #else
 			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Found uncleaned CellJunctions(%s), scrubbing."), *CellJunctions[i]->GetFName().ToString());
-#endif // WITH_EDITOR			
+#endif // WITH_EDITOR
 			CellJunctions.RemoveAt(i);
 		}
 	}
-	
+
 	// Scrub Cell Roots
 	for (int i = CellRoots.Num() - 1; i >= 0; --i)
 	{
@@ -483,7 +483,7 @@ void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnd
 			CellRoots.RemoveAt(i);
 		}
 	}
-	
+
 	// Scrub Organs
 	for (int i = Organs.Num() - 1; i >= 0; --i)
 	{
@@ -493,11 +493,11 @@ void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnd
 			Organs.RemoveAt(i);
 		}
 	}
-	
+
 	// Scrub CellLevelInstances
 	TArray<int32> OperationTickets;
 	CellLevelInstances.GetKeys(OperationTickets);
-	
+
 	for (int i = OperationTickets.Num() - 1; i >= 0; --i)
 	{
 		const int32 Ticket = OperationTickets[i];
@@ -510,7 +510,7 @@ void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnd
 				CellLevelInstances[Ticket].RemoveAt(j);
 			}
 		}
-		
+
 		// Remove empty containers
 		if (CellLevelInstances[Ticket].IsEmpty())
 		{

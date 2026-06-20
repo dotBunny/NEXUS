@@ -38,9 +38,9 @@ public:
 	 * the progress bar keeps moving while spawning re-dispatches frame to frame. INDEX_NONE until opened.
 	 */
 	int32 SpawnStatusChannelId = INDEX_NONE;
-	
+
 	int32 CellNodesLoadCurrentIndex = 0;
-	
+
 	/** Per-frame time budget for spawning cell proxies, in seconds. */
 	float CellTimeSlice = 0.002f;
 

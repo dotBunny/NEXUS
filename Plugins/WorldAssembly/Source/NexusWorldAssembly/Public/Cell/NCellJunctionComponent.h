@@ -32,7 +32,7 @@ UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Cell Junction", meta=(Blueprin
 class NEXUSWORLDASSEMBLY_API UNCellJunctionComponent : public USceneComponent
 {
 	GENERATED_BODY()
-	
+
 	explicit UNCellJunctionComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get())
 		: Details()
 		, LevelInstance(nullptr)
@@ -40,8 +40,8 @@ class NEXUSWORLDASSEMBLY_API UNCellJunctionComponent : public USceneComponent
 		PrimaryComponentTick.bCanEverTick = false;
 		PrimaryComponentTick.bStartWithTickEnabled = false;
 		bAutoActivate = 0;
-		
-		
+
+
 		Mobility = EComponentMobility::Static;
 #if WITH_EDITOR
 		TArray<USceneComponent*> ParentComponents;
@@ -63,20 +63,20 @@ public:
 	/** Junction shape, orientation, and flags authored per junction. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction")
 	FNCellJunctionDetails Details;
-	
+
 	/** Candidate fillers for this junction; one is selected (constraint-gated, then weighted-random) and spawned when the junction is left unconnected. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction", meta=(TitleProperty="{Actor}"))
 	TArray<FNCellJunctionFillerEntry> Fillers;
-	
+
 	/** When true, bypass filler time-slicing and spawn this junction's filler immediately during BeginPlay. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Spawn Filler Immediately", Category = "Cell Junction",
 		meta=(ToolTip="Override timeslicing support and immediately spawn this filler in BeginPlay"))
 	bool bSpawnFillerImmediately = false;
-	
+
 	UPROPERTY(EditInstanceOnly, DisplayName="BeginPlay", Category = "Callbacks",
 		meta=(AllowedClasses="/Script/NexusWorldAssembly.NCellJunctionBeginPlay"))
 	TArray<TObjectPtr<AActor>> OnBeginPlayCallback;
-	
+
 	/** Connection state for this junction, resolved during generation; its bConnected flag gates whether the junction is filled at BeginPlay. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Assembly Operation")
 	FNCellLinkDetails LinkDetails;
@@ -88,26 +88,26 @@ public:
 
 	/** @return The rotational offset authored on the junction's details. */
 	FRotator GetOffsetRotator() const;
-	
+
 	/** @return The location offset authored on the junction's details. */
 	FVector GetOffsetLocation() const;
 
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	
+
 #if WITH_EDITOR
 
 	virtual void PostEditImport() override;
-	
+
 	/** @return The display name of this junction. */
 	FString GetJunctionName() const;
 	/** Transform-changed callback that keeps the junction's hull-derived data in sync after the component moves. */
 	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
 #endif // WITH_EDITOR
-	
+
 	/** Draw the junction's debug visualization through the supplied PDI. */
-	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, 
-		bool bShowDepth = false, FLinearColor ValidColor = FNColor::GreenLight, FLinearColor Invalid = FLinearColor::Red, 
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI,
+		bool bShowDepth = false, FLinearColor ValidColor = FNColor::GreenLight, FLinearColor Invalid = FLinearColor::Red,
 		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get()) const;
 
 	/**
@@ -115,24 +115,24 @@ public:
 	 * @return The junction's socket corner points in world space.
 	 */
 	TArray<FVector> GetWorldCornerPoints(const FVector2D& SocketSize) const;
-	
+
 	/**
 	 * Spawn a filler actor for this junction when it is left unconnected: select an eligible entry from Fillers
 	 * (constraint-gated, then weighted-random), fall back to the project-wide Default Filler when none qualify, and
 	 * notify the spawned actor through INCellJunctionFiller.
 	 */
 	void Fill();
-	
+
 protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Assembly Operation")
 	TWeakObjectPtr<AActor> FillerActor;
-	
+
 	int32 OperationTicket;
-	
+
 	/** Cached level-instance owner when the junction is spawned as part of a streamed-in cell. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Assembly Operation")
 	TWeakObjectPtr<ALevelInstance> LevelInstance;
-	
+
 private:
 	/**
 	 * Filter this junction's Fillers down to the entries whose context-tag and tag-counter constraints are

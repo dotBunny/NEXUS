@@ -20,7 +20,7 @@ FNPositionRotation UNOrganComponent::GetDebugLabelPositionRotation() const
 {
 	FNPositionRotation PositionRotation;
 	const AActor* Owner = GetOwner();
-	
+
 	const AVolume* Volume = IsVolumeBased() ? Cast<AVolume>(Owner) : nullptr;
 	if (Volume != nullptr)
 	{
@@ -32,7 +32,7 @@ FNPositionRotation UNOrganComponent::GetDebugLabelPositionRotation() const
 		PositionRotation.Position = Owner->GetActorLocation();
 		PositionRotation.Rotation = Owner->GetActorRotation();
 	}
-	
+
 	return PositionRotation;
 }
 
@@ -47,12 +47,12 @@ void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 		FTransform BoxTransform = Owner->GetLevelTransform();
 		const auto Box =  Volume->GetBounds().GetBox();
 		BoxTransform.SetLocation( Owner->GetActorLocation() );
-		
+
 		UModel* Model = Volume->GetBrushComponent()->Brush;
-		
+
 		FNVolumeGeometryData Data;
 		FNVolumeUtils::FillGeometryData(Model, Data);
-		
+
 		FDynamicMeshBuilder MeshBuilder(PDI->View->GetFeatureLevel());
 		MeshBuilder.AddVertices(Data.Vertices);
 		for (int32 i = 0; i < Data.Indices.Num(); i += 3)
@@ -65,15 +65,15 @@ void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 		}
 		if (bUnbound)
 		{
-			MeshBuilder.Draw(PDI, Volume->GetBrushComponent()->GetRenderMatrix(), 
+			MeshBuilder.Draw(PDI, Volume->GetBrushComponent()->GetRenderMatrix(),
 			GEngine->ConstraintLimitMaterial->GetRenderProxy(), SDPG_World);
 		}
 		else
 		{
-			MeshBuilder.Draw(PDI, Volume->GetBrushComponent()->GetRenderMatrix(), 
+			MeshBuilder.Draw(PDI, Volume->GetBrushComponent()->GetRenderMatrix(),
 			GEngine->ConstraintLimitMaterialPrismatic->GetRenderProxy(), SDPG_World);
 		}
-		
+
 	}
 }
 

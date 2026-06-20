@@ -24,7 +24,7 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 	for (AActor* Actor : Actors)
 	{
 		if (!IsValid(Actor)) continue;
-		
+
 		// Actor-bounds overlap filter: include when the actor's bounds intersect at least one supplied bounds.
 		if (!ContainingBounds.IsEmpty())
 		{
@@ -112,7 +112,7 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 				{
 					Body->CreatePhysicsMeshes();
 				}
-				
+
 				FromChaosBodySetup(Body, CompToWorld, OutMeshes, OutTransforms);
 				continue;
 			}
@@ -166,7 +166,7 @@ bool FNRawMeshFactory::FromChaosBox(const FKBoxElem& Box, const FTransform& Comp
 
 	Mesh.CalculateCenterAndBounds();
 	Mesh.Validate();
-	
+
 
 	const FTransform ElemLocal(Box.Rotation, Box.Center);
 	OutMesh = MoveTemp(Mesh);
@@ -331,7 +331,7 @@ bool FNRawMeshFactory::FromChaosSphyl(const FKSphylElem& Sphyl, const FTransform
 
 	Mesh.CalculateCenterAndBounds();
 	Mesh.Validate();
-	
+
 	const FTransform ElemLocal(Sphyl.Rotation, Sphyl.Center);
 	OutMesh = MoveTemp(Mesh);
 	OutTransform = ElemLocal * CompToWorld;
@@ -341,7 +341,7 @@ bool FNRawMeshFactory::FromChaosSphyl(const FKSphylElem& Sphyl, const FTransform
 bool FNRawMeshFactory::FromChaosTriMeshes(const Chaos::FTriangleMeshImplicitObjectPtr& TriMesh, FNRawMesh& OutMesh)
 {
 	if (!TriMesh.IsValid()) return false;
-	
+
 	const auto& Particles = TriMesh->Particles();
 	const Chaos::FTrimeshIndexBuffer& IdxBuffer = TriMesh->Elements();
 
@@ -504,7 +504,7 @@ bool FNRawMeshFactory::FromStaticMesh(const UStaticMesh* StaticMesh, FNRawMesh& 
 
 void FNRawMeshFactory::AppendChaosAggregateGeometry(const FKAggregateGeom& Agg, const FTransform& BaseToWorld, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms)
 {
-	
+
 	for (const FKConvexElem& ConvexHull : Agg.ConvexElems)
 	{
 		FNRawMesh WorkingMesh;

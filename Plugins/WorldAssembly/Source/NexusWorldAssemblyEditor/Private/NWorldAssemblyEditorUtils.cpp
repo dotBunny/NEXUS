@@ -120,7 +120,7 @@ TArray<ANOrganVolume*> FNWorldAssemblyEditorUtils::GetSelectedOrganVolumes(const
 	{
 		if (ANOrganVolume* TestVolume = Cast<ANOrganVolume>( *SelectedActor )) Result.Add(TestVolume);
 	}
-	
+
 	if (bSorted)
 	{
 		Result.Sort([](const ANOrganVolume& A, const ANOrganVolume& B) {
@@ -140,14 +140,14 @@ TArray<UNOrganComponent*> FNWorldAssemblyEditorUtils::GetSelectedOrganComponents
 			Components.Add(Organ->GetOrganComponent());
 		}
 	}
-	
+
 	if (bSorted)
 	{
 		Components.Sort([](const UNOrganComponent& A, const UNOrganComponent& B) {
 			return A.Identifier < B.Identifier;
 		});
 	}
-	
+
 	return Components;
 }
 
@@ -160,7 +160,7 @@ ENWorldAssemblySelectionFlags FNWorldAssemblyEditorUtils::GetSelectionFlags()
 		{
 			N_FLAGS_ADD_UINT8(Flags, ENWorldAssemblySelectionFlags::CellActor);
 		}
-		
+
 		if (Cast<ANOrganVolume>( *SelectedActor ))
 		{
 			N_FLAGS_ADD_UINT8(Flags, ENWorldAssemblySelectionFlags::OrganVolume);
@@ -239,7 +239,7 @@ void FNWorldAssemblyEditorUtils::EnsureCellInitializedCallbackActors(const UWorl
 bool FNWorldAssemblyEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 {
 	bool bUpdatedCellData = false;
-	
+
 	FScopedSlowTask MainTask = FScopedSlowTask(7, NSLOCTEXT("NexusWorldAssemblyEditor", "Task_UpdateCell", "Update Cell"));
 	MainTask.MakeDialog(false);
 
@@ -251,7 +251,7 @@ bool FNWorldAssemblyEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor
 	{
 		CellActor->SetActorLabel(CellActorName);
 	}
-	
+
 	// STEP 2 - Calculate Bounds
 	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusWorldAssemblyEditor", "Task_UpdateCell_Step2", "Cell Bounds ..."));
 	// Update Our Cell Overall Data (in the level, not copied at this point)
@@ -267,14 +267,14 @@ bool FNWorldAssemblyEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor
 		CellActor->CalculateHull();
 		FNWorldAssemblyEdMode::ProtectCellEdMode();
 	}
-	
+
 	// STEP 4 - Calculate Voxel Data
 	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusWorldAssemblyEditor", "Task_UpdateCell_Step4", "Cell Voxel ..."));
 	if (CellActor->CellRoot->Details.VoxelSettings.bCalculateOnSave)
 	{
 		CellActor->CalculateVoxelData();
 	}
-	
+
 	// STEP 4A - Clear Data If Not Suppose To Be There
 	if (!CellActor->CellRoot->Details.VoxelSettings.bUseVoxelData && CellActor->CellRoot->Details.VoxelData.GetCount() != 0)
 	{
@@ -291,7 +291,7 @@ bool FNWorldAssemblyEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor
 		CellActor->CellRoot->Details.CopyTo(Cell->Root);
 		bUpdatedCellData = true;
 	}
-	
+
 	// STEP 6 - Clean up Junction Data
 	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusWorldAssemblyEditor", "Task_UpdateCell_Step6", "Clean Up Junction Data ..."));
 	const TMap<int32, TObjectPtr<UNCellJunctionComponent>>& JunctionComponents = CellActor->CellJunctions;
@@ -332,10 +332,10 @@ bool FNWorldAssemblyEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor
 			bUpdatedCellData =  true;
 		}
 	}
-	
+
 	// STEP 7 - Ensure Sidecar
 	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusWorldAssemblyEditor", "Task_UpdateCell_Step7", "Ensure Sidecar ..."));
-	
+
 	// Ensure the Cell is mapped to the component.
 	if (CellActor->Sidecar != Cell)
 	{
@@ -344,7 +344,7 @@ bool FNWorldAssemblyEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor
 		// We changed it, make sure the level is known dirty too.
 		if (!CellActor->MarkPackageDirty())
 		{
-			UE_LOG(LogNexusWorldAssemblyEditor, Warning, TEXT("Failed to mark UPackage dirty for ANCellActor(%s) in UWorld(%s) when updating UNCell(%s)."), 
+			UE_LOG(LogNexusWorldAssemblyEditor, Warning, TEXT("Failed to mark UPackage dirty for ANCellActor(%s) in UWorld(%s) when updating UNCell(%s)."),
 				*CellActor->GetName(), *CellActor->GetWorld()->GetName(), *Cell->GetName());
 		}
 		bUpdatedCellData = true;
@@ -358,7 +358,7 @@ bool FNWorldAssemblyEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor
 	{
 		Cell->Version++;
 	}
-	
+
 	return bUpdatedCellData;
 }
 
@@ -392,7 +392,7 @@ TArray<FAssetData> FNWorldAssemblyEditorUtils::GetAllCellDataAssetData(bool bWai
 	FARFilter Filter;
 	Filter.ClassPaths.Add(UNCell::StaticClass()->GetClassPathName());
 	Filter.bRecursiveClasses = true;
-	
+
 	TArray<FAssetData> FoundAssets;
 	AssetRegistry.GetAssets(Filter, FoundAssets);
 	return FoundAssets;

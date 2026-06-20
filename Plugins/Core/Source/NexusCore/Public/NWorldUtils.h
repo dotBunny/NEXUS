@@ -12,7 +12,7 @@
 class FNWorldUtils
 {
 public:
-	
+
 	/** @return The first active Game or PIE world, or nullptr if none exists. */
 	static UWorld* GetGameWorld()
 	{
@@ -25,11 +25,11 @@ public:
 		}
 		return nullptr;
 	}
-	
+
 	static bool IsStreaming(const UWorld* InWorld)
 	{
 		if (!InWorld) return false;
-	
+
 		const TArray<ULevelStreaming*>& StreamingLevels = InWorld->GetStreamingLevels();
 		for (ULevelStreaming* Level : StreamingLevels)
 		{
@@ -37,9 +37,9 @@ public:
 			{
 				if (Level->IsLevelLoaded() && !Level->IsLevelVisible() && Level->ShouldBeVisible())
 				{
-					return true; 
+					return true;
 				}
-			
+
 				if (Level->HasLoadRequestPending())
 				{
 					return true;

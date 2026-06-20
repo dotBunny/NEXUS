@@ -76,7 +76,7 @@ IAssetEditorInstance* FNEditorUtils::GetForegroundAssetEditor()
 
 UBlueprint* FNEditorUtils::CreateBlueprint(const FString& InPath, const TSubclassOf<UObject>& InParentClass)
 {
-	
+
 	if (StaticLoadObject(UObject::StaticClass(), nullptr, *InPath))
 	{
 		UE_LOG(LogNexusCoreEditor, Error, TEXT("Unable to create a new UBlueprint as one already exists at the provided path(%s)."), *InPath);
@@ -258,7 +258,7 @@ void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDock
 		}
 		return;
 	}
-	
+
 	if (const FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
 	{
 		const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
@@ -277,7 +277,7 @@ void FNEditorUtils::CleanLogsFolder()
 {
 	TArray<FString> FilePaths;
 	IFileManager& FileManager = IFileManager::Get();
-	
+
 	TArray<FString> Searches;
 	Searches.Add(TEXT("*BuildOut*"));
 	Searches.Add(TEXT("*-backup-*")); // Backups
@@ -300,7 +300,7 @@ void FNEditorUtils::CleanLogsFolder()
 			DeleteCount++;
 		}
 	}
-	
+
 	if (DeleteCount > 0)
 	{
 		UE_LOG(LogNexusCoreEditor, Log, TEXT("Deleted %i files from %s."), DeleteCount, *FPaths::ProjectLogDir());

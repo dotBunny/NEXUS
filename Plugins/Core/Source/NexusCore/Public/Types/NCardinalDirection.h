@@ -103,7 +103,7 @@ public:
 			GetClosestCardinalAngle(Rotator.Yaw),
 			GetClosestCardinalAngle(Rotator.Roll));
 	}
-	
+
 	/**
 	 * Returns true when Angle lies within Tolerance of Direction's cardinal heading.
 	 *
@@ -270,7 +270,7 @@ public:
 		return North;
 
 	}
-	
+
 	/**
 	 * Returns the [0, 360) decimal-degree bearing of CardinalDirection.
 	 * @param CardinalDirection Enum value to convert.
