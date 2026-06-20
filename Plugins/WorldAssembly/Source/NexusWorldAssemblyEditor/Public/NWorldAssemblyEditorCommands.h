@@ -191,7 +191,6 @@ private:
 
 	/** @return every Organ command appended to the global action list (see FOrganGlobalAction). */
 	TArray<FNCommandInfoAction> GetGlobalOrganActions() const;
-	TArray<FNCommandInfoAction> GetQuickAssemblyActions() const;
 
 	TSharedPtr<FUICommandList> CommandList_Cell;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCaptureThumbnail;
