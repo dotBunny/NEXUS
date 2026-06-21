@@ -217,7 +217,7 @@ void UNWorldAssemblySubsystem::DestroyOperationActors(const int32 OperationTicke
 void UNWorldAssemblySubsystem::Tick(float DeltaTime)
 {
 	// Seamless-traveled players arrive asynchronously through HandleSeamlessTravelPlayer (no delegate to bind), so
-	// when seamless travel is supported we poll for unserved controllers. Throttled to roughly once per second: a
+	// when seamless travel is supported we poll for unserved controllers. Throttled to roughly once per half-second: a
 	// frame-accurate response buys nothing and SpawnRelay is idempotent, so missed frames cost only a little latency.
 	if (bCachedSeamlessTravelMonitor)
 	{
