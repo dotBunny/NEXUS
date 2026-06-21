@@ -6,6 +6,7 @@
 #include "Assembly/NAssemblyOperationSettings.h"
 #include "Cell/NCellProxy.h"
 #include "Assembly/Graph/NAssemblyGraph.h"
+#include "Math/NMersenneTwister.h"
 
 /**
  * A drained snapshot of a single status channel, handed to the game thread by ConsumeChannelUpdates.
@@ -72,6 +73,13 @@ public:
 	{
 		FScopeLock Lock(&OrganCellMutex);
 		OrganCellCount.Add(OrganIdentifier, NewCount);
+	}
+
+	/** Record the random-stream snapshot a successful organ build finished from, keyed by the organ's identifier. */
+	void SetOrganRandomState(const FGuid& OrganIdentifier, const FNMersenneTwisterState& State)
+	{
+		FScopeLock Lock(&OrganRandomStateMutex);
+		OrganRandomState.Add(OrganIdentifier, State);
 	}
 
 	/**
@@ -227,6 +235,9 @@ public:
 
 	TMap<FGuid, int> OrganCellCount;
 
+	/** Random-stream snapshot each successful organ build finished from, keyed by the organ's identifier; drained back onto the source component on the game thread. */
+	TMap<FGuid, FNMersenneTwisterState> OrganRandomState;
+
 	/**
 	 * @param OutputWorld World to target when spawning proxies.
 	 * @param OperationTicket Identifier of the operation that owns this context.
@@ -246,6 +257,7 @@ private:
 	FCriticalSection TagCounterMutex;
 	FCriticalSection TakeGraphMutex;
 	FCriticalSection OrganCellMutex;
+	FCriticalSection OrganRandomStateMutex;
 
 	/** Guards PendingDisplayMessage against concurrent writes from task threads. */
 	FCriticalSection DisplayMessageMutex;

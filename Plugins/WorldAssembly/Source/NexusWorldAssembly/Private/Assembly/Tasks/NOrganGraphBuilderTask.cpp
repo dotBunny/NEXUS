@@ -242,6 +242,9 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		// Report findings for later
 		TaskGraphContextPtr->SetOrganCellCount(OrganContextPtr->GetIdentifier(), OrganContextPtr->CellGraph->GetCellNodeCount());
 
+		// Hand back the random-stream position the winning attempt started from so the source component can record it.
+		TaskGraphContextPtr->SetOrganRandomState(OrganContextPtr->GetIdentifier(), SavedRandomState);
+
 		// Hand off only this organ's contribution. The working TagCounter was seeded with BaseTagCounter so
 		// constraints could gate against absolute counts, but the base already lives in the world/task-graph
 		// counter the pass Combines into; differencing it out leaves just this organ's delta to avoid

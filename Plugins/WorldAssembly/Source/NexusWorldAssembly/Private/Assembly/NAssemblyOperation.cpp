@@ -357,6 +357,12 @@ void UNAssemblyOperation::FinishBuild(const TSharedRef<FNAssemblyTaskGraphContex
 	for (const auto Component : Context->InputComponents)
 	{
 		Component->SetLastOperationTicket(GetTicket());
+
+		// Only successful organ builds register a snapshot, so a missing entry leaves the component's prior state intact.
+		if (const FNMersenneTwisterState* RandomState = TaskGraphContext->OrganRandomState.Find(Component->Identifier))
+		{
+			Component->SetLastRandomState(*RandomState);
+		}
 	}
 
 	// Were going to delete this object

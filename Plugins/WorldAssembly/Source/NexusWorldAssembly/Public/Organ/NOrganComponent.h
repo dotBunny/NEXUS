@@ -138,6 +138,12 @@ public:
 	/** Stash the ticket of the most recent operation that targeted this organ. */
 	void SetLastOperationTicket(const int32& Ticket) { LastOperationTicket = Ticket; }
 
+	/** Record the random-stream snapshot the organ's most recent successful build finished from. */
+	void SetLastRandomState(const FNMersenneTwisterState& State) { LastRandomState = State; }
+
+	/** @return The random-stream snapshot of the organ's most recent successful build. */
+	const FNMersenneTwisterState& GetLastRandomState() const { return LastRandomState; }
+
 	/** @return The ticket of the most recent operation that targeted this organ. */
 	const int32& GetLastOperationTicket() const { return LastOperationTicket; }
 
