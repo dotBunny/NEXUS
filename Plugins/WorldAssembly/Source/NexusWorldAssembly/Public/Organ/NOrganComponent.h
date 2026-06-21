@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Collections/NGameplayTagCounterConstraint.h"
 #include "NWorldAssemblySettings.h"
+#include "Math/NMersenneTwister.h"
 #include "Types/NPositionRotation.h"
 #include "NOrganComponent.generated.h"
 
@@ -174,4 +175,5 @@ protected:
 private:
 	/** Ticket of the operation most recently scheduled against this organ; zeroed by GetAndResetLastOperationTicket. */
 	int32 LastOperationTicket = 0;
+	FNMersenneTwisterState LastRandomState;
 };

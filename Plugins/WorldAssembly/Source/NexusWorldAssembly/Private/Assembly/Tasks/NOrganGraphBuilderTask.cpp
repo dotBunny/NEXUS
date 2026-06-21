@@ -71,8 +71,14 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	OrganContextPtr->TagCounter = OrganContextPtr->BaseTagCounter;
 	OrganContextPtr->ContextTags = OrganContextPtr->BaseContextTags;
 
+	// Cache reproduction information
+
+	FNMersenneTwisterState SavedRandomState;
 	while (!OrganContextPtr->IsSuccessful())
 	{
+		// Cache before we start doing anything so that we can maybe use this in the future to skip over the failed iterations on save/load/restore?
+		SavedRandomState = Random.SaveState();
+
 		// Cooperative cancellation — stop retrying and fall through to the unsuccessful teardown below.
 		if (TaskGraphContextPtr->IsCancelled())
 		{

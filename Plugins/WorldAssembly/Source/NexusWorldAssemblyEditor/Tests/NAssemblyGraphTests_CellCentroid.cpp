@@ -8,6 +8,7 @@
 #include "Assembly/Graph/NAssemblyGraph.h"
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
 #include "Assembly/Graph/NAssemblyGraphNodeFactory.h"
+#include "Types/NRawMeshUtils.h"
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
@@ -28,6 +29,15 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNCellCentroidHarness
 	 */
 	static FNAssemblyGraphCellNode* AddCellAt(FNAssemblyGraph& Graph, FNVirtualCellData& Cell, const FVector& Position)
 	{
+		// Give the cell a valid convex hull so the cell-node constructor's IsConvex()/EnsureCachedFacePlanes()
+		// probe runs cleanly instead of warning on an empty FNRawMesh. The centroid is computed from
+		// CellDetails.Bounds (not the hull), so a fixed origin-centered box leaves every expected centroid intact
+		// — including the caller that authors offset Bounds to test the bounds-center behaviour.
+		if (Cell.CellDetails.Hull.Vertices.IsEmpty())
+		{
+			Cell.CellDetails.Hull = FNRawMeshUtils::MakeBoxHull(FBox(FVector(-50.0), FVector(50.0)));
+		}
+
 		FNAssemblyGraphNodeParams Params;
 		Params.WorldPosition = Position;
 		FNAssemblyGraphCellNode* Node = FNAssemblyGraphNodeFactory::CreateCellNode(Params, &Cell, FVector(100.f));

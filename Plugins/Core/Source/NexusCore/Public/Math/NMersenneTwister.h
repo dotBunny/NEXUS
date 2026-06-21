@@ -8,6 +8,39 @@
 #include "NSeedGenerator.h"
 
 /**
+ * A minimal, portable snapshot of an FNMersenneTwister's position within its sequence.
+ *
+ * Holds the originating seed plus the exact number of engine draws taken since that seed was set.
+ * RestoreState reproduces the precise state by re-seeding and replaying, so a snapshot is fully
+ * deterministic across platforms/compilers yet small enough to store or transmit as two numbers.
+ * @see FNMersenneTwisterFriendlyState for a Blueprint-exposable, hexadecimal-string form.
+ */
+struct NEXUSCORE_API FNMersenneTwisterState
+{
+	/** The seed the engine was initialized with. */
+	uint64 InitialSeed = 0;
+
+	/** The exact number of engine draws taken since the seed was set. */
+	uint64 DrawCount = 0;
+
+	/** @return true if this snapshot's draw count is within the bounds RestoreState will replay. */
+	bool IsValid() const;
+
+	/**
+	 * Serializes the snapshot to a compact hexadecimal token suitable for logging or storage.
+	 * @return a string of the form "<SeedHex>-<DrawCountHex>".
+	 */
+	FString ToString() const;
+
+	/**
+	 * Parses a snapshot previously produced by ToString.
+	 * @param InState The token to parse.
+	 * @return the parsed snapshot; a zeroed snapshot if the token is malformed.
+	 */
+	static FNMersenneTwisterState FromString(const FString& InState);
+};
+
+/**
  * Mersenne Twister based FRandomStream-like API with some extras!
  * Implements the std::mt19937_64 engine to produce high-quality uint64 random numbers.
  * Guaranteed behavior across platforms/compilers by avoiding using std::*_distribution.
@@ -216,10 +249,12 @@ public:
 	}
 
 	/**
-	 * Returns the number of times the FMersenneTwister has been called since the seed has been set.
-	 * @return the number of times the FMersenneTwister has been called.
+	 * Returns the exact number of engine draws taken since the seed has been set.
+	 * @return the engine draw count.
+	 * @note This is a true draw count: rejection-sampled and array draws each count individually, so
+	 *       it is suitable as the replay offset used by SaveState/RestoreState.
 	 */
-	uint32 GetCallCounter() const
+	uint64 GetCallCounter() const
 	{
 		return this->CallCounter;
 	}
@@ -240,8 +275,7 @@ public:
 	 */
 	uint64 UnsignedInteger64()
 	{
-		this->CallCounter++;
-		return this->Engine();
+		return this->Draw();
 	}
 
 	/**
@@ -259,16 +293,56 @@ public:
 		Initialize(this->InitialSeed);
 	}
 
+	/**
+	 * Upper bound on the draw count RestoreState will replay.
+	 * @note Natural overflow of the uint64 draw count is infeasible (centuries of continuous drawing);
+	 *       this instead guards against a corrupt or hand-edited snapshot whose huge draw count would
+	 *       make the O(n) discard() effectively hang. Raise it if a legitimate workload exceeds it.
+	 */
+	static constexpr uint64 MaxRestoreDrawCount = 1000000000000000000ULL;
+
+	/**
+	 * Captures the engine's current position so it can be restored to this exact point later.
+	 * @return a snapshot { InitialSeed, draw count } sufficient to reproduce the exact sequence from here.
+	 * @see RestoreState
+	 */
+	FNMersenneTwisterState SaveState() const
+	{
+		return FNMersenneTwisterState{ this->InitialSeed, this->CallCounter };
+	}
+
+	/**
+	 * Restores the engine to a previously captured state by re-seeding and replaying.
+	 * @param State The snapshot produced by SaveState.
+	 * @return true if restored; false if State.DrawCount exceeds MaxRestoreDrawCount, in which case the engine is left unchanged.
+	 * @note O(DrawCount): replays the engine forward from the seed via discard(). The result is identical
+	 *       across platforms/compilers because both the engine and discard() are fully standard-defined.
+	 * @see SaveState
+	 */
+	bool RestoreState(const FNMersenneTwisterState& State);
+
 private:
 
-	/** The number of times the Mersenne Twister has been called since the seed has been set. */
-	uint32 CallCounter;
+	/** The exact number of engine draws taken since the seed was set; doubles as the replay offset for SaveState/RestoreState. */
+	uint64 CallCounter;
 
 	/** Single instance of the 64-bit Mersenne Twister pseudo random engine. */
 	std::mt19937_64 Engine;
 
 	/** The last seed set on the Mersenne Twister. */
 	uint64 InitialSeed;
+
+	/**
+	 * Advances the engine exactly once and accounts the draw.
+	 * @return the raw uint64 produced by the engine.
+	 * @note All random output must route through this so CallCounter stays an exact draw count, which
+	 *       SaveState/RestoreState rely on to replay to the precise position.
+	 */
+	FORCEINLINE uint64 Draw()
+	{
+		++this->CallCounter;
+		return this->Engine();
+	}
 
 	/**
 	 * Maps a raw engine draw to a float in the half-open range [0, 1).
