@@ -57,7 +57,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 	float CellSpawnTimeSlice = 2.f;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "World Collision")
-	TArray<FName> WorldCollisionActorIgnoreTags;
+	FNWorldAssemblyWorldCollisionSettings WorldCollisionSettings;
 
 	/** @return Default runtime-generation settings with a freshly generated friendly seed. */
 	static FNAssemblyOperationSettings GetDefaultSettings()
@@ -70,7 +70,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		Settings.ContextTags.AppendTags(AssemblySettings->AssemblyContextTags);
 		Settings.CellSpawnTimeSlice = AssemblySettings->AssemblySpawningCellProxiesTimeSlice;
 		Settings.TagCounters = FNGameplayTagCounter(AssemblySettings->AssemblyTagCounters);
-		Settings.WorldCollisionActorIgnoreTags = AssemblySettings->WorldCollisionActorIgnoreTags;
+		Settings.WorldCollisionSettings = AssemblySettings->WorldCollisionSettings;
 
 		return Settings;
 	}
@@ -87,7 +87,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		Settings.ContextTags.AppendTags(AssemblySettings->AssemblyContextTags);
 		Settings.CellSpawnTimeSlice = AssemblySettings->AssemblySpawningCellProxiesTimeSlice;
 		Settings.TagCounters = FNGameplayTagCounter(AssemblySettings->AssemblyTagCounters);
-		Settings.WorldCollisionActorIgnoreTags = AssemblySettings->WorldCollisionActorIgnoreTags;
+		Settings.WorldCollisionSettings = AssemblySettings->WorldCollisionSettings;
 
 		return Settings;
 	}

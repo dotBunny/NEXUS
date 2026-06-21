@@ -19,6 +19,24 @@ enum class ENWorldAssemblyNetworkMode : uint8
 	AlwaysRelevantLevelInstances UMETA(DisplayName = "Always Replicate Level Instances", ToolTip="All created level instances will be flagged as always relevant, ignoring normal relevancy culling methods."),
 };
 
+
+USTRUCT(BlueprintType)
+struct FNWorldAssemblyWorldCollisionSettings
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Actor Ignore Tags", meta=(ToolTip="Additional tags to query for when ignoring actors from world collision detection."))
+	TArray<FName> ActorIgnoreTags;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Exclude Non-Collision Enabled Actors", meta=(ToolTip="Do not include Actors who have their collision turned off."))
+	bool bExcludeNonCollisionEnabledActors = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Include Player Starts", meta=(ToolTip="Player start positions should be considered to be avoided."))
+	bool bIncludePlayerStarts = true;
+};
+
+
+
 /**
  * Project-wide settings for the NexusWorldAssembly plugin.
  */
@@ -84,9 +102,9 @@ public:
 		meta=(ToolTip="Offset value applied to the direction provided by the enumeration."))
 	FVector OrganAutomaticBoneDirectionOffset = FVector::ZeroVector;
 
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "World Collision", DisplayName="Actor Ignore Tags",
-		meta=(ToolTip="Additional tags to query for when ignoring actors from world collision detection."))
-	TArray<FName> WorldCollisionActorIgnoreTags;
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="World Collisions",
+		meta=(ToolTip="Settings used for world collision and avoidance."))
+	FNWorldAssemblyWorldCollisionSettings  WorldCollisionSettings;
 
 	/** Maximum number of full assembly attempts before a space is considered a complete failure. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="Retry Count",

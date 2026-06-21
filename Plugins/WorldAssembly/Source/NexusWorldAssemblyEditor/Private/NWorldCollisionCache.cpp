@@ -49,7 +49,7 @@ FNRawMesh FNWorldCollisionCache::Build(const UWorld* World, const TArray<FBoxSph
 
 	// Same world-geometry definition assembly uses: filtered actors' simple collision, gathered within Bounds.
 	const TArray<AActor*> WorldActors = FNActorUtils::GetWorldActors(World,
-		FNCreateVirtualWorldTask::CreateWorldActorFilterSettings(UNWorldAssemblySettings::Get()->WorldCollisionActorIgnoreTags));
+		FNCreateVirtualWorldTask::CreateWorldActorFilterSettings(UNWorldAssemblySettings::Get()->WorldCollisionSettings));
 
 	if (OutSourceActors != nullptr)
 	{

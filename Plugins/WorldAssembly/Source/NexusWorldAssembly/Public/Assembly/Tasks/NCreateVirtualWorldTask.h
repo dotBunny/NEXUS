@@ -30,13 +30,15 @@ public:
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 	/** @return The shared filter settings used to gather collision-source actors from the world. */
-	static FNWorldActorFilterSettings CreateWorldActorFilterSettings(const TArray<FName>& ActorTags)
+	static FNWorldActorFilterSettings CreateWorldActorFilterSettings(const FNWorldAssemblyWorldCollisionSettings& Settings)
 	{
 		// Collect the world AActors that we need to care about
 		FNWorldActorFilterSettings ActorFilterSettings;
-		ActorFilterSettings.bExcludeNonCollisionEnabledActors = true;
-		ActorFilterSettings.bIncludePlayerStarts = true;
-		ActorFilterSettings.WorldCollisionActorIgnoreTags = ActorTags;
+
+		ActorFilterSettings.bExcludeNonCollisionEnabledActors = Settings.bExcludeNonCollisionEnabledActors;
+		ActorFilterSettings.bIncludePlayerStarts = Settings.bIncludePlayerStarts;
+		ActorFilterSettings.WorldCollisionActorIgnoreTags = Settings.ActorIgnoreTags;
+
 		ActorFilterSettings.ExclusionFunction = &IsWorldCollisionSource;
 		return ActorFilterSettings;
 	}

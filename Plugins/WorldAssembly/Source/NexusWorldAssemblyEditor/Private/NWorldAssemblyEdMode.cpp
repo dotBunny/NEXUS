@@ -23,7 +23,6 @@
 #include "Math/NVectorUtils.h"
 #include "Assembly/NAssemblyOperation.h"
 #include "Developer/NMethodScopeTimer.h"
-#include "Types/NRawMeshUtils.h"
 #include "UObject/UnrealType.h"
 
 void FNWorldAssemblyEdMode::ProtectCellEdMode()
@@ -168,7 +167,7 @@ bool FNWorldAssemblyEdMode::ShouldRebuildForActor(const AActor* Actor)
 	if (CollisionSourceActors.Contains(FObjectKey(Actor))) return true;
 
 	// Is it relevant now? (covers add / collision-on transitions) — same predicate the visualizer build uses.
-	return FNActorUtils::PassesFilter(Actor, FNCreateVirtualWorldTask::CreateWorldActorFilterSettings(UNWorldAssemblySettings::Get()->WorldCollisionActorIgnoreTags));
+	return FNActorUtils::PassesFilter(Actor, FNCreateVirtualWorldTask::CreateWorldActorFilterSettings(UNWorldAssemblySettings::Get()->WorldCollisionSettings));
 }
 
 AActor* FNWorldAssemblyEdMode::ResolveAffectedActor(UObject* Object)
