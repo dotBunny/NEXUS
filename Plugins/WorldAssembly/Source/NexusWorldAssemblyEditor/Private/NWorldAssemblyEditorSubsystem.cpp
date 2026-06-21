@@ -142,13 +142,9 @@ void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Op
 	ProxyMap.Add(Operation->GetTicket(), TArray<TObjectPtr<ANCellProxy>>(TaskGraphContext->CreatedProxies));
 	KnownOperations.Remove(Operation);
 
-	// Auto-assembly loop runs are summarized on stop, so suppress their per-run toast here.
-	if (bWasAutoLoopRun)
-	{
-		return;
-	}
+	// Toast - skip if disabled or autorun
+	if (bWasAutoLoopRun || !UNWorldAssemblyEditorUserSettings::Get()->bNotificationsToastEditorAssemblyOperations) return;
 
-	// Toast
 	const FNAssemblyOperationResult Results = Operation->GetResult();
 	FNotificationInfo Info(Results.Title);
 	Info.SubText = Results.Message;
@@ -377,6 +373,9 @@ void UNWorldAssemblyEditorSubsystem::AccumulateAutoAssemblyResult(const FNAssemb
 
 void UNWorldAssemblyEditorSubsystem::ShowAutoAssemblySummaryToast() const
 {
+	// Skip out on toast due to setting
+	if (!UNWorldAssemblyEditorUserSettings::Get()->bNotificationsToastEditorAssemblyOperations) return;
+
 	// Echo the same tally to the log so it persists beyond the transient toast.
 	UE_LOG(LogNexusWorldAssemblyEditor, Log,
 		TEXT("Auto Assembly summary: %d runs - %d passed, %d warnings, %d failed (%d cells, %.0f ms)"),

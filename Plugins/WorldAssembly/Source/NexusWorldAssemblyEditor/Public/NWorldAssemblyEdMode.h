@@ -33,17 +33,18 @@ enum class ENWorldAssemblyEdModeRenderMode
 	None,
 };
 
+// still not used #00FFFF
 namespace NEXUS::WorldAssembly::DefaultColors
 {
-	static constexpr FLinearColor BoneValid = FLinearColor(1.f,1.f,1.f, 1.f);
-	static constexpr FLinearColor BoneInvalid = FLinearColor(0.73f,0.127f,0.067f, 1.f);
+	static constexpr FLinearColor BoneValid = FLinearColor(0.061246f,1.f,1.f, 1.f); // #46FFFFFF
+	static constexpr FLinearColor BoneInvalid = FLinearColor(0.254152f,0.012983f,1.f, 1.f); // #8A1EFFFF
 
-	static constexpr FLinearColor JunctionValid = FLinearColor(0.f,1.f,0.402f, 1.f);
-	static constexpr FLinearColor JunctionInvalid = FLinearColor(0.73f,0.127f,0.067f, 1.f);
-	static constexpr FLinearColor JunctionUnfilled = FLinearColor(0.5f,0.5f,0.5f, 1.f);
+	static constexpr FLinearColor JunctionValid = FLinearColor(0.010330f,1.f,0.391573f, 1.f); // #1AFFA8FF
+	static constexpr FLinearColor JunctionInvalid = FLinearColor(1.f,0.097587f,1.f, 1.f); // #FF58FFFF
+	static constexpr FLinearColor JunctionUnfilled = FLinearColor(1.f,1.f,1.f, 1.f); // #FFFFFFFF
 
-	static constexpr FLinearColor CellHull = FLinearColor(0.f,0.491f,0.863f, 1.f);
-	static constexpr FLinearColor CellBounds = FLinearColor(0.73f,0.127f,0.067f, 1.f);
+	static constexpr FLinearColor CellHull = FLinearColor(0.f,0.630757f,1.f, 1.f); // #00D0FFFF
+	static constexpr FLinearColor CellBounds = FLinearColor(0.434154f,0.006995f,0.001821f, 1.f); // #B01406FF
 }
 
 /**

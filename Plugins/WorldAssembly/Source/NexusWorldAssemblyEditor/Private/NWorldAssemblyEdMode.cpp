@@ -218,12 +218,12 @@ void FNWorldAssemblyEdMode::CacheUserSettings()
 {
 	const UNWorldAssemblyEditorUserSettings* Settings = UNWorldAssemblyEditorUserSettings::Get();
 
-	CachedCellHullColor = Settings->CellHullColor;
-	CachedCellBoundsColor = Settings->CellBoundsColor;
+	CachedCellHullColor = Settings->ColorPaletteCellHull;
+	CachedCellBoundsColor = Settings->ColorPaletteCellBounds;
 
-	CachedJunctionUnfilledColor = Settings->JunctionsUnfilledColor;
-	CachedJunctionValidColor = Settings->JunctionsValidColor;
-	CachedJunctionInvalidColor = Settings->JunctionsInvalidColor;
+	CachedJunctionUnfilledColor = Settings->ColorPaletteJunctionsUnfilled;
+	CachedJunctionValidColor = Settings->ColorPaletteJunctionsValid;
+	CachedJunctionInvalidColor = Settings->ColorPaletteJunctionsInvalid;
 }
 
 const FEditorModeID FNWorldAssemblyEdMode::Identifier = TEXT("NWorldAssemblyEdMode");
@@ -442,16 +442,16 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 				if (WorldAssemblyEditorUserSettings->bDebugWorldDrawUnfilledJunctions)
 				{
 					JunctionComponent->DrawDebugPDI(PDI, true,
-						WorldAssemblyEditorUserSettings->JunctionsUnfilledColor,
-						WorldAssemblyEditorUserSettings->JunctionsUnfilledColor,
+						WorldAssemblyEditorUserSettings->ColorPaletteJunctionsUnfilled,
+						WorldAssemblyEditorUserSettings->ColorPaletteJunctionsUnfilled,
 						WorldAssemblySettings);
 				}
 			}
 			else
 			{
 				JunctionComponent->DrawDebugPDI(PDI, true,
-					WorldAssemblyEditorUserSettings->JunctionsValidColor,
-					WorldAssemblyEditorUserSettings->JunctionsInvalidColor,
+					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsValid,
+					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsInvalid,
 					WorldAssemblySettings);
 			}
 		}
@@ -509,7 +509,7 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 void FNWorldAssemblyEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FViewport* Viewport, const FSceneView* View, FCanvas* Canvas)
 {
 	// Messages disabled
-	if (!UNWorldAssemblyEditorUserSettings::Get()->bCellDisplayViewportMessages || FNEditorUtils::IsPlayInEditor() ||
+	if (!UNWorldAssemblyEditorUserSettings::Get()->bNotificationsDisplayViewportMessages || FNEditorUtils::IsPlayInEditor() ||
 		RenderMode != ENWorldAssemblyEdModeRenderMode::All)
 	{
 		FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);

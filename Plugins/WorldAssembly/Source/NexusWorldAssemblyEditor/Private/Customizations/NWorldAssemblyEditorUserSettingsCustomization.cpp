@@ -19,15 +19,15 @@ void FNWorldAssemblyEditorUserSettingsCustomization::CustomizeDetails(IDetailLay
 	// color row by overriding it explicitly. Defaults mirror the member initializers in the settings header.
 	using Settings = UNWorldAssemblyEditorUserSettings;
 
-	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, BonesValidColor), NEXUS::WorldAssembly::DefaultColors::BoneValid);
-	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, BonesInvalidColor), NEXUS::WorldAssembly::DefaultColors::BoneInvalid);
+	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, ColorPaletteBonesValid), NEXUS::WorldAssembly::DefaultColors::BoneValid);
+	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, ColorPaletteBonesInvalid), NEXUS::WorldAssembly::DefaultColors::BoneInvalid);
 
-	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, CellBoundsColor), NEXUS::WorldAssembly::DefaultColors::CellBounds);
-	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, CellHullColor), NEXUS::WorldAssembly::DefaultColors::CellHull);
+	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, ColorPaletteCellBounds), NEXUS::WorldAssembly::DefaultColors::CellBounds);
+	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, ColorPaletteCellHull), NEXUS::WorldAssembly::DefaultColors::CellHull);
 
-	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, JunctionsUnfilledColor), NEXUS::WorldAssembly::DefaultColors::JunctionUnfilled);
-	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, JunctionsValidColor), NEXUS::WorldAssembly::DefaultColors::JunctionValid);
-	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, JunctionsInvalidColor), NEXUS::WorldAssembly::DefaultColors::JunctionInvalid);
+	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, ColorPaletteJunctionsUnfilled), NEXUS::WorldAssembly::DefaultColors::JunctionUnfilled);
+	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, ColorPaletteJunctionsValid), NEXUS::WorldAssembly::DefaultColors::JunctionValid);
+	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, ColorPaletteJunctionsInvalid), NEXUS::WorldAssembly::DefaultColors::JunctionInvalid);
 }
 
 void FNWorldAssemblyEditorUserSettingsCustomization::OverrideColorReset(
