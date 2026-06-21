@@ -216,10 +216,17 @@ void UNWorldAssemblySubsystem::DestroyOperationActors(const int32 OperationTicke
 
 void UNWorldAssemblySubsystem::Tick(float DeltaTime)
 {
-	// Not ideal but keeps seamless better
+	// Seamless-traveled players arrive asynchronously through HandleSeamlessTravelPlayer (no delegate to bind), so
+	// when seamless travel is supported we poll for unserved controllers. Throttled to roughly once per second: a
+	// frame-accurate response buys nothing and SpawnRelay is idempotent, so missed frames cost only a little latency.
 	if (bCachedSeamlessTravelMonitor)
 	{
-		EnsurePlayerControllerRelays(GetWorld());
+		SeamlessTravelMonitorAccumulator += DeltaTime;
+		if (SeamlessTravelMonitorAccumulator >= SeamlessTravelMonitorInterval)
+		{
+			SeamlessTravelMonitorAccumulator = 0.f;
+			EnsurePlayerControllerRelays(GetWorld());
+		}
 	}
 
 	if (KnownOperations.Num() > 0)
@@ -375,10 +382,16 @@ void UNWorldAssemblySubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	bCachedSeamlessTravelMonitor = Settings->bSupportSeamlessTravel;
 	CachedCellJunctionTimeSlice = Settings->AssemblySpawningDelayedJunctionSpawningTimeSlice * 0.001f;
 
-	if (FNMultiplayerUtils::HasWorldAuthority(InWorld) && !bCachedSeamlessTravelMonitor)
+	if (FNMultiplayerUtils::HasWorldAuthority(InWorld))
 	{
+		// Login/logout cover fresh connections and late joins in every mode; they never fire for players carried
+		// across by seamless travel, so binding them unconditionally is safe and never double-spawns a relay.
 		OnLoginHandle = FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &UNWorldAssemblySubsystem::OnPostLogin);
 		OnLogoutHandle = FGameModeEvents::GameModeLogoutEvent.AddUObject(this, &UNWorldAssemblySubsystem::OnLogout);
+
+		// One-shot back-fill for controllers already present when this world begins play — notably the listen-server
+		// local PC, which the engine hands to HandleSeamlessTravelPlayer before BeginPlay. Remote clients that finish
+		// loading later are picked up by the throttled monitor in Tick when seamless travel is enabled.
 		EnsurePlayerControllerRelays(InWorld.GetWorld());
 	}
 	Super::OnWorldBeginPlay(InWorld);

@@ -159,11 +159,18 @@ private:
 
 	/**
 	 * Cached copy of UNWorldAssemblySettings::bSupportSeamlessTravel, captured on world begin play (authority only).
-	 * When true, the GameMode OnPostLogin/OnLogout delegates are not bound (they do not reliably survive seamless
-	 * travel); instead the subsystem stays tickable and re-runs EnsurePlayerControllerRelays every Tick to keep each
-	 * player's relay in sync. When false, those delegates manage relays and this per-tick monitor stays off.
+	 * The OnPostLogin/OnLogout delegates are always bound and cover fresh connections and late joins, but they never
+	 * fire for players carried across by seamless travel (those route through AGameModeBase::HandleSeamlessTravelPlayer,
+	 * which has no global delegate). When this is true the subsystem stays tickable and polls EnsurePlayerControllerRelays
+	 * (throttled, see SeamlessTravelMonitorInterval) to back-fill relays for those asynchronously-arriving controllers.
 	 */
 	bool bCachedSeamlessTravelMonitor = false;
+
+	/** Seconds between seamless-travel relay polls; a frame-accurate response is unnecessary since SpawnRelay is idempotent. */
+	static constexpr float SeamlessTravelMonitorInterval = 0.5f;
+
+	/** Time accumulated toward the next seamless-travel relay poll; advanced in Tick while bCachedSeamlessTravelMonitor is set. */
+	float SeamlessTravelMonitorAccumulator = 0.f;
 
 	float CachedCellJunctionTimeSlice = 0.5f * 0.001f;
 
