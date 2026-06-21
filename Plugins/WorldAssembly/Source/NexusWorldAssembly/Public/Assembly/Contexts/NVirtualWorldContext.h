@@ -35,7 +35,8 @@ public:
 	/** Per-cell-node collision hulls, parallel array to NodeIndex. */
 	TArray<FNRawMesh> NodeCollisionMeshes;
 
-	FNWorldAssemblyWorldCollisionSettings WorldCollisionSettings;;
+	/** World collision capture settings carried from the operation, controlling which actors are treated as collision sources. */
+	FNWorldAssemblyWorldCollisionSettings WorldCollisionSettings;
 
 
 	/** Context tags associated with this world context, added to during FNProcessPassTask collecting additions. */

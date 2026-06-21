@@ -20,17 +20,23 @@ enum class ENWorldAssemblyNetworkMode : uint8
 };
 
 
+/**
+ * Controls which world actors are captured as collision sources during the virtual-world capture phase of an assembly run.
+ */
 USTRUCT(BlueprintType)
 struct FNWorldAssemblyWorldCollisionSettings
 {
 	GENERATED_BODY()
 
+	/** Additional tags to query for when ignoring actors from world collision detection, on top of the NWorldCollision_Ignore markup tag. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Actor Ignore Tags", meta=(ToolTip="Additional tags to query for when ignoring actors from world collision detection."))
 	TArray<FName> ActorIgnoreTags;
 
+	/** When true, actors with collision disabled are excluded from world collision capture. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Exclude Non-Collision Enabled Actors", meta=(ToolTip="Do not include Actors who have their collision turned off."))
 	bool bExcludeNonCollisionEnabledActors = true;
 
+	/** When true, player start positions are captured so generated content avoids them. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Include Player Starts", meta=(ToolTip="Player start positions should be considered to be avoided."))
 	bool bIncludePlayerStarts = true;
 };
@@ -102,6 +108,7 @@ public:
 		meta=(ToolTip="Offset value applied to the direction provided by the enumeration."))
 	FVector OrganAutomaticBoneDirectionOffset = FVector::ZeroVector;
 
+	/** Settings controlling which world actors are treated as collision sources and avoided during assembly. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="World Collisions",
 		meta=(ToolTip="Settings used for world collision and avoidance."))
 	FNWorldAssemblyWorldCollisionSettings  WorldCollisionSettings;

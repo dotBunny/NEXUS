@@ -56,6 +56,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Spawning")
 	float CellSpawnTimeSlice = 2.f;
 
+	/** Controls which world actors are captured as collision sources and avoided during this operation. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "World Collision")
 	FNWorldAssemblyWorldCollisionSettings WorldCollisionSettings;
 
