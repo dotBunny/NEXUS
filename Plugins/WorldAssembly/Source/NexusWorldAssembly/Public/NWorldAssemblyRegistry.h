@@ -150,6 +150,17 @@ private:
 		OnOperationStateChanged.Broadcast(Operation, NewState);
 	}
 
+	// These are raw, non-owning pointers; correctness depends on every entry being removed before its object is
+	// freed. The invariant is upheld per registrant type:
+	//   - Component arrays: the engine routes OnUnregister via BeginDestroy -> ExecuteUnregisterEvents for any
+	//     still-registered component (and UnregisterAllComponents when the owning actor is destroyed), so a
+	//     component cannot be GC'd while in these arrays.
+	//   - Operations: UNAssemblyOperation AddToRoot()s while registered and RemoveFromRoot()s on unregister,
+	//     so it is GC-pinned for exactly its registered window.
+	//   - CellLevelInstances: ANCellLevelInstance is an unrooted actor whose EndPlay is not routed on every
+	//     teardown, so it carries an explicit BeginDestroy() backstop to guarantee removal before free.
+	// Any future registrant must provide an equivalent guarantee, or this becomes a use-after-free in the
+	// OnPostWorldCleanup scrub below.
 	static TArray<UNBoneComponent*> Bones;
 	static TArray<UNCellRootComponent*> CellRoots;
 	static TArray<UNCellJunctionComponent*> CellJunctions;
