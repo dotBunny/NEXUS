@@ -8,7 +8,6 @@
 #include "NCellJunctionDetails.h"
 #include "NCellJunctionFillerEntry.h"
 #include "NCellLinkDetails.h"
-#include "NColor.h"
 #include "NWorldAssemblySettings.h"
 #include "Collections/NWeightedIntegerArray.h"
 #include "Components/BillboardComponent.h"

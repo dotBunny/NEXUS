@@ -23,6 +23,8 @@ struct NEXUSCORE_API FNWorldActorFilterSettings
 	 */
 	bool bIncludePlayerStarts = false;
 
+	TArray<FName> WorldCollisionActorIgnoreTags;
+
 	/**
 	 * Optional caller-supplied predicate evaluated per actor. Return true to keep the actor, false to exclude it.
 	 * @note Owned by value, so safe to assign a temporary lambda. Leave default-constructed (empty) to skip the predicate check entirely.

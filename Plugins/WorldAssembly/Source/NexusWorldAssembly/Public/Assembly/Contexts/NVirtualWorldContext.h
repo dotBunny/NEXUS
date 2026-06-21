@@ -35,6 +35,8 @@ public:
 	/** Per-cell-node collision hulls, parallel array to NodeIndex. */
 	TArray<FNRawMesh> NodeCollisionMeshes;
 
+	TArray<FName> WorldCollisionActorIgnoreTags;
+
 
 	/** Context tags associated with this world context, added to during FNProcessPassTask collecting additions. */
 	FGameplayTagContainer ContextTags;
@@ -46,5 +48,6 @@ public:
 		InputBounds = TargetBounds;
 		ContextTags = Settings.ContextTags;
 		TagCounter = Settings.TagCounters;
+		WorldCollisionActorIgnoreTags = Settings.WorldCollisionActorIgnoreTags;
 	}
 };

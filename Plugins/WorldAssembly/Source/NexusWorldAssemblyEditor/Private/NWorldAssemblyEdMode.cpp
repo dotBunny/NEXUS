@@ -168,7 +168,7 @@ bool FNWorldAssemblyEdMode::ShouldRebuildForActor(const AActor* Actor)
 	if (CollisionSourceActors.Contains(FObjectKey(Actor))) return true;
 
 	// Is it relevant now? (covers add / collision-on transitions) — same predicate the visualizer build uses.
-	return FNActorUtils::PassesFilter(Actor, FNCreateVirtualWorldTask::CreateWorldActorFilterSettings());
+	return FNActorUtils::PassesFilter(Actor, FNCreateVirtualWorldTask::CreateWorldActorFilterSettings(UNWorldAssemblySettings::Get()->WorldCollisionActorIgnoreTags));
 }
 
 AActor* FNWorldAssemblyEdMode::ResolveAffectedActor(UObject* Object)

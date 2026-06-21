@@ -86,6 +86,15 @@ void ANCellLevelInstance::OnRep_AssemblyData()
 	UpdateFromAssemblyData();
 }
 
+UDynamicMesh* ANCellLevelInstance::GetProxyMesh() const
+{
+	if (ProxyMesh.IsValid())
+	{
+		return ProxyMesh.Get();
+	}
+	return nullptr;
+}
+
 void ANCellLevelInstance::UpdateFromAssemblyData()
 {
 	JunctionData.Empty();

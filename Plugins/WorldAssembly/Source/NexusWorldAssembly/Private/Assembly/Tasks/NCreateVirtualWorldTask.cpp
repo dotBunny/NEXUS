@@ -9,7 +9,8 @@ void FNCreateVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const F
 	N_ASSEMBLY_ANALYTICS(CreateVirtualWorldContextStart)
 
 	// Collect the world AActors that we need to care about
-	const TArray<AActor*> WorldActors = FNActorUtils::GetWorldActors(VirtualWorldContextPtr->InputWorld, CreateWorldActorFilterSettings());
+	const TArray<AActor*> WorldActors = FNActorUtils::GetWorldActors(VirtualWorldContextPtr->InputWorld,
+		CreateWorldActorFilterSettings(VirtualWorldContextPtr->WorldCollisionActorIgnoreTags));
 
 	// Gather simple-collision meshes from every primitive in the target world, restricted
 	// to actors whose bounds fall inside one of the input organs' volume bounds.

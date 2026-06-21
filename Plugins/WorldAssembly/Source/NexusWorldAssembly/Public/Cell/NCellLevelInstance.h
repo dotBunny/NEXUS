@@ -11,6 +11,8 @@
 #include "LevelInstance/LevelInstanceActor.h"
 #include "NCellLevelInstance.generated.h"
 
+class UDynamicMesh;
+
 /**
  * Runtime level-instance actor spawned for a cell during a World Assembly pass.
  *
@@ -96,6 +98,12 @@ public:
 		return AssemblyData.NodeIdentifier;
 	}
 
+	/** @return The cell's proxy dynamic mesh, or nullptr if none is set; only resolvable on the server/owner that spawned the proxy. */
+	UDynamicMesh* GetProxyMesh() const;
+
+	/** Caches the proxy's dynamic mesh on this cell; called on the server/owner during ANCellProxy spawn. @param Mesh The proxy dynamic mesh. */
+	void SetProxyMesh(UDynamicMesh* Mesh) { ProxyMesh = Mesh; }
+
 #if WITH_EDITOR
 	virtual bool IsUserManaged() const override { return false; }
 	virtual bool CanEnterEdit(FText* OutReason = nullptr) const override
@@ -143,4 +151,7 @@ protected:
 
 	/** Whether this cell is currently registered with the World Assembly registry. */
 	bool bRegistered = false;
+
+	/** Non-owning reference to the originating ANCellProxy's dynamic mesh; set on the server/owner at spawn for GetProxyMesh. */
+	TWeakObjectPtr<UDynamicMesh> ProxyMesh;
 };

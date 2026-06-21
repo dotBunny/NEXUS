@@ -109,6 +109,9 @@ void ANCellProxy::CreateLevelInstance()
 		return;
 	}
 
+	// Assign server/owner proxy-mesh reference on CellLevelInstance
+	LevelInstance->SetProxyMesh(Mesh->GetDynamicMesh());
+
 	// Replicated assembly data
 	LevelInstance->AssemblyData = AssemblyData;
 	// Server needs to do its process of the level assembly data (junctions rotate/etc based)

@@ -19,8 +19,6 @@ enum class ENWorldAssemblyNetworkMode : uint8
 	AlwaysRelevantLevelInstances UMETA(DisplayName = "Always Replicate Level Instances", ToolTip="All created level instances will be flagged as always relevant, ignoring normal relevancy culling methods."),
 };
 
-
-
 /**
  * Project-wide settings for the NexusWorldAssembly plugin.
  */
@@ -85,6 +83,10 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ", DisplayName="Automatic Bone Direction Offset",
 		meta=(ToolTip="Offset value applied to the direction provided by the enumeration."))
 	FVector OrganAutomaticBoneDirectionOffset = FVector::ZeroVector;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "World Collision", DisplayName="Actor Ignore Tags",
+		meta=(ToolTip="Additional tags to query for when ignoring actors from world collision detection."))
+	TArray<FName> WorldCollisionActorIgnoreTags;
 
 	/** Maximum number of full assembly attempts before a space is considered a complete failure. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="Retry Count",

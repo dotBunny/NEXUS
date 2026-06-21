@@ -176,6 +176,16 @@ public:
 	}
 
 	/**
+	 * Only the owner / creator of the ANCellProxy will be able to reach the DynamicMesh through their ANCellLevelInstance.
+	 * @param LevelInstance The cell level instance to query.
+	 * @return The cell's proxy dynamic mesh, or nullptr if the instance is invalid or has no proxy mesh set.
+	 */
+	static UDynamicMesh* GetProxyMesh(ANCellLevelInstance* LevelInstance)
+	{
+		return IsValid(LevelInstance) ? LevelInstance->GetProxyMesh() : nullptr;
+	}
+
+	/**
 	 * @param LevelInstance The cell level instance to query.
 	 * @return true if this cell lies on the assembly's hot path.
 	 */

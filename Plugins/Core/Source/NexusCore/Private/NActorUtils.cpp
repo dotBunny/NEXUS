@@ -67,6 +67,15 @@ bool FNActorUtils::PassesFilter(const AActor* Actor, const FNWorldActorFilterSet
 	// Exclude when collision is disabled per setting
 	if (Settings.bExcludeNonCollisionEnabledActors && !Actor->GetActorEnableCollision()) return false;
 
+	// Exclude based on Actor Tags
+	for (int i = 0; i < Settings.WorldCollisionActorIgnoreTags.Num(); ++i)
+	{
+		if (Actor->ActorHasTag(Settings.WorldCollisionActorIgnoreTags[i]))
+		{
+			return false;
+		}
+	}
+
 	// Exclude because of filter
 	if (Settings.ExclusionFunction.IsSet() && !Settings.ExclusionFunction(Actor)) return false;
 

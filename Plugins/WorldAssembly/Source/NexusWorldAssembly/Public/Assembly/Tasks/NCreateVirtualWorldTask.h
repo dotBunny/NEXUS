@@ -30,12 +30,13 @@ public:
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 	/** @return The shared filter settings used to gather collision-source actors from the world. */
-	static FNWorldActorFilterSettings CreateWorldActorFilterSettings()
+	static FNWorldActorFilterSettings CreateWorldActorFilterSettings(const TArray<FName>& ActorTags)
 	{
 		// Collect the world AActors that we need to care about
 		FNWorldActorFilterSettings ActorFilterSettings;
 		ActorFilterSettings.bExcludeNonCollisionEnabledActors = true;
 		ActorFilterSettings.bIncludePlayerStarts = true;
+		ActorFilterSettings.WorldCollisionActorIgnoreTags = ActorTags;
 		ActorFilterSettings.ExclusionFunction = &IsWorldCollisionSource;
 		return ActorFilterSettings;
 	}
@@ -47,9 +48,6 @@ public:
 	 */
 	static bool IsWorldCollisionSource(const AActor* Actor)
 	{
-		// It's being destroyed so don't even bother with it
-		if (Actor->IsPendingKillPending()) return false;
-
 		// Check global ignore tag
 		if (Actor->ActorHasTag(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore)) return false;
 
