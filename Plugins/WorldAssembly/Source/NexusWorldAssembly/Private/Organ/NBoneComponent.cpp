@@ -283,7 +283,8 @@ TArray<FVector> UNBoneComponent::GetCornerPoints(const FVector2D& SocketUnitSize
 }
 
 
-void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor& ValidColor, const FLinearColor& InvalidColor, const bool bShowDepth, const UNWorldAssemblySettings* Settings, float WorldPenetration) const
+void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor& ValidColor, const FLinearColor& InvalidColor,
+	const bool bShowDepth, const bool bShowSocket, const UNWorldAssemblySettings* Settings, float WorldPenetration) const
 {
 	FLinearColor GizmoColor = ValidColor;
 
@@ -343,6 +344,7 @@ void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearCo
 	SocketSettings.SocketSize = Settings->SocketSize;
 	SocketSettings.SocketType = Type;
 	SocketSettings.UnitSize = SocketSize;
+	SocketSettings.bIsConnected = bShowSocket;
 	FNWorldAssemblyDebugDraw::DrawSocket(PDI,  ComponentLocation, ComponentRotation, SocketSettings);
 }
 

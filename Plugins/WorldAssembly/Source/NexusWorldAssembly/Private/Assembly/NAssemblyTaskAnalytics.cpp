@@ -63,6 +63,12 @@ void FNAssemblyTaskAnalytics::OrganGraphBuilder_SetFailure(int32 Index, int32 Fi
 	Analytic.FailureReasonOverride = Reason;
 }
 
+void FNAssemblyTaskAnalytics::OrganGraphBuilder_SetDrawCount(int32 Index, uint64 DrawCount)
+{
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.DrawCount = DrawCount;
+}
+
 void FNAssemblyTaskAnalytics::OrganGraphBuilder_AddMessages(int32 Index, const TArray<FString>& Messages)
 {
 	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
@@ -214,10 +220,10 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	const int32 OrganBuilderTableTicket = Report->CreateTableBlock(TimespanContentTicket);
 	FNReportTableBlock* OrganBuilderTable = Report->GetTableBlock(OrganBuilderTableTicket);
 	OrganBuilderTable->SetHeading("FNOrganGraphBuildTasks");
-	OrganBuilderTable->Initialize({ "Thread", "Organ", "Iterations", "Status", "ms" });
+	OrganBuilderTable->Initialize({ "Thread", "Organ", "Iterations", "Draws", "Status", "ms" });
 	for (const auto Analytic : OrganGraphBuilderAnalytics)
 	{
-		OrganBuilderTable->AddRow({"Task", *Analytic.Name, FString::FromInt(Analytic.Iterations), Analytic.GetStatusString(), FString::SanitizeFloat(Analytic.Timer.Duration)});
+		OrganBuilderTable->AddRow({"Task", *Analytic.Name, FString::FromInt(Analytic.Iterations), FString::Printf(TEXT("%llu"), Analytic.DrawCount), Analytic.GetStatusString(), FString::SanitizeFloat(Analytic.Timer.Duration)});
 		DurationTotal += Analytic.Timer.Duration;
 		LoopTotal += Analytic.Timer.Duration;
 		if (Analytic.bSucceeded) { SucceededOrganCount++; }

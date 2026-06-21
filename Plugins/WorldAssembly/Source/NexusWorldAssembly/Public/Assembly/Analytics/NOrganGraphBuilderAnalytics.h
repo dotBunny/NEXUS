@@ -31,6 +31,9 @@ struct FNOrganGraphBuilderAnalytics
 	/** Cell-node count of the produced graph; on failure, the count from the final attempt. */
 	int32 FinalCellNodeCount = 0;
 
+	/** Total random-stream draws consumed by the whole build, across every retry iteration. */
+	uint64 DrawCount = 0;
+
 	/** Lower bound on cell count required for success, captured from the organ context; -1 disables the check. */
 	int32 MinimumCellCount = -1;
 

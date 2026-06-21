@@ -101,6 +101,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		{
 			N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetFailure, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, 0,
 				FString(TEXT("Unable to place a starting cell (no valid starter cell available or every candidate collided).")))
+			N_ASSEMBLY_ANALYTICS_TWO_PARAM(OrganGraphBuilder_SetDrawCount, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, Random.GetCallCounter())
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
 			// Drive the per-organ channel to a terminal state so its overlay row doesn't linger mid-build.
 			TaskGraphContextPtr->SetChannelStatus(StatusChannel, TEXT("Unsuccessful"), 0.f);
@@ -112,6 +113,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		{
 			N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetFailure, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, 0,
 				FString(TEXT("Starting graph contained no nodes after placement.")))
+			N_ASSEMBLY_ANALYTICS_TWO_PARAM(OrganGraphBuilder_SetDrawCount, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, Random.GetCallCounter())
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
 			// Drive the per-organ channel to a terminal state so its overlay row doesn't linger mid-build.
 			TaskGraphContextPtr->SetChannelStatus(StatusChannel, TEXT("Unsuccessful"), 0.f);
@@ -126,6 +128,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetFailure, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX,
 				OrganContextPtr->CellGraph->GetCellNodeCount(),
 				FString(TEXT("Starter cell has no open junctions; the graph cannot grow past it.")))
+			N_ASSEMBLY_ANALYTICS_TWO_PARAM(OrganGraphBuilder_SetDrawCount, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, Random.GetCallCounter())
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
 			// Drive the per-organ channel to a terminal state so its overlay row doesn't linger mid-build.
 			TaskGraphContextPtr->SetChannelStatus(StatusChannel, TEXT("Unsuccessful"), 0.f);
@@ -223,6 +226,9 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetResult, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, true, OrganContextPtr->CellGraph->GetCellNodeCount())
 		}
 	}
+
+	// Record the total random draws this build consumed (across every retry iteration) for the report.
+	N_ASSEMBLY_ANALYTICS_TWO_PARAM(OrganGraphBuilder_SetDrawCount, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, Random.GetCallCounter())
 
 	// Clean up graph of pointers that can't be kept
 	if (OrganContextPtr->CellGraph != nullptr)

@@ -428,10 +428,12 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 			// We can't use caching because we are drawing ALL of the possible roots
 		}
 	}
-	if (FNWorldAssemblyRegistry::HasJunctionComponents())
+	if (FNWorldAssemblyRegistry::HasJunctionComponents() || FNWorldAssemblyRegistry::HasBoneComponents())
 	{
 		const UNWorldAssemblySettings* WorldAssemblySettings = UNWorldAssemblySettings::Get();
 		const UNWorldAssemblyEditorUserSettings* WorldAssemblyEditorUserSettings = UNWorldAssemblyEditorUserSettings::Get();
+
+		// Draw Junctions
 		for (const auto JunctionComponent : FNWorldAssemblyRegistry::GetCellJunctionComponents())
 		{
 			// Bad ref?
@@ -476,6 +478,12 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 					false,false,true, false,
 					WorldAssemblySettings);
 			}
+		}
+
+		// We draw the bones in world mode without socket, so that they show up in edit mode of generated stuff
+		for (const auto BoneComponent : FNWorldAssemblyRegistry::GetBoneComponents())
+		{
+			BoneComponent->DrawDebugPDI(PDI, WorldAssemblyEditorUserSettings->ColorPaletteBonesValid, WorldAssemblyEditorUserSettings->ColorPaletteBonesInvalid, false, false);
 		}
 	}
 

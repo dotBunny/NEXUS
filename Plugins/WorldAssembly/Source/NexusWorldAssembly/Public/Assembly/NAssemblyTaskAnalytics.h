@@ -145,6 +145,13 @@ public:
 	 */
 	void OrganGraphBuilder_SetFailure(int32 Index, int32 FinalCellNodeCount, const FString& Reason);
 
+	/**
+	 * Record the total number of random-stream draws the organ build consumed for the record at Index.
+	 * @param Index Record index returned from OrganGraphBuilderCreate.
+	 * @param DrawCount The build's final FNMersenneTwister call counter (draws across all retry iterations).
+	 */
+	void OrganGraphBuilder_SetDrawCount(int32 Index, uint64 DrawCount);
+
 	void OrganGraphBuilder_AddMessages(int32 Index, const TArray<FString>& Messages);
 
 	/** Increment the AddNullNodes counter for the current iteration of the record at Index. */

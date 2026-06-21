@@ -102,7 +102,8 @@ public:
 	 * @param WorldPenetration Deepest penetration of the socket corners into world collision (supplied by the
 	 *        visualizer from FNWorldCollisionCache); drives the red threshold and depth readout when bShowDepth.
 	 */
-	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor& ValidColor, const FLinearColor& InvalidColor,  bool bShowDepth = false, const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get(), float WorldPenetration = 0.f) const;
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor& ValidColor, const FLinearColor& InvalidColor,  bool bShowDepth = false,
+		const bool bShowSocket = true, const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get(), float WorldPenetration = 0.f) const;
 
 	TArray<FVector> GetWorldCornerPoints(const FVector2D& SettingSocketSize) const;
 private:
