@@ -132,6 +132,15 @@ protected:
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	/**
+	 * Backstop unregister. EndPlay is the normal path, but the engine does not route it on every teardown
+	 * (editor undo, forced delete, or GC of an actor that never begun play), and this actor is not GC-rooted,
+	 * so without this it could be freed while still in the registry — leaving a dangling pointer that
+	 * FNWorldAssemblyRegistry::OnPostWorldCleanup would dereference. BeginDestroy always runs before the
+	 * actor's memory is reclaimed, so it is the reliable place to guarantee removal.
+	 */
+	virtual void BeginDestroy() override;
+
 	/** Whether this cell is currently registered with the World Assembly registry. */
 	bool bRegistered = false;
 };

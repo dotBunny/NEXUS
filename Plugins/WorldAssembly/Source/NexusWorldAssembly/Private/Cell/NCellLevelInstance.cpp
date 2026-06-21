@@ -63,6 +63,18 @@ void ANCellLevelInstance::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
+void ANCellLevelInstance::BeginDestroy()
+{
+	// Guaranteed-before-free backstop for the teardown paths that never route EndPlay (editor undo, forced
+	// delete, GC of a never-played actor). UnregisterCellLevelInstance clears bRegistered, so if EndPlay
+	// already ran this is a no-op and never double-unregisters.
+	if (bRegistered)
+	{
+		FNWorldAssemblyRegistry::UnregisterCellLevelInstance(this);
+	}
+	Super::BeginDestroy();
+}
+
 
 
 void ANCellLevelInstance::OnRep_AssemblyData()
