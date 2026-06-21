@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Collections/NGameplayTagCounterConstraint.h"
+#include "NWorldAssemblySettings.h"
 #include "Types/NPositionRotation.h"
 #include "NOrganComponent.generated.h"
 
@@ -21,6 +22,17 @@ enum class ENOrganGenerationTrigger : uint8
 {
 	OnDemand = 0	UMETA(DisplayName="On Demand", ToolTip = "Generates only when requested (e.g. via Blueprint or Subsystem)."),
 	BeginPlay = 1	UMETA(DisplayName="Begin Play", ToolTip = "Generates when the component receives it's BeginPlay call.")
+};
+
+/**
+ * Selects the reference point a cell's directional constraint measures candidate bearings from.
+ */
+UENUM(BlueprintType)
+enum class ENOrganDirectionConstraintMode : uint8
+{
+	StartBone = 0 UMETA(DisplayName = "Start Bone", ToolTip = "Measure candidate bearings from the organ's start bone (the generation anchor)."),
+	OrganCenter = 1 UMETA(DisplayName = "Organ Center", ToolTip = "Measure candidate bearings from the geometric center of the organ volume. Unbound organs fall back to the start bone."),
+	DynamicCentroid = 2 UMETA(DisplayName = "Dynamic Centroid", ToolTip = "Measure candidate bearings from the running centroid of already-placed cells, which shifts as the organ grows. Falls back to the start bone before any cell is placed.")
 };
 
 /**
@@ -80,6 +92,11 @@ public:
 	/** Deterministic seed mixed into the organ's generation decisions. */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Operation")
 	int32 Seed = -1;
+
+	/** Reference point this organ's cell directional constraints measure candidate bearings from. */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Operation", DisplayName="Direction Mode",
+		meta=(ToolTip="How directional constraints are resolved for this organ: from the start bone, the organ volume's center, or the running centroid of placed cells."))
+	ENOrganDirectionConstraintMode DirectionMode = ENOrganDirectionConstraintMode::StartBone;
 
 	/** @return true if the owning actor is a volume-derived actor. */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|World Assembly")

@@ -59,6 +59,15 @@ public:
 		return CellNodeCount;
 	}
 
+	/**
+	 * @return Centroid (mean of cell world bounds centers) of all Cell-type nodes, or ZeroVector when none are
+	 *         placed. Derived from the running CellPositionSum kept in sync by Register/UnregisterNode, so this is O(1).
+	 */
+	FVector GetCellCentroid() const
+	{
+		return CellNodeCount > 0 ? CellPositionSum / static_cast<double>(CellNodeCount) : FVector::ZeroVector;
+	}
+
 	/** @return true if the graph was allowed to extend outside its organ bounds. */
 	bool IsUnbounded() const { return bUnbounded; }
 
@@ -86,4 +95,12 @@ private:
 
 	/** Cached count of Cell-type nodes, kept in sync by Register/UnregisterNode to avoid O(N) recounts. */
 	int32 CellNodeCount = 0;
+
+	/**
+	 * Running sum of every Cell-type node's world bounds center, kept in sync by Register/UnregisterNode. Stored as
+	 * a sum (not a pre-divided average) so removals subtract exactly the value their placement added, avoiding the
+	 * compounding drift an incrementally maintained mean would accrue across the builder's add/remove churn.
+	 * Divided by CellNodeCount on demand in GetCellCentroid.
+	 */
+	FVector CellPositionSum = FVector::ZeroVector;
 };

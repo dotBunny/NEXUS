@@ -7,6 +7,7 @@
 ### Added
 
 - `UNOrganComponent` now have both `Context Tag` and `Tag Counter` requirements.
+- `UNOrganComponent` `Direction Mode` (`ENOrganDirectionConstraintMode`) selecting the reference point a cell's directional constraint measures candidate bearings from, per-organ: `Start Bone` (default, the original behavior), `Organ Center` (the volume's geometric center, falling back to the start bone when unbounded), or `Dynamic Centroid` (the running centroid of already-placed cells, falling back to the start bone before the first cell is placed).
 - `Quick Assembly` workflow on the World Assembly editor-mode toolbar: select a target `UNOrganComponent` from a dropdown and start/cancel an assembly operation in place, with an optional `Auto Assembly` mode that re-runs on a configurable timer. Adds `World Assembly (User)` settings `Load Level Instances`, `Auto Assembly`, and `Auto Assembly Timer`.
 - `NEXUS.WorldAssembly.Flag.Hotpath` assembly flag for creating pathing feedback post assembly in both the `ANCellLevelInstance` as well as junctions.
 - `INCellJunctionFiller` interface for filler objects to implement to get callbacks when used to fill empty junctions.

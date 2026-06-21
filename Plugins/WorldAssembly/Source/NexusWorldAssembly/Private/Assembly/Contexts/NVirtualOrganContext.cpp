@@ -39,6 +39,8 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	CellHullPenetration = WorldOrganContext->CellHullPenetration;
 	WorldHullPenetration = WorldOrganContext->WorldHullPenetration;
 	AssemblyDirectionTolerance = WorldOrganContext->AssemblyDirectionTolerance;
+	AssemblyDirectionMode = WorldOrganContext->SourceComponent->DirectionMode;
+
 	VoxelSize = WorldOrganContext->VoxelSize;
 
 	// Keep a local copy of this here
@@ -197,7 +199,11 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	PreFilter.bIsStartNode = true;
 
 	// TODO: Odd spot but right now just using one bone
-	SetDirectionTargetPosition(BoneInputData[0].WorldPosition);
+	// Seed the directional-constraint reference point per the configured mode. StartBone uses the start bone;
+	// OrganCenter uses the volume center; DynamicCentroid seeds to the start bone here and is overridden each
+	// filter pass once cells are placed (see FilterCellInputData). Both DynamicCentroid (pre-placement) and
+	// unbound OrganCenter fall back to the start bone.
+	SetDirectionTargetPosition(ResolveDirectionTargetPosition(AssemblyDirectionMode, bUnbound, Bounds, BoneInputData[0].WorldPosition));
 
 	FNWeightedIntegerArray PreIndices;
 	TMap<int32, TArray<int32>> ValidJunctions;
@@ -466,6 +472,20 @@ bool FNVirtualOrganContext::IsGatedByDirectionalConstraint(float Angle, ENCardin
 	return !FNCardinalDirectionUtils::IsCloseToDirection(Direction, Angle, Tolerance);
 }
 
+FVector FNVirtualOrganContext::ResolveDirectionTargetPosition(const ENOrganDirectionConstraintMode Mode,
+	const bool bUnbound, const FBoxSphereBounds& Bounds, const FVector& StartBoneWorldPosition)
+{
+	// OrganCenter measures candidate bearings from the volume's geometric center. Unbound organs carry a degenerate
+	// (near-infinite) bounds whose Origin is meaningless, so they fall back to the start bone. StartBone uses the
+	// start bone directly; DynamicCentroid also resolves to the start bone here as its pre-placement seed/fallback,
+	// and is overridden with the live centroid per filter pass in FilterCellInputData once cells exist.
+	if (Mode == ENOrganDirectionConstraintMode::OrganCenter && !bUnbound)
+	{
+		return Bounds.Origin;
+	}
+	return StartBoneWorldPosition;
+}
+
 FRotator FNVirtualOrganContext::GetRequiredJunctionRotation(const FQuat& SourceQuat, const FRotator& JunctionWorldRotation)
 {
 	// Flip 180 around Up to oppose the source's facing direction, then undo the junction's local rotation so only
@@ -517,6 +537,17 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 	// The source side of the junction-rotation math is invariant for the whole call, so compose it once here:
 	// SourceQuat flipped 180 around Up. The per-junction term is read from the junction's CachedInverseWorldQuat.
 	const FQuat SourceFlippedQuat = Filter.SourceQuat * YawFlipQuat;
+
+	// Resolve the directional-constraint reference point once for the whole call (it does not vary per candidate).
+	// Static modes (StartBone/OrganCenter) use DirectionTargetPosition seeded at construction. DynamicCentroid
+	// tracks the centroid of placed cells, which shifts as the graph grows; before any cell exists (the start-node
+	// pre-filters, where CellGraph is still null) it falls back to DirectionTargetPosition, i.e. the start bone.
+	FVector DirectionReferencePoint = DirectionTargetPosition;
+	if (AssemblyDirectionMode == ENOrganDirectionConstraintMode::DynamicCentroid &&
+		CellGraph != nullptr && CellGraph->GetCellNodeCount() > 0)
+	{
+		DirectionReferencePoint = CellGraph->GetCellCentroid();
+	}
 
 	for (int32 i = 0; i < CellInputData.Num(); i++)
 	{
@@ -592,10 +623,11 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		// Cardinal Direction Constraint
 		if (CellData->bHasDirectionConstraint)
 		{
-			// Compass bearing from the organ's start point out to the candidate's world position. FVector::Rotation()
+			// Compass bearing from the configured reference point (start bone, organ center, or dynamic centroid;
+			// resolved into DirectionReferencePoint above) out to the candidate's world position. FVector::Rotation()
 			// derives yaw from atan2(Y, X), so North (+X) = 0 and East (+Y) = 90, matching ENCardinalDirection; Z is
 			// ignored, keeping this a purely horizontal heading.
-			const float Angle = (Filter.WorldPosition - DirectionTargetPosition).Rotation().Yaw;
+			const float Angle = (Filter.WorldPosition - DirectionReferencePoint).Rotation().Yaw;
 			if (IsGatedByDirectionalConstraint(Angle, CellData->DirectionConstraint, AssemblyDirectionTolerance))
 			{
 				continue;

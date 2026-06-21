@@ -441,17 +441,19 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 			{
 				if (WorldAssemblyEditorUserSettings->bDebugWorldDrawUnfilledJunctions)
 				{
-					JunctionComponent->DrawDebugPDI(PDI, true,
+					JunctionComponent->DrawDebugPDI(PDI,
 						WorldAssemblyEditorUserSettings->ColorPaletteJunctionsUnfilled,
 						WorldAssemblyEditorUserSettings->ColorPaletteJunctionsUnfilled,
+						true,
 						WorldAssemblySettings);
 				}
 			}
 			else
 			{
-				JunctionComponent->DrawDebugPDI(PDI, true,
+				JunctionComponent->DrawDebugPDI(PDI,
 					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsValid,
 					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsInvalid,
+					true,
 					WorldAssemblySettings);
 			}
 		}

@@ -151,7 +151,7 @@ void UNCellJunctionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 }
 
 
-void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const bool bShowDepth, FLinearColor ValidColor, FLinearColor InvalidColor, const UNWorldAssemblySettings* Settings) const
+void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor& ValidColor, const FLinearColor& InvalidColor, const bool bShowDepth, const UNWorldAssemblySettings* Settings) const
 {
 	FLinearColor GizmoColor = ValidColor; // Default color
 	const FVector ComponentLocation = GetComponentLocation();

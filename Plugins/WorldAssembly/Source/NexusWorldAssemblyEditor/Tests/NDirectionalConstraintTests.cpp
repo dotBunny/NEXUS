@@ -106,4 +106,61 @@ N_TEST_HIGH(FNDirectionalConstraintTests_StartPointBearing_DiagonalAndVertical,
 	CHECK_FALSE_MESSAGE(TEXT("+X candidate with a Z offset still reads as North"), FNVirtualOrganContext::IsGatedByDirectionalConstraint(NorthWithHeight, ENCardinalDirection::North, Tolerance));
 }
 
+N_TEST_HIGH(FNDirectionalConstraintTests_ResolveDirectionTargetPosition_StartBoneUsesBone,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::ResolveDirectionTargetPosition::StartBoneUsesBone",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// StartBone always resolves to the start bone, regardless of the volume bounds.
+	const FVector StartBone(10.0, 20.0, 30.0);
+	const FBoxSphereBounds Bounds(FVector(1000.0, 2000.0, 3000.0), FVector(50.0, 50.0, 50.0), 50.0);
+
+	const FVector Resolved = FNVirtualOrganContext::ResolveDirectionTargetPosition(
+		ENOrganDirectionConstraintMode::StartBone, false, Bounds, StartBone);
+
+	CHECK_MESSAGE(TEXT("StartBone mode must resolve to the start bone position."), Resolved.Equals(StartBone));
+}
+
+N_TEST_HIGH(FNDirectionalConstraintTests_ResolveDirectionTargetPosition_OrganCenterUsesBoundsOrigin,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::ResolveDirectionTargetPosition::OrganCenterUsesBoundsOrigin",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// OrganCenter on a bounded organ resolves to the volume's geometric center (Bounds.Origin), not the start bone.
+	const FVector StartBone(10.0, 20.0, 30.0);
+	const FBoxSphereBounds Bounds(FVector(1000.0, 2000.0, 3000.0), FVector(50.0, 50.0, 50.0), 50.0);
+
+	const FVector Resolved = FNVirtualOrganContext::ResolveDirectionTargetPosition(
+		ENOrganDirectionConstraintMode::OrganCenter, false, Bounds, StartBone);
+
+	CHECK_MESSAGE(TEXT("OrganCenter mode on a bounded organ must resolve to Bounds.Origin."), Resolved.Equals(Bounds.Origin));
+}
+
+N_TEST_HIGH(FNDirectionalConstraintTests_ResolveDirectionTargetPosition_OrganCenterUnboundFallsBackToBone,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::ResolveDirectionTargetPosition::OrganCenterUnboundFallsBackToBone",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// An unbound organ has a degenerate bounds whose Origin is meaningless, so OrganCenter falls back to the start bone.
+	const FVector StartBone(10.0, 20.0, 30.0);
+	const FBoxSphereBounds Bounds(FVector(1000.0, 2000.0, 3000.0), FVector(50.0, 50.0, 50.0), 50.0);
+
+	const FVector Resolved = FNVirtualOrganContext::ResolveDirectionTargetPosition(
+		ENOrganDirectionConstraintMode::OrganCenter, true, Bounds, StartBone);
+
+	CHECK_MESSAGE(TEXT("OrganCenter mode on an unbound organ must fall back to the start bone."), Resolved.Equals(StartBone));
+}
+
+N_TEST_HIGH(FNDirectionalConstraintTests_ResolveDirectionTargetPosition_DynamicCentroidSeedsToBone,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::ResolveDirectionTargetPosition::DynamicCentroidSeedsToBone",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// DynamicCentroid resolves to the start bone here (its pre-placement seed); the live centroid is applied per
+	// filter pass in FilterCellInputData, not by this static resolver.
+	const FVector StartBone(10.0, 20.0, 30.0);
+	const FBoxSphereBounds Bounds(FVector(1000.0, 2000.0, 3000.0), FVector(50.0, 50.0, 50.0), 50.0);
+
+	const FVector Resolved = FNVirtualOrganContext::ResolveDirectionTargetPosition(
+		ENOrganDirectionConstraintMode::DynamicCentroid, false, Bounds, StartBone);
+
+	CHECK_MESSAGE(TEXT("DynamicCentroid mode must seed to the start bone in the static resolver."), Resolved.Equals(StartBone));
+}
+
 #endif //WITH_TESTS

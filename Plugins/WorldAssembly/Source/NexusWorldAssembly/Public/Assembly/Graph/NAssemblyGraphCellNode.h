@@ -59,6 +59,12 @@ public:
 	/** Drop the link on the given junction, returning it to the free pool. */
 	void UnlinkJunction(int32 JunctionKey);
 
+	/**
+	 * @return World-space center of the cell's (rotation-baked) bounds. Differs from GetWorldPosition when the
+	 *         authored bounds are not centered on the cell pivot.
+	 */
+	FVector GetWorldBoundsCenter() const { return WorldBounds.GetCenter(); }
+
 	/** @return true if this cell's world bounds intersect Other's world bounds. */
 	bool CheckBoundsIntersects(const FNAssemblyGraphCellNode* Other) const
 	{

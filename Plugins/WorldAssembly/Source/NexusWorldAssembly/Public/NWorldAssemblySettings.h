@@ -19,6 +19,8 @@ enum class ENWorldAssemblyNetworkMode : uint8
 	AlwaysRelevantLevelInstances UMETA(DisplayName = "Always Replicate Level Instances", ToolTip="All created level instances will be flagged as always relevant, ignoring normal relevancy culling methods."),
 };
 
+
+
 /**
  * Project-wide settings for the NexusWorldAssembly plugin.
  */

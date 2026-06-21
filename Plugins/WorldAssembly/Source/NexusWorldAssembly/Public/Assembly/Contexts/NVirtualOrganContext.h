@@ -3,11 +3,13 @@
 
 #pragma once
 
+#include "NWorldAssemblySettings.h"
 #include "Assembly/Data/NVirtualBoneData.h"
 #include "Assembly/Graph/NAssemblyGraph.h"
 #include "Assembly/Data/NVirtualCellData.h"
 #include "Collections/NWeightedIntegerArray.h"
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
+#include "Organ/NOrganComponent.h"
 #include "Types/NCardinalDirection.h"
 #include "Types/NRotationConstraints.h"
 
@@ -76,6 +78,8 @@ public:
 	float WorldHullPenetration = 1.f;
 
 	float AssemblyDirectionTolerance = 15.f;
+
+	ENOrganDirectionConstraintMode AssemblyDirectionMode = ENOrganDirectionConstraintMode::StartBone;
 
 	/** World-space size of a single voxel, cached from UNWorldAssemblySettings so placed cells re-voxelize without re-reading settings. */
 	FVector VoxelSize = FVector(100.f, 100.f, 100.f);
@@ -249,16 +253,31 @@ public:
 	static NEXUSWORLDASSEMBLY_API bool IsGatedByMaximumNodeDepth(int32 MaximumNodeDepth, int32 CandidateNodeDepth);
 
 	/**
-	 * Gate a candidate by its required compass heading. Angle is the candidate's bearing measured from the organ's
-	 * start point (see FilterCellInputData), and the candidate survives only when that bearing lands within
-	 * Tolerance degrees of Direction. Wrapping is handled by FNCardinalDirectionUtils::IsCloseToDirection, so the
-	 * 0/360 seam and out-of-range inputs compare correctly.
+	 * Gate a candidate by its required compass heading. Angle is the candidate's bearing measured from the
+	 * configured directional reference point (see FilterCellInputData and AssemblyDirectionMode), and the candidate
+	 * survives only when that bearing lands within Tolerance degrees of Direction. Wrapping is handled by
+	 * FNCardinalDirectionUtils::IsCloseToDirection, so the 0/360 seam and out-of-range inputs compare correctly.
 	 * @param Angle The candidate's bearing in degrees (any range; normalized internally).
 	 * @param Direction The cardinal heading the candidate is constrained to.
 	 * @param Tolerance Maximum absolute degree deviation (+/-) from Direction that still permits placement.
 	 * @return true if the candidate's bearing is outside the tolerance window and must be gated out.
 	 */
 	static NEXUSWORLDASSEMBLY_API bool IsGatedByDirectionalConstraint(float Angle, ENCardinalDirection Direction, float Tolerance);
+
+	/**
+	 * Resolve the static world-space reference point a directional constraint measures candidate bearings from, per
+	 * the configured mode. StartBone returns the start bone position; OrganCenter returns the organ volume's
+	 * geometric center (Bounds.Origin); DynamicCentroid returns the start bone as its pre-placement seed (the live
+	 * centroid is resolved per filter pass in FilterCellInputData, not here). Unbound organs have a degenerate
+	 * bounds, so OrganCenter falls back to the start bone for them.
+	 * @param Mode The configured directional-constraint mode.
+	 * @param bUnbound True when the organ is unbounded (its Bounds is a degenerate/near-infinite box).
+	 * @param Bounds The organ's spatial bounds; its Origin is the volume's geometric center.
+	 * @param StartBoneWorldPosition World position of the start bone (StartBone reference and the unbound/seed fallback).
+	 * @return The world-space reference point candidate bearings are measured from.
+	 */
+	static NEXUSWORLDASSEMBLY_API FVector ResolveDirectionTargetPosition(ENOrganDirectionConstraintMode Mode,
+		bool bUnbound, const FBoxSphereBounds& Bounds, const FVector& StartBoneWorldPosition);
 
 
 	/**
@@ -317,12 +336,14 @@ public:
 	NEXUSWORLDASSEMBLY_API bool ValidateGraph();
 
 	/**
-	 * Set the world-space point the directional constraint measures candidate bearings from.
+	 * Set the static world-space point the directional constraint measures candidate bearings from. Seeded once per
+	 * mode at construction (see ResolveDirectionTargetPosition); DynamicCentroid overrides the effective reference
+	 * per filter pass and uses this only as its pre-placement fallback.
 	 * @param Location World-space origin for direction-constraint bearings.
 	 */
 	void SetDirectionTargetPosition(const FVector& Location) { DirectionTargetPosition = Location; }
 
-	/** @return The world-space point candidate bearings are measured from for the directional constraint. */
+	/** @return The static world-space point candidate bearings are measured from (the DynamicCentroid fallback). */
 	FVector GetDirectionTargetPosition() const { return DirectionTargetPosition; }
 
 	int32 GetRetryCount() const { return RetryCount; }
@@ -339,7 +360,11 @@ private:
 	/** Random-stream seed for this organ's build. */
 	uint64 Seed;
 
-	/** World-space target direction-constraint bearings are measured from. */
+	/**
+	 * Static world-space point direction-constraint bearings are measured from, seeded per mode at construction.
+	 * For DynamicCentroid this is only the pre-placement fallback; the live reference is the graph's cell centroid,
+	 * resolved per filter pass in FilterCellInputData.
+	 */
 	FVector DirectionTargetPosition;
 
 	/** Human-readable task name used in logs. */
