@@ -338,7 +338,12 @@ void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearCo
 		}
 	}
 
-	FNWorldAssemblyDebugDraw::DrawSocket(PDI,  ComponentLocation, ComponentRotation, SocketSize, Settings->SocketSize, Type, GizmoColor);
+	FNDrawSocketSettings SocketSettings;
+	SocketSettings.Color = GizmoColor;
+	SocketSettings.SocketSize = Settings->SocketSize;
+	SocketSettings.SocketType = Type;
+	SocketSettings.UnitSize = SocketSize;
+	FNWorldAssemblyDebugDraw::DrawSocket(PDI,  ComponentLocation, ComponentRotation, SocketSettings);
 }
 
 

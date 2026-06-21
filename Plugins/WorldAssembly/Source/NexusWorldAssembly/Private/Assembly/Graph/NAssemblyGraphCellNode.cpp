@@ -169,6 +169,7 @@ void FNAssemblyGraphCellNode::GenerateLinkDetails()
 	{
 		FNCellLinkDetails& Details = LinkDetails.AddDefaulted_GetRef();
 		Details.JunctionInstanceIdentifier = Junction.Value.InstanceIdentifier;
+		Details.NodeIdentifier = this->NodeIdentifier;
 
 		// A junction that is still free has no link, leave the connection fields at their defaults.
 		FNAssemblyGraphNode** LinkedNodePtr = Links.Find(Junction.Key);

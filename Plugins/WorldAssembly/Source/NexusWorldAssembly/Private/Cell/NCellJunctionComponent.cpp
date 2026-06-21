@@ -151,12 +151,22 @@ void UNCellJunctionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 }
 
 
-void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor& ValidColor, const FLinearColor& InvalidColor, const bool bShowDepth, const UNWorldAssemblySettings* Settings) const
+void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor& ValidColor, const FLinearColor& InvalidColor,
+	const bool bShowDepth, const bool bIsConnected, const bool bDrawBox, const bool bDrawCornerLines,
+	const UNWorldAssemblySettings* Settings) const
 {
 	FLinearColor GizmoColor = ValidColor; // Default color
 	const FVector ComponentLocation = GetComponentLocation();
 	const FRotator ComponentRotation = GetComponentRotation();
 	const ULevel* Level = GetComponentLevel();
+
+	FNDrawSocketSettings SocketSettings;
+	SocketSettings.SocketSize = Settings->SocketSize;
+	SocketSettings.SocketType = Details.Type;
+	SocketSettings.UnitSize = Details.SocketSize;
+	SocketSettings.bIsConnected = bIsConnected;
+	SocketSettings.bDrawBox = bDrawBox;
+	SocketSettings.bDrawCornerLines = bDrawCornerLines;
 
 	if (bShowDepth && Level != nullptr)
 	{
@@ -164,7 +174,7 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const F
 		const UNCellRootComponent* CellRoot = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(Level);
 		if (CellRoot == nullptr)
 		{
-			FNWorldAssemblyDebugDraw::DrawSocket(PDI, ComponentLocation, ComponentRotation, Details.SocketSize, Settings->SocketSize, Details.Type, GizmoColor);
+			FNWorldAssemblyDebugDraw::DrawSocket(PDI, ComponentLocation, ComponentRotation, SocketSettings);
 			return;
 		}
 
@@ -208,7 +218,8 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const F
 		}
 	}
 
-	FNWorldAssemblyDebugDraw::DrawSocket(PDI, ComponentLocation, ComponentRotation, Details.SocketSize, Settings->SocketSize, Details.Type, GizmoColor);
+	SocketSettings.Color = GizmoColor;
+	FNWorldAssemblyDebugDraw::DrawSocket(PDI, ComponentLocation, ComponentRotation, SocketSettings);
 }
 
 void UNCellJunctionComponent::OnRegister()

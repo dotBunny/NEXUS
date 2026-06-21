@@ -9,8 +9,7 @@
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMesh.h"
 
-void FNWorldAssemblyDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FVector& Location, const FRotator& Rotation,
-	const FIntVector2& UnitSize, const FVector2D& SocketSize, const ENCellJunctionType& SocketType, const FLinearColor& Color)
+void FNWorldAssemblyDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FVector& Location, const FRotator& Rotation, const FNDrawSocketSettings& DrawSettings)
 {
 	// Compose: yaw-align the local XZ-plane corners into the YZ-plane (rect normal becomes +X),
 	// then apply the socket rotation. Rotator addition is component-wise and only matches
@@ -19,12 +18,12 @@ void FNWorldAssemblyDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FV
 	const FRotator DisplayRotation = DisplayQuat.Rotator();
 	const FVector FacingRotation = Rotation.Vector();
 
-	const FVector2D Size = FNWorldAssemblyUtils::GetWorldSize2D(UnitSize, SocketSize);
-	const float LineLength = SocketSize.X * 0.25f;
+	const FVector2D Size = FNWorldAssemblyUtils::GetWorldSize2D(DrawSettings.UnitSize, DrawSettings.SocketSize);
+	const float LineLength = DrawSettings.SocketSize.X * 0.25f;
 
 	const TArray<FVector> UnrotatedCornerPoints = FNWorldAssemblyUtils::GetCenteredWorldCornerPoints2D(Size.X,Size.Y, ENAxis::Z);
 	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, Location);
-	const TArray<FVector2D> UnrotatedSocketPoints = FNWorldAssemblyUtils::GetSocketPoints2D(UnitSize, SocketSize);
+	const TArray<FVector2D> UnrotatedSocketPoints = FNWorldAssemblyUtils::GetSocketPoints2D(DrawSettings.UnitSize, DrawSettings.SocketSize);
 	const int32 SocketPointsCount = UnrotatedSocketPoints.Num();
 
 	const FVector DirectionEndPoint = Location + (FacingRotation * 50.f);
@@ -35,57 +34,66 @@ void FNWorldAssemblyDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FV
 	const FVector DirectionBottomPoint = DirectionBottom + (FacingRotation * 35.f);
 
 	// Estimate of lines: Rectangle(4) + Corner Lines(4) + Direction Arrow(3)
-	const int32 ReserveLineCount = 11 + (SocketPointsCount*32);
-	PDI->AddReserveLines(SDPG_Foreground, ReserveLineCount, false, false);
+	if (DrawSettings.bDrawBox)
+	{
+		const int32 ReserveLineCount = 11 + (SocketPointsCount*32);
+		PDI->AddReserveLines(SDPG_Foreground, ReserveLineCount, false, false);
 
-	// Draw Rectangle
-	PDI->DrawLine(RotatedCornerPoints[1], RotatedCornerPoints[2], Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
-	PDI->DrawLine(RotatedCornerPoints[2], RotatedCornerPoints[3], Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
-	PDI->DrawLine(RotatedCornerPoints[3], RotatedCornerPoints[0], Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
-	PDI->DrawLine(RotatedCornerPoints[0], RotatedCornerPoints[1], Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
+		// Draw Rectangle
+		PDI->DrawLine(RotatedCornerPoints[1], RotatedCornerPoints[2], DrawSettings.Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
+		PDI->DrawLine(RotatedCornerPoints[2], RotatedCornerPoints[3], DrawSettings.Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
+		PDI->DrawLine(RotatedCornerPoints[3], RotatedCornerPoints[0], DrawSettings.Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
+		PDI->DrawLine(RotatedCornerPoints[0], RotatedCornerPoints[1], DrawSettings.Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
+	}
 
 	// Draw Socket Points
-	for (int32 i = 0; i < SocketPointsCount; i++)
+	if (!DrawSettings.bIsConnected)
 	{
-		FVector RotatedNubPoint = FNVectorUtils::RotatedAroundPivot(Location +
-			FVector(UnrotatedSocketPoints[i].X, 0.0f, UnrotatedSocketPoints[i].Y), Location, DisplayRotation);
+		for (int32 i = 0; i < SocketPointsCount; i++)
+		{
+			FVector RotatedNubPoint = FNVectorUtils::RotatedAroundPivot(Location +
+				FVector(UnrotatedSocketPoints[i].X, 0.0f, UnrotatedSocketPoints[i].Y), Location, DisplayRotation);
 
-		DrawCircle(PDI, RotatedNubPoint,
-			FRotationMatrix(DisplayRotation).GetScaledAxis(EAxis::X), FRotationMatrix(DisplayRotation).GetScaledAxis(EAxis::Z),
-			Color, 10.f, 32, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
+			DrawCircle(PDI, RotatedNubPoint,
+				FRotationMatrix(DisplayRotation).GetScaledAxis(EAxis::X), FRotationMatrix(DisplayRotation).GetScaledAxis(EAxis::Z),
+				DrawSettings.Color, 10.f, 32, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
+		}
 	}
 
 	// Draw Corner Lines
-	for (int32 i = 0; i < 4; i++)
+	if (DrawSettings.bDrawCornerLines)
 	{
-		switch (SocketType)
+		for (int32 i = 0; i < 4; i++)
 		{
-			using enum ENCellJunctionType;
-		case TwoWaySocket:
-			const FVector TwoWayPointA = RotatedCornerPoints[i] + (FacingRotation * LineLength);
-			const FVector TwoWayPointB = RotatedCornerPoints[i] + (FacingRotation * -LineLength);
-			PDI->DrawLine(TwoWayPointA, TwoWayPointB, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
-			break;
+			switch (DrawSettings.SocketType)
+			{
+				using enum ENCellJunctionType;
+			case TwoWaySocket:
+				const FVector TwoWayPointA = RotatedCornerPoints[i] + (FacingRotation * LineLength);
+				const FVector TwoWayPointB = RotatedCornerPoints[i] + (FacingRotation * -LineLength);
+				PDI->DrawLine(TwoWayPointA, TwoWayPointB, DrawSettings.Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
+				break;
 
-		case InOnlySocket:
-			const FVector InOnlySocketPoint = RotatedCornerPoints[i] + (FacingRotation * -LineLength);
-			PDI->DrawLine(RotatedCornerPoints[i], InOnlySocketPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
-			break;
+			case InOnlySocket:
+				const FVector InOnlySocketPoint = RotatedCornerPoints[i] + (FacingRotation * -LineLength);
+				PDI->DrawLine(RotatedCornerPoints[i], InOnlySocketPoint, DrawSettings.Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
+				break;
 
-		case OutOnlySocket:
-			const FVector OutOnlySocketPoint = RotatedCornerPoints[i] + (FacingRotation * LineLength);
-			PDI->DrawLine(RotatedCornerPoints[i], OutOnlySocketPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
-			break;
+			case OutOnlySocket:
+				const FVector OutOnlySocketPoint = RotatedCornerPoints[i] + (FacingRotation * LineLength);
+				PDI->DrawLine(RotatedCornerPoints[i], OutOnlySocketPoint, DrawSettings.Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
+				break;
 
-		case OneWaySocket:
-			break;
+			case OneWaySocket:
+				break;
+			}
 		}
 	}
 
 	// Draw Direction
-	PDI->DrawLine(Location, DirectionEndPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
-	PDI->DrawLine(DirectionEndPoint, DirectionTopPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
-	PDI->DrawLine(DirectionEndPoint, DirectionBottomPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
+	PDI->DrawLine(Location, DirectionEndPoint, DrawSettings.Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
+	PDI->DrawLine(DirectionEndPoint, DirectionTopPoint, DrawSettings.Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
+	PDI->DrawLine(DirectionEndPoint, DirectionBottomPoint, DrawSettings.Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
 }
 
 void FNWorldAssemblyDebugDraw::DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const FRotator& Rotation, const FVector& Offset, const FLinearColor Color, const float DashSize, const ESceneDepthPriorityGroup Priority)

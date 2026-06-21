@@ -434,26 +434,46 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 		const UNWorldAssemblyEditorUserSettings* WorldAssemblyEditorUserSettings = UNWorldAssemblyEditorUserSettings::Get();
 		for (const auto JunctionComponent : FNWorldAssemblyRegistry::GetCellJunctionComponents())
 		{
-			if (JunctionComponent == nullptr) continue;
-
-			// Runtime
-			if (JunctionComponent->LinkDetails.JunctionInstanceIdentifier != -1 && !JunctionComponent->LinkDetails.bConnected)
+			// Bad ref?
+			if (JunctionComponent == nullptr)
 			{
-				if (WorldAssemblyEditorUserSettings->bDebugWorldDrawUnfilledJunctions)
-				{
-					JunctionComponent->DrawDebugPDI(PDI,
-						WorldAssemblyEditorUserSettings->ColorPaletteJunctionsUnfilled,
-						WorldAssemblyEditorUserSettings->ColorPaletteJunctionsUnfilled,
-						true,
-						WorldAssemblySettings);
-				}
+				continue;
 			}
-			else
+
+			FNCellLinkDetails& LinkDetails = JunctionComponent->LinkDetails;
+			// Author-time
+			if (LinkDetails.JunctionInstanceIdentifier == -1)
 			{
 				JunctionComponent->DrawDebugPDI(PDI,
 					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsValid,
 					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsInvalid,
 					true,
+					true,
+					true,
+					true,
+					WorldAssemblySettings);
+				continue;
+			}
+
+			// Runtime Connected
+			if (LinkDetails.bConnected)
+			{
+				const bool bConnectedDrawer = LinkDetails.ConnectedNodeIdentifier > LinkDetails.NodeIdentifier;
+				JunctionComponent->DrawDebugPDI(PDI,
+					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsValid,
+					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsInvalid,
+					false,true,bConnectedDrawer, bConnectedDrawer,
+					WorldAssemblySettings);
+				continue;
+			}
+
+			// Runtime Disconnected
+			if (WorldAssemblyEditorUserSettings->bDebugWorldDrawUnfilledJunctions)
+			{
+				JunctionComponent->DrawDebugPDI(PDI,
+					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsUnfilled,
+					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsUnfilled,
+					false,false,true, false,
 					WorldAssemblySettings);
 			}
 		}

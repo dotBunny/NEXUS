@@ -108,6 +108,7 @@ public:
 	/** Draw the junction's debug visualization through the supplied PDI. */
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI,
 		const FLinearColor& ValidColor, const FLinearColor& Invalid, bool bShowDepth = false,
+		bool bIsConnected = true, bool bDrawBox = true, bool bDrawCornerLines = true,
 		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get()) const;
 
 	/**

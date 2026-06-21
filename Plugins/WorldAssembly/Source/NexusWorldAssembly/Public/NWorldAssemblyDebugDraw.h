@@ -5,9 +5,29 @@
 
 #include "Cell/NCellJunctionDetails.h"
 #include "Cell/NCellVoxelData.h"
-#include "Math/NVectorUtils.h"
 
 struct FNRawMesh;
+
+struct NEXUSWORLDASSEMBLY_API FNDrawSocketSettings
+{
+	/** A unit representation of size (width(x) and height(y)). No concept of depth. */
+	FIntVector2 UnitSize;
+
+	/** The actual world size of each unit dimension (width(x) and height(y)). */
+	FVector2D SocketSize;
+
+	/** An indicator of the socket type determining what sort of additional information is drawn. */
+	ENCellJunctionType SocketType;
+
+	/** The color to draw the socket. */
+	FLinearColor Color;
+
+	bool bIsConnected = false;
+
+	bool bDrawBox = true;
+
+	bool bDrawCornerLines = true;
+};
 
 /**
  * Shared debug-draw helpers for cell/junction/voxel overlays used across editor-mode visualizers.
@@ -20,13 +40,9 @@ public:
 	 * @param PDI Drawing Interface
 	 * @param Location The World Location that is the center of the drawn rectangle
 	 * @param Rotation The World Rotation that represents the forward direction of the socket.
-	 * @param UnitSize A unit representation of size (width(x) and height(y)). No concept of depth.
-	 * @param SocketSize The actual world size of each unit dimension (width(x) and height(y)).
-	 * @param SocketType An indicator of the socket type determining what sort of additional information is drawn.
-	 * @param Color The color to draw the socket.
+	 * @param DrawSettings Settings used for drawing the socket.
 	 */
-	static void DrawSocket(FPrimitiveDrawInterface* PDI, const FVector& Location, const FRotator& Rotation,
-	                       const FIntVector2& UnitSize, const FVector2D& SocketSize, const ENCellJunctionType& SocketType, const FLinearColor& Color);
+	static void DrawSocket(FPrimitiveDrawInterface* PDI, const FVector& Location, const FRotator& Rotation, const FNDrawSocketSettings& DrawSettings);
 
 	/**
 	 * Draw the edges of Mesh as dashed line segments, offset and rotated into world space.
