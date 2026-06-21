@@ -53,6 +53,7 @@ struct FNCellInputDataFilter
 	/** Orientation applied to the candidate's junction to match the source. */
 	FQuat SourceQuat = FQuat();
 
+	/** World position the candidate would occupy; its bearing from the directional reference point drives the cardinal-direction constraint. */
 	FVector WorldPosition;
 };
 
@@ -69,6 +70,7 @@ class FNVirtualOrganContext
 
 public:
 
+	/** Stable identifier copied from the source organ component this context was built from. */
 	FGuid Identifier;
 
 	/** Allowed penetration, in world units, between adjacent cell hulls before they are treated as overlapping. */
@@ -77,8 +79,10 @@ public:
 	/** Allowed penetration, in world units, between a placed cell hull and existing world collision before it is rejected. */
 	float WorldHullPenetration = 1.f;
 
+	/** Maximum absolute degree deviation a candidate's bearing may have from its required cardinal direction. */
 	float AssemblyDirectionTolerance = 15.f;
 
+	/** Configured mode for resolving the world-space reference point that directional-constraint bearings are measured from. */
 	ENOrganDirectionConstraintMode AssemblyDirectionMode = ENOrganDirectionConstraintMode::StartBone;
 
 	/** World-space size of a single voxel, cached from UNWorldAssemblySettings so placed cells re-voxelize without re-reading settings. */
@@ -96,8 +100,10 @@ public:
 	/** Number of retries this organ is allowed before giving up. */
 	int32 MaximumRetryCount = 0;
 
+	/** Context tags the finished graph must carry (HasAllExact) to pass CheckGraph. */
 	FGameplayTagContainer RequiredContextTags;
 
+	/** Tag-counter constraints the finished graph's TagCounter must satisfy to pass CheckGraph. */
 	TArray<FNGameplayTagCounterConstraint> RequiredTagCounters;
 
 	/** When true, the graph may extend past Bounds. */
@@ -136,6 +142,14 @@ public:
 	/** Output graph, owned by this context until handed off to the task-graph context. */
 	TUniquePtr<FNAssemblyGraph> CellGraph = nullptr;
 
+	/**
+	 * Production constructor. Snapshots everything the build needs off the source organ component while still on the
+	 * game thread (settings, bounds, tags, bones, and the cell pool) so the rest of the build can run off-thread, then
+	 * runs an initial pre-filter pass that sets IsValid.
+	 * @param WorldOrganContext Source organ data to snapshot; read on the game thread only.
+	 * @param TaskSeed Fallback seed (overridden by the component's own Seed when set) driving this organ's random stream.
+	 * @param TaskName Human-readable task name reported through GetName.
+	 */
 	FNVirtualOrganContext(const FNWorldOrganData* WorldOrganContext, uint64 TaskSeed, FString TaskName);
 	NEXUSWORLDASSEMBLY_API ~FNVirtualOrganContext();
 
@@ -153,17 +167,20 @@ public:
 	/** @return Deterministic seed used to drive this organ's random stream. */
 	uint64 GetSeed() const { return Seed; };
 #if !UE_BUILD_SHIPPING
+	/** @return Diagnostic messages accumulated during the build (non-shipping builds only). */
 	const TArray<FString>& GetMessages() const { return Messages; }
 #endif
 
 	/** @return Human-readable task name for logs/debug. */
 	const FString& GetName() { return Name; };
 
+	/** @return Stable identifier copied from the source organ component. */
 	const FGuid& GetIdentifier() const { return Identifier; };
 
 	/** @return true once the builder has produced a valid graph (cell count within bounds, etc.). */
 	bool IsSuccessful() const { return bSuccessful; };
 
+	/** @return true if this organ must produce results for the overall assembly to be considered successful. */
 	bool IsRequired() const { return bRequired; };
 
 	/** @return true if the context is set up well enough to attempt a build. */
@@ -346,6 +363,7 @@ public:
 	/** @return The static world-space point candidate bearings are measured from (the DynamicCentroid fallback). */
 	FVector GetDirectionTargetPosition() const { return DirectionTargetPosition; }
 
+	/** @return Number of retries consumed so far. */
 	int32 GetRetryCount() const { return RetryCount; }
 private:
 	/** Number of retries consumed so far. */
