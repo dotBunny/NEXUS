@@ -449,7 +449,7 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsValid,
 					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsInvalid,
 					true,
-					true,
+					false,
 					true,
 					true,
 					WorldAssemblySettings);
