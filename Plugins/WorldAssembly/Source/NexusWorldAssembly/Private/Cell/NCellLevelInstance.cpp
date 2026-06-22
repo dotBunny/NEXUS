@@ -3,6 +3,7 @@
 
 #include "Cell/NCellLevelInstance.h"
 
+#include "UDynamicMesh.h"
 #include "NWorldAssemblyRegistry.h"
 #include "NWorldAssemblySettings.h"
 #include "NWorldAssemblyUtils.h"
@@ -93,6 +94,11 @@ UDynamicMesh* ANCellLevelInstance::GetProxyMesh() const
 		return ProxyMesh.Get();
 	}
 	return nullptr;
+}
+
+void ANCellLevelInstance::SetProxyMesh(UDynamicMesh* Mesh)
+{
+	ProxyMesh = Mesh;
 }
 
 void ANCellLevelInstance::UpdateFromAssemblyData()

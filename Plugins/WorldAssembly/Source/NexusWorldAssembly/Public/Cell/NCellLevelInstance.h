@@ -102,7 +102,7 @@ public:
 	UDynamicMesh* GetProxyMesh() const;
 
 	/** Caches the proxy's dynamic mesh on this cell; called on the server/owner during ANCellProxy spawn. @param Mesh The proxy dynamic mesh. */
-	void SetProxyMesh(UDynamicMesh* Mesh) { ProxyMesh = Mesh; }
+	void SetProxyMesh(UDynamicMesh* Mesh);
 
 #if WITH_EDITOR
 	virtual bool IsUserManaged() const override { return false; }
