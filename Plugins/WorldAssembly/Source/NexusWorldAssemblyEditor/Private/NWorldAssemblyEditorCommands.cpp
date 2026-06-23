@@ -7,6 +7,7 @@
 #include "AssetDefinitions/AssetDefinition_NCell.h"
 #include "EditorAssetLibrary.h"
 #include "FileHelpers.h"
+#include "LevelEditor.h"
 #include "Cell/NCellActor.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NEditorUtils.h"
@@ -23,6 +24,7 @@
 #include "Selection.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Assembly/NAssemblyOperation.h"
+#include "Subsystems/EditorActorSubsystem.h"
 #include "Types/NRawMeshFactory.h"
 
 void FNWorldAssemblyEditorCommands::RegisterCommands()
@@ -195,12 +197,25 @@ FExecuteAction::CreateStatic(&CellToggleVoxelData),
 	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
 	EUserInterfaceActionType::Button, FInputChord());
 
+	// Collect Components
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellJunctionCollectComponents,
+		"NWorldAssembly.NCellJunction.CollectComponents",
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_CollectComponents", "Collect Components"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_CollectComponents_Tooltip", "Collects all Junctions and move them to the selected Actor, maintaining their world transform."),
+		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.Junction.CollectJunctionComponents"),
+		EUserInterfaceActionType::Button, FInputChord());
+
 	// Create NCell Command List
 	CommandList_CellJunction = MakeShared<FUICommandList>();
 
 	CommandList_CellJunction->MapAction(Get().CommandInfo_CellJunctionAddComponent,
 FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	FCanExecuteAction::CreateStatic(&FNEditorUtils::HasActorsSelected));
+
+	CommandList_CellJunction->MapAction(Get().CommandInfo_CellJunctionCollectComponents,
+FExecuteAction::CreateStatic(&CellJunctionCollectComponents),
+	FCanExecuteAction::CreateStatic(&FNEditorUtils::HasActorSelected));
+
 
 	// Organ
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganGenerateProxies,
@@ -796,6 +811,94 @@ void FNWorldAssemblyEditorCommands::CellJunctionSelectComponent(UNCellJunctionCo
 {
 	GEditor->SelectNone(false, true);
 	GEditor->SelectComponent(Junction, true, true, true);
+}
+
+void FNWorldAssemblyEditorCommands::CellJunctionCollectComponents()
+{
+	UEditorActorSubsystem* EditorActorSubsystem = GEditor->GetEditorSubsystem<UEditorActorSubsystem>();
+	if (EditorActorSubsystem)
+	{
+		TArray<AActor*> SelectedActors = EditorActorSubsystem->GetSelectedLevelActors();
+		if (SelectedActors.Num() > 0)
+		{
+			AActor* TargetActor = SelectedActors[0];
+			// Snapshot the registry: reparenting unregisters/re-registers each junction, which mutates the live
+			// registry array (via OnUnregister/OnRegister), so iterating the reference directly would skip entries.
+			TArray<UNCellJunctionComponent*> CellJunctions = FNWorldAssemblyRegistry::GetCellJunctionComponents();
+			if (CellJunctions.Num() == 0)
+			{
+				return;
+			}
+
+			// Confirm the move with the user, listing the junctions and their destination actor.
+			constexpr int32 MaxListedJunctions = 25;
+			FString JunctionList;
+			for (int32 Index = 0; Index < CellJunctions.Num(); ++Index)
+			{
+				if (Index >= MaxListedJunctions)
+				{
+					JunctionList.Append(FString::Printf(TEXT("\n  - ...and %d more"), CellJunctions.Num() - MaxListedJunctions));
+					break;
+				}
+				JunctionList.Append(FString::Printf(TEXT("\n  - %s"), *CellJunctions[Index]->GetJunctionName()));
+			}
+
+			const FText ConfirmMessage = FText::FromString(FString::Printf(
+				TEXT("This will move %d junction(s) to '%s':\n%s\n\nDo you wish to proceed?"),
+				CellJunctions.Num(), *TargetActor->GetActorLabel(), *JunctionList));
+
+			const EAppReturnType::Type Choice = FMessageDialog::Open(EAppMsgCategory::Warning, EAppMsgType::Type::YesNo,
+				ConfirmMessage, FText::FromString(TEXT("NEXUS: World Assembly")));
+			if (Choice != EAppReturnType::Yes)
+			{
+				return;
+			}
+
+			const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCommands_CellJunctionCollectComponents", "Collect Junction Components"));
+			TargetActor->Modify();
+			const FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepWorld, true);
+			for (UNCellJunctionComponent* Component : CellJunctions)
+			{
+				AActor* PreviousOwner = Component->GetOwner();
+
+				Component->SetFlags(RF_Transactional);
+				Component->Modify();
+				if (PreviousOwner)
+				{
+					PreviousOwner->Modify();
+				}
+
+				// Tear down render/physics state before reparenting the component.
+				Component->UnregisterComponent();
+				Component->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+
+				// Drop the component from the previous owner's bookkeeping.
+				if (PreviousOwner)
+				{
+					PreviousOwner->RemoveInstanceComponent(Component);
+					PreviousOwner->RemoveOwnedComponent(Component);
+				}
+
+				// Reparent the UObject to the target actor and register with its bookkeeping + scene.
+				Component->Rename(nullptr, TargetActor, REN_DontCreateRedirectors);
+				TargetActor->AddOwnedComponent(Component);
+				TargetActor->AddInstanceComponent(Component);
+				Component->AttachToComponent(TargetActor->GetRootComponent(), AttachmentRules);
+				Component->RegisterComponent();
+			}
+
+			// Flag the level so the change is picked up by Save.
+			if (UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+			{
+				// ReSharper disable once CppExpressionWithoutSideEffects
+				CurrentWorld->MarkPackageDirty();
+			}
+
+			// Refresh the Details panel / components tree for the current selection without re-selecting the actor.
+			FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+			LevelEditorModule.BroadcastComponentsEdited();
+		}
+	}
 }
 
 void FNWorldAssemblyEditorCommands::OrganSelectComponent(UNOrganComponent* Organ)

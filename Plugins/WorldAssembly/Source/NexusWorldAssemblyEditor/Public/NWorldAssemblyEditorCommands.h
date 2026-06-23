@@ -146,6 +146,7 @@ public:
 	static void CellJunctionAddComponent();
 	/** Select the given junction component in the level editor. */
 	static void CellJunctionSelectComponent(UNCellJunctionComponent* Junction);
+	static void CellJunctionCollectComponents();
 
 	/** Select the given organ component in the level editor. */
 	static void OrganSelectComponent(UNOrganComponent* Organ);
@@ -224,4 +225,5 @@ private:
 	TSharedPtr<FUICommandList> CommandList_CellJunction;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellJunctionAddComponent;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellJunctionSelectComponent;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellJunctionCollectComponents;
 };

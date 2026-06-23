@@ -357,6 +357,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 
 					MenuBuilder.SetSearchable(false); // Life's too short to search this menu.
 					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_CellJunctionAddComponent);
+					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_CellJunctionCollectComponents);
 					MenuBuilder.BeginSection("NCellJunctionExtensions_Section", NSLOCTEXT("NexusWorldAssemblyEditor", "NCellJunctionExtensions_Section", "Select Junction"));
 					TArray<UNCellJunctionComponent*> Junctions = FNWorldAssemblyRegistry::GetCellJunctionsComponentsFromLevel(FNEditorUtils::GetCurrentLevel());
 					for (auto Junction : Junctions)

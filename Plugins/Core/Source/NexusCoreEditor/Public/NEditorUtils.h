@@ -35,6 +35,16 @@ public:
 		return true;
 	}
 
+	/**
+	 * Is a single actor selected?
+	 * @return true/false if a single actor is selected.
+	 */
+	FORCEINLINE static bool HasActorSelected()
+	{
+		if (GEditor->GetSelectedActorCount() == 1) return true;
+		return false;
+	}
+
 	/** Get the current editor map name. */
 	FORCEINLINE static FString GetCurrentMapName()
 	{

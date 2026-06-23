@@ -174,6 +174,8 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 	Style.Set("Command.WorldAssemblyEd.HasCollisionVisualizer", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_HasCollisionVisualizer"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.CreateCollisionVisualizer", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CreateCollisionVisualizer"), Icon16x16));
 
+	Style.Set("Command.WorldAssemblyEd.Junction.CollectJunctionComponents", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Junction_CollectJunctionComponents"), Icon16x16));
+
 	Style.Set("Command.WorldAssemblyEd.CellIgnore_NotIgnored", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CellIgnore_NotIgnored"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.CellIgnore_Ignored", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CellIgnore_Ignored"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.CellIgnore_Unknown", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CellIgnore_Unknown"), Icon16x16));
