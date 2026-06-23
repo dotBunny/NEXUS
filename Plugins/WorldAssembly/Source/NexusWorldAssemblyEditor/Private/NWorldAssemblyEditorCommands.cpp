@@ -201,7 +201,7 @@ FExecuteAction::CreateStatic(&CellToggleVoxelData),
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellJunctionCollectComponents,
 		"NWorldAssembly.NCellJunction.CollectComponents",
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_CollectComponents", "Collect Components"),
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_CollectComponents_Tooltip", "Collects all Junctions and move them to the selected Actor, maintaining their world transform."),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_CollectComponents_Tooltip", "Collects all Junctions and move them to the selected Actor, maintaining their world transforms."),
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.Junction.CollectJunctionComponents"),
 		EUserInterfaceActionType::Button, FInputChord());
 
