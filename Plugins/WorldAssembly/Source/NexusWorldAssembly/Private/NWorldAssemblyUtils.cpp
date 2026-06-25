@@ -9,8 +9,10 @@
 #include "NWorldAssemblySettings.h"
 #include "Organ/NOrganVolume.h"
 #include "Chaos/Convex.h"
+#include "Components/PrimitiveComponent.h"
 #include "Organ/NOrganComponent.h"
 #include "Misc/ScopedSlowTask.h"
+#include "Types/NRawMeshFactory.h"
 
 FBox FNWorldAssemblyUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCellBoundsGenerationSettings& Settings)
 {
@@ -60,45 +62,86 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 		CellActor = CellRoot->GetNCellActor();
 	}
 
-	FVector BoxVertices[8];
 	const int32 NumActors = InLevel->Actors.Num();
 
+	// STEP 1 - Filter the level's actors down to those that should contribute to the hull.
 	FScopedSlowTask ActorTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusWorldAssembly", "Task_CalculateConvexHull_Actor", "Calculate Convex Hull - Actors"));
 	ActorTask.MakeDialog(false);
 
-	Vertices.Reserve(NumActors * 8);
-	for (int32 ActorIndex = 0; ActorIndex < InLevel->Actors.Num() ; ++ActorIndex)
+	TArray<AActor*> HullActors;
+	HullActors.Reserve(NumActors);
+	for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
 	{
 		ActorTask.EnterProgressFrame(1);
-		const AActor* Actor = InLevel->Actors[ActorIndex];
-		if (Actor && Actor->IsLevelBoundsRelevant())
+		AActor* Actor = InLevel->Actors[ActorIndex];
+		if (Actor == nullptr || !Actor->IsLevelBoundsRelevant()) continue;
+
+		// Check Editor Only
+		if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly) continue;
+
+		// Don't bother with transient actors
+		if (Actor->HasAnyFlags(RF_Transient)) continue;
+
+		// Ignore Tags
+		if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
+
+		// Author Time Only
+		if (CellActor != nullptr && CellActor->IsAuthorTimeActor(Actor)) continue;
+
+		HullActors.Add(Actor);
+	}
+
+	// STEP 2 - Pull each qualifying actor's collision geometry (convex/box/sphere/capsule, or the
+	// complex-as-simple tri-mesh) and flatten every vertex into world space for the hull builder.
+	TArray<FNRawMesh> CollisionMeshes;
+	TArray<FTransform> CollisionTransforms;
+	FNRawMeshFactory::FromActorsInBounds(HullActors, {}, CollisionMeshes, CollisionTransforms);
+
+	int32 CollisionVertexCount = 0;
+	for (const FNRawMesh& CollisionMesh : CollisionMeshes)
+	{
+		CollisionVertexCount += CollisionMesh.Vertices.Num();
+	}
+
+	Vertices.Reserve(CollisionVertexCount + (Settings.bIncludeNonColliding ? HullActors.Num() * 8 : 0));
+	for (int32 MeshIndex = 0; MeshIndex < CollisionMeshes.Num(); ++MeshIndex)
+	{
+		const FTransform& ToWorld = CollisionTransforms[MeshIndex];
+		for (const FVector& Vertex : CollisionMeshes[MeshIndex].Vertices)
 		{
-			// Check Editor Only
-			if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly) continue;
+			Vertices.Add(Chaos::FConvex::FVec3Type(ToWorld.TransformPosition(Vertex)));
+		}
+	}
 
-			// Don't bother with transient actors
-			if (Actor->HasAnyFlags(RF_Transient)) continue;
+	// STEP 3 - Non-colliding actors yield no collision geometry, so (when requested) fall back to their
+	// bounding-box corners. A registered primitive with a BodySetup is the same gate FNRawMeshFactory uses
+	// to emit geometry, so its absence means the factory produced nothing for this actor.
+	if (Settings.bIncludeNonColliding)
+	{
+		FVector BoxVertices[8];
+		for (AActor* Actor : HullActors)
+		{
+			bool bHasCollisionGeometry = false;
+			TInlineComponentArray<UPrimitiveComponent*> ActorPrimitives(Actor);
+			for (UPrimitiveComponent* ActorPrimitive : ActorPrimitives)
+			{
+				if (ActorPrimitive != nullptr && ActorPrimitive->IsRegistered() && ActorPrimitive->GetBodySetup() != nullptr)
+				{
+					bHasCollisionGeometry = true;
+					break;
+				}
+			}
+			if (bHasCollisionGeometry) continue;
 
-			// Ignore Tags
-			if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
-
-			// Author Time Only
-			if (CellActor != nullptr && CellActor->IsAuthorTimeActor(Actor)) continue;
-
-			FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
+			FBox ActorBox = Actor->GetComponentsBoundingBox(true);
 			if (ActorBox.IsValid &&
 				(ActorBox.GetExtent().X > 0 && ActorBox.GetExtent().Y > 0 && ActorBox.GetExtent().Z > 0))
 			{
 				ActorBox.GetVertices(BoxVertices);
-
-				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[0]));
-				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[1]));
-				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[2]));
-				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[3]));
-				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[4]));
-				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[5]));
-				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[6]));
-				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[7]));
+				for (const FVector& BoxVertex : BoxVertices)
+				{
+					Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertex));
+				}
 			}
 		}
 	}

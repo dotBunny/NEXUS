@@ -512,4 +512,49 @@ N_TEST_HIGH(FNRawMeshFactoryTests_FromActorsInBounds_BareActor_SkippedGracefully
 	});
 }
 
+N_TEST_HIGH(FNRawMeshFactoryTests_FromActorsInBounds_StaticMeshActor_ProducesGeometry,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromActorsInBounds::StaticMeshActor_ProducesGeometry",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// A registered static-mesh actor must yield collision geometry through FromActorsInBounds. This guards the
+	// CPU-access-gated render-data route (IsStaticMeshCPUReadable returns true in editor) and the AggGeom route —
+	// whichever the engine cube uses — against the Part A changes, complementing the bare-actor "no output" test.
+	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	{
+		UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube"));
+		if (Cube == nullptr)
+		{
+			ADD_ERROR("Failed to load /Engine/BasicShapes/Cube");
+			return;
+		}
+
+		AStaticMeshActor* MeshActor = World->SpawnActor<AStaticMeshActor>();
+		if (MeshActor == nullptr)
+		{
+			ADD_ERROR("Failed to spawn AStaticMeshActor");
+			return;
+		}
+		UStaticMeshComponent* MeshComponent = MeshActor->GetStaticMeshComponent();
+		MeshComponent->SetMobility(EComponentMobility::Movable);
+		MeshComponent->SetStaticMesh(Cube);
+
+		const TArray<AActor*> Actors = { MeshActor };
+		const TArray<FBoxSphereBounds> NoBounds;
+		TArray<FNRawMesh> OutMeshes;
+		TArray<FTransform> OutTransforms;
+
+		FNRawMeshFactory::FromActorsInBounds(Actors, NoBounds, OutMeshes, OutTransforms);
+
+		CHECK_MESSAGE(TEXT("A static-mesh actor must emit at least one collision mesh"), OutMeshes.Num() > 0);
+		CHECK_EQUALS("Each emitted mesh must have a matching transform", OutMeshes.Num(), OutTransforms.Num());
+
+		int32 TotalVertices = 0;
+		for (const FNRawMesh& Mesh : OutMeshes)
+		{
+			TotalVertices += Mesh.Vertices.Num();
+		}
+		CHECK_MESSAGE(TEXT("Emitted collision geometry must contain vertices"), TotalVertices > 0);
+	});
+}
+
 #endif //WITH_TESTS

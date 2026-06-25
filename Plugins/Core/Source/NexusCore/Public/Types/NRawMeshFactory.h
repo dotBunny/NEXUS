@@ -131,4 +131,14 @@ private:
 	 * @return true when the component's class name begins with "Landscape".
 	 */
 	static bool IsLandscapePrimitive(const UPrimitiveComponent* Prim);
+
+	/**
+	 * @param StaticMesh Mesh whose LOD0 render buffers are inspected.
+	 * @return true when StaticMesh's LOD0 render buffers can be read on the CPU. Always true in editor (CPU copies
+	 *         are retained regardless of the asset flag); in cooked builds, true only when the mesh opted into CPU
+	 *         access — otherwise the vertex/index CPU data is freed after GPU upload and FromStaticMesh would
+	 *         dereference null buffer data.
+	 * @note Guards every render-data read in FromActorsInBounds; route 2 (cooked Chaos tri mesh) is the fallback.
+	 */
+	static bool IsStaticMeshCPUReadable(const UStaticMesh* StaticMesh);
 };

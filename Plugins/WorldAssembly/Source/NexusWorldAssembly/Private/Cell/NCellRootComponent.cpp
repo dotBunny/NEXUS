@@ -79,7 +79,7 @@ void UNCellRootComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI,  const FBox
 	// Hull
 	if (WorldHullVertices.Num() > 0)
 	{
-		FNWorldAssemblyDebugDraw::DrawDashedRawMesh(PDI, this->Details.Hull, WorldHullVertices, HullColor, 2, SDPG_World);
+		FNWorldAssemblyDebugDraw::DrawRawMesh(PDI, this->Details.Hull, WorldHullVertices, HullColor, SDPG_World);
 	}
 
 	// Voxel

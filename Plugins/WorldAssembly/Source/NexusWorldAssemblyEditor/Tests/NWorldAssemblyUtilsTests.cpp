@@ -4,9 +4,16 @@
 #if WITH_TESTS
 
 #include "NWorldAssemblyUtils.h"
+#include "Cell/NCellHullGenerationSettings.h"
+#include "Components/StaticMeshComponent.h"
+#include "Developer/NTestUtils.h"
+#include "Engine/StaticMesh.h"
+#include "Engine/StaticMeshActor.h"
+#include "Engine/World.h"
 #include "Macros/NTestMacros.h"
 #include "Math/NVectorUtils.h"
 #include "Tests/TestHarnessAdapter.h"
+#include "Types/NRawMesh.h"
 
 namespace NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyUtilsHarness
 {
@@ -304,6 +311,92 @@ N_TEST_MEDIUM(FNWorldAssemblyUtilsTests_CreateRotatedBox_TranslatesByOffset,
 		Result.Min.Equals(FVector(9, -1, -1), Tolerance))
 	CHECK_MESSAGE(TEXT("A zero-rotation box should simply translate by the offset (max)."),
 		Result.Max.Equals(FVector(11, 1, 1), Tolerance))
+}
+
+//
+// CalculateConvexHull
+//
+
+N_TEST_HIGH(FNWorldAssemblyUtilsTests_CalculateConvexHull_NullLevel_EmptyMesh,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyUtils::CalculateConvexHull::NullLevel_EmptyMesh",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Null level is the early-out guard — it must return a default, empty mesh without touching the registry.
+	const FNCellHullGenerationSettings Settings;
+	const FNRawMesh Mesh = FNWorldAssemblyUtils::CalculateConvexHull(nullptr, Settings);
+
+	CHECK_EQUALS("A null level should yield no hull vertices", Mesh.Vertices.Num(), 0)
+}
+
+N_TEST_HIGH(FNWorldAssemblyUtilsTests_CalculateConvexHull_StaticMeshActor_ProducesConvexHull,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyUtils::CalculateConvexHull::StaticMeshActor_ProducesConvexHull",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// A single 100cm engine cube must drive a convex hull built from its collision geometry rather than an inflated
+	// render-bounds box. The hull should be convex, carry bounds, and stay close to the cube's ±50 extents.
+	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	{
+		UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube"));
+		if (Cube == nullptr)
+		{
+			ADD_ERROR("Failed to load /Engine/BasicShapes/Cube");
+			return;
+		}
+
+		AStaticMeshActor* MeshActor = World->SpawnActor<AStaticMeshActor>();
+		if (MeshActor == nullptr)
+		{
+			ADD_ERROR("Failed to spawn AStaticMeshActor");
+			return;
+		}
+		UStaticMeshComponent* MeshComponent = MeshActor->GetStaticMeshComponent();
+		MeshComponent->SetMobility(EComponentMobility::Movable);
+		MeshComponent->SetStaticMesh(Cube);
+
+		const FNCellHullGenerationSettings Settings;
+		const FNRawMesh Mesh = FNWorldAssemblyUtils::CalculateConvexHull(World->PersistentLevel, Settings);
+
+		CHECK_MESSAGE(TEXT("The cube actor should drive a hull with at least the cube's 8 corners"),
+			Mesh.Vertices.Num() >= 8)
+		CHECK_MESSAGE(TEXT("The generated hull should report bounds"), Mesh.HasBounds())
+		CHECK_MESSAGE(TEXT("A Chaos-built hull over a single convex cube should be convex"), Mesh.IsConvex())
+		CHECK_MESSAGE(TEXT("Hull extents should match the cube's collision geometry, not an inflated box"),
+			Mesh.Bounds.Max.X < 100.0 && Mesh.Bounds.Min.X > -100.0)
+	});
+}
+
+N_TEST_HIGH(FNWorldAssemblyUtilsTests_CalculateConvexHull_IgnoreTag_ExcludesActor,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyUtils::CalculateConvexHull::IgnoreTag_ExcludesActor",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// An actor carrying one of Settings.ActorIgnoreTags must be filtered out before geometry extraction. With the
+	// only actor ignored, the hull collapses to nothing — locking the Step 1 tag filter.
+	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	{
+		UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube"));
+		if (Cube == nullptr)
+		{
+			ADD_ERROR("Failed to load /Engine/BasicShapes/Cube");
+			return;
+		}
+
+		AStaticMeshActor* MeshActor = World->SpawnActor<AStaticMeshActor>();
+		if (MeshActor == nullptr)
+		{
+			ADD_ERROR("Failed to spawn AStaticMeshActor");
+			return;
+		}
+		UStaticMeshComponent* MeshComponent = MeshActor->GetStaticMeshComponent();
+		MeshComponent->SetMobility(EComponentMobility::Movable);
+		MeshComponent->SetStaticMesh(Cube);
+
+		FNCellHullGenerationSettings Settings;
+		MeshActor->Tags.Add(Settings.ActorIgnoreTags[0]);
+
+		const FNRawMesh Mesh = FNWorldAssemblyUtils::CalculateConvexHull(World->PersistentLevel, Settings);
+
+		CHECK_EQUALS("An ignored actor should contribute no hull vertices", Mesh.Vertices.Num(), 0)
+	});
 }
 
 #endif //WITH_TESTS
