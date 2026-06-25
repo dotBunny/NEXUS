@@ -1,0 +1,80 @@
+// Copyright dotBunny Inc. All Rights Reserved.
+
+#pragma once
+
+#include "IDetailCustomization.h"
+#include "Types/SlateEnums.h"
+
+class AActor;
+class SWidget;
+class UNCellJunctionComponent;
+
+/**
+ * Detail-panel customization for UNCellJunctionComponent. Surfaces a "Filler Visualizer" panel: a dropdown of the
+ * junction's authored Fillers plus Fill/Clear buttons. Fill spawns the selected entry's Actor as a transient
+ * preview at the junction's transform combined with the entry's Offset; changing the dropdown while a preview is
+ * live replaces it, and the preview is removed on Clear or when the junction leaves the editor selection.
+ *
+ * @note Editor-only and single-junction only: the controls are suppressed when 0 or more than 1 junction is selected.
+ */
+class FNCellJunctionComponentCustomization final : public IDetailCustomization
+{
+public:
+	/** Factory entry point registered with the property editor module. */
+	static TSharedRef<IDetailCustomization> MakeInstance();
+
+	virtual ~FNCellJunctionComponentCustomization() override;
+
+	//~IDetailCustomization
+	virtual void CustomizeDetails(IDetailLayoutBuilder& DetailBuilder) override;
+	//End IDetailCustomization
+
+private:
+	/** @return Friendly label for the filler entry at FillerIndex ("(None)" when its Actor is unset), e.g. "BP My Filler". */
+	FText GetFillerLabel(int32 FillerIndex) const;
+
+	/** @return Friendly label for the currently selected filler entry, or empty when there is no selection. */
+	FText GetSelectedFillerLabel() const;
+
+	/** Builds the dropdown row widget for a single filler option. */
+	TSharedRef<SWidget> OnGenerateFillerWidget(TSharedPtr<int32> InOption) const;
+
+	/** Stores the new dropdown selection and, when a preview is already live, replaces it with the new entry. */
+	void OnFillerSelectionChanged(TSharedPtr<int32> NewSelection, ESelectInfo::Type SelectInfo);
+
+	/** Spawns (replacing any existing) the transient preview actor for the selected filler. */
+	FReply OnFillClicked();
+
+	/** Removes the transient preview actor, if any. */
+	FReply OnClearClicked();
+
+	/** @return true when a junction with a non-null selected filler is available to spawn. */
+	bool IsFillEnabled() const;
+
+	/** @return true when a live preview actor exists to clear. */
+	bool IsClearEnabled() const;
+
+	/** Spawns the transient preview actor for the filler at FillerIndex, placed at the junction transform + entry Offset. */
+	void SpawnPreview(int32 FillerIndex);
+
+	/** Destroys the transient preview actor, if one exists. */
+	void DestroyPreview();
+
+	/** Selection-changed backstop: removes the preview once the junction's owner leaves the editor selection. */
+	void OnEditorSelectionChanged(UObject* NewSelection);
+
+	/** The single junction being customized; unset when 0 or more than 1 junction is selected. */
+	TWeakObjectPtr<UNCellJunctionComponent> Junction;
+
+	/** Combo source — one shared int per index into Junction->Fillers. */
+	TArray<TSharedPtr<int32>> FillerOptions;
+
+	/** Current dropdown selection (an entry of FillerOptions), or null when there are no fillers. */
+	TSharedPtr<int32> SelectedOption;
+
+	/** Live transient preview actor, or invalid when none is spawned. */
+	TWeakObjectPtr<AActor> PreviewActor;
+
+	/** Handle for the USelection::SelectionChangedEvent backstop subscription. */
+	FDelegateHandle SelectionChangedHandle;
+};

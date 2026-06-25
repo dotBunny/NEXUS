@@ -32,6 +32,7 @@
 #include "Customizations/NOrganComponentCustomization.h"
 #include "Customizations/NWorldAssemblyEditorUserSettingsCustomization.h"
 #include "NWorldAssemblyEditorUserSettings.h"
+#include "Customizations/NCellJunctionComponentCustomization.h"
 #include "Editor/UnrealEdEngine.h"
 #include "Macros/NEditorModuleMacros.h"
 #include "Organ/NBoneActor.h"
@@ -162,6 +163,9 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 
 	PropertyModule.RegisterCustomClassLayout(UNCellRootComponent::StaticClass()->GetFName(),
 			FOnGetDetailCustomizationInstance::CreateStatic(&FNCellRootComponentCustomization::MakeInstance));
+
+	PropertyModule.RegisterCustomClassLayout(UNCellJunctionComponent::StaticClass()->GetFName(),
+			FOnGetDetailCustomizationInstance::CreateStatic(&FNCellJunctionComponentCustomization::MakeInstance));
 
 	PropertyModule.RegisterCustomClassLayout(UNOrganComponent::StaticClass()->GetFName(),
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNOrganComponentCustomization::MakeInstance));
