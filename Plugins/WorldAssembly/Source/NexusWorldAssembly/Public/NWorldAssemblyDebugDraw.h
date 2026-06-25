@@ -58,6 +58,13 @@ public:
 	static void DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const TArray<FVector>& WorldVertices,
 		FLinearColor Color, float DashSize = 2, ESceneDepthPriorityGroup Priority = SDPG_World);
 
+
+	static void DrawRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const FRotator& Rotation, const FVector& Offset,
+		FLinearColor Color, ESceneDepthPriorityGroup Priority = SDPG_World);
+
+	static void DrawRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const TArray<FVector>& WorldVertices,
+		FLinearColor Color, ESceneDepthPriorityGroup Priority = SDPG_World);
+
 	/** Render the voxel grid as line segments between adjacent occupied voxels. */
 	static void DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation);
 

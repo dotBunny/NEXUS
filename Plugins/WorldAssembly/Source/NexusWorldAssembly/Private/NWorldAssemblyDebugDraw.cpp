@@ -121,6 +121,32 @@ void FNWorldAssemblyDebugDraw::DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, c
 	}
 }
 
+void FNWorldAssemblyDebugDraw::DrawRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const FRotator& Rotation, const FVector& Offset, FLinearColor Color, ESceneDepthPriorityGroup Priority)
+{
+	const TArray<FVector> WorldVertices = FNVectorUtils::RotateAndOffsetPoints(Mesh.Vertices, Rotation, Offset);
+	DrawRawMesh(PDI, Mesh, WorldVertices, Color, Priority);
+}
+
+void FNWorldAssemblyDebugDraw::DrawRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const TArray<FVector>& WorldVertices, const FLinearColor Color, const ESceneDepthPriorityGroup Priority)
+{
+	const TArray<FNRawMeshLoop>& Loops = Mesh.Loops;
+	const int LoopCount = Loops.Num();
+
+	for (int32 i = 0; i < LoopCount; i++)
+	{
+		const FNRawMeshLoop& Loop = Loops[i];
+		const int32 Stride = Loop.Indices.Num();
+		const int32 StrideShort = Stride - 1;
+
+		for (int32 j = 0; j < StrideShort; j++)
+		{
+			PDI->DrawLine(WorldVertices[Loop.Indices[j]] ,WorldVertices[Loop.Indices[j+1]], Color, Priority, 1);
+		}
+
+		PDI->DrawLine(WorldVertices[Loop.Indices[StrideShort]] ,WorldVertices[Loop.Indices[0]], Color, Priority, 1);
+	}
+}
+
 void FNWorldAssemblyDebugDraw::DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation)
 {
 	const size_t PointCount = VoxelData.GetCount();
