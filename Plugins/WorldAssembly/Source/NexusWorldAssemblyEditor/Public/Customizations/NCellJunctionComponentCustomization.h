@@ -60,6 +60,16 @@ private:
 	/** Destroys the transient preview actor, if one exists. */
 	void DestroyPreview();
 
+	/**
+	 * Computes the world placement for a preview at the junction with the given authored Offset, mirroring
+	 * UNCellJunctionComponent::Fill(): the location offset is authored in the junction's frame (rotated by the
+	 * junction's orientation before adding) and the rotation offset spins the preview in place at that spot.
+	 */
+	void ComputePreviewPlacement(const FTransform& Offset, FVector& OutLocation, FQuat& OutRotation) const;
+
+	/** Re-places (or, when the entry's Actor changed, respawns) the live preview after the Fillers data is edited. */
+	void OnFillersPropertyChanged();
+
 	/** Selection-changed backstop: removes the preview once the junction's owner leaves the editor selection. */
 	void OnEditorSelectionChanged(UObject* NewSelection);
 
@@ -74,6 +84,9 @@ private:
 
 	/** Live transient preview actor, or invalid when none is spawned. */
 	TWeakObjectPtr<AActor> PreviewActor;
+
+	/** The preview actor's intrinsic scale captured at spawn (before the entry Offset scale), so offset edits re-scale from a stable base. */
+	FVector PreviewBaseScale = FVector::OneVector;
 
 	/** Handle for the USelection::SelectionChangedEvent backstop subscription. */
 	FDelegateHandle SelectionChangedHandle;

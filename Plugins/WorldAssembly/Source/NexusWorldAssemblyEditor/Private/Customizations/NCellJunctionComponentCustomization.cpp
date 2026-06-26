@@ -5,9 +5,11 @@
 #include "DetailCategoryBuilder.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
+#include "PropertyHandle.h"
 #include "Editor.h"
 #include "Selection.h"
 #include "NWorldAssemblyEditorMinimal.h"
+#include "NWorldAssemblySettings.h"
 #include "Cell/INCellJunctionFiller.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "Engine/World.h"
@@ -15,6 +17,27 @@
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SComboBox.h"
 #include "Widgets/Text/STextBlock.h"
+
+namespace
+{
+	/** Sentinel combo index representing the project-wide default junction filler (UNWorldAssemblySettings), not a Fillers entry. */
+	constexpr int32 DefaultFillerIndex = INDEX_NONE;
+
+	/** Humanizes a generated-class name for display: drops the Blueprint "_C" suffix, then NameToDisplayString. */
+	FText MakeFillerDisplayText(const FString& InRawClassName)
+	{
+		FString ClassName = InRawClassName;
+		ClassName.RemoveFromEnd(TEXT("_C"));
+		return FText::FromString(FName::NameToDisplayString(ClassName, false));
+	}
+
+	/** @return The configured project-wide default junction filler class (loading it on demand), or null when unset. */
+	UClass* ResolveDefaultFillerClass()
+	{
+		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
+		return Settings != nullptr ? Settings->AssemblySpawningDefaultJunctionFiller.LoadSynchronous() : nullptr;
+	}
+}
 
 TSharedRef<IDetailCustomization> FNCellJunctionComponentCustomization::MakeInstance()
 {
@@ -63,12 +86,28 @@ void FNCellJunctionComponentCustomization::CustomizeDetails(IDetailLayoutBuilder
 	{
 		FillerOptions.Add(MakeShared<int32>(Index));
 	}
-	SelectedOption = FillerOptions.Num() > 0 ? FillerOptions[0] : nullptr;
+	// Always offer the project-wide default junction filler (UNWorldAssemblySettings) as a trailing fallback option,
+	// labeled "(Default)" — it is the actor Fill() spawns when none of a junction's authored fillers are eligible.
+	FillerOptions.Add(MakeShared<int32>(DefaultFillerIndex));
+	// Prefer the first authored filler as the initial selection, falling back to the default when none are authored.
+	SelectedOption = FillerOptions[0];
 
 	// Backstop cleanup: the destructor is the primary "junction deselected" path (the panel rebuilds and drops this
 	// customization), but this also covers the panel keeping the layout alive after a viewport selection change.
 	SelectionChangedHandle = USelection::SelectionChangedEvent.AddSP(this,
 		&FNCellJunctionComponentCustomization::OnEditorSelectionChanged);
+
+	// Keep a live preview in sync with edits to the authored Fillers data — child changes catch nested Offset edits,
+	// the top-level change catches add/remove/reorder of entries.
+	const TSharedRef<IPropertyHandle> FillersHandle = DetailBuilder.GetProperty(
+		GET_MEMBER_NAME_CHECKED(UNCellJunctionComponent, Fillers));
+	if (FillersHandle->IsValidHandle())
+	{
+		const FSimpleDelegate OnFillersChanged = FSimpleDelegate::CreateSP(this,
+			&FNCellJunctionComponentCustomization::OnFillersPropertyChanged);
+		FillersHandle->SetOnPropertyValueChanged(OnFillersChanged);
+		FillersHandle->SetOnChildPropertyValueChanged(OnFillersChanged);
+	}
 
 	FDetailWidgetRow& Row = FillerCategory.AddCustomRow(NSLOCTEXT("NexusWorldAssemblyEditor", "FillerVisualizer", "Filler Visualizer"));
 	Row.NameContent()
@@ -125,6 +164,21 @@ void FNCellJunctionComponentCustomization::CustomizeDetails(IDetailLayoutBuilder
 
 FText FNCellJunctionComponentCustomization::GetFillerLabel(int32 FillerIndex) const
 {
+	// Default option: resolve the configured class from settings without forcing a load (use the soft path's asset name),
+	// and tag it "(Default)" so it reads distinctly from the junction's authored fillers.
+	if (FillerIndex == DefaultFillerIndex)
+	{
+		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
+		const FSoftObjectPath DefaultPath = Settings != nullptr
+			? Settings->AssemblySpawningDefaultJunctionFiller.ToSoftObjectPath() : FSoftObjectPath();
+		if (DefaultPath.IsNull())
+		{
+			return NSLOCTEXT("NexusWorldAssemblyEditor", "FillerDefaultNone", "(None) (Default)");
+		}
+		return FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "FillerDefaultFormat", "{0} (Default)"),
+			MakeFillerDisplayText(DefaultPath.GetAssetName()));
+	}
+
 	const UNCellJunctionComponent* Component = Junction.Get();
 	if (Component == nullptr || !Component->Fillers.IsValidIndex(FillerIndex))
 	{
@@ -137,10 +191,7 @@ FText FNCellJunctionComponentCustomization::GetFillerLabel(int32 FillerIndex) co
 		return NSLOCTEXT("NexusWorldAssemblyEditor", "FillerNone", "(None)");
 	}
 
-	// Friendly display name: drop the Blueprint generated-class "_C" suffix, then humanize.
-	FString ClassName = FillerClass->GetName();
-	ClassName.RemoveFromEnd(TEXT("_C"));
-	return FText::FromString(FName::NameToDisplayString(ClassName, false));
+	return MakeFillerDisplayText(FillerClass->GetName());
 }
 
 FText FNCellJunctionComponentCustomization::GetSelectedFillerLabel() const
@@ -184,14 +235,73 @@ FReply FNCellJunctionComponentCustomization::OnClearClicked()
 bool FNCellJunctionComponentCustomization::IsFillEnabled() const
 {
 	const UNCellJunctionComponent* Component = Junction.Get();
-	return Component != nullptr && SelectedOption.IsValid() &&
-		Component->Fillers.IsValidIndex(*SelectedOption) &&
-		Component->Fillers[*SelectedOption].Actor != nullptr;
+	if (Component == nullptr || !SelectedOption.IsValid())
+	{
+		return false;
+	}
+
+	const int32 Index = *SelectedOption;
+	if (Index == DefaultFillerIndex)
+	{
+		// Enabled when a default filler is configured; avoid loading it just to gate the button (check the soft path).
+		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
+		return Settings != nullptr && !Settings->AssemblySpawningDefaultJunctionFiller.IsNull();
+	}
+
+	return Component->Fillers.IsValidIndex(Index) && Component->Fillers[Index].Actor != nullptr;
 }
 
 bool FNCellJunctionComponentCustomization::IsClearEnabled() const
 {
 	return PreviewActor.IsValid();
+}
+
+void FNCellJunctionComponentCustomization::ComputePreviewPlacement(const FTransform& Offset, FVector& OutLocation, FQuat& OutRotation) const
+{
+	const UNCellJunctionComponent* Component = Junction.Get();
+	if (Component == nullptr)
+	{
+		OutLocation = FVector::ZeroVector;
+		OutRotation = FQuat::Identity;
+		return;
+	}
+
+	// Mirror UNCellJunctionComponent::Fill(): the location offset is authored in the junction's frame (rotate it by
+	// the junction's orientation before adding); the rotation offset then spins the preview in place at that spot.
+	const FQuat JunctionRotation = Component->GetComponentRotation().Quaternion();
+	OutLocation = Component->GetComponentLocation() + JunctionRotation.RotateVector(Offset.GetLocation());
+	OutRotation = JunctionRotation * FQuat(Offset.Rotator());
+}
+
+void FNCellJunctionComponentCustomization::OnFillersPropertyChanged()
+{
+	// The default option reads its placement from settings (identity offset), so authored-Fillers edits never move it.
+	if (!PreviewActor.IsValid() || !SelectedOption.IsValid() || *SelectedOption == DefaultFillerIndex)
+	{
+		return;
+	}
+
+	UNCellJunctionComponent* Component = Junction.Get();
+	if (Component == nullptr || !Component->Fillers.IsValidIndex(*SelectedOption))
+	{
+		return;
+	}
+
+	const FNCellJunctionFillerEntry& Entry = Component->Fillers[*SelectedOption];
+
+	// A changed (or cleared) Actor needs a fresh spawn; an Offset-only edit just re-places the existing preview.
+	AActor* Preview = PreviewActor.Get();
+	if (Preview->GetClass() != Entry.Actor.Get())
+	{
+		SpawnPreview(*SelectedOption);
+		return;
+	}
+
+	FVector NewLocation;
+	FQuat NewRotation;
+	ComputePreviewPlacement(Entry.Offset, NewLocation, NewRotation);
+	Preview->SetActorLocationAndRotation(NewLocation, NewRotation);
+	Preview->SetActorScale3D(PreviewBaseScale * Entry.Offset.GetScale3D());
 }
 
 void FNCellJunctionComponentCustomization::SpawnPreview(int32 FillerIndex)
@@ -200,34 +310,48 @@ void FNCellJunctionComponentCustomization::SpawnPreview(int32 FillerIndex)
 	DestroyPreview();
 
 	UNCellJunctionComponent* Component = Junction.Get();
-	if (Component == nullptr || !Component->Fillers.IsValidIndex(FillerIndex)) return;
+	if (Component == nullptr) return;
 
-	const FNCellJunctionFillerEntry& Entry = Component->Fillers[FillerIndex];
-	if (Entry.Actor == nullptr) return;
+	// Resolve the class to spawn and its placement offset. The default option carries no authored offset, so it
+	// previews at the junction's transform exactly as Fill() spawns the project-wide fallback.
+	UClass* FillerClass = nullptr;
+	FTransform Offset = FTransform::Identity;
+	if (FillerIndex == DefaultFillerIndex)
+	{
+		FillerClass = ResolveDefaultFillerClass();
+	}
+	else
+	{
+		if (!Component->Fillers.IsValidIndex(FillerIndex)) return;
+		const FNCellJunctionFillerEntry& Entry = Component->Fillers[FillerIndex];
+		FillerClass = Entry.Actor.Get();
+		Offset = Entry.Offset;
+	}
+	if (FillerClass == nullptr) return;
 
 	UWorld* World = Component->GetWorld();
 	if (World == nullptr) return;
 
-	// Mirror the placement applied by UNCellJunctionComponent::Fill(): the location offset is authored in the
-	// junction's frame (rotate it by the junction's orientation before adding), the rotation offset then spins the
-	// preview in place at that spot, and the scale offset multiplies the spawned actor's own scale.
-	const FQuat JunctionRotation = Component->GetComponentRotation().Quaternion();
-	const FVector SpawnLocation = Component->GetComponentLocation() + JunctionRotation.RotateVector(Entry.Offset.GetLocation());
-	const FRotator SpawnRotation = (JunctionRotation * FQuat(Entry.Offset.Rotator())).Rotator();
+	// Location & rotation follow the junction frame; the scale offset multiplies the spawned actor's own scale.
+	FVector SpawnLocation;
+	FQuat SpawnRotation;
+	ComputePreviewPlacement(Offset, SpawnLocation, SpawnRotation);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.OverrideLevel = Component->GetComponentLevel();
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.ObjectFlags |= RF_Transient;
 
-	AActor* SpawnedActor = World->SpawnActor<AActor>(Entry.Actor, SpawnLocation, SpawnRotation, SpawnParams);
+	AActor* SpawnedActor = World->SpawnActor<AActor>(FillerClass, SpawnLocation, SpawnRotation.Rotator(), SpawnParams);
 	if (SpawnedActor == nullptr)
 	{
 		UE_LOG(LogNexusWorldAssemblyEditor, Warning, TEXT("Failed to spawn filler preview actor for junction '%s'."), *Component->GetName());
 		return;
 	}
 
-	SpawnedActor->SetActorScale3D(SpawnedActor->GetActorScale3D() * Entry.Offset.GetScale3D());
+	// Capture the actor's intrinsic scale before applying the offset so later offset edits re-scale from the same base.
+	PreviewBaseScale = SpawnedActor->GetActorScale3D();
+	SpawnedActor->SetActorScale3D(PreviewBaseScale * Offset.GetScale3D());
 	PreviewActor = SpawnedActor;
 
 	// Notify the filler as the runtime path does (FinalizeFillerSpawn). There is no generated cell at author time,

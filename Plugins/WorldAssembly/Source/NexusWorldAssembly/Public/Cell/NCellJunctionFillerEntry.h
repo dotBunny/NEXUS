@@ -20,8 +20,8 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionFillerEntry
 {
 	GENERATED_BODY()
 
-	/** The actor to spawn when this entry is selected; must implement INCellJunctionFiller. */
-	UPROPERTY(EditAnywhere, DisplayName="Actor", Category="Object", meta=(MustImplement="/Script/NexusWorldAssembly.NCellJunctionFiller"))
+	/** The actor to spawn when this entry is selected. */
+	UPROPERTY(EditAnywhere, DisplayName="Actor", Category="Object")
 	TSubclassOf<AActor> Actor;
 
 	/**
