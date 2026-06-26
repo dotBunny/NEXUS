@@ -3,9 +3,11 @@
 
 #include "NWorldAssemblyEditorValidator.h"
 
+#include "NWorldAssemblyRegistry.h"
 #include "AssetDefinitions/AssetDefinition_NCell.h"
 #include "AssetDefinitions/AssetDefinition_NTissue.h"
 #include "Cell/NCellActor.h"
+#include "Cell/NCellJunctionComponent.h"
 #include "Misc/DataValidation.h"
 
 
@@ -64,10 +66,29 @@ EDataValidationResult UNWorldAssemblyEditorValidator::ValidateWorldAsset(const F
 		}
 	}
 
-	// TODO: Validate now that we have our CellActor
-	if(CellActor != nullptr)
+	// Now that we have the cell actor, sweep its level's junctions for the cook-fatal mobility mismatch: a
+	// UNCellJunctionComponent forces itself to Static mobility, so any non-Static attach parent produces a
+	// Static-under-Movable error during cook. Catch it here so it surfaces in Data Validation / on save first.
+	if (CellActor != nullptr)
 	{
+		for (const ULevel* Level : World->GetLevels())
+		{
+			// We don't want to check instanced levels
+			if (Level->IsInstancedLevel()) continue;
 
+			for (const UNCellJunctionComponent* Junction : FNWorldAssemblyRegistry::GetCellJunctionsComponentsFromLevel(Level))
+			{
+				const USceneComponent* AttachParent = Junction->GetAttachParent();
+				if (AttachParent != nullptr && AttachParent->Mobility != EComponentMobility::Static)
+				{
+					Result = EDataValidationResult::Invalid;
+					Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_World_JunctionNonStaticParent",
+						"Junction '{0}' is attached to non-Static parent '{1}'; this errors during cook. Set its owning actor/component Mobility to Static."),
+						FText::FromString(Junction->GetJunctionName()),
+						FText::FromString(AttachParent->GetName())));
+				}
+			}
+		}
 	}
 	return Result;
 }

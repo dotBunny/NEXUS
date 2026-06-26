@@ -12,6 +12,7 @@
 - `NEXUS.WorldAssembly.Flag.Hotpath` assembly flag for creating pathing feedback post assembly in both the `ANCellLevelInstance` as well as junctions.
 - `INCellJunctionFiller` interface for filler objects to implement to get callbacks when used to fill empty junctions.
 - `UNPickerSettings` project settings (Project Settings > NEXUS > Picker, stored in `DefaultNexusGame.ini`) exposing point-projection configuration: `Trace Complex`, `Nav Query Extent`, `Nav Agent Radius`, and `Nav Agent Height`.
+- `UNCell` validator checks for `UNCellJunctionComponent` that are attached to non-static movability Actors/components.
 
 ### Changed
 

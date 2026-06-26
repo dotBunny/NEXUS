@@ -5,6 +5,7 @@
 
 #include "FileHelpers.h"
 #include "ISourceControlModule.h"
+#include "Misc/ScopedSlowTask.h"
 #include "NEditorUtils.h"
 #include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEditorUtils.h"
@@ -40,9 +41,28 @@ int32 UNUpdateCellDataCommandlet::Execute(bool bShouldErrorOnChanges, bool bShou
 	TArray<FString> CommitPaths;
 	int32 ReturnCode = 0;
 
+	// Top-level progress over every Cell. Each SaveCell() below opens its own nested FScopedSlowTask, which
+	// auto-nests under this frame, so the dialog shows overall cell progress with per-cell sub-progress. In a
+	// headless commandlet run MakeDialog falls back to log output and ShouldCancel never trips.
+	const int32 TotalCells = CellAssetData.Num();
+	FNumberFormattingOptions CellNumberFormat;
+	CellNumberFormat.SetUseGrouping(false); // Keep the running count as "3/42", not "3/4,200".
+	FScopedSlowTask CellTask(TotalCells, NSLOCTEXT("NexusWorldAssemblyEditor", "Task_UpdateCellData", "Updating Cell Data..."));
+	CellTask.MakeDialog(true);
+
 	// Process Cell Assets
+	int32 CellNumber = 0;
 	for (auto AssetData : CellAssetData)
 	{
+		// Advance once per cell before any skip so the bar tracks the iteration, and honor a user cancel.
+		++CellNumber;
+		CellTask.EnterProgressFrame(1, FText::Format(
+			NSLOCTEXT("NexusWorldAssemblyEditor", "Task_UpdateCellData_Item", "{0} ({1}/{2})"),
+			FText::FromName(AssetData.AssetName),
+			FText::AsNumber(CellNumber, &CellNumberFormat),
+			FText::AsNumber(TotalCells, &CellNumberFormat)));
+		if (CellTask.ShouldCancel()) break;
+
 		if (!AssetData.IsValid())
 		{
 			UE_LOG(LogNexusWorldAssemblyEditor, Error, TEXT("NCell(%s) @ %s is invalid."),* AssetData.AssetName.ToString(),  *AssetData.GetObjectPathString());

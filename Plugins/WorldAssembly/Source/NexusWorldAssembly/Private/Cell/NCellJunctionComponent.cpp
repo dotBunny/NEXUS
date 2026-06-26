@@ -245,6 +245,18 @@ void UNCellJunctionComponent::OnRegister()
 	// registration across ticks and race this check.
 	if (!LevelInstance.IsValid())
 	{
+		// Author-time validation: a junction forces itself to Static mobility, so a non-Static attach parent
+		// produces a Static-under-Movable error at cook time. Warn early; the authoritative gate is
+		// UNWorldAssemblyEditorValidator::ValidateWorldAsset, which also catches a parent whose mobility is
+		// changed after this junction has registered.
+		if (const USceneComponent* ParentComponent = GetAttachParent();
+			ParentComponent != nullptr && ParentComponent->Mobility != EComponentMobility::Static)
+		{
+			UE_LOG(LogNexusWorldAssembly, Warning,
+				TEXT("Junction '%s' is attached to non-Static parent '%s'; this errors during cook. Set the owning actor/component Mobility to Static."),
+				*GetJunctionName(), *ParentComponent->GetName());
+		}
+
 		TWeakObjectPtr WeakJunctionComponent(this);
 		Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([WeakJunctionComponent]()
 		{
