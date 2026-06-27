@@ -57,7 +57,7 @@ FNCellJunctionComponentCustomization::~FNCellJunctionComponentCustomization()
 
 void FNCellJunctionComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
 {
-	IDetailCategoryBuilder& FillerCategory = DetailBuilder.EditCategory(TEXT("Filler Visualizer"),
+	IDetailCategoryBuilder& FillerCategory = DetailBuilder.EditCategory(TEXT("Cell Junction"),
 		FText::GetEmpty(), ECategoryPriority::Important);
 
 	// Single-junction only: each junction has its own Fillers list, so a shared dropdown across a multi-selection
@@ -80,17 +80,8 @@ void FNCellJunctionComponentCustomization::CustomizeDetails(IDetailLayoutBuilder
 	const UNCellJunctionComponent* Component = Junction.Get();
 	if (Component == nullptr) return;
 
-	// Dropdown source is index-based so the live Fillers entry (Actor/Offset) is read on demand.
-	FillerOptions.Reset();
-	for (int32 Index = 0; Index < Component->Fillers.Num(); ++Index)
-	{
-		FillerOptions.Add(MakeShared<int32>(Index));
-	}
-	// Always offer the project-wide default junction filler (UNWorldAssemblySettings) as a trailing fallback option,
-	// labeled "(Default)" — it is the actor Fill() spawns when none of a junction's authored fillers are eligible.
-	FillerOptions.Add(MakeShared<int32>(DefaultFillerIndex));
-	// Prefer the first authored filler as the initial selection, falling back to the default when none are authored.
-	SelectedOption = FillerOptions[0];
+	// Build the index-based dropdown source (so each entry's live Actor/Offset is read on demand) and seed the selection.
+	RebuildFillerOptions();
 
 	// Backstop cleanup: the destructor is the primary "junction deselected" path (the panel rebuilds and drops this
 	// customization), but this also covers the panel keeping the layout alive after a viewport selection change.
@@ -113,7 +104,7 @@ void FNCellJunctionComponentCustomization::CustomizeDetails(IDetailLayoutBuilder
 	Row.NameContent()
 		[
 			SNew(STextBlock)
-				.Text(NSLOCTEXT("NexusWorldAssemblyEditor", "FillerPreview", "Preview"))
+				.Text(NSLOCTEXT("NexusWorldAssemblyEditor", "FillerPreview", "Filler Preview"))
 				.Font(IDetailLayoutBuilder::GetDetailFont())
 		];
 	Row.ValueContent()
@@ -125,7 +116,7 @@ void FNCellJunctionComponentCustomization::CustomizeDetails(IDetailLayoutBuilder
 			.VAlign(VAlign_Center)
 			.Padding(0, 0, 5, 0)
 			[
-				SNew(SComboBox<TSharedPtr<int32>>)
+				SAssignNew(FillerComboBox, SComboBox<TSharedPtr<int32>>)
 					.OptionsSource(&FillerOptions)
 					.InitiallySelectedItem(SelectedOption)
 					.OnGenerateWidget(this, &FNCellJunctionComponentCustomization::OnGenerateFillerWidget)
@@ -208,6 +199,14 @@ TSharedRef<SWidget> FNCellJunctionComponentCustomization::OnGenerateFillerWidget
 
 void FNCellJunctionComponentCustomization::OnFillerSelectionChanged(TSharedPtr<int32> NewSelection, ESelectInfo::Type SelectInfo)
 {
+	// Ignore re-selections of the index already showing: RebuildFillerOptions re-points the selection at the same entry
+	// after an add/remove, which would otherwise needlessly destroy and respawn the live preview. When a preview exists
+	// its index always matches SelectedOption, so this also covers a manual reselect of the current item.
+	if (SelectedOption.IsValid() && NewSelection.IsValid() && *SelectedOption == *NewSelection)
+	{
+		return;
+	}
+
 	SelectedOption = NewSelection;
 
 	// Replace a live preview so the spawned actor always reflects the current dropdown selection.
@@ -273,8 +272,56 @@ void FNCellJunctionComponentCustomization::ComputePreviewPlacement(const FTransf
 	OutRotation = JunctionRotation * FQuat(Offset.Rotator());
 }
 
+void FNCellJunctionComponentCustomization::RebuildFillerOptions()
+{
+	const UNCellJunctionComponent* Component = Junction.Get();
+	if (Component == nullptr) return;
+
+	// Remember the current selection by index so it survives the rebuild — the option pointers are recreated below.
+	const int32 PreviousSelection = SelectedOption.IsValid() ? *SelectedOption : DefaultFillerIndex;
+
+	// Dropdown source is index-based so the live Fillers entry (Actor/Offset) is read on demand.
+	FillerOptions.Reset();
+	for (int32 Index = 0; Index < Component->Fillers.Num(); ++Index)
+	{
+		FillerOptions.Add(MakeShared<int32>(Index));
+	}
+	// Always offer the project-wide default junction filler (UNWorldAssemblySettings) as a trailing fallback option,
+	// labeled "(Default)" — it is the actor Fill() spawns when none of a junction's authored fillers are eligible.
+	FillerOptions.Add(MakeShared<int32>(DefaultFillerIndex));
+
+	// Re-point the selection at the rebuilt option carrying the same index; fall back to the first authored filler
+	// (or the trailing default when none are authored) if the previous selection no longer exists.
+	SelectedOption = FillerOptions[0];
+	for (const TSharedPtr<int32>& Option : FillerOptions)
+	{
+		if (*Option == PreviousSelection)
+		{
+			SelectedOption = Option;
+			break;
+		}
+	}
+
+	// On the initial build the widget does not exist yet (InitiallySelectedItem seeds it); afterwards, push the new
+	// option set into the live combo so it repopulates the next time the dropdown is opened.
+	if (FillerComboBox.IsValid())
+	{
+		FillerComboBox->RefreshOptions();
+		FillerComboBox->SetSelectedItem(SelectedOption);
+	}
+}
+
 void FNCellJunctionComponentCustomization::OnFillersPropertyChanged()
 {
+	// Adding or removing an entry changes the option set, so rebuild it (reorders and nested Offset/Actor edits keep the
+	// same count — labels are read live by index, so the dropdown stays correct without a rebuild). The trailing default
+	// option accounts for the +1 over the authored Fillers count.
+	const UNCellJunctionComponent* CountComponent = Junction.Get();
+	if (CountComponent != nullptr && FillerOptions.Num() != CountComponent->Fillers.Num() + 1)
+	{
+		RebuildFillerOptions();
+	}
+
 	// The default option reads its placement from settings (identity offset), so authored-Fillers edits never move it.
 	if (!PreviewActor.IsValid() || !SelectedOption.IsValid() || *SelectedOption == DefaultFillerIndex)
 	{

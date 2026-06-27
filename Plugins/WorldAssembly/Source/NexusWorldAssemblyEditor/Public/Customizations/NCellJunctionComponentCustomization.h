@@ -8,6 +8,7 @@
 class AActor;
 class SWidget;
 class UNCellJunctionComponent;
+template<typename OptionType> class SComboBox;
 
 /**
  * Detail-panel customization for UNCellJunctionComponent. Surfaces a "Filler Visualizer" panel: a dropdown of the
@@ -70,6 +71,12 @@ private:
 	/** Re-places (or, when the entry's Actor changed, respawns) the live preview after the Fillers data is edited. */
 	void OnFillersPropertyChanged();
 
+	/**
+	 * Rebuilds FillerOptions from the junction's current Fillers (plus the trailing default option), preserves the
+	 * current selection by index, and refreshes the live dropdown so it reflects added/removed entries when reopened.
+	 */
+	void RebuildFillerOptions();
+
 	/** Selection-changed backstop: removes the preview once the junction's owner leaves the editor selection. */
 	void OnEditorSelectionChanged(UObject* NewSelection);
 
@@ -81,6 +88,9 @@ private:
 
 	/** Current dropdown selection (an entry of FillerOptions), or null when there are no fillers. */
 	TSharedPtr<int32> SelectedOption;
+
+	/** The filler dropdown widget, retained so its options can be refreshed when the junction's Fillers list changes. */
+	TSharedPtr<SComboBox<TSharedPtr<int32>>> FillerComboBox;
 
 	/** Live transient preview actor, or invalid when none is spawned. */
 	TWeakObjectPtr<AActor> PreviewActor;
