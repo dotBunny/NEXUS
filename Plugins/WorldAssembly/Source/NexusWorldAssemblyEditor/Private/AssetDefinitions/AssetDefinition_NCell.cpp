@@ -308,11 +308,16 @@ void UAssetDefinition_NCell::OnPostSaveWorldWithContext(UWorld* World, FObjectPo
 	if (CellActor == nullptr) return;
 
 	// Flush this world's side-car if its pre-save pass dirtied it. The world package is fully written by now, so this is
-	// a safe top-level save. Remove() both consumes the queue entry and confirms it was actually queued for this save.
+	// a safe top-level save; SaveLoadedAsset routes through SavePackages, which checks the package out (p4 edit) or marks
+	// a freshly created one for add (p4 add) under source control. Only dequeue on success so a failed checkout (offline,
+	// exclusively locked) retries on the next save rather than being silently dropped.
 	UNCell* Cell = CellActor->Sidecar.Get();
-	if (Cell != nullptr && PendingSidecarFlushes.Remove(Cell) > 0)
+	if (Cell != nullptr && PendingSidecarFlushes.Contains(Cell))
 	{
-		UEditorAssetLibrary::SaveLoadedAsset(Cell);
+		if (UEditorAssetLibrary::SaveLoadedAsset(Cell))
+		{
+			PendingSidecarFlushes.Remove(Cell);
+		}
 	}
 }
 
