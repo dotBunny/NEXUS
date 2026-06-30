@@ -36,4 +36,18 @@ struct NEXUSWORLDASSEMBLY_API FNCellLinkDetails
 	/** Does this junction connect two cells that both lie on the sequential hot path (visiting chain). */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bHotPathSequential = false;
+
+	FString ToString() const
+	{
+		return FString::Printf(
+			TEXT("[%d:%d] Connected: %s > [%d:%d] | HotShort: %s | HotSeq: %s"),
+			NodeIdentifier,
+			JunctionInstanceIdentifier,
+			bConnected ? TEXT("True") : TEXT("False"),
+			ConnectedNodeIdentifier,
+			ConnectedJunctionInstanceIdentifier,
+			bHotPathShortest ? TEXT("True") : TEXT("False"),
+			bHotPathSequential ? TEXT("True") : TEXT("False")
+		);
+	}
 };
