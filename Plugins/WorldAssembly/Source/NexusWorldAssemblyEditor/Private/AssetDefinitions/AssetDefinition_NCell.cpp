@@ -318,6 +318,14 @@ void UAssetDefinition_NCell::OnPostSaveWorldWithContext(UWorld* World, FObjectPo
 		{
 			PendingSidecarFlushes.Remove(Cell);
 		}
+		else
+		{
+			// Kept queued for a retry on the next save. Surface it so a source-control failure (not checked out,
+			// exclusively locked, offline) isn't silently swallowed mid level-save — the data is safe in memory.
+			UE_LOG(LogNexusWorldAssemblyEditor, Warning,
+				TEXT("Failed to write the UNCell side-car '%s' to disk after saving world '%s'. It may not be checked out in source control; the change is kept in memory and will be retried on the next save."),
+				*Cell->GetName(), *World->GetName());
+		}
 	}
 }
 

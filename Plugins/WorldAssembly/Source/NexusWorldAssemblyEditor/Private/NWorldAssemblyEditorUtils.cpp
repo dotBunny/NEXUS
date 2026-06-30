@@ -225,7 +225,14 @@ void FNWorldAssemblyEditorUtils::SaveCell(UWorld* World, ANCellActor* CellActor,
 	// synchronous path used by explicit user actions (Save Cell menu, cell spawn, commandlet) outside the world-save flow.
 	if (UNCell* Cell = SyncCell(World, CellActor, bForceSave))
 	{
-		UEditorAssetLibrary::SaveLoadedAsset(Cell);
+		if (!UEditorAssetLibrary::SaveLoadedAsset(Cell))
+		{
+			// The data is synced in memory and the package left dirty; surface the disk-write failure so a source-control
+			// problem (not checked out, exclusively locked, offline) isn't missed — especially in the headless commandlet.
+			UE_LOG(LogNexusWorldAssemblyEditor, Warning,
+				TEXT("Failed to write the UNCell side-car '%s' to disk. It may not be checked out in source control; the change is kept in memory."),
+				*Cell->GetName());
+		}
 	}
 }
 
