@@ -54,6 +54,13 @@ namespace
 		}));
 	}
 
+	/**
+	 * Side-cars dirtied by OnPreSaveWorldWithContext that still need their own SavePackage. The flush is deferred to the
+	 * matching OnPostSaveWorldWithContext so the write happens as a fresh top-level save, never re-entrantly inside the
+	 * host world's pre-save broadcast. Held as weak pointers so a side-car GC'd between pre- and post-save simply drops out.
+	 */
+	TSet<TWeakObjectPtr<UNCell>> PendingSidecarFlushes;
+
 	/** @return the full object path of the side-car asset within the given side-car package. */
 	FSoftObjectPath MakeSidecarObjectPath(const FString& SidecarPackage)
 	{
@@ -280,8 +287,33 @@ void UAssetDefinition_NCell::OnPreSaveWorldWithContext(UWorld* World, FObjectPre
 	// Ensure CellActor settings
 	FNWorldAssemblyEditorUtils::EnsureCellInitializedCallbackActors(World, CellActor);
 
-	// Create or get our package for the world
-	FNWorldAssemblyEditorUtils::SaveCell(World, CellActor);
+	// Sync the cell data into its side-car now (in-memory), so the recalculated actor state is captured by this level
+	// save, but defer the side-car's own disk write to OnPostSaveWorldWithContext rather than running a re-entrant
+	// SavePackage inside this pre-save broadcast.
+	if (UNCell* Cell = FNWorldAssemblyEditorUtils::SyncCell(World, CellActor))
+	{
+		PendingSidecarFlushes.Add(Cell);
+	}
+}
+
+void UAssetDefinition_NCell::OnPostSaveWorldWithContext(UWorld* World, FObjectPostSaveContext ObjectPostSaveContext)
+{
+	// Nothing is queued during a cook save (OnPreSaveWorldWithContext bails first); mirror the guard for symmetry.
+	if (ObjectPostSaveContext.IsCooking())
+	{
+		return;
+	}
+
+	const ANCellActor* CellActor = FNWorldAssemblyUtils::GetCellActorFromWorld(World, true);
+	if (CellActor == nullptr) return;
+
+	// Flush this world's side-car if its pre-save pass dirtied it. The world package is fully written by now, so this is
+	// a safe top-level save. Remove() both consumes the queue entry and confirms it was actually queued for this save.
+	UNCell* Cell = CellActor->Sidecar.Get();
+	if (Cell != nullptr && PendingSidecarFlushes.Remove(Cell) > 0)
+	{
+		UEditorAssetLibrary::SaveLoadedAsset(Cell);
+	}
 }
 
 EDataValidationResult UAssetDefinition_NCell::ValidateAsset(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context)

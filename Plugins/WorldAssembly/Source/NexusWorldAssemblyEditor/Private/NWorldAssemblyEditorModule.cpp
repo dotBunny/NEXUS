@@ -48,6 +48,25 @@ void FNWorldAssemblyEditorModule::StartupModule()
 void FNWorldAssemblyEditorModule::ShutdownModule()
 {
 	N_MODULE_REMOVE_POST_ENGINE_INIT()
+
+	// Drop the asset-registry hooks registered in OnPostEngineInit. Use the module pointer so we don't force the
+	// AssetRegistry module to load during shutdown if it's already gone.
+	if (const FAssetRegistryModule* AssetRegistryModule =
+		FModuleManager::GetModulePtr<FAssetRegistryModule>(FName("AssetRegistry")))
+	{
+		IAssetRegistry& AssetRegistry = AssetRegistryModule->Get();
+		AssetRegistry.OnAssetRenamed().Remove(AssetRenamedHandle);
+		AssetRegistry.OnAssetRemoved().Remove(AssetRemovedHandle);
+	}
+	AssetRenamedHandle.Reset();
+	AssetRemovedHandle.Reset();
+
+	// Drop the world save hooks registered in OnPostEngineInit.
+	FEditorDelegates::PreSaveWorldWithContext.Remove(PreSaveWorldHandle);
+	FEditorDelegates::PostSaveWorldWithContext.Remove(PostSaveWorldHandle);
+	PreSaveWorldHandle.Reset();
+	PostSaveWorldHandle.Reset();
+
 	// No-op in practice: the startup callback(s) are bound via CreateStatic (no `this` owner
 	// for RemoveAll to match) and RegisterStartupCallback usually runs them immediately. Kept
 	// for symmetry with Epic's module template; the real menu teardown is below.
@@ -116,10 +135,11 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 
 	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
-	AssetRegistry.OnAssetRenamed().AddStatic(&UAssetDefinition_NCell::OnAssetRenamed);
-	AssetRegistry.OnAssetRemoved().AddStatic(&UAssetDefinition_NCell::OnAssetRemoved);
+	AssetRenamedHandle = AssetRegistry.OnAssetRenamed().AddStatic(&UAssetDefinition_NCell::OnAssetRenamed);
+	AssetRemovedHandle = AssetRegistry.OnAssetRemoved().AddStatic(&UAssetDefinition_NCell::OnAssetRemoved);
 
-	FEditorDelegates::PreSaveWorldWithContext.AddStatic(&UAssetDefinition_NCell::OnPreSaveWorldWithContext);
+	PreSaveWorldHandle = FEditorDelegates::PreSaveWorldWithContext.AddStatic(&UAssetDefinition_NCell::OnPreSaveWorldWithContext);
+	PostSaveWorldHandle = FEditorDelegates::PostSaveWorldWithContext.AddStatic(&UAssetDefinition_NCell::OnPostSaveWorldWithContext);
 
 	// Initialize Tool Menu
 	if (FSlateApplication::IsInitialized())

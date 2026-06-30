@@ -30,6 +30,7 @@
 - `UNTextRenderComponent` now warns about replication instead of setting it, with a toggle.
 - `UNMultiplayerLibrary::KickPlayer` is now `BlueprintAuthorityOnly`; the Blueprint node only executes on the authority.
 - `Collect Junction Components` now bails out with a warning when the target actor is location-locked (such as an `ANCellActor`), since Unreal disables transform editing on components owned by a location-locked actor, which would otherwise leave the collected junctions unmovable.
+- Saving a level now writes the `UNCell` side-car to disk via `PostSaveWorldWithContext` instead of synchronously inside the world pre-save broadcast: the cell data is still synced in-memory during pre-save (so it is captured by the level save), but the side-car's own `SavePackage` is deferred until after the world has been written, avoiding a re-entrant package save.
 
 ### Fixed
 

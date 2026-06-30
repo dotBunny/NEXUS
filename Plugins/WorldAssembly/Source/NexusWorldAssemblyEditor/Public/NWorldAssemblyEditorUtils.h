@@ -123,6 +123,25 @@ public:
 	static void SaveCell(UWorld* World, ANCellActor* CellActor = nullptr, bool bForceSave = false);
 
 	/**
+	 * Refreshes the cell side-car asset from CellActor (via UpdateCell) and marks the package dirty, but does NOT write
+	 * it to disk. This is the in-memory half of SaveCell, split out so callers that run inside the world-save flow can
+	 * sync the data here and defer the side-car's own SavePackage to PostSaveWorldWithContext (saving a package from
+	 * inside PreSaveWorldWithContext is a re-entrant save and is unsafe).
+	 *
+	 * Resolves or creates the UNCell package via UAssetDefinition_NCell::GetOrCreatePackage. When CellActor is null, the
+	 * world's primary ANCellActor is resolved via FNWorldAssemblyUtils::GetCellActorFromWorld; if no cell actor can be
+	 * found at all, a warning is logged and the call no-ops.
+	 *
+	 * @param World World whose cell asset should be synced.
+	 * @param CellActor Specific cell actor to sync, or nullptr to use the world's primary cell actor.
+	 * @param bForceSave When true, flags the side-car for a flush even if UpdateCell reported no changes.
+	 * @return The side-car UNCell that was dirtied and now needs a disk flush, or nullptr when nothing changed (or the
+	 *         cell actor / package could not be resolved).
+	 * @note Editor-only. Triggers the same slow-task UI as UpdateCell (it's invoked internally).
+	 */
+	static UNCell* SyncCell(UWorld* World, ANCellActor* CellActor = nullptr, bool bForceSave = false);
+
+	/**
 	 * Ensures the callback actors required by the cell exist and are initialized in the world.
 	 * @param World The world containing the cell.
 	 * @param CellActor The cell actor whose callback actors should be validated.

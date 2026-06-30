@@ -187,7 +187,7 @@ bool FNWorldAssemblyEditorUtils::HasSelectedGeneratedCellProxies()
 	return false;
 }
 
-void FNWorldAssemblyEditorUtils::SaveCell(UWorld* World, ANCellActor* CellActor, bool bForceSave)
+UNCell* FNWorldAssemblyEditorUtils::SyncCell(UWorld* World, ANCellActor* CellActor, bool bForceSave)
 {
 	if (CellActor == nullptr)
 	{
@@ -198,14 +198,14 @@ void FNWorldAssemblyEditorUtils::SaveCell(UWorld* World, ANCellActor* CellActor,
 	if (CellActor == nullptr)
 	{
 		UE_LOG(LogNexusWorldAssemblyEditor, Warning, TEXT("No ANCellActor found in the world when trying to save UNCell."));
-		return;
+		return nullptr;
 	}
 
 	UNCell* Cell = UAssetDefinition_NCell::GetOrCreatePackage(World);
 	if (Cell == nullptr)
 	{
 		UE_LOG(LogNexusWorldAssemblyEditor, Warning, TEXT("Unable to get or create the UNCell side-car package when trying to save."));
-		return;
+		return nullptr;
 	}
 
 	if (UpdateCell(Cell, CellActor) || bForceSave)
@@ -213,6 +213,18 @@ void FNWorldAssemblyEditorUtils::SaveCell(UWorld* World, ANCellActor* CellActor,
 		// Need to tell the cell it's dirty so it gets saved to disk
 		// ReSharper disable once CppExpressionWithoutSideEffects
 		Cell->MarkPackageDirty();
+		return Cell;
+	}
+
+	return nullptr;
+}
+
+void FNWorldAssemblyEditorUtils::SaveCell(UWorld* World, ANCellActor* CellActor, bool bForceSave)
+{
+	// Sync the cell data into its side-car (in-memory) and, when something changed, write it straight to disk. This is the
+	// synchronous path used by explicit user actions (Save Cell menu, cell spawn, commandlet) outside the world-save flow.
+	if (UNCell* Cell = SyncCell(World, CellActor, bForceSave))
+	{
 		UEditorAssetLibrary::SaveLoadedAsset(Cell);
 	}
 }
