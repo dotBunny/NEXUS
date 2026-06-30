@@ -57,8 +57,8 @@ FNCellJunctionComponentCustomization::~FNCellJunctionComponentCustomization()
 
 void FNCellJunctionComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
 {
-	IDetailCategoryBuilder& FillerCategory = DetailBuilder.EditCategory(TEXT("Cell Junction"),
-		FText::GetEmpty(), ECategoryPriority::Important);
+	IDetailCategoryBuilder& FillerCategory = DetailBuilder.EditCategory(TEXT("Cell Junction Visualizer"),
+		FText::GetEmpty(), ECategoryPriority::Default);
 
 	// Single-junction only: each junction has its own Fillers list, so a shared dropdown across a multi-selection
 	// is meaningless.

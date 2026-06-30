@@ -67,14 +67,14 @@ void UNCellJunctionComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// Send out calls to anything linked to it
-	if (OnBeginPlayCallback.Num() > 0)
+	if (OnBeginPlayTargets.Num() > 0)
 	{
-		for (int i = 0; i < OnBeginPlayCallback.Num(); ++i)
+		for (int i = 0; i < OnBeginPlayTargets.Num(); ++i)
 		{
-			if ( OnBeginPlayCallback[i] == nullptr ) continue;
+			if ( OnBeginPlayTargets[i] == nullptr ) continue;
 
 
-			AActor* Actor = OnBeginPlayCallback[i].Get();
+			AActor* Actor = OnBeginPlayTargets[i].Get();
 			if (Actor == nullptr) continue;
 
 

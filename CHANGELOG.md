@@ -54,6 +54,8 @@
 ```ini
 [CoreRedirects]
 +PropertyRedirects=(OldName="/Script/NexusWorldAssembly.NOrganComponent.bUnbounded",NewName="/Script/NexusWorldAssembly.NOrganComponent.bUnbound")
++PropertyRedirects=(OldName="/Script/NexusWorldAssembly.NWorldAssemblySettings.DefaultFillerActor",NewName="/Script/NexusWorldAssembly.NWorldAssemblySettings.AssemblySpawningDefaultJunctionFiller")
++PropertyRedirects=(OldName="/Script/NexusWorldAssembly.NCellJunctionComponent.OnBeginPlayCallback",NewName="/Script/NexusWorldAssembly.NCellJunctionComponent.OnBeginPlayTargets")
 +ClassRedirects=(OldName="/Script/NexusActorPools.NPooledActor",NewName="/Script/NexusActorPools.NPooledActorBase")
 ```
 

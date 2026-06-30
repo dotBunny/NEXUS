@@ -99,6 +99,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 			true // Should it be vertically aligned neatly in the toolbar?
 		);
 		EdModeSection.AddEntry(QuickAssemblyComboBox);
+
 		// Toggles between starting a Quick Assembly operation and cancelling the one it started. The icon, label and
 		// tooltip all key off FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive() so they stay in sync across both
 		// a running operation and the wait between auto-assembly runs.
@@ -136,7 +137,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 				FExecuteAction(),
 				FCanExecuteAction(),
 				FIsActionChecked(),
-				FIsActionButtonVisible()),
+				FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorToolMenu::ShowOrganDropdown)),
 				FOnGetContent::CreateLambda([]()
 				{
 					FMenuBuilder MenuBuilder(true, FNWorldAssemblyEditorCommands::Get().CommandList_QuickAssembly);

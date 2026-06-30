@@ -72,9 +72,9 @@ public:
 		meta=(ToolTip="Override timeslicing support and immediately spawn this filler in BeginPlay"))
 	bool bSpawnFillerImmediately = false;
 
-	UPROPERTY(EditInstanceOnly, DisplayName="BeginPlay", Category = "Callbacks",
+	UPROPERTY(EditInstanceOnly, DisplayName="OnBeginPlay Targets", Category = "Cell Junction",
 		meta=(AllowedClasses="/Script/NexusWorldAssembly.NCellJunctionBeginPlay"))
-	TArray<TObjectPtr<AActor>> OnBeginPlayCallback;
+	TArray<TObjectPtr<AActor>> OnBeginPlayTargets;
 
 	/** Connection state for this junction, resolved during generation; its bConnected flag gates whether the junction is filled at BeginPlay. */
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, Category = "Assembly Operation")

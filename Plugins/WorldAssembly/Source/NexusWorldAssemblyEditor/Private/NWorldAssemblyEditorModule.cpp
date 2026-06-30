@@ -204,7 +204,12 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 	FNPropertySections::AddActorComponentCategory("Organ Component");
 	FNPropertySections::AddSceneComponentCategory("Cell Root");
 	FNPropertySections::AddSceneComponentCategory("Cell Junction");
+	FNPropertySections::AddSceneComponentCategory("Cell Junction Visualizer");
+
 	FNPropertySections::AddSceneComponentCategory("Bone Component");
+
+	FNPropertySections::AddSceneComponentCategory("Assembly Operation");
+
 
 	// Cache stuff
 	FNWorldAssemblyEdMode::CacheUserSettings();
