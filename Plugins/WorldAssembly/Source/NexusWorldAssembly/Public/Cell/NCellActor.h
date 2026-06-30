@@ -157,7 +157,7 @@ private:
 
 	/** Actors in this cell implementing INCellInitialized; each receives OnInitializedFromProxy once InitializeFromProxy completes. */
 	UPROPERTY(VisibleInstanceOnly, Category="Cell Actor")
-	TArray<TObjectPtr<AActor>> InitializeCallbackActors;
+	TArray<TObjectPtr<AActor>> CellInitializedTargets;
 
 	/** Reference to the paired UNCell data asset that stores derived cell data on disk. */
 	UPROPERTY(VisibleInstanceOnly, Category="Cell Actor")

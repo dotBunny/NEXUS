@@ -29,6 +29,7 @@
 - Cell junction `Requirements` now respected, weights for junctions are automatically doubled when they are `Required`.
 - `UNTextRenderComponent` now warns about replication instead of setting it, with a toggle.
 - `UNMultiplayerLibrary::KickPlayer` is now `BlueprintAuthorityOnly`; the Blueprint node only executes on the authority.
+- `Collect Junction Components` now bails out with a warning when the target actor is location-locked (such as an `ANCellActor`), since Unreal disables transform editing on components owned by a location-locked actor, which would otherwise leave the collected junctions unmovable.
 
 ### Fixed
 
@@ -56,6 +57,7 @@
 +PropertyRedirects=(OldName="/Script/NexusWorldAssembly.NOrganComponent.bUnbounded",NewName="/Script/NexusWorldAssembly.NOrganComponent.bUnbound")
 +PropertyRedirects=(OldName="/Script/NexusWorldAssembly.NWorldAssemblySettings.DefaultFillerActor",NewName="/Script/NexusWorldAssembly.NWorldAssemblySettings.AssemblySpawningDefaultJunctionFiller")
 +PropertyRedirects=(OldName="/Script/NexusWorldAssembly.NCellJunctionComponent.OnBeginPlayCallback",NewName="/Script/NexusWorldAssembly.NCellJunctionComponent.OnBeginPlayTargets")
++PropertyRedirects=(OldName="/Script/NexusWorldAssembly.NCellActor.InitializeCallbackActors",NewName="/Script/NexusWorldAssembly.NCellActor.CellInitializedTargets")
 +ClassRedirects=(OldName="/Script/NexusActorPools.NPooledActor",NewName="/Script/NexusActorPools.NPooledActorBase")
 ```
 

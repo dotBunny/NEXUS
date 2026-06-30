@@ -228,9 +228,9 @@ void FNWorldAssemblyEditorUtils::EnsureCellInitializedCallbackActors(const UWorl
 			FoundActors.Add(Actor);
 		}
 	}
-	if (!FNArrayUtils::IsSameUnorderedValues<TObjectPtr<AActor>>(CellActor->InitializeCallbackActors, FoundActors))
+	if (!FNArrayUtils::IsSameUnorderedValues<TObjectPtr<AActor>>(CellActor->CellInitializedTargets, FoundActors))
 	{
-		CellActor->InitializeCallbackActors = FoundActors;
+		CellActor->CellInitializedTargets = FoundActors;
 		// ReSharper disable once CppExpressionWithoutSideEffects
 		CellActor->MarkPackageDirty();
 	}

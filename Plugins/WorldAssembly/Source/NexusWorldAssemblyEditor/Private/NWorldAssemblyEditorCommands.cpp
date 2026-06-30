@@ -822,6 +822,31 @@ void FNWorldAssemblyEditorCommands::CellJunctionCollectComponents()
 		if (SelectedActors.Num() > 0)
 		{
 			AActor* TargetActor = SelectedActors[0];
+
+			// A location-locked actor (such as the ANCellActor, which pins itself to the origin) propagates its lock to
+			// every scene component it owns: USceneComponent::CanEditChange disables RelativeLocation/RelativeRotation/
+			// RelativeScale3D on components owned by a location-locked actor. Collecting junctions onto such an actor would
+			// leave them unmovable in the editor (Details transform greyed out, scale gizmo disabled), so bail out with a
+			// warning rather than silently breaking junction authoring.
+			if (TargetActor->IsLockLocation())
+			{
+				const TCHAR* TargetTypeName = TargetActor->IsA<ANCellActor>()
+					? TEXT("NEXUS Cell Actor")
+					: TEXT("location-locked actor");
+
+				UE_LOG(LogNexusWorldAssemblyEditor, Warning,
+					TEXT("Aborting Collect Junction Components: target actor '%s' is a %s and is location-locked; junctions parented to it would become unmovable in the editor."),
+					*TargetActor->GetActorLabel(), TargetTypeName);
+
+				const FText WarningMessage = FText::FromString(FString::Printf(
+					TEXT("'%s' is a %s and is locked to its location.\n\nCollecting junctions onto it would lock their transforms — Unreal disables moving, rotating, and scaling components owned by a location-locked actor, so the junctions could no longer be edited.\n\nSelect a non-locked actor as the collection target instead."),
+					*TargetActor->GetActorLabel(), TargetTypeName));
+
+				FMessageDialog::Open(EAppMsgCategory::Warning, EAppMsgType::Type::Ok,
+					WarningMessage, FText::FromString(TEXT("NEXUS: World Assembly")));
+				return;
+			}
+
 			// Snapshot the registry: reparenting unregisters/re-registers each junction, which mutates the live
 			// registry array (via OnUnregister/OnRegister), so iterating the reference directly would skip entries.
 			TArray<UNCellJunctionComponent*> CellJunctions = FNWorldAssemblyRegistry::GetCellJunctionComponents();
