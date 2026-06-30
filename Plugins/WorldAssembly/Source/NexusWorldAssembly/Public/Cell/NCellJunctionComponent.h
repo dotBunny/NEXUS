@@ -77,7 +77,7 @@ public:
 	TArray<TObjectPtr<AActor>> OnBeginPlayCallback;
 
 	/** Connection state for this junction, resolved during generation; its bConnected flag gates whether the junction is filled at BeginPlay. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Assembly Operation")
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, Category = "Assembly Operation")
 	FNCellLinkDetails LinkDetails;
 
 	//~USceneComponent
@@ -124,13 +124,13 @@ public:
 	void Fill();
 
 protected:
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Assembly Operation")
+	UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, Category = "Assembly Operation")
 	TWeakObjectPtr<AActor> FillerActor;
 
 	int32 OperationTicket;
 
 	/** Cached level-instance owner when the junction is spawned as part of a streamed-in cell. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Assembly Operation")
+	UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, Category = "Assembly Operation")
 	TWeakObjectPtr<ALevelInstance> LevelInstance;
 
 private:
