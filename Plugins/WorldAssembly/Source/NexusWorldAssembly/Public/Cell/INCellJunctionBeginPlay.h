@@ -28,8 +28,9 @@ class NEXUSWORLDASSEMBLY_API INCellJunctionBeginPlay
 public:
 	/**
 	 * Called during the owning junction's BeginPlay for each actor registered on its BeginPlay callback list.
+	 * @param Junction The cell junction component that is making the call.
 	 * @param CellLinkDetails The junction's resolved connection state, including whether it connected to another cell and the connected node and junction identifiers.
 	 */
 	UFUNCTION(BlueprintNativeEvent, CallInEditor, Category="NEXUS|World Assembly")
-	void OnJunctionBeginPlay(FNCellLinkDetails CellLinkDetails);
+	void OnJunctionBeginPlay(UNCellJunctionComponent* Junction, FNCellLinkDetails CellLinkDetails);
 };

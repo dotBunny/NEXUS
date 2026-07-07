@@ -80,7 +80,7 @@ void UNCellJunctionComponent::BeginPlay()
 
 			if (Actor->Implements<UNCellJunctionBeginPlay>())
 			{
-				INCellJunctionBeginPlay::Execute_OnJunctionBeginPlay(Actor, LinkDetails);
+				INCellJunctionBeginPlay::Execute_OnJunctionBeginPlay(Actor, this, LinkDetails);
 			}
 			else
 			{
