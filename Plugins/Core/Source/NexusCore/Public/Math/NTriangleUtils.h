@@ -34,7 +34,16 @@ public:
 		const float denom = dot00 * dot11 - dot01 * dot01;
 		if (FMath::Abs(denom) >= SMALL_NUMBER)
 		{
+			// The guard above proves denom != 0. The pragma silences a false-positive C4723 that MSVC raises
+			// when a degenerate (collinear) unit-test triangle is inlined and constant-folds denom to 0.
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable: 4723) // potential divide by 0
+#endif
 			const float invDenom = 1.0f / denom;
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 			const float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
 			const float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
