@@ -31,28 +31,23 @@ public:
 		const float dot11 = FVector::DotProduct(v1, v1);
 		const float dot12 = FVector::DotProduct(v1, v2);
 
+		// denom is a Gram determinant (dot00 * dot11 - dot01^2) and is therefore always >= 0. When it collapses
+		// to (near) zero the triangle is degenerate/collinear and has no valid barycentric basis, so the point
+		// cannot be inside. Testing deynom directly also catches tiny negative values from floating-point error.
 		const float denom = dot00 * dot11 - dot01 * dot01;
-		if (FMath::Abs(denom) >= SMALL_NUMBER)
+		if (denom < SMALL_NUMBER)
 		{
-			// The guard above proves denom != 0. The pragma silences a false-positive C4723 that MSVC raises
-			// when a degenerate (collinear) unit-test triangle is inlined and constant-folds denom to 0.
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable: 4723) // potential divide by 0
-#endif
-			const float invDenom = 1.0f / denom;
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
-
-			const float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-			const float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-			return (u >= 0.0f) && (v >= 0.0f) && (u + v <= 1.0f);
+			return false;
 		}
 
-		// Degenerate (collinear) triangle — no valid barycentric basis, so the point cannot be inside.
-		return false;
+		// Compare the barycentric numerators against denom rather than dividing. Because denom > 0 here this is
+		// algebraically identical to (u >= 0 && v >= 0 && u + v <= 1) but performs no division — which avoids
+		// the false-positive C4723 (potential divide by 0) that MSVC raises when this header is inlined into a
+		// unit test with degenerate constant vertices and constant-folds denom to 0.
+		const float uNum = dot11 * dot02 - dot01 * dot12;
+		const float vNum = dot00 * dot12 - dot01 * dot02;
+
+		return (uNum >= 0.0f) && (vNum >= 0.0f) && (uNum + vNum <= denom);
 	}
 
 	/**
