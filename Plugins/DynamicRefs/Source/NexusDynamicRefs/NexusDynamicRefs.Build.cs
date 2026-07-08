@@ -15,6 +15,8 @@ namespace UnrealBuildTool.Rules
 					"Core",
 					"Engine",
 					"GameplayTags",
+					"Slate",
+					"SlateCore",
 					"UMG"
 				]
 			);

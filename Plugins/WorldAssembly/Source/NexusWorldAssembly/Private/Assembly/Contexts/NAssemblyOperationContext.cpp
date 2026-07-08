@@ -376,7 +376,7 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 	ComponentTableBlock->SetHeading(FString::Printf(TEXT("Components (%i)"), OrganData.Num()));
 	ComponentTableBlock->Initialize({ "Component", "Intersections", "Contains", "Bones", "Tissues" });
 
-	FStringBuilderBase Builder;
+	TStringBuilder<256> Builder;
 
 	for (auto Data : OrganData)
 	{

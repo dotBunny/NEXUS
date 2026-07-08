@@ -168,8 +168,14 @@ FText UAssetDefinition_NCell::GetAssetDescription(const FAssetData& AssetData) c
 
 bool UAssetDefinition_NCell::GetThumbnailActionOverlay(const FAssetData& InAssetData, FAssetActionThumbnailOverlayInfo& OutActionOverlayInfo) const
 {
+	// NCell displays a custom static overlay brush rather than a play/stop toggle. UE 5.8 deprecated
+	// ActionImageWidget in favor of IsActionPlayingDelegate, but that path is hard-wired to the engine
+	// Play/Stop icons and cannot render a custom brush, so we keep the still-honored widget path and
+	// locally silence the deprecation — mirroring how the engine's own SAssetThumbnail continues to use it.
+	PRAGMA_DISABLE_DEPRECATION_WARNINGS
 	OutActionOverlayInfo.ActionImageWidget = SNew(SImage)
 		.Image(FNWorldAssemblyEditorStyle::Get().GetBrush("AssetOverlay.NCell"));
+	PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 	OutActionOverlayInfo.ActionButtonArgs = SButton::FArguments()
 		.ToolTipText(NSLOCTEXT("NexusWorldAssemblyEditor", "NCell_SelectInContentBrowser", "Select Level in Content Browser"))

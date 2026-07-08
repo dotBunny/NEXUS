@@ -93,7 +93,7 @@ void FNReportTableBlock::Render(FNReport& Report, TArray<FString>& Output, const
 
 void FNReportTableBlock::RenderContentAsMarkdown(FNReport& Report, TArray<FString>& Output)
 {
-	FStringBuilderBase Builder;
+	TStringBuilder<256> Builder;
 	Builder.Append(TEXT("|"));
 	for (int32 i = 0; i < ColumnCount; i++)
 	{
@@ -128,7 +128,7 @@ void FNReportTableBlock::RenderContentAsMarkdown(FNReport& Report, TArray<FStrin
 
 void FNReportTableBlock::RenderContentAsPlainText(FNReport& Report, TArray<FString>& Output)
 {
-	FStringBuilderBase Builder;
+	TStringBuilder<256> Builder;
 	if (HeaderCells.Num() > 0)
 	{
 		for (int32 i = 0; i < ColumnCount; i++)

@@ -18,6 +18,8 @@ namespace UnrealBuildTool.Rules
 					"GameplayTags",
 					"GeometryCore",
 					"PCG",
+					"Slate",
+					"SlateCore",
 					"UMG"
 				]
 			);

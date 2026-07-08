@@ -55,7 +55,7 @@ void FNReportBlock::RenderHeading(TArray<FString>& Output, const ENReportOutputF
 		return;
 	}
 
-	FStringBuilderBase Builder;
+	TStringBuilder<256> Builder;
 	Output.Add(TEXT(" "));
 	switch (Level)
 	{

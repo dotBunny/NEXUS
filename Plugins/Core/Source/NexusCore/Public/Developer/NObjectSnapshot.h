@@ -72,7 +72,7 @@ struct NEXUSCORE_API FNObjectSnapshot
 	 */
 	FString ToDetailedString() const
 	{
-		FStringBuilderBase StringBuilder;
+		TStringBuilder<256> StringBuilder;
 		StringBuilder.Appendf(TEXT("Captured %i Objects (%i Untracked)\n"), CapturedObjectCount, UntrackedObjectCount);
 		for (const FNObjectSnapshotEntry& Entry : CapturedObjects)
 		{

@@ -34,11 +34,11 @@ public: \
 	} \
 	else \
 	{ \
-		FCoreDelegates::OnPostEngineInit.AddRaw(this, &Type::Method); \
+		FCoreDelegates::GetOnPostEngineInit().AddRaw(this, &Type::Method); \
 	}
 
 #define N_MODULE_REMOVE_POST_ENGINE_INIT() \
-	FCoreDelegates::OnPostEngineInit.RemoveAll(this);
+	FCoreDelegates::GetOnPostEngineInit().RemoveAll(this);
 
 #define N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE() \
 	static void OnPostEngineInit(); \
@@ -54,13 +54,13 @@ public: \
 	} \
 	else \
 	{ \
-		OnPostEngineInitDelegateHandle = FCoreDelegates::OnPostEngineInit.AddStatic(&Method); \
+		OnPostEngineInitDelegateHandle = FCoreDelegates::GetOnPostEngineInit().AddStatic(&Method); \
 	}
 
 #define N_MODULE_REMOVE_POST_ENGINE_INIT_DELEGATE() \
 	if (OnPostEngineInitDelegateHandle.IsValid()) \
 	{ \
-		FCoreDelegates::OnPostEngineInit.Remove(OnPostEngineInitDelegateHandle); \
+		FCoreDelegates::GetOnPostEngineInit().Remove(OnPostEngineInitDelegateHandle); \
 		OnPostEngineInitDelegateHandle.Reset(); \
 	}
 

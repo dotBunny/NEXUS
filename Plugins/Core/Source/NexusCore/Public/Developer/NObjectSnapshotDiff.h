@@ -77,7 +77,7 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 	 */
 	FString ToDetailedString() const
 	{
-		FStringBuilderBase StringBuilder;
+		TStringBuilder<256> StringBuilder;
 
 		StringBuilder.Appendf(TEXT("Captured %i Objects (%i Changes)\n"), ObjectCount, ChangeCount);
 		StringBuilder.Appendf(TEXT("Previously %i Untracked Objects | Currently %i Untracked Objects\n"), UntrackedObjectCountA, UntrackedObjectCountB);

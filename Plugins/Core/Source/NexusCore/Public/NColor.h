@@ -72,7 +72,7 @@ public:
 
 
 	static constexpr FLinearColor GreenDark = FLinearColor(0.0352941176470588f, 0.2009803921568627f, 0.0450980392156863f, 1.0f);
-	static constexpr FLinearColor GreenMid = FLinearColor(0.1607843137254902f, 0.5254901960784314f, 0.1254901960784314, 1.0f);
+	static constexpr FLinearColor GreenMid = FLinearColor(0.1607843137254902f, 0.5254901960784314f, 0.1254901960784314f, 1.0f);
 	static constexpr FLinearColor GreenLight = FLinearColor(0.1019607843137255f, 0.9f, 0.1019607843137255f, 1.0f);
 
 	static constexpr FLinearColor Pink = FLinearColor(0.8196078431372549f, 0.3529411764705882f, 0.8941176470588235f, 1.0f);

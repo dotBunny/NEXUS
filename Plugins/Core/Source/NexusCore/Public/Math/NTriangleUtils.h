@@ -32,13 +32,18 @@ public:
 		const float dot12 = FVector::DotProduct(v1, v2);
 
 		const float denom = dot00 * dot11 - dot01 * dot01;
-		if (FMath::Abs(denom) < SMALL_NUMBER) return false;
-		const float invDenom = 1.0f / denom;
+		if (FMath::Abs(denom) >= SMALL_NUMBER)
+		{
+			const float invDenom = 1.0f / denom;
 
-		const float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-		const float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+			const float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+			const float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
-		return (u >= 0.0f) && (v >= 0.0f) && (u + v <= 1.0f);
+			return (u >= 0.0f) && (v >= 0.0f) && (u + v <= 1.0f);
+		}
+
+		// Degenerate (collinear) triangle — no valid barycentric basis, so the point cannot be inside.
+		return false;
 	}
 
 	/**
