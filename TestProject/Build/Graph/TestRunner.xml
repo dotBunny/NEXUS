@@ -120,7 +120,7 @@
     </Do>
 
     <!-- INCLUDE EPICS MAIN TASK -->
-    <Include Script="../../../../Engine/Build/Graph/Tasks/BuildAndTestProject.xml" />
+    <Include Script="../../../../../Engine/Build/Graph/Tasks/BuildAndTestProject.xml" />
 
 
     <!-- SETUP OUR PUBLISHING OF GIT COMMIT STATUS -->
@@ -153,7 +153,7 @@
                 <CsCompile Project="$(K9GitHubCommitStatusProject)" Configuration="$(K9Configuration)" />
                                 
                 <!-- UPDATE STATUS -->        
-                <Spawn Exe="$(K9GitHubCommitStatusExecutable)" Arguments="---CREDENTIALS=$(RootDir)\Staging\github.k9.tmp ---REPO-OWNER=dotBunny ---REPO-NAME=NEXUS ---SHA-FILE=$(RootDir)/NEXUS/GIT_COMMIT_SHA ---STATE=success ---CONTEXT=&quot;Horde / NEXUS / $(TestPackageLabel)&quot; ---DESCRIPTION=&quot;Successful.&quot; ---URL=https://horde.dotbunny.com:5001/job/$(UE_HORDE_JOBID)" />	                            
+                <Spawn Exe="$(K9GitHubCommitStatusExecutable)" Arguments="---CREDENTIALS=$(RootDir)\Staging\github.k9.tmp ---REPO-OWNER=dotBunny ---REPO-NAME=NEXUS ---SHA-FILE=$(RootDir)/Projects/NEXUS/GIT_COMMIT_SHA ---STATE=success ---CONTEXT=&quot;Horde / NEXUS / $(TestPackageLabel)&quot; ---DESCRIPTION=&quot;Successful.&quot; ---URL=https://horde.dotbunny.com:5001/job/$(UE_HORDE_JOBID)" />	                            
             </Node>
         </Do>        
     </Agent>
