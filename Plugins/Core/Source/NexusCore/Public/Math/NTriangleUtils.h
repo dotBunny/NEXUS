@@ -33,7 +33,7 @@ public:
 
 		// denom is a Gram determinant (dot00 * dot11 - dot01^2) and is therefore always >= 0. When it collapses
 		// to (near) zero the triangle is degenerate/collinear and has no valid barycentric basis, so the point
-		// cannot be inside. Testing deynom directly also catches tiny negative values from floating-point error.
+		// cannot be inside. Testing denom directly also catches tiny negative values from floating-point error.
 		const float denom = dot00 * dot11 - dot01 * dot01;
 		if (denom < SMALL_NUMBER)
 		{

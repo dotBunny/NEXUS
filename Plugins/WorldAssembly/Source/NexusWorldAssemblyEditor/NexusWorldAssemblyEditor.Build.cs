@@ -35,6 +35,7 @@ namespace UnrealBuildTool.Rules
 					"GameplayTags",
 					"InputCore",
 					"LevelEditor",
+					"PCG",
 					"Projects",
 					"Slate",
 					"SlateCore",
