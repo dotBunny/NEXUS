@@ -120,7 +120,7 @@
     </Do>
 
     <!-- INCLUDE EPICS MAIN TASK -->
-    <Include Script="../../../../../Engine/Build/Graph/Tasks/BuildAndTestProject.xml" />
+    <Include Script="../../../../../../Engine/Build/Graph/Tasks/BuildAndTestProject.xml" />
 
 
     <!-- SETUP OUR PUBLISHING OF GIT COMMIT STATUS -->
