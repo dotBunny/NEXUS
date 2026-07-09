@@ -119,7 +119,7 @@
         <Property Name="TestPackageLabel" Value="PackageTest Game Win64" />      
     </Do>
 
-    <!-- INCLUDE EPICS MAIN TASK -->    
+    <!-- INCLUDE EPICS MAIN TASK RELATIVE TO ENGINE IN OUR DEPOT --> 
     <Include Script="$(RootDir)/Engine/Build/Graph/Tasks/BuildAndTestProject.xml" />
 
 
