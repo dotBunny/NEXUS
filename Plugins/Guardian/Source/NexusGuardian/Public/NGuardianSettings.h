@@ -30,7 +30,7 @@ public:
 	/** How often, in seconds, the subsystem polls the UObject count and responds. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Subsystem", DisplayName ="Tick Rate",
 		meta=(ToolTip="How often should the system poll the object count? and respond.",
-			EditCondition="BuildAvailability!=0", ClampMin="0.0", UIMin="0.0", ClampMin="0.0", UIMin="0.0", ClampMax="300.0", UIMax="300.0", Units="s"))
+			EditCondition="BuildAvailability!=0", ClampMin="0.0", UIMin="0.0", ClampMax="300.0", UIMax="300.0", Units="cm"))
 	float TickRate = 1.0f;
 
 	/** When true, captured snapshots are also written to the project's logs folder (comparison works from memory regardless). */

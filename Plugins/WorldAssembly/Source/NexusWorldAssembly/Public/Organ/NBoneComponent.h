@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "NWorldAssemblySettings.h"
 #include "Cell/NCellJunctionDetails.h"
+#include "Components/SceneComponent.h"
 #include "Macros/NActorMacros.h"
 #include "NBoneComponent.generated.h"
 

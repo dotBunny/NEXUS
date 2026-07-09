@@ -6,6 +6,8 @@
 #include "NWorldAssemblyMinimal.h"
 #include "NWorldAssemblySettings.h"
 #include "NWorldAssemblyUtils.h"
+#include "PrimitiveDrawingUtils.h"
+#include "PrimitiveDrawInterface.h"
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMesh.h"
 
@@ -86,6 +88,45 @@ void FNWorldAssemblyDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FV
 
 			case OneWaySocket:
 				break;
+			}
+		}
+	}
+
+	// Depth
+	if (DrawSettings.bDrawFillDepth && DrawSettings.FillDepth != 0.f)
+	{
+		// Extrude the socket rectangle along the facing axis to preview the fill volume. The near edge is anchored per
+		// ENCellJunctionFillDepthMode: forward grows ahead of the socket, backward behind it, and centered straddles it.
+		const float NearDistance = DrawSettings.FillDepth * FNCellJunctionDetails::GetFillDepthAnchorScale(DrawSettings.FillDepthMode);
+		const float FarDistance = NearDistance + DrawSettings.FillDepth;
+
+		const FVector NearOffset = FacingRotation * NearDistance;
+		const FVector FarOffset = FacingRotation * FarDistance;
+
+		const FLinearColor DepthColor(0.4f, 0.4f, 0.4f, 1.f);
+
+		// Far rectangle(4) + corner connectors(4) + near rectangle(4, only when offset from the socket plane).
+		PDI->AddReserveLines(SDPG_Foreground, 12, false, false);
+
+		const bool bDrawNearRectangle = !FMath::IsNearlyZero(NearDistance);
+		for (int32 i = 0; i < 4; i++)
+		{
+			const int32 Next = (i + 1) % 4;
+
+			// Far rectangle edge.
+			PDI->DrawLine(RotatedCornerPoints[i] + FarOffset, RotatedCornerPoints[Next] + FarOffset,
+				DepthColor, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
+
+			// Connector from the near corner out to the far corner.
+			PDI->DrawLine(RotatedCornerPoints[i] + NearOffset, RotatedCornerPoints[i] + FarOffset,
+				DepthColor, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
+
+			// Near rectangle edge, drawn only when it is offset from the socket rectangle (backward / centered) so the
+			// volume reads as closed. Forward mode's near face coincides with the already-drawn socket rectangle.
+			if (bDrawNearRectangle)
+			{
+				PDI->DrawLine(RotatedCornerPoints[i] + NearOffset, RotatedCornerPoints[Next] + NearOffset,
+					DepthColor, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
 			}
 		}
 	}

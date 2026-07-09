@@ -43,7 +43,7 @@ public:
 		ReturnVector.Y = JunctionComponent->Details.SocketSize.Y * Settings->SocketSize.Y;
 		if (bWithDepth)
 		{
-			ReturnVector.Z = Settings->SocketDepth;
+			ReturnVector.Z = JunctionComponent->GetFillDepth();
 		}
 		return ReturnVector;
 	}
@@ -64,9 +64,45 @@ public:
 		}
 		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
 		return FVector(
-			Settings->SocketDepth * Scale,
+			JunctionComponent->GetFillDepth() * Scale,
 			(JunctionComponent->Details.SocketSize.X * Settings->SocketSize.X) * Scale,
 			(JunctionComponent->Details.SocketSize.Y * Settings->SocketSize.Y) * Scale);
+	}
+
+	/**
+	 * Signed distance, along the junction's forward axis, at which a filler should anchor its fill volume before it
+	 * extrudes forward by the fill depth. Encodes the direction of the junction's FillDepthMode: 0 for the forward
+	 * modes, -depth for the backward modes, and -depth/2 for the centered modes.
+	 * @param JunctionComponent The junction whose fill-depth anchor to read.
+	 * @return The anchor distance in world units; negative values shift the volume toward the junction's backward direction.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction Fill Depth Anchor")
+	static float GetJunctionFillDepthAnchor(UNCellJunctionComponent* JunctionComponent)
+	{
+		if (JunctionComponent == nullptr)
+		{
+			UE_LOG(LogNexusWorldAssembly, Error, TEXT("Unable to get Junction Fill Depth Anchor as no JunctionComponent was made available."));
+			return 0.f;
+		}
+		return JunctionComponent->GetFillDepthAnchor();
+	}
+
+	/**
+	 * World-space form of Get Junction Fill Depth Anchor: the anchor distance projected along the junction's forward
+	 * direction. Add this to a filler's placement location so it extrudes forward from the anchored near edge, which
+	 * realizes the Forward / Backward / Centered fill-depth modes without moving the junction's spawn transform.
+	 * @param JunctionComponent The junction whose fill-depth anchor to read.
+	 * @return The world-space anchor offset (junction forward direction scaled by the signed anchor distance).
+	 */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction Fill Depth Offset")
+	static FVector GetJunctionFillDepthOffset(UNCellJunctionComponent* JunctionComponent)
+	{
+		if (JunctionComponent == nullptr)
+		{
+			UE_LOG(LogNexusWorldAssembly, Error, TEXT("Unable to get Junction Fill Depth Offset as no JunctionComponent was made available."));
+			return FVector::ZeroVector;
+		}
+		return JunctionComponent->GetComponentRotation().Vector() * JunctionComponent->GetFillDepthAnchor();
 	}
 
 	/**

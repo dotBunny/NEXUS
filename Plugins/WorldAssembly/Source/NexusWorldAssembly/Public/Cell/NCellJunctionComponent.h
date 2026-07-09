@@ -91,6 +91,16 @@ public:
 	/** @return The location offset authored on the junction's details. */
 	FVector GetOffsetLocation() const;
 
+	/** @return The fill depth magnitude for this junction: the project SocketDepth for the Default* modes, or the authored OverrideFillDepth for the Override* modes. */
+	float GetFillDepth() const;
+
+	/**
+	 * Signed offset, along the junction's forward axis, at which a filler should anchor its fill volume before extruding
+	 * forward by GetFillDepth(). Encodes the directional half of the fill-depth mode without moving the spawn transform.
+	 * @return 0 for the forward modes, -GetFillDepth() for the backward modes, and -GetFillDepth()/2 for the centered modes.
+	 */
+	float GetFillDepthAnchor() const;
+
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

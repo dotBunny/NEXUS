@@ -100,6 +100,30 @@ void FNCellJunctionComponentCustomization::CustomizeDetails(IDetailLayoutBuilder
 		FillersHandle->SetOnChildPropertyValueChanged(OnFillersChanged);
 	}
 
+	// Keep the live preview in sync with the junction's fill-depth settings. These live on the Details struct (not
+	// Fillers), so they need their own subscription; a committed change respawns the preview so it re-reads the depth
+	// through the filler's OnInitializedFromJunction (see OnFillDepthPropertyChanged). The WithData variant is used so
+	// the handler can ignore interactive slider drags.
+	const TSharedRef<IPropertyHandle> DetailsHandle = DetailBuilder.GetProperty(
+		GET_MEMBER_NAME_CHECKED(UNCellJunctionComponent, Details));
+	if (DetailsHandle->IsValidHandle())
+	{
+		const TDelegate<void(const FPropertyChangedEvent&)> OnFillDepthChanged =
+			TDelegate<void(const FPropertyChangedEvent&)>::CreateSP(this,
+				&FNCellJunctionComponentCustomization::OnFillDepthPropertyChanged);
+
+		if (const TSharedPtr<IPropertyHandle> ModeHandle = DetailsHandle->GetChildHandle(
+			GET_MEMBER_NAME_CHECKED(FNCellJunctionDetails, FillDepthMode)); ModeHandle.IsValid())
+		{
+			ModeHandle->SetOnPropertyValueChangedWithData(OnFillDepthChanged);
+		}
+		if (const TSharedPtr<IPropertyHandle> DepthHandle = DetailsHandle->GetChildHandle(
+			GET_MEMBER_NAME_CHECKED(FNCellJunctionDetails, OverrideFillDepth)); DepthHandle.IsValid())
+		{
+			DepthHandle->SetOnPropertyValueChangedWithData(OnFillDepthChanged);
+		}
+	}
+
 	FDetailWidgetRow& Row = FillerCategory.AddCustomRow(NSLOCTEXT("NexusWorldAssemblyEditor", "FillerVisualizer", "Filler Visualizer"));
 	Row.NameContent()
 		[
@@ -349,6 +373,26 @@ void FNCellJunctionComponentCustomization::OnFillersPropertyChanged()
 	ComputePreviewPlacement(Entry.Offset, NewLocation, NewRotation);
 	Preview->SetActorLocationAndRotation(NewLocation, NewRotation);
 	Preview->SetActorScale3D(PreviewBaseScale * Entry.Offset.GetScale3D());
+}
+
+void FNCellJunctionComponentCustomization::OnFillDepthPropertyChanged(const FPropertyChangedEvent& PropertyChangedEvent)
+{
+	// Ignore interactive slider drags; EPropertyChangeType::Interactive is always followed by a ValueSet commit that
+	// refreshes once, so respawning on every drag tick would only thrash the preview.
+	if ((PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive) != 0)
+	{
+		return;
+	}
+
+	// Only refresh when a preview is actually live. Fill depth is authored per junction, so unlike OnFillersPropertyChanged
+	// this also applies to the trailing "(Default)" option — no DefaultFillerIndex exclusion.
+	if (!PreviewActor.IsValid() || !SelectedOption.IsValid())
+	{
+		return;
+	}
+
+	// Respawn so the filler re-reads the depth through a clean OnInitializedFromJunction (SpawnPreview destroys first).
+	SpawnPreview(*SelectedOption);
 }
 
 void FNCellJunctionComponentCustomization::SpawnPreview(int32 FillerIndex)

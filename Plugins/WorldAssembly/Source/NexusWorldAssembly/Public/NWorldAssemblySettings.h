@@ -5,8 +5,11 @@
 
 #include "GameplayTagContainer.h"
 #include "NSettingsUtils.h"
+#include "Engine/DeveloperSettings.h"
 #include "Macros/NSettingsMacros.h"
 #include "Types/NDirection.h"
+#include "UObject/ConstructorHelpers.h"
+#include "UObject/SoftObjectPtr.h"
 #include "NWorldAssemblySettings.generated.h"
 
 /**
@@ -75,7 +78,7 @@ public:
 
 	/** Per-side depth of a junction, used for collision detection in some (PCG) scenarios. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "General", DisplayName="Socket Depth",
-		meta=(ToolTip="The depth per side of a junction that is used for collision detection in some (PCG) scenarios."))
+		meta=(ToolTip="The depth per side of a junction that is used for collision detection in some (PCG) scenarios.", Units="cm"))
 	float SocketDepth = 100.f;
 
 	/** Approximate player collider size, used when reasoning about traversable space. */

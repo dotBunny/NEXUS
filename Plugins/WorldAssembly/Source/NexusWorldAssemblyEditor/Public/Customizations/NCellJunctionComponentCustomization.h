@@ -3,11 +3,13 @@
 #pragma once
 
 #include "IDetailCustomization.h"
+#include "Input/Reply.h"
 #include "Types/SlateEnums.h"
 
 class AActor;
 class SWidget;
 class UNCellJunctionComponent;
+struct FPropertyChangedEvent;
 template<typename OptionType> class SComboBox;
 
 /**
@@ -70,6 +72,14 @@ private:
 
 	/** Re-places (or, when the entry's Actor changed, respawns) the live preview after the Fillers data is edited. */
 	void OnFillersPropertyChanged();
+
+	/**
+	 * Respawns the live preview after a committed edit to the junction's fill depth (FillDepthMode / OverrideFillDepth)
+	 * so it re-reads the depth through the filler's OnInitializedFromJunction. Interactive changes (slider drags) are
+	 * ignored; the trailing commit refreshes once. Applies to the authored fillers and the "(Default)" option alike.
+	 * @param PropertyChangedEvent The change notification, inspected for its EPropertyChangeType.
+	 */
+	void OnFillDepthPropertyChanged(const FPropertyChangedEvent& PropertyChangedEvent);
 
 	/**
 	 * Rebuilds FillerOptions from the junction's current Fillers (plus the trailing default option), preserves the

@@ -11,12 +11,15 @@
 #include "NWorldAssemblySettings.h"
 #include "NWorldAssemblySubsystem.h"
 #include "NWorldAssemblyUtils.h"
+#include "TimerManager.h"
 #include "Cell/INCellJunctionBeginPlay.h"
 #include "Cell/INCellJunctionFiller.h"
 #include "Cell/NCellLevelInstance.h"
 #include "Collections/NWeightedIntegerArray.h"
 #include "Developer/NPrimitiveFont.h"
 #include "Engine/AssetManager.h"
+#include "Engine/Level.h"
+#include "Engine/World.h"
 #include "LevelInstance/LevelInstanceActor.h"
 #include "LevelInstance/LevelInstanceInterface.h"
 #include "Math/NMersenneTwister.h"
@@ -60,6 +63,23 @@ FVector UNCellJunctionComponent::GetOffsetLocation() const
 		return Instance->GetActorLocation();
 	}
 	return FVector::ZeroVector;
+}
+
+float UNCellJunctionComponent::GetFillDepth() const
+{
+	const ENCellJunctionFillDepthMode Mode = Details.FillDepthMode;
+	if (Mode == ENCellJunctionFillDepthMode::DefaultBackward ||
+		Mode == ENCellJunctionFillDepthMode::DefaultCentered ||
+		Mode == ENCellJunctionFillDepthMode::DefaultForward)
+	{
+		return UNWorldAssemblySettings::Get()->SocketDepth;
+	}
+	return Details.OverrideFillDepth;
+}
+
+float UNCellJunctionComponent::GetFillDepthAnchor() const
+{
+	return GetFillDepth() * FNCellJunctionDetails::GetFillDepthAnchorScale(Details.FillDepthMode);
 }
 
 void UNCellJunctionComponent::BeginPlay()
@@ -152,8 +172,8 @@ void UNCellJunctionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 
 void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor& ValidColor, const FLinearColor& InvalidColor,
-	const bool bShowDepth, const bool bIsConnected, const bool bDrawBox, const bool bDrawCornerLines,
-	const UNWorldAssemblySettings* Settings) const
+                                           const bool bShowDepth, const bool bIsConnected, const bool bDrawBox, const bool bDrawCornerLines,
+                                           const UNWorldAssemblySettings* Settings) const
 {
 	FLinearColor GizmoColor = ValidColor; // Default color
 	const FVector ComponentLocation = GetComponentLocation();
@@ -163,8 +183,15 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const F
 	FNDrawSocketSettings SocketSettings;
 	SocketSettings.SocketSize = Settings->SocketSize;
 	SocketSettings.SocketType = Details.Type;
+
+	// Do we want to make this an option?
+	SocketSettings.bDrawFillDepth = true;
+	SocketSettings.FillDepthMode = Details.FillDepthMode;
+	SocketSettings.FillDepth = GetFillDepth();
+
 	SocketSettings.UnitSize = Details.SocketSize;
 	SocketSettings.bIsConnected = bIsConnected;
+
 	SocketSettings.bDrawBox = bDrawBox;
 	SocketSettings.bDrawCornerLines = bDrawCornerLines;
 

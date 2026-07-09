@@ -3,8 +3,10 @@
 
 #pragma once
 
+#include "PrimitiveDrawInterface.h"
 #include "Cell/NCellJunctionDetails.h"
 #include "Cell/NCellVoxelData.h"
+#include "Engine/EngineTypes.h"
 
 struct FNRawMesh;
 
@@ -27,6 +29,12 @@ struct NEXUSWORLDASSEMBLY_API FNDrawSocketSettings
 	bool bDrawBox = true;
 
 	bool bDrawCornerLines = true;
+
+	bool bDrawFillDepth = false;
+
+	ENCellJunctionFillDepthMode FillDepthMode = ENCellJunctionFillDepthMode::DefaultForward;
+
+	float FillDepth = 10.f;
 };
 
 /**

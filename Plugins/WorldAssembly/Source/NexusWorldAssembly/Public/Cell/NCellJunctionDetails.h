@@ -19,6 +19,18 @@ enum class ENCellJunctionType : uint8
 };
 
 
+UENUM()
+enum class ENCellJunctionFillDepthMode : uint8
+{
+	DefaultForward = 0,
+	DefaultBackward = 1,
+	DefaultCentered = 2,
+	OverrideForward = 3,
+	OverrideBackward = 4,
+	OverrideCentered = 5,
+};
+
+
 /**
  * How a junction must be resolved during generation when it is left unconnected to another junction.
  *
@@ -55,6 +67,13 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 	/** Size of the junction socket in grid units (width, height). */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	FIntVector2 SocketSize = FIntVector2(2, 4);
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
+	ENCellJunctionFillDepthMode FillDepthMode = ENCellJunctionFillDepthMode::DefaultForward;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, meta=(EditCondition="FillDepthMode != ENCellJunctionFillDepthMode::DefaultForward  && FillDepthMode != ENCellJunctionFillDepthMode::DefaultBackward && FillDepthMode != ENCellJunctionFillDepthMode::DefaultCentered",
+		ClampMin="0.0", UIMin="0.0", Units="cm"))
+	float OverrideFillDepth = 10.f;
 
 	/** World-space location of the junction — derived from the component transform. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -94,6 +113,31 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 		return true;
 	}
 
+	/**
+	 * Classifies a fill-depth mode into the fraction of the fill depth by which a filler's fill volume near edge is
+	 * offset along the junction's forward axis before it extrudes forward by the depth. Shared by the junction component
+	 * (runtime anchor) and the debug draw (fill-volume overlay) so the two never diverge.
+	 * @param Mode The fill-depth mode to classify.
+	 * @return 0 for the forward modes, -1 for the backward modes, and -0.5 for the centered modes.
+	 */
+	static float GetFillDepthAnchorScale(const ENCellJunctionFillDepthMode Mode)
+	{
+		switch (Mode)
+		{
+			using enum ENCellJunctionFillDepthMode;
+		case DefaultBackward:
+		case OverrideBackward:
+			return -1.0f;
+		case DefaultCentered:
+		case OverrideCentered:
+			return -0.5f;
+		case DefaultForward:
+		case OverrideForward:
+		default:
+			return 0.0f;
+		}
+	}
+
 	/** @return true if every field matches structurally; used to detect author-time drift from the side-car. */
 	bool IsEqual(const FNCellJunctionDetails& Other) const
 	{
@@ -104,6 +148,9 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 			&& Requirements == Other.Requirements
 			&& Type == Other.Type
 			&& SocketSize == Other.SocketSize
+
+			&& FillDepthMode == Other.FillDepthMode
+			&& OverrideFillDepth == Other.OverrideFillDepth
 
 			&& WorldLocation == Other.WorldLocation
 			&& WorldRotation == Other.WorldRotation

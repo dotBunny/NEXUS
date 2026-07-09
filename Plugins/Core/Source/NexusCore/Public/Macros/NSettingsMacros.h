@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/DeveloperSettings.h"
+
 /**
  * Wires a UDeveloperSettings-derived runtime settings class into the Project Settings UI with cached singleton access.
  *

@@ -11,6 +11,8 @@
 - `Quick Assembly` workflow on the World Assembly editor-mode toolbar: select a target `UNOrganComponent` from a dropdown and start/cancel an assembly operation in place, with an optional `Auto Assembly` mode that re-runs on a configurable timer. Adds `World Assembly (User)` settings `Load Level Instances`, `Auto Assembly`, and `Auto Assembly Timer`.
 - `NEXUS.WorldAssembly.Flag.Hotpath` assembly flag for creating pathing feedback post assembly in both the `ANCellLevelInstance` as well as junctions.
 - `INCellJunctionFiller` interface for filler objects to implement to get callbacks when used to fill empty junctions.
+- `UNCellJunctionComponent` fillers now honor `ENCellJunctionFillDepthMode`: `Forward` (extends along the junction facing, the prior behavior), `Backward` (opposite), and `Centered` (straddles the socket plane) — each with a `Default` variant driven by the project `Socket Depth` and an `Override` variant driven by the junction's `Override Fill Depth`. `UNWorldAssemblyLibrary::GetJunctionFillDepthAnchor` (signed distance along the junction forward axis) and `GetJunctionFillDepthOffset` (that distance as a world-space vector) expose it to fillers, and the junction visualizer draws a grey depth-volume box reflecting the selected mode.
+- The junction `Filler Visualizer` preview respawns when `Fill Depth Mode` or `Override Fill Depth` is committed so the spawned preview re-reads the depth through `OnInitializedFromJunction` (interactive slider drags are ignored until released).
 - `UNPickerSettings` project settings (Project Settings > NEXUS > Picker, stored in `DefaultNexusGame.ini`) exposing point-projection configuration: `Trace Complex`, `Nav Query Extent`, `Nav Agent Radius`, and `Nav Agent Height`.
 - `UNCell` validator checks for `UNCellJunctionComponent` that are attached to non-static movability Actors/components.
 
@@ -27,6 +29,7 @@
 - Created `UNMersenneTwisterObject` to hold a twister to be used for deterministic random in a wider scope, Blueprint-exposed under the `NEXUS|Core|Random` category (`Seed`, `Random Bool`, `Random Bools`, `Random Integer In Range`).
 - Consolidated `Twisted` to `Next` concept/naming.
 - Cell junction `Requirements` now respected, weights for junctions are automatically doubled when they are `Required`.
+- `INCellJunctionFiller` implementers must add `UNWorldAssemblyLibrary::GetJunctionFillDepthOffset` to their placement inside `OnInitializedFromJunction` (before extruding forward by the fill depth) to respect the `Backward`/`Centered` fill-depth modes; a filler that ignores it always fills `Forward` regardless of the junction's `Fill Depth Mode`. The junction's spawn transform is unchanged, so existing forward-growing fillers keep their behavior for `Forward` modes.
 - `UNTextRenderComponent` now warns about replication instead of setting it, with a toggle.
 - `UNMultiplayerLibrary::KickPlayer` is now `BlueprintAuthorityOnly`; the Blueprint node only executes on the authority.
 - `Collect Junction Components` now bails out with a warning when the target actor is location-locked (such as an `ANCellActor`), since Unreal disables transform editing on components owned by a location-locked actor, which would otherwise leave the collected junctions unmovable.
