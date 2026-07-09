@@ -119,8 +119,8 @@
         <Property Name="TestPackageLabel" Value="PackageTest Game Win64" />      
     </Do>
 
-    <!-- INCLUDE EPICS MAIN TASK -->
-    <Include Script="../../../../../../Engine/Build/Graph/Tasks/BuildAndTestProject.xml" />
+    <!-- INCLUDE EPICS MAIN TASK -->    
+    <Include Script="$(RootDir)/Engine/Build/Graph/Tasks/BuildAndTestProject.xml" />
 
 
     <!-- SETUP OUR PUBLISHING OF GIT COMMIT STATUS -->
