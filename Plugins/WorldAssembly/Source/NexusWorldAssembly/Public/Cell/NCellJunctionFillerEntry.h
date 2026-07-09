@@ -4,6 +4,7 @@
 #pragma once
 #include "GameplayTagContainer.h"
 #include "Collections/NGameplayTagCounterConstraint.h"
+#include "Templates/SubclassOf.h"
 
 #include "NCellJunctionFillerEntry.generated.h"
 
