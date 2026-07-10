@@ -28,13 +28,18 @@ struct NEXUSWORLDASSEMBLY_API FNCellRootDetails
 	UPROPERTY(EditAnywhere)
 	FNCellBoundsGenerationSettings BoundsSettings;
 
-	/** World-space axis-aligned bounds of the cell content, derived from BoundsSettings. */
+	/**
+	 * World-space axis-aligned bounds of the cell content, derived from BoundsSettings.
+	 * @remark Default-initialized to a zero-extent, origin-centered box. UE's FBox default constructor leaves
+	 *         Min/Max uninitialized (NaN under the box diagnostic) and only clears IsValid, so a stack-constructed
+	 *         FNCellRootDetails would otherwise carry garbage bounds until BoundsSettings regeneration runs.
+	 */
 	UPROPERTY(VisibleAnywhere)
-	FBox Bounds;
+	FBox Bounds = FBox(ForceInit);
 
 	/** Bounds quantized to UnitSize — used when aligning cells onto a grid during generation. */
 	UPROPERTY(VisibleAnywhere)
-	FBox UnitBounds;
+	FBox UnitBounds = FBox(ForceInit);
 
 	/** Derived unit size (one grid cell) implied by Bounds and project voxel size. */
 	UPROPERTY(VisibleAnywhere)
