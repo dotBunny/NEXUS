@@ -47,7 +47,7 @@ struct NEXUSWORLDASSEMBLY_API FNWorldOrganData
 	FVector VoxelSize = FVector(100.f, 100.f, 100.f);
 
 	/** Spatial bounds of the SourceComponent unless bUnbounded. */
-	FBoxSphereBounds Bounds;
+	FBoxSphereBounds Bounds = FBoxSphereBounds(ForceInit);
 
 	/** World origin of the SourceComponent's actor. */
 	FVector Origin;

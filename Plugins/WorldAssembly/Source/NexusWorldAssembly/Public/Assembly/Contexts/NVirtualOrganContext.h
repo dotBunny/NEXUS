@@ -110,7 +110,7 @@ public:
 	bool bUnbound = false;
 
 	/** Spatial bounds the graph must stay within unless bUnbounded. */
-	FBoxSphereBounds Bounds;
+	FBoxSphereBounds Bounds = FBoxSphereBounds(ForceInit);
 
 	/** World origin of the organ used as the graph root. */
 	FVector Origin;
