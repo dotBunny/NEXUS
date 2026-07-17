@@ -46,4 +46,10 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionFillerEntry
 	 */
 	UPROPERTY(EditAnywhere)
 	int32 Weighting = 1;
+
+	/**
+	 * Should this filler skip the additional filled actors being toggled (still hides additional unfilled actors).
+	 */
+	UPROPERTY(EditAnywhere)
+	bool bSkipAdditionalActors = false;
 };

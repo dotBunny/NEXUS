@@ -66,11 +66,11 @@ void FNCellJunctionComponentCustomization::CustomizeDetails(IDetailLayoutBuilder
 	DetailBuilder.GetObjectsBeingCustomized(Objects);
 	if (Objects.Num() != 1)
 	{
-		FillerCategory.AddCustomRow(NSLOCTEXT("NexusWorldAssemblyEditor", "FillerVisualizer", "Filler Visualizer"))
+		FillerCategory.AddCustomRow(NSLOCTEXT("NexusWorldAssemblyEditor", "FillVisualizer", "Fill Visualizer"))
 			.WholeRowContent()
 			[
 				SNew(STextBlock)
-					.Text(NSLOCTEXT("NexusWorldAssemblyEditor", "FillerSelectSingle", "Select a single junction to preview its fillers."))
+					.Text(NSLOCTEXT("NexusWorldAssemblyEditor", "FillSelectSingle", "Select a single junction to preview its fillers."))
 					.Font(IDetailLayoutBuilder::GetDetailFont())
 			];
 		return;
@@ -124,11 +124,11 @@ void FNCellJunctionComponentCustomization::CustomizeDetails(IDetailLayoutBuilder
 		}
 	}
 
-	FDetailWidgetRow& Row = FillerCategory.AddCustomRow(NSLOCTEXT("NexusWorldAssemblyEditor", "FillerVisualizer", "Filler Visualizer"));
+	FDetailWidgetRow& Row = FillerCategory.AddCustomRow(NSLOCTEXT("NexusWorldAssemblyEditor", "FillVisualizer", "Fill Visualizer"));
 	Row.NameContent()
 		[
 			SNew(STextBlock)
-				.Text(NSLOCTEXT("NexusWorldAssemblyEditor", "FillerPreview", "Filler Preview"))
+				.Text(NSLOCTEXT("NexusWorldAssemblyEditor", "FillPreview", "Fill Preview"))
 				.Font(IDetailLayoutBuilder::GetDetailFont())
 		];
 	Row.ValueContent()
@@ -159,7 +159,7 @@ void FNCellJunctionComponentCustomization::CustomizeDetails(IDetailLayoutBuilder
 				SNew(SButton)
 					.VAlign(VAlign_Center)
 					.Text(NSLOCTEXT("NexusWorldAssemblyEditor", "FillerFill", "Fill"))
-					.ToolTipText(NSLOCTEXT("NexusWorldAssemblyEditor", "FillerFillTooltip", "Spawn the selected filler as a transient preview at this junction."))
+					.ToolTipText(NSLOCTEXT("NexusWorldAssemblyEditor", "FillTooltip", "Spawn the selected filler as a transient preview at this junction."))
 					.IsEnabled(this, &FNCellJunctionComponentCustomization::IsFillEnabled)
 					.OnClicked(this, &FNCellJunctionComponentCustomization::OnFillClicked)
 			]
@@ -169,8 +169,8 @@ void FNCellJunctionComponentCustomization::CustomizeDetails(IDetailLayoutBuilder
 			[
 				SNew(SButton)
 					.VAlign(VAlign_Center)
-					.Text(NSLOCTEXT("NexusWorldAssemblyEditor", "FillerClear", "Clear"))
-					.ToolTipText(NSLOCTEXT("NexusWorldAssemblyEditor", "FillerClearTooltip", "Remove the spawned filler preview from the level."))
+					.Text(NSLOCTEXT("NexusWorldAssemblyEditor", "FillClear", "Clear"))
+					.ToolTipText(NSLOCTEXT("NexusWorldAssemblyEditor", "FillClearTooltip", "Remove the spawned filler preview from the level."))
 					.IsEnabled(this, &FNCellJunctionComponentCustomization::IsClearEnabled)
 					.OnClicked(this, &FNCellJunctionComponentCustomization::OnClearClicked)
 			]
@@ -188,22 +188,22 @@ FText FNCellJunctionComponentCustomization::GetFillerLabel(int32 FillerIndex) co
 			? Settings->AssemblySpawningDefaultJunctionFiller.ToSoftObjectPath() : FSoftObjectPath();
 		if (DefaultPath.IsNull())
 		{
-			return NSLOCTEXT("NexusWorldAssemblyEditor", "FillerDefaultNone", "(None) (Default)");
+			return NSLOCTEXT("NexusWorldAssemblyEditor", "FillDefaultNone", "(None) (Default)");
 		}
-		return FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "FillerDefaultFormat", "{0} (Default)"),
+		return FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "FillDefaultFormat", "{0} (Default)"),
 			MakeFillerDisplayText(DefaultPath.GetAssetName()));
 	}
 
 	const UNCellJunctionComponent* Component = Junction.Get();
 	if (Component == nullptr || !Component->Fillers.IsValidIndex(FillerIndex))
 	{
-		return NSLOCTEXT("NexusWorldAssemblyEditor", "FillerNone", "(None)");
+		return NSLOCTEXT("NexusWorldAssemblyEditor", "FillNone", "(None)");
 	}
 
 	const UClass* FillerClass = Component->Fillers[FillerIndex].Actor.Get();
 	if (FillerClass == nullptr)
 	{
-		return NSLOCTEXT("NexusWorldAssemblyEditor", "FillerNone", "(None)");
+		return NSLOCTEXT("NexusWorldAssemblyEditor", "FillNone", "(None)");
 	}
 
 	return MakeFillerDisplayText(FillerClass->GetName());

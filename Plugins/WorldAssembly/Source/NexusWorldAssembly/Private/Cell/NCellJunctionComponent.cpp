@@ -86,6 +86,12 @@ void UNCellJunctionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Early enable/disable based on connection
+	if (LinkDetails.bConnected)
+	{
+		ProcessAdditionalFillActors(false);
+	}
+
 	// Send out calls to anything linked to it
 	if (OnBeginPlayTargets.Num() > 0)
 	{
@@ -109,7 +115,8 @@ void UNCellJunctionComponent::BeginPlay()
 		}
 	}
 
-	if (LinkDetails.bConnected) return;
+	if (LinkDetails.bConnected)
+		return;
 
 	switch (Details.Requirements)
 	{
@@ -458,6 +465,8 @@ void UNCellJunctionComponent::Fill()
 		const int32 FillerIndex = WeightedAvailableIndices.TwistedValue(RandomGenerator);
 		if (FillerIndex != INDEX_NONE)
 		{
+			ProcessAdditionalFillActors(true, Fillers[FillerIndex].bSkipAdditionalActors);
+
 			// Location offset is authored in the junction's frame, so rotate it by the junction's orientation before
 			// nudging; the rotation offset then spins the filler in place at that spot.
 			AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Fillers[FillerIndex].Actor,
@@ -486,12 +495,14 @@ void UNCellJunctionComponent::Fill()
 	// Already resident: spawn immediately to keep the synchronous fast path.
 	if (UClass* LoadedFiller = DefaultFiller.Get())
 	{
+		ProcessAdditionalFillActors(true);
 		SpawnDefaultFiller(LoadedFiller, CellLevelInstance);
 		return;
 	}
 
 	// Not resident: stream it in, then spawn once it lands. Weak captures bail if the junction or its cell were
 	// destroyed (e.g. the cell streamed back out) while the load was in flight.
+	ProcessAdditionalFillActors(true);
 	TWeakObjectPtr<UNCellJunctionComponent> WeakThis(this);
 	TWeakObjectPtr<ANCellLevelInstance> WeakCell(CellLevelInstance);
 	UAssetManager::GetStreamableManager().RequestAsyncLoad(DefaultFiller.ToSoftObjectPath(),
@@ -539,6 +550,26 @@ void UNCellJunctionComponent::FinalizeFillerSpawn(AActor* SpawnedActor, ANCellLe
 	UNWorldAssemblySubsystem* System = UNWorldAssemblySubsystem::Get(GetWorld());
 	System->RegisterOperationActor(SpawnedActor, CellLevelInstance->GetAssemblyData().OperationTicket);
 	FillerActor = SpawnedActor;
+}
+
+void UNCellJunctionComponent::ProcessAdditionalFillActors(const bool bFilled, const bool bSkipAdditionalFilledActors)
+{
+	if (!bSkipAdditionalFilledActors)
+	{
+		for (int i = 0; i < AdditionalFilledActors.Num(); i++)
+		{
+			AActor* FilledActor = AdditionalFilledActors[i];
+			if (FilledActor == nullptr) continue;
+			FilledActor->SetActorHiddenInGame(!bFilled);
+		}
+	}
+
+	for (int i = 0; i < AdditionalUnfilledActors.Num(); i++)
+	{
+		AActor* UnfilledActor = AdditionalUnfilledActors[i];
+		if (UnfilledActor == nullptr) continue;
+		UnfilledActor->SetActorHiddenInGame(bFilled);
+	}
 }
 
 FNWeightedIntegerArray UNCellJunctionComponent::GetJunctionFillEntries(const FNCellAssemblyData& AssemblyData) const
