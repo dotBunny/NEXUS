@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.3.2] - 2026-07-13
+## [0.3.2] - 2026-07-31
 
 >  It's IMPORTANT that you rebake any `UNCell` data (use the commandlet) as calculations and existing data needs to be rebuilt.
 

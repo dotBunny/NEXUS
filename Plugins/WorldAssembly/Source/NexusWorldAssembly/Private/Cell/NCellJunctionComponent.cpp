@@ -574,6 +574,17 @@ void UNCellJunctionComponent::ProcessAdditionalActors(const bool bConnected, con
 			FilledActor->SetActorHiddenInGame(!bShowFilledActors);
 		}
 	}
+	else
+	{
+		for (int i = 0; i < AdditionalFilledActors.Num(); i++)
+		{
+			AActor* FilledActor = AdditionalFilledActors[i];
+			if (FilledActor == nullptr) continue;
+
+			FilledActor->SetActorEnableCollision(false);
+			FilledActor->SetActorHiddenInGame(true);
+		}
+	}
 
 	const bool bShowConnectedActors = bConnected;
 	for (int i = 0; i < AdditionalConnectedActors.Num(); i++)

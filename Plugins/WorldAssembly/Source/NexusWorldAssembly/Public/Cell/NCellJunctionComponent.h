@@ -67,9 +67,8 @@ public:
 	meta=(AllowedClasses="/Script/NexusWorldAssembly.NCellJunctionBeginPlay"))
 	TArray<TObjectPtr<AActor>> OnBeginPlayTargets;
 
-	/** When true, bypass filler time-slicing and spawn this junction's filler immediately during BeginPlay. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Disable Filling", Category = "Cell Junction|Fill",
-		meta=(ToolTip="Should the junction not be filled regardless?"))
+		meta=(ToolTip="Should the junction not be filled regardless of the requirements."))
 	bool bDisableFill = false;
 
 	/** Candidate fillers for this junction; one is selected (constraint-gated, then weighted-random) and spawned when the junction is left unconnected. */
