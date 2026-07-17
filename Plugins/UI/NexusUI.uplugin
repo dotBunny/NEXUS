@@ -29,6 +29,26 @@
 				"Linux",
 				"Win64"
 			]
+		},
+		{
+			"Name": "NexusUITests",
+			"Type": "DeveloperTool",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
+		},
+		{
+			"Name": "NexusUIEditorTests",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
 		}
 	],
 	"Plugins": [

@@ -21,7 +21,7 @@ class UNInterfaceMacrosTestSubject : public UInterface
 };
 
 /** Native interface half of UNInterfaceMacrosTestSubject; see that type for the dispatch matrix it exercises. */
-class NEXUSCOREEDITOR_API INInterfaceMacrosTestSubject
+class NEXUSCORETESTS_API INInterfaceMacrosTestSubject
 {
 	GENERATED_BODY()
 
@@ -44,7 +44,7 @@ public:
 
 /** Native C++ implementer that records every invocation so tests can verify routing and argument forwarding. */
 UCLASS()
-class NEXUSCOREEDITOR_API UNInterfaceMacrosTestImplementer : public UObject, public INInterfaceMacrosTestSubject
+class NEXUSCORETESTS_API UNInterfaceMacrosTestImplementer : public UObject, public INInterfaceMacrosTestSubject
 {
 	GENERATED_BODY()
 
@@ -68,7 +68,7 @@ public:
 
 /** Bare UObject that does not implement the test interface; used to validate the macro's guard branch. */
 UCLASS()
-class NEXUSCOREEDITOR_API UNInterfaceMacrosTestNonImplementer : public UObject
+class NEXUSCORETESTS_API UNInterfaceMacrosTestNonImplementer : public UObject
 {
 	GENERATED_BODY()
 };

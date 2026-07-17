@@ -29,6 +29,26 @@
 				"Linux",
 				"Win64"
 			]
+		},
+		{
+			"Name": "NexusWorldAssemblyTests",
+			"Type": "DeveloperTool",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
+		},
+		{
+			"Name": "NexusWorldAssemblyEditorTests",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
 		}
 	],
 	"Plugins": [

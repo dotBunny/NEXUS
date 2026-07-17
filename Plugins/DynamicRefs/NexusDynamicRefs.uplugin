@@ -29,6 +29,16 @@
 				"Linux",
 				"Win64"
 			]
+		},
+		{
+			"Name": "NexusDynamicRefsTests",
+			"Type": "DeveloperTool",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
 		}
 	],
 	"Plugins": [

@@ -29,6 +29,26 @@
 				"Linux",
 				"Win64"
 			]
+		},
+		{
+			"Name": "NexusCoreTests",
+			"Type": "DeveloperTool",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
+		},
+		{
+			"Name": "NexusCoreEditorTests",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
 		}
 	],
 	"Plugins": [

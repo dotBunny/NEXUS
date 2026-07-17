@@ -29,8 +29,10 @@ Each plugin follows this layout:
 ```
 Plugins/<Name>/
 ├── Source/
-│   ├── Nexus<Name>/          # Runtime module (Public/ + Private/)
-│   └── Nexus<Name>Editor/    # Editor module (includes Tests/ subdirectory)
+│   ├── Nexus<Name>/            # Runtime module (Public/ + Private/)
+│   ├── Nexus<Name>Editor/      # Editor module (Public/ + Private/)
+│   ├── Nexus<Name>Tests/       # Runtime unit/perf tests — DeveloperTool module (present if the plugin has runtime tests)
+│   └── Nexus<Name>EditorTests/ # Editor-only tests — Editor module (present if the plugin has editor-touching tests)
 └── Nexus<Name>.uplugin
 ```
 
@@ -52,4 +54,4 @@ Active plugins loaded by the `TestProject`:
 
 `NexusCore` provides developer-only headers in `Public/Developer/` (test utilities, object snapshots, scope timers, `NDebugActor`) and framework-wide macros in `Public/Macros/` used across all plugins.
 
-**Samples vs Tests**: Functional test content lives in `Samples/<Name>/Content/` as separate plugins (`NexusXxxSamples`). Unit tests live in `Plugins/<Name>/Source/Nexus<Name>Editor/Tests/`. The two test categories use different exec commands (`Tests.Nexus` vs `NEXUS.UnitTests`).
+**Samples vs Tests**: Functional test content lives in `Samples/<Name>/Content/` as separate plugins (`NexusXxxSamples`). Unit and performance tests live in dedicated test modules beside the runtime/editor modules, split by what they depend on: `Nexus<Name>Tests` (a `DeveloperTool` module) for tests that exercise only runtime/shippable code, and `Nexus<Name>EditorTests` (an `Editor` module) for tests that reference editor-only symbols. A plugin has whichever of the two it needs. Functional/sample tests and these unit/perf tests use different exec commands (`Tests.Nexus` for functional tests vs `NEXUS.UnitTests` / `NEXUS.PerfTests` for unit/perf tests).

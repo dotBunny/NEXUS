@@ -9,7 +9,7 @@
 #include "NPooledActorBase.h"
 #include "NTestPooledActor.generated.h"
 
-/** Minimal concrete ANPooledActorBase used by the Actor Pools editor tests; just a bare scene-component root. */
+/** Minimal concrete ANPooledActorBase used by the Actor Pools tests; just a bare scene-component root. */
 UCLASS(ClassGroup = "NEXUS", Hidden, HideDropdown, DisplayName = "NEXUS | Test Pooled Actor")
 class ANTestPooledActor : public ANPooledActorBase
 {

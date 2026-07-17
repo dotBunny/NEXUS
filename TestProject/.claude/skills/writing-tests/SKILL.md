@@ -9,8 +9,12 @@ Follow the `coding-style` skill for all formatting, naming, and doc comment conv
 
 ## File Placement & Naming
 
-- Tests belong in the `Editor` module under a `Tests/` subdirectory:
-  `Plugins/<Name>/Source/Nexus<Name>Editor/Tests/`
+- Tests live in dedicated **test modules** under the plugin's `Source/`, split by what they depend on (which is also the shippability boundary):
+  - **Runtime tests** → `Plugins/<Name>/Source/Nexus<Name>Tests/Private/` — a `DeveloperTool` module. Use this when the test touches only runtime/shippable code (the `Nexus<Name>` runtime module + `NexusCore`).
+  - **Editor tests** → `Plugins/<Name>/Source/Nexus<Name>EditorTests/Private/` — an `Editor` module. Use this **only** when the test references an editor-module symbol — anything from `Nexus<Name>Editor`, `NexusCoreEditor`, `UnrealEd`, editor subsystems, data validators, etc.
+  - Decision rule: if the file compiles against only runtime headers it belongs in `Nexus<Name>Tests`; a **single** editor-module include pushes it to `Nexus<Name>EditorTests`.
+- A plugin has whichever of the two modules it needs (often just `Nexus<Name>Tests`). If the required test module doesn't exist yet, create it — `Nexus<Name>Tests.Build.cs` (or `…EditorTests`) + `Public/` & `Private/` module `.h`/`.cpp` (`N_MODULE_BASE` + `IMPLEMENT_MODULE`) — then register it in the plugin's `.uplugin` `Modules` array with `"Type": "DeveloperTool"` (runtime) or `"Type": "Editor"` (editor). Model it on an existing one: `NexusActorPoolsTests` (runtime) or `NexusUIEditorTests` (editor). An editor test module must depend on the editor module(s) it includes; a runtime test module must not depend on any editor module.
+- **Reflected test-helper types** — a `UCLASS`/`UINTERFACE` used only by tests (e.g. `NTestPooledActor.h`, `NInterfaceMacrosTestTypes.h`) — must be guarded with `#if WITH_EDITORONLY_DATA`, **not** `#if WITH_TESTS`: UHT rejects `UFUNCTION`s inside a `WITH_TESTS` scope. Plain (non-reflected) helper headers may use `#if WITH_TESTS`. Tag any exported helper with the test module's own API macro (`NEXUS<UPPERCASEPLUGIN>TESTS_API`), not the editor module's.
 - File naming is based on the **class being tested**:
   - `<ClassName>Tests.cpp` — all tests for one class
   - `<ClassName>Tests_<Feature>.cpp` — tests for a specific feature area
@@ -376,4 +380,4 @@ N_TEST_PERF(UNMySubsystemPerfTests_GetActorPool,
 - **Subsystem null guard in unit tests**: `ADD_ERROR` + `return` inside the lambda.
 - **Subsystem null guard in perf tests**: bare `if (!Subsystem) return;` — no `ADD_ERROR` needed.
 - **Brief intent comment**: Start the test/lambda body with `// Verifies that …` when the test name alone doesn't make the intent obvious.
-- **Reading existing tests before writing**: Always read the existing `Tests/` files for the target plugin first to match established patterns and avoid conflicting fixture values.
+- **Reading existing tests before writing**: Always read the existing test files for the target plugin first (in `Nexus<Name>Tests/` and/or `Nexus<Name>EditorTests/`) to match established patterns and avoid conflicting fixture values.
