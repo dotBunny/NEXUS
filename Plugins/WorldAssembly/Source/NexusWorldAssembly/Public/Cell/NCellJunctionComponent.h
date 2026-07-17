@@ -67,22 +67,27 @@ public:
 	meta=(AllowedClasses="/Script/NexusWorldAssembly.NCellJunctionBeginPlay"))
 	TArray<TObjectPtr<AActor>> OnBeginPlayTargets;
 
+	/** When true, bypass filler time-slicing and spawn this junction's filler immediately during BeginPlay. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Disable Filling", Category = "Cell Junction|Fill",
+		meta=(ToolTip="Should the junction not be filled regardless?"))
+	bool bDisableFill = false;
+
 	/** Candidate fillers for this junction; one is selected (constraint-gated, then weighted-random) and spawned when the junction is left unconnected. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction|Fill", meta=(TitleProperty="{Actor}"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction|Fill", meta=(TitleProperty="{Actor}", EditCondition="!bDisableFill"))
 	TArray<FNCellJunctionFillerEntry> Fillers;
 
 	/** When true, bypass filler time-slicing and spawn this junction's filler immediately during BeginPlay. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Spawn Filler Immediately", Category = "Cell Junction|Fill",
-		meta=(ToolTip="Override timeslicing support and immediately spawn this filler in BeginPlay"))
+		meta=(ToolTip="Override timeslicing support and immediately spawn this filler in BeginPlay", EditCondition="!bDisableFill"))
 	bool bSpawnFillerImmediately = false;
 
 	UPROPERTY(EditInstanceOnly, DisplayName="Additional Filled Actors", Category = "Cell Junction|Fill",
-		meta=(ToolTip="Any actors that should be enabled when this Junction is filled, will be disabled otherwise."))
+		meta=(ToolTip="Any actors that should be enabled when this Junction is filled (not connected), will be disabled otherwise."))
 	TArray<TObjectPtr<AActor>> AdditionalFilledActors;
 
-	UPROPERTY(EditInstanceOnly, DisplayName="Additional Unfilled Actors", Category = "Cell Junction|Fill",
-		meta=(ToolTip="Any actors that should be enabled when this Junction is unfilled (connected), will be disabled otherwise. Runs after the AdditionalFilledActors are processed which means it can override those Actor settings."))
-	TArray<TObjectPtr<AActor>> AdditionalUnfilledActors;
+	UPROPERTY(EditInstanceOnly, DisplayName="Additional Connected Actors", Category = "Cell Junction|Fill",
+		meta=(ToolTip="Any actors that should be enabled when this Junction is connected (not filled), will be disabled otherwise. Runs after the AdditionalFilledActors are processed which means it can override those Actor settings."))
+	TArray<TObjectPtr<AActor>> AdditionalConnectedActors;
 
 	/** Connection state for this junction, resolved during generation; its bConnected flag gates whether the junction is filled at BeginPlay. */
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, Category = "Assembly Operation")
@@ -175,7 +180,7 @@ private:
 	 */
 	void FinalizeFillerSpawn(AActor* SpawnedActor, ANCellLevelInstance* CellLevelInstance);
 
-	void ProcessAdditionalFillActors(bool bFilled, bool bSkipAdditionalFilledActors = false);
+	void ProcessAdditionalActors(bool bConnected, bool bSkipAdditionalFilledActors = false);
 
 	N_WORLD_ICON_HEADER()
 };

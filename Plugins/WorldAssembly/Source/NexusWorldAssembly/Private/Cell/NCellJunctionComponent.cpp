@@ -89,7 +89,7 @@ void UNCellJunctionComponent::BeginPlay()
 	// Early enable/disable based on connection
 	if (LinkDetails.bConnected)
 	{
-		ProcessAdditionalFillActors(false);
+		ProcessAdditionalActors(true, bDisableFill);
 	}
 
 	// Send out calls to anything linked to it
@@ -436,10 +436,18 @@ TArray<FVector> UNCellJunctionComponent::GetWorldCornerPoints(const FVector2D& S
 
 void UNCellJunctionComponent::Fill()
 {
+	if (bDisableFill)
+	{
+		ProcessAdditionalActors(false);
+		return;
+	}
+
 	ALevelInstance* LocalLevelInstance = LevelInstance.Get();
 	if (LocalLevelInstance == nullptr) return;
 	ANCellLevelInstance* CellLevelInstance = Cast<ANCellLevelInstance>(LocalLevelInstance);
 	if (CellLevelInstance == nullptr) return;
+
+
 
 	// AUTHORED FILLERS — pick an eligible, weighted entry and spawn it directly. These classes are hard-referenced by
 	// the junction, so they are always resident and can spawn synchronously.
@@ -465,7 +473,7 @@ void UNCellJunctionComponent::Fill()
 		const int32 FillerIndex = WeightedAvailableIndices.TwistedValue(RandomGenerator);
 		if (FillerIndex != INDEX_NONE)
 		{
-			ProcessAdditionalFillActors(true, Fillers[FillerIndex].bSkipAdditionalActors);
+			ProcessAdditionalActors(false, Fillers[FillerIndex].bSkipAdditionalActors);
 
 			// Location offset is authored in the junction's frame, so rotate it by the junction's orientation before
 			// nudging; the rotation offset then spins the filler in place at that spot.
@@ -495,14 +503,14 @@ void UNCellJunctionComponent::Fill()
 	// Already resident: spawn immediately to keep the synchronous fast path.
 	if (UClass* LoadedFiller = DefaultFiller.Get())
 	{
-		ProcessAdditionalFillActors(true);
+		ProcessAdditionalActors(false);
 		SpawnDefaultFiller(LoadedFiller, CellLevelInstance);
 		return;
 	}
 
 	// Not resident: stream it in, then spawn once it lands. Weak captures bail if the junction or its cell were
 	// destroyed (e.g. the cell streamed back out) while the load was in flight.
-	ProcessAdditionalFillActors(true);
+	ProcessAdditionalActors(false);
 	TWeakObjectPtr<UNCellJunctionComponent> WeakThis(this);
 	TWeakObjectPtr<ANCellLevelInstance> WeakCell(CellLevelInstance);
 	UAssetManager::GetStreamableManager().RequestAsyncLoad(DefaultFiller.ToSoftObjectPath(),
@@ -552,23 +560,29 @@ void UNCellJunctionComponent::FinalizeFillerSpawn(AActor* SpawnedActor, ANCellLe
 	FillerActor = SpawnedActor;
 }
 
-void UNCellJunctionComponent::ProcessAdditionalFillActors(const bool bFilled, const bool bSkipAdditionalFilledActors)
+void UNCellJunctionComponent::ProcessAdditionalActors(const bool bConnected, const bool bSkipAdditionalFilledActors)
 {
 	if (!bSkipAdditionalFilledActors)
 	{
+		const bool bShowFilledActors = !bConnected;
 		for (int i = 0; i < AdditionalFilledActors.Num(); i++)
 		{
 			AActor* FilledActor = AdditionalFilledActors[i];
 			if (FilledActor == nullptr) continue;
-			FilledActor->SetActorHiddenInGame(!bFilled);
+
+			FilledActor->SetActorEnableCollision(bShowFilledActors);
+			FilledActor->SetActorHiddenInGame(!bShowFilledActors);
 		}
 	}
 
-	for (int i = 0; i < AdditionalUnfilledActors.Num(); i++)
+	const bool bShowConnectedActors = bConnected;
+	for (int i = 0; i < AdditionalConnectedActors.Num(); i++)
 	{
-		AActor* UnfilledActor = AdditionalUnfilledActors[i];
-		if (UnfilledActor == nullptr) continue;
-		UnfilledActor->SetActorHiddenInGame(bFilled);
+		AActor* ConnectedActor = AdditionalConnectedActors[i];
+		if (ConnectedActor == nullptr) continue;
+
+		ConnectedActor->SetActorEnableCollision(bShowConnectedActors);
+		ConnectedActor->SetActorHiddenInGame(!bShowConnectedActors);
 	}
 }
 

@@ -15,6 +15,7 @@
 - The junction `Filler Visualizer` preview respawns when `Fill Depth Mode` or `Override Fill Depth` is committed so the spawned preview re-reads the depth through `OnInitializedFromJunction` (interactive slider drags are ignored until released).
 - `UNPickerSettings` project settings (Project Settings > NEXUS > Picker, stored in `DefaultNexusGame.ini`) exposing point-projection configuration: `Trace Complex`, `Nav Query Extent`, `Nav Agent Radius`, and `Nav Agent Height`.
 - `UNCell` validator checks for `UNCellJunctionComponent` that are attached to non-static movability Actors/components.
+- `UNCellJunctionComponent` now has additional filling options related to toggling cell/level specific actors based on its status.
 
 ### Changed
 
@@ -46,6 +47,7 @@
 - `CellLinkDetails.bConnected` will only be true connecting to another Cell.
 - `UNMultiplayerTestSubsystem` now always removes its `BeginStandaloneLocalPlay` delegate binding when stopping, including on the editor teardown path where the previous guard skipped cleanup.
 - `UNBlueprintValidator` now guards against a null `Blueprint` cast and null `Node` entries while iterating graph nodes, matching `UNLevelBlueprintValidator`.
+- Ramps in blockout now have simple collision.
 
 ### Removed
 
