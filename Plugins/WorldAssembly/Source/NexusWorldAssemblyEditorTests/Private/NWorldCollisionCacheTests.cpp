@@ -10,6 +10,7 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/StaticMeshActor.h"
 #include "Engine/TriggerVolume.h"
+#include "Math/NMeshBVH.h"
 #include "Types/NRawMeshUtils.h"
 
 namespace NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionCacheHarness
@@ -106,6 +107,116 @@ N_TEST_MEDIUM(FNWorldCollisionCacheTests_Build_NullWorldReturnsEmpty,
 	using namespace NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionCacheHarness;
 	const FNRawMesh Mesh = FNWorldCollisionCache::Build(nullptr, WideBounds());
 	CHECK_MESSAGE(TEXT("A null world should yield an empty mesh."), Mesh.Loops.Num() == 0)
+}
+
+N_TEST_MEDIUM(FNWorldCollisionCacheTests_Build_ReportsSourceActors,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionCache::Build::ReportsSourceActors",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Verifies Build reports the gathered collision-source actors — the set the cache keys reactive invalidation on, so
+	// that a change to an actor that is NOT a source (e.g. a bone) is ignored.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionCacheHarness;
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		AStaticMeshActor* Box = SpawnBox(World, FVector::ZeroVector, FVector(50.0));
+		if (Box == nullptr)
+		{
+			ADD_ERROR("Could not spawn the test box (engine cube mesh unavailable).");
+			return;
+		}
+
+		TArray<AActor*> SourceActors;
+		const FNRawMesh Mesh = FNWorldCollisionCache::Build(World, WideBounds(), &SourceActors);
+		CHECK_MESSAGE(TEXT("A blocking box should be reported as a collision-source actor."), SourceActors.Contains(Box))
+	});
+}
+
+N_TEST_HIGH(FNWorldCollisionCacheTests_Generation_BumpsOnInvalidate,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionCache::Generation::BumpsOnInvalidate",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Verifies the "did the world change?" signal the bone visualizer memoizes against: stable across repeated Gets of
+	// the same clean world, and strictly increasing after an invalidation.
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		// First Get syncs the cache to this world (and registers the invalidation hooks); capture the generation after.
+		FNWorldCollisionCache::Get(World);
+		const uint32 GenerationAfterSync = FNWorldCollisionCache::GetGeneration();
+
+		// A repeat Get of the same, un-invalidated world neither rebuilds nor bumps.
+		FNWorldCollisionCache::Get(World);
+		CHECK_EQUALS("Repeated Get on the same clean world should not change generation.",
+			FNWorldCollisionCache::GetGeneration(), GenerationAfterSync)
+
+		FNWorldCollisionCache::Invalidate();
+		CHECK_MESSAGE(TEXT("Invalidate should bump the generation."),
+			FNWorldCollisionCache::GetGeneration() > GenerationAfterSync)
+	});
+}
+
+N_TEST_HIGH(FNWorldCollisionCacheTests_GetBVH_SamplesBlockingActor,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionCache::GetBVH::SamplesBlockingActor",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Verifies the cache builds a BVH in lockstep with the mesh and that it reports penetration for a contained point.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionCacheHarness;
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		if (SpawnBox(World, FVector::ZeroVector, FVector(50.0)) == nullptr)
+		{
+			ADD_ERROR("Could not spawn the test box (engine cube mesh unavailable).");
+			return;
+		}
+
+		const FNRawMesh& Mesh = FNWorldCollisionCache::Get(World);
+		if (Mesh.Loops.Num() == 0)
+		{
+			ADD_ERROR("Expected the spawned box to contribute collision geometry.");
+			return;
+		}
+
+		const FNMeshBVH& BVH = FNWorldCollisionCache::GetBVH(World);
+		CHECK_FALSE_MESSAGE(TEXT("A world with a blocking box should yield a non-empty BVH."), BVH.IsEmpty())
+
+		// A point at the box center sits 50 units from every face; a point well outside reports no penetration.
+		CHECK_MESSAGE(TEXT("The box center should report positive penetration through the BVH."),
+			BVH.GetPointDepth(FVector::ZeroVector) > 0.f)
+		CHECK_MESSAGE(TEXT("A point clear of the box should report no penetration through the BVH."),
+			BVH.GetPointDepth(FVector(0, 0, 400)) < 0.f)
+	});
+}
+
+N_TEST_HIGH(FNWorldCollisionCacheTests_AsyncRefresh_PublishesBVH,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionCache::AsyncRefresh::PublishesBVH",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Verifies the async pipeline gathers, merges, builds, and publishes a usable BVH + mesh for a world with geometry.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionCacheHarness;
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		if (SpawnBox(World, FVector::ZeroVector, FVector(50.0)) == nullptr)
+		{
+			ADD_ERROR("Could not spawn the test box (engine cube mesh unavailable).");
+			return;
+		}
+
+		// Drive the gather -> background build -> publish pipeline to completion synchronously.
+		FNWorldCollisionCache::FlushAsyncRefreshForTesting(World);
+
+		const TSharedPtr<const FNMeshBVH> BVH = FNWorldCollisionCache::GetPublishedBVH();
+		const TSharedPtr<const FNRawMesh> Mesh = FNWorldCollisionCache::GetPublishedMesh();
+		if (!BVH.IsValid() || !Mesh.IsValid())
+		{
+			ADD_ERROR("The async refresh should have published a mesh and BVH for a world with a blocking box.");
+			return;
+		}
+
+		CHECK_MESSAGE(TEXT("The published mesh should carry the box geometry."), Mesh->Loops.Num() > 0)
+		CHECK_MESSAGE(TEXT("The published BVH should report penetration at the box center."),
+			BVH->GetPointDepth(FVector::ZeroVector) > 0.f)
+		CHECK_MESSAGE(TEXT("A publish should have advanced the results generation."),
+			FNWorldCollisionCache::GetResultsGeneration() > 0)
+	});
 }
 
 #endif //WITH_TESTS

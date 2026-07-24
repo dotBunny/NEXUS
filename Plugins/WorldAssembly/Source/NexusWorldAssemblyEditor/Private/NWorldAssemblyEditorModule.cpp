@@ -28,6 +28,7 @@
 #include "NWorldAssemblyEditorToolMenu.h"
 #include "NWorldAssemblyEditorUndo.h"
 #include "NWorldAssemblyEdMode.h"
+#include "NWorldCollisionCache.h"
 #include "UnrealEdGlobals.h"
 #include "Customizations/NOrganComponentCustomization.h"
 #include "Customizations/NWorldAssemblyEditorUserSettingsCustomization.h"
@@ -51,6 +52,10 @@ void FNWorldAssemblyEditorModule::StartupModule()
 void FNWorldAssemblyEditorModule::ShutdownModule()
 {
 	N_MODULE_REMOVE_POST_ENGINE_INIT()
+
+	// Remove the world-collision cache's async ticker and drain any in-flight background build before the module (and
+	// the static function it ticks into) can be unloaded — otherwise Live Coding / editor shutdown would dangle it.
+	FNWorldCollisionCache::Shutdown();
 
 	// Drop the asset-registry hooks registered in OnPostEngineInit. Use the module pointer so we don't force the
 	// AssetRegistry module to load during shutdown if it's already gone.
