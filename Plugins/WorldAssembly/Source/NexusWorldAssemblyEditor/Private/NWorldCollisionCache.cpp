@@ -8,6 +8,7 @@
 #include "Components/ActorComponent.h"
 #include "Editor.h"
 #include "Engine/Engine.h"
+#include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "HAL/PlatformTime.h"
 #include "Types/NRawMeshFactory.h"
@@ -36,20 +37,7 @@ bool FNWorldCollisionCache::bBVHDirty = true;
 bool FNWorldCollisionCache::bHooksRegistered = false;
 uint32 FNWorldCollisionCache::Generation = 0;
 
-TWeakObjectPtr<const UWorld> FNWorldCollisionCache::AsyncWorld;
-TSharedPtr<const FNRawMesh> FNWorldCollisionCache::PublishedMesh;
-TSharedPtr<const FNMeshBVH> FNWorldCollisionCache::PublishedBVH;
-bool FNWorldCollisionCache::bPublishedMeshIsConvex = false;
-bool FNWorldCollisionCache::bPublishedMeshHasNonTris = false;
-uint32 FNWorldCollisionCache::ResultsGeneration = 0;
-bool FNWorldCollisionCache::bAsyncDirty = false;
-bool FNWorldCollisionCache::bRebuildInFlight = false;
-uint64 FNWorldCollisionCache::RebuildRequestId = 0;
-uint64 FNWorldCollisionCache::InFlightRequestId = 0;
-UE::Tasks::TTask<FNWorldCollisionCache::FRebuildResult> FNWorldCollisionCache::InFlightTask;
-TSharedPtr<FThreadSafeBool, ESPMode::ThreadSafe> FNWorldCollisionCache::InFlightCancelFlag;
-double FNWorldCollisionCache::LastInvalidateTime = 0.0;
-double FNWorldCollisionCache::LastDrawTime = 0.0;
+TMap<TWeakObjectPtr<const UWorld>, FNWorldCollisionCache::FAsyncWorldState> FNWorldCollisionCache::AsyncStates;
 bool FNWorldCollisionCache::bPumpRegistered = false;
 FTSTicker::FDelegateHandle FNWorldCollisionCache::PumpHandle;
 
@@ -147,20 +135,52 @@ FNRawMesh FNWorldCollisionCache::Build(const UWorld* World, const TArray<FBoxSph
 	return MergedMesh;
 }
 
+void FNWorldCollisionCache::MarkStateDirty(FAsyncWorldState& State)
+{
+	State.bAsyncDirty = true;
+	++State.RebuildRequestId;
+	State.LastInvalidateTime = FPlatformTime::Seconds();
+	if (State.bRebuildInFlight && State.InFlightCancelFlag.IsValid())
+	{
+		*State.InFlightCancelFlag = true;
+	}
+}
+
 void FNWorldCollisionCache::Invalidate()
 {
+	// Synchronous path.
 	bDirty = true;
 	bBVHDirty = true;
 	++Generation;
 
-	// Drive the async path: mark stale, bump the request id so any in-flight build's result is superseded, note the
-	// time for the debounce, and ask the in-flight background task to bail early.
-	bAsyncDirty = true;
-	++RebuildRequestId;
-	LastInvalidateTime = FPlatformTime::Seconds();
-	if (bRebuildInFlight && InFlightCancelFlag.IsValid())
+	// Asynchronous path: this is the world-agnostic entry point (undo/redo), so mark every tracked world stale. Targeted
+	// actor edits use InvalidateWorld and only touch the affected world.
+	for (TPair<TWeakObjectPtr<const UWorld>, FAsyncWorldState>& Pair : AsyncStates)
 	{
-		*InFlightCancelFlag = true;
+		MarkStateDirty(Pair.Value);
+	}
+}
+
+void FNWorldCollisionCache::InvalidateWorld(const UWorld* World)
+{
+	if (World == nullptr)
+	{
+		return;
+	}
+
+	// Synchronous path (single cached world): only relevant when the change hit the world we currently have cached.
+	if (CachedWorld.Get() == World)
+	{
+		bDirty = true;
+		bBVHDirty = true;
+		++Generation;
+	}
+
+	// Asynchronous path: mark just this world's pipeline stale, if we are tracking it. A world with no entry yet has no
+	// consumer, so there is nothing to rebuild — its first RequestAsyncRefresh will start a build from scratch.
+	if (FAsyncWorldState* State = AsyncStates.Find(World))
+	{
+		MarkStateDirty(*State);
 	}
 }
 
@@ -188,11 +208,24 @@ bool FNWorldCollisionCache::IsRelevantActor(const AActor* Actor)
 		return false;
 	}
 
-	// Was it part of the geometry we last built? (covers delete / collision-off / ignore-tag-added transitions, where
-	// the actor no longer passes the live filter but its removal still changes the mesh.)
-	if (CachedSourceActors.Contains(FObjectKey(Actor)))
+	const UWorld* World = Actor->GetWorld();
+	const FObjectKey Key(Actor);
+
+	// Was it part of the geometry we last built for its world? (covers delete / collision-off / ignore-tag-added
+	// transitions, where the actor no longer passes the live filter but its removal still changes that world's mesh.)
+	if (World != nullptr)
 	{
-		return true;
+		if (const FAsyncWorldState* State = AsyncStates.Find(World))
+		{
+			if (State->SourceActors.Contains(Key))
+			{
+				return true;
+			}
+		}
+		if (CachedWorld.Get() == World && CachedSourceActors.Contains(Key))
+		{
+			return true;
+		}
 	}
 
 	// Is it relevant now? (covers add / collision-on transitions.) Same predicate the merge itself uses, so a bone —
@@ -211,29 +244,34 @@ void FNWorldCollisionCache::EnsureInvalidationHooks()
 
 	// Geometry changes that should rebuild the cache. Mirrors the ed mode's collision-visualizer refresh triggers —
 	// including its relevance filtering, so changes to non-collision actors (bones, lights, editor gizmos) do NOT force
-	// a full world re-gather. Bindings live for the editor session (the cache is a process-lifetime static), so handles
-	// aren't tracked.
+	// a full world re-gather. Actor-scoped events invalidate only the changed actor's world. Bindings live for the
+	// editor session (the cache is a process-lifetime static), so handles aren't tracked.
 	if (GEngine != nullptr)
 	{
-		GEngine->OnLevelActorAdded().AddLambda([](AActor* Actor) { if (IsRelevantActor(Actor)) { Invalidate(); } });
-		GEngine->OnLevelActorDeleted().AddLambda([](AActor* Actor) { if (IsRelevantActor(Actor)) { Invalidate(); } });
+		GEngine->OnLevelActorAdded().AddLambda([](AActor* Actor) { if (IsRelevantActor(Actor)) { InvalidateWorld(Actor->GetWorld()); } });
+		GEngine->OnLevelActorDeleted().AddLambda([](AActor* Actor) { if (IsRelevantActor(Actor)) { InvalidateWorld(Actor->GetWorld()); } });
 	}
 	if (GEditor != nullptr)
 	{
-		GEditor->OnEndObjectMovement().AddLambda([](UObject& Object) { if (IsRelevantActor(ResolveActor(&Object))) { Invalidate(); } });
+		GEditor->OnEndObjectMovement().AddLambda([](UObject& Object)
+		{
+			AActor* Actor = ResolveActor(&Object);
+			if (IsRelevantActor(Actor)) { InvalidateWorld(Actor->GetWorld()); }
+		});
 	}
 
-	// Undo/redo can affect geometry in ways not tied to a single reported actor, so invalidate unconditionally (as the
-	// ed mode does).
+	// Undo/redo can affect geometry in ways not tied to a single reported actor (or world), so invalidate everything
+	// unconditionally (as the ed mode does).
 	FEditorDelegates::PostUndoRedo.AddLambda([] { Invalidate(); });
 
 	// Skip the continuous mid-edit stream (slider scrubs, gizmo drags); rebuild on the finalizing change to a relevant
-	// actor instead.
+	// actor instead, scoped to that actor's world.
 	FCoreUObjectDelegates::OnObjectPropertyChanged.AddLambda([](UObject* Object, FPropertyChangedEvent& PropertyChangedEvent)
 	{
-		if (PropertyChangedEvent.ChangeType != EPropertyChangeType::Interactive && IsRelevantActor(ResolveActor(Object)))
+		AActor* Actor = ResolveActor(Object);
+		if (PropertyChangedEvent.ChangeType != EPropertyChangeType::Interactive && IsRelevantActor(Actor))
 		{
-			Invalidate();
+			InvalidateWorld(Actor->GetWorld());
 		}
 	});
 }
@@ -252,55 +290,49 @@ void FNWorldCollisionCache::RequestAsyncRefresh(const UWorld* World)
 		return;
 	}
 
-	// Mark that a bone is drawing now — this is what keeps the pump gathering. When no bone draws, this stops updating
-	// and the pump leaves a stale cache alone until a bone reappears.
-	LastDrawTime = FPlatformTime::Seconds();
-
-	if (AsyncWorld.Get() != World)
+	const TWeakObjectPtr<const UWorld> Key(World);
+	FAsyncWorldState* State = AsyncStates.Find(Key);
+	if (State == nullptr)
 	{
-		// New world (or the very first request): the previously published data belongs to a different level, so drop it
-		// and rebuild from scratch. Consumers see null results (draw nothing) until the first background build lands.
-		AsyncWorld = World;
-		PublishedMesh.Reset();
-		PublishedBVH.Reset();
-		bPublishedMeshIsConvex = false;
-		bPublishedMeshHasNonTris = false;
-		++ResultsGeneration;
-
-		bAsyncDirty = true;
-		++RebuildRequestId;
-		LastInvalidateTime = FPlatformTime::Seconds();
-		if (bRebuildInFlight && InFlightCancelFlag.IsValid())
-		{
-			*InFlightCancelFlag = true;
-		}
+		// First time this world is sampled: create its pipeline and schedule the initial build. Consumers see null
+		// results (draw nothing) until that first background build lands. Other worlds are untouched.
+		State = &AsyncStates.Add(Key);
+		MarkStateDirty(*State);
 	}
-	// Otherwise nothing to do here — the pump acts on bAsyncDirty, which Invalidate sets on relevant world changes.
+
+	// Mark that a bone is drawing for this world now — this is what keeps its pump gathering. When no bone draws for a
+	// world, this stops updating and the pump leaves that world's stale cache alone until a bone reappears.
+	State->LastDrawTime = FPlatformTime::Seconds();
 }
 
-TSharedPtr<const FNMeshBVH> FNWorldCollisionCache::GetPublishedBVH()
+TSharedPtr<const FNMeshBVH> FNWorldCollisionCache::GetPublishedBVH(const UWorld* World)
 {
-	return PublishedBVH;
+	const FAsyncWorldState* State = AsyncStates.Find(World);
+	return State != nullptr ? State->PublishedBVH : nullptr;
 }
 
-TSharedPtr<const FNRawMesh> FNWorldCollisionCache::GetPublishedMesh()
+TSharedPtr<const FNRawMesh> FNWorldCollisionCache::GetPublishedMesh(const UWorld* World)
 {
-	return PublishedMesh;
+	const FAsyncWorldState* State = AsyncStates.Find(World);
+	return State != nullptr ? State->PublishedMesh : nullptr;
 }
 
-bool FNWorldCollisionCache::IsPublishedMeshConvex()
+bool FNWorldCollisionCache::IsPublishedMeshConvex(const UWorld* World)
 {
-	return bPublishedMeshIsConvex;
+	const FAsyncWorldState* State = AsyncStates.Find(World);
+	return State != nullptr && State->bPublishedMeshIsConvex;
 }
 
-bool FNWorldCollisionCache::PublishedMeshHasNonTris()
+bool FNWorldCollisionCache::PublishedMeshHasNonTris(const UWorld* World)
 {
-	return bPublishedMeshHasNonTris;
+	const FAsyncWorldState* State = AsyncStates.Find(World);
+	return State != nullptr && State->bPublishedMeshHasNonTris;
 }
 
-uint32 FNWorldCollisionCache::GetResultsGeneration()
+uint32 FNWorldCollisionCache::GetResultsGeneration(const UWorld* World)
 {
-	return ResultsGeneration;
+	const FAsyncWorldState* State = AsyncStates.Find(World);
+	return State != nullptr ? State->ResultsGeneration : 0;
 }
 
 void FNWorldCollisionCache::EnsureAsyncPump()
@@ -321,65 +353,117 @@ bool FNWorldCollisionCache::Pump(float /*DeltaTime*/)
 
 void FNWorldCollisionCache::PumpOnce()
 {
-	// 1. Publish finished work (or discard it when a newer change has superseded this build).
-	if (bRebuildInFlight && InFlightTask.IsCompleted())
-	{
-		FRebuildResult Result = InFlightTask.GetResult();
-		InFlightTask = UE::Tasks::TTask<FRebuildResult>();
-		bRebuildInFlight = false;
+	const double Now = FPlatformTime::Seconds();
 
-		if (InFlightRequestId == RebuildRequestId)
+	// Snapshot the keys so a re-entrant RequestAsyncRefresh/Invalidate during a gather (which can mutate AsyncStates and
+	// reallocate it) can't invalidate the loop.
+	TArray<TWeakObjectPtr<const UWorld>> Keys;
+	AsyncStates.GetKeys(Keys);
+
+	for (const TWeakObjectPtr<const UWorld>& Key : Keys)
+	{
+		if (Key.Get() == nullptr)
 		{
-			PublishedMesh = Result.Mesh;
-			PublishedBVH = Result.BVH;
-			bPublishedMeshIsConvex = Result.bMeshIsConvex;
-			bPublishedMeshHasNonTris = Result.bMeshHasNonTris;
-			CachedSourceActors.Reset();
+			// The world was destroyed. Drain any in-flight build for it before dropping the entry so we don't dangle
+			// the background task against freed state.
+			if (FAsyncWorldState* State = AsyncStates.Find(Key))
+			{
+				if (State->bRebuildInFlight)
+				{
+					if (State->InFlightCancelFlag.IsValid())
+					{
+						*State->InFlightCancelFlag = true;
+					}
+					State->InFlightTask.Wait();
+				}
+			}
+			AsyncStates.Remove(Key);
+			continue;
+		}
+
+		PumpState(Key.Get(), Key, Now);
+	}
+}
+
+void FNWorldCollisionCache::PumpState(const UWorld* World, const TWeakObjectPtr<const UWorld>& Key, const double Now)
+{
+	FAsyncWorldState* State = AsyncStates.Find(Key);
+	if (State == nullptr)
+	{
+		return;
+	}
+
+	// 1. Publish finished work (or discard it when a newer change has superseded this build). No external calls here,
+	// so the State reference stays valid across this block.
+	if (State->bRebuildInFlight && State->InFlightTask.IsCompleted())
+	{
+		FRebuildResult Result = State->InFlightTask.GetResult();
+		State->InFlightTask = UE::Tasks::TTask<FRebuildResult>();
+		State->bRebuildInFlight = false;
+
+		if (State->InFlightRequestId == State->RebuildRequestId)
+		{
+			State->PublishedMesh = Result.Mesh;
+			State->PublishedBVH = Result.BVH;
+			State->bPublishedMeshIsConvex = Result.bMeshIsConvex;
+			State->bPublishedMeshHasNonTris = Result.bMeshHasNonTris;
+			State->SourceActors.Reset();
 			for (const FObjectKey& SourceKey : Result.SourceActors)
 			{
-				CachedSourceActors.Add(SourceKey);
+				State->SourceActors.Add(SourceKey);
 			}
-			++ResultsGeneration;
+			++State->ResultsGeneration;
 		}
 		// else: a newer edit arrived mid-build; bAsyncDirty is set, so a fresh gather starts below.
 	}
 
-	// 2. Start a new gather when stale, idle, the debounce has elapsed, and a bone actually drew recently — so editing
-	// collision while no bone is visible marks the cache dirty but does no gather work until a bone reappears.
-	const double Now = FPlatformTime::Seconds();
-	const UWorld* World = AsyncWorld.Get();
-	if (!bRebuildInFlight && bAsyncDirty && World != nullptr
-		&& (Now - LastInvalidateTime) >= NEXUS::WorldAssembly::CollisionCache::AsyncDebounceSeconds
-		&& (Now - LastDrawTime) <= NEXUS::WorldAssembly::CollisionCache::AsyncActiveWindowSeconds)
+	// 2. Start a new gather when stale, idle, the debounce has elapsed, and a bone actually drew recently for this
+	// world — so editing collision while no bone is visible marks the cache dirty but does no gather work until a bone
+	// reappears.
+	if (State->bRebuildInFlight || !State->bAsyncDirty
+		|| (Now - State->LastInvalidateTime) < NEXUS::WorldAssembly::CollisionCache::AsyncDebounceSeconds
+		|| (Now - State->LastDrawTime) > NEXUS::WorldAssembly::CollisionCache::AsyncActiveWindowSeconds)
 	{
-		// Game-thread gather (unavoidably: walks live actors and flushes static-mesh compilation).
-		TArray<FNRawMesh> Meshes;
-		TArray<FTransform> Transforms;
-		TArray<AActor*> SourceActors;
-		GatherRaw(World, Meshes, Transforms, SourceActors);
-
-		TArray<FObjectKey> SourceKeys;
-		SourceKeys.Reserve(SourceActors.Num());
-		for (const AActor* SourceActor : SourceActors)
-		{
-			SourceKeys.Add(FObjectKey(SourceActor));
-		}
-
-		// This snapshot reflects the world as of now; a later edit re-sets bAsyncDirty and supersedes via the request id.
-		bAsyncDirty = false;
-		InFlightRequestId = RebuildRequestId;
-		InFlightCancelFlag = MakeShared<FThreadSafeBool, ESPMode::ThreadSafe>(false);
-		const TSharedRef<FThreadSafeBool, ESPMode::ThreadSafe> CancelRef = InFlightCancelFlag.ToSharedRef();
-
-		// Background: the merge + BVH build are pure FNRawMesh math with no UObject access.
-		InFlightTask = UE::Tasks::Launch(TEXT("NWorldCollisionCacheRebuild"),
-			[Meshes = MoveTemp(Meshes), Transforms = MoveTemp(Transforms), SourceKeys = MoveTemp(SourceKeys), CancelRef]() mutable
-			{
-				return MergeAndBuild(MoveTemp(Meshes), MoveTemp(Transforms), MoveTemp(SourceKeys), CancelRef);
-			},
-			UE::Tasks::ETaskPriority::BackgroundLow);
-		bRebuildInFlight = true;
+		return;
 	}
+	const uint64 RequestIdAtGather = State->RebuildRequestId;
+
+	// Game-thread gather (unavoidably: walks live actors and flushes static-mesh compilation). This can broadcast
+	// editor delegates, so treat the map reference as potentially stale afterward and re-acquire before writing back.
+	TArray<FNRawMesh> Meshes;
+	TArray<FTransform> Transforms;
+	TArray<AActor*> SourceActors;
+	GatherRaw(World, Meshes, Transforms, SourceActors);
+
+	State = AsyncStates.Find(Key);
+	if (State == nullptr || State->bRebuildInFlight || State->RebuildRequestId != RequestIdAtGather)
+	{
+		// The world went away, another gather already started, or a newer edit superseded this one mid-gather. In the
+		// superseded case bAsyncDirty is still set, so the next pump gathers afresh.
+		return;
+	}
+
+	TArray<FObjectKey> SourceKeys;
+	SourceKeys.Reserve(SourceActors.Num());
+	for (const AActor* SourceActor : SourceActors)
+	{
+		SourceKeys.Add(FObjectKey(SourceActor));
+	}
+
+	// This snapshot reflects the world as of now; a later edit re-sets bAsyncDirty and supersedes via the request id.
+	State->bAsyncDirty = false;
+	State->InFlightRequestId = State->RebuildRequestId;
+	State->InFlightCancelFlag = MakeShared<FThreadSafeBool, ESPMode::ThreadSafe>(false);
+	const TSharedRef<FThreadSafeBool, ESPMode::ThreadSafe> CancelRef = State->InFlightCancelFlag.ToSharedRef();
+
+	// Background: the merge + BVH build are pure FNRawMesh math with no UObject access.
+	State->InFlightTask = UE::Tasks::Launch(TEXT("NWorldCollisionCacheRebuild"),
+		[Meshes = MoveTemp(Meshes), Transforms = MoveTemp(Transforms), SourceKeys = MoveTemp(SourceKeys), CancelRef]() mutable
+		{
+			return MergeAndBuild(MoveTemp(Meshes), MoveTemp(Transforms), MoveTemp(SourceKeys), CancelRef);
+		},
+		UE::Tasks::ETaskPriority::BackgroundLow);
+	State->bRebuildInFlight = true;
 }
 
 void FNWorldCollisionCache::GatherRaw(const UWorld* World, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms,
@@ -440,18 +524,27 @@ void FNWorldCollisionCache::FlushAsyncRefreshForTesting(const UWorld* World)
 {
 	RequestAsyncRefresh(World);
 
+	const TWeakObjectPtr<const UWorld> Key(World);
+	FAsyncWorldState* State = AsyncStates.Find(Key);
+	if (State == nullptr)
+	{
+		return; // null world (RequestAsyncRefresh created nothing)
+	}
+
 	// Force a rebuild regardless of prior state, bypass the debounce, and mark a draw as current so the pump's
 	// active-window gate lets the gather through — the pipeline then runs deterministically.
-	bAsyncDirty = true;
-	++RebuildRequestId;
-	LastInvalidateTime = 0.0;
-	LastDrawTime = FPlatformTime::Seconds();
+	State->bAsyncDirty = true;
+	++State->RebuildRequestId;
+	State->LastInvalidateTime = 0.0;
+	State->LastDrawTime = FPlatformTime::Seconds();
 
-	PumpOnce(); // gather (game thread) + launch background task
-	if (bRebuildInFlight)
+	PumpState(World, Key, FPlatformTime::Seconds()); // gather (game thread) + launch background task
+
+	State = AsyncStates.Find(Key);
+	if (State != nullptr && State->bRebuildInFlight)
 	{
-		InFlightTask.Wait(); // block until the background merge + BVH build finishes
-		PumpOnce();          // publish
+		State->InFlightTask.Wait();                      // block until the background merge + BVH build finishes
+		PumpState(World, Key, FPlatformTime::Seconds()); // publish
 	}
 }
 
@@ -464,20 +557,21 @@ void FNWorldCollisionCache::Shutdown()
 		bPumpRegistered = false;
 	}
 
-	// Don't leave a background task running against soon-to-be-freed state.
-	if (bRebuildInFlight)
+	// Don't leave any background task running against soon-to-be-freed state.
+	for (TPair<TWeakObjectPtr<const UWorld>, FAsyncWorldState>& Pair : AsyncStates)
 	{
-		if (InFlightCancelFlag.IsValid())
+		FAsyncWorldState& State = Pair.Value;
+		if (State.bRebuildInFlight)
 		{
-			*InFlightCancelFlag = true;
+			if (State.InFlightCancelFlag.IsValid())
+			{
+				*State.InFlightCancelFlag = true;
+			}
+			State.InFlightTask.Wait();
+			State.InFlightTask = UE::Tasks::TTask<FRebuildResult>();
+			State.bRebuildInFlight = false;
 		}
-		InFlightTask.Wait();
-		InFlightTask = UE::Tasks::TTask<FRebuildResult>();
-		bRebuildInFlight = false;
 	}
 
-	PublishedMesh.Reset();
-	PublishedBVH.Reset();
-	InFlightCancelFlag.Reset();
-	AsyncWorld = nullptr;
+	AsyncStates.Empty();
 }

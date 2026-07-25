@@ -203,8 +203,8 @@ N_TEST_HIGH(FNWorldCollisionCacheTests_AsyncRefresh_PublishesBVH,
 		// Drive the gather -> background build -> publish pipeline to completion synchronously.
 		FNWorldCollisionCache::FlushAsyncRefreshForTesting(World);
 
-		const TSharedPtr<const FNMeshBVH> BVH = FNWorldCollisionCache::GetPublishedBVH();
-		const TSharedPtr<const FNRawMesh> Mesh = FNWorldCollisionCache::GetPublishedMesh();
+		const TSharedPtr<const FNMeshBVH> BVH = FNWorldCollisionCache::GetPublishedBVH(World);
+		const TSharedPtr<const FNRawMesh> Mesh = FNWorldCollisionCache::GetPublishedMesh(World);
 		if (!BVH.IsValid() || !Mesh.IsValid())
 		{
 			ADD_ERROR("The async refresh should have published a mesh and BVH for a world with a blocking box.");
@@ -215,7 +215,68 @@ N_TEST_HIGH(FNWorldCollisionCacheTests_AsyncRefresh_PublishesBVH,
 		CHECK_MESSAGE(TEXT("The published BVH should report penetration at the box center."),
 			BVH->GetPointDepth(FVector::ZeroVector) > 0.f)
 		CHECK_MESSAGE(TEXT("A publish should have advanced the results generation."),
-			FNWorldCollisionCache::GetResultsGeneration() > 0)
+			FNWorldCollisionCache::GetResultsGeneration(World) > 0)
+	});
+}
+
+N_TEST_HIGH(FNWorldCollisionCacheTests_AsyncRefresh_TracksWorldsIndependently,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionCache::AsyncRefresh::TracksWorldsIndependently",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Regression test for the per-world async cache: the bone visualizer draws for several worlds at once (the level
+	// viewport plus Blueprint-editor preview scenes), so refreshing one world must NOT reset another's published data
+	// or bump its results generation. A single global async slot (the previous design) would clobber World A the moment
+	// World B refreshed, silently zeroing every bone's penetration whenever two worlds were visible.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionCacheHarness;
+	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* WorldA)
+	{
+		if (SpawnBox(WorldA, FVector::ZeroVector, FVector(50.0)) == nullptr)
+		{
+			ADD_ERROR("Could not spawn the test box in World A (engine cube mesh unavailable).");
+			return;
+		}
+
+		// Publish World A first and record its results generation.
+		FNWorldCollisionCache::FlushAsyncRefreshForTesting(WorldA);
+		const TSharedPtr<const FNMeshBVH> BVHABefore = FNWorldCollisionCache::GetPublishedBVH(WorldA);
+		const uint32 GenerationABefore = FNWorldCollisionCache::GetResultsGeneration(WorldA);
+		if (!BVHABefore.IsValid())
+		{
+			ADD_ERROR("World A should have published a BVH after its flush.");
+			return;
+		}
+
+		// A second, distinct world with its own geometry, published while World A is still tracked.
+		FNTestUtils::WorldTest(EWorldType::PIE, [this, WorldA, BVHABefore, GenerationABefore](UWorld* WorldB)
+		{
+			if (SpawnBox(WorldB, FVector::ZeroVector, FVector(50.0)) == nullptr)
+			{
+				ADD_ERROR("Could not spawn the test box in World B (engine cube mesh unavailable).");
+				return;
+			}
+
+			FNWorldCollisionCache::FlushAsyncRefreshForTesting(WorldB);
+
+			// World B publishes its own usable data.
+			const TSharedPtr<const FNMeshBVH> BVHB = FNWorldCollisionCache::GetPublishedBVH(WorldB);
+			CHECK_MESSAGE(TEXT("World B should publish its own BVH."), BVHB.IsValid())
+			if (BVHB.IsValid())
+			{
+				CHECK_MESSAGE(TEXT("World B's BVH should report penetration at its box center."),
+					BVHB->GetPointDepth(FVector::ZeroVector) > 0.f)
+			}
+
+			// ...and refreshing World B must have left World A entirely untouched: same BVH instance, same generation.
+			const TSharedPtr<const FNMeshBVH> BVHAAfter = FNWorldCollisionCache::GetPublishedBVH(WorldA);
+			CHECK_MESSAGE(TEXT("World A's published BVH should survive a World B refresh."), BVHAAfter.IsValid())
+			CHECK_MESSAGE(TEXT("World A should keep the very same published BVH after World B refreshes."),
+				BVHAAfter == BVHABefore)
+			CHECK_EQUALS("World A's results generation should not move when only World B refreshes.",
+				FNWorldCollisionCache::GetResultsGeneration(WorldA), GenerationABefore)
+
+			// The two worlds keep independent BVH instances.
+			CHECK_MESSAGE(TEXT("The two worlds should hold distinct published BVHs."), BVHB != BVHAAfter)
+		});
 	});
 }
 

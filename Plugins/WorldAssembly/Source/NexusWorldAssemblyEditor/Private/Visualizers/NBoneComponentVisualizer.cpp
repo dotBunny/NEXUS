@@ -11,7 +11,6 @@
 #include "Types/NRawMesh.h"
 #include "Types/NRawMeshUtils.h"
 
-uint32 FNBoneComponentVisualizer::CachedGeneration = 0;
 TMap<TWeakObjectPtr<const UNBoneComponent>, FNBoneComponentVisualizer::FCachedPenetration> FNBoneComponentVisualizer::PenetrationCache;
 
 void FNBoneComponentVisualizer::DrawVisualization(const UActorComponent* Component, const FSceneView* View,
@@ -43,18 +42,15 @@ float FNBoneComponentVisualizer::GetCachedWorldPenetration(const UNBoneComponent
 {
 	const UWorld* World = BoneComponent->GetWorld();
 
-	// Kick a background rebuild if world collision changed. This never blocks: the gather + merge + BVH build happen off
-	// the draw (see FNWorldCollisionCache async path), so a viewport redraw is always cheap even right after an edit.
+	// Kick a background rebuild if this world's collision changed. This never blocks: the gather + merge + BVH build
+	// happen off the draw (see FNWorldCollisionCache async path), so a viewport redraw is always cheap even right after
+	// an edit. Each world is tracked independently, so this never disturbs another viewport's published data.
 	FNWorldCollisionCache::RequestAsyncRefresh(World);
 
-	// The memo clears only when NEW results publish (ResultsGeneration), not on invalidation — so during a rebuild we
-	// keep drawing the last-known value instead of recomputing against soon-to-be-replaced data.
-	const uint32 Generation = FNWorldCollisionCache::GetResultsGeneration();
-	if (Generation != CachedGeneration)
-	{
-		PenetrationCache.Reset();
-		CachedGeneration = Generation;
-	}
+	// The memo entry stays valid until NEW results publish for this bone's world (ResultsGeneration bumps only on a
+	// publish, not on invalidation) — so during a rebuild we keep drawing the last-known value, and a rebuild in one
+	// world never invalidates bones drawn for another.
+	const uint32 Generation = FNWorldCollisionCache::GetResultsGeneration(World);
 
 	// Per-bone inputs that change the result independently of world geometry.
 	const FTransform CurrentTransform = BoneComponent->GetComponentTransform();
@@ -64,7 +60,8 @@ float FNBoneComponentVisualizer::GetCachedWorldPenetration(const UNBoneComponent
 	const TWeakObjectPtr<const UNBoneComponent> Key(BoneComponent);
 	if (const FCachedPenetration* Existing = PenetrationCache.Find(Key))
 	{
-		if (Existing->KeySocketSize == CurrentSocketSize
+		if (Existing->KeyResultsGeneration == Generation
+			&& Existing->KeySocketSize == CurrentSocketSize
 			&& Existing->KeySettingSocketSize == CurrentSettingSocketSize
 			&& Existing->KeyTransform.Equals(CurrentTransform))
 		{
@@ -72,12 +69,23 @@ float FNBoneComponentVisualizer::GetCachedWorldPenetration(const UNBoneComponent
 		}
 	}
 
-	// Miss — sample the socket corners against the most recently published world-collision mesh + BVH. When nothing has
-	// been published yet (first build still running) both are null and we report 0 until results land and bump the
+	// Miss — we are about to recompute this entry. Misses are rare (a real input or generation change), so use the
+	// opportunity to drop entries whose bone has been destroyed; without a whole-map reset this is what keeps the memo
+	// from growing across selection changes and across the multiple worlds it serves.
+	for (TMap<TWeakObjectPtr<const UNBoneComponent>, FCachedPenetration>::TIterator It(PenetrationCache); It; ++It)
+	{
+		if (!It.Key().IsValid())
+		{
+			It.RemoveCurrent();
+		}
+	}
+
+	// Sample the socket corners against this world's most recently published world-collision mesh + BVH. When nothing
+	// has been published yet (first build still running) both are null and we report 0 until results land and bump the
 	// generation above.
 	float WorldPenetration = 0.f;
-	const TSharedPtr<const FNMeshBVH> WorldCollisionBVH = FNWorldCollisionCache::GetPublishedBVH();
-	const TSharedPtr<const FNRawMesh> WorldCollisionMesh = FNWorldCollisionCache::GetPublishedMesh();
+	const TSharedPtr<const FNMeshBVH> WorldCollisionBVH = FNWorldCollisionCache::GetPublishedBVH(World);
+	const TSharedPtr<const FNRawMesh> WorldCollisionMesh = FNWorldCollisionCache::GetPublishedMesh(World);
 	if (WorldCollisionBVH.IsValid() && WorldCollisionMesh.IsValid() && WorldCollisionMesh->Loops.Num() > 0)
 	{
 		const TArray<FVector> CornerPoints = BoneComponent->GetWorldCornerPoints(Settings->SocketSize);
@@ -86,7 +94,7 @@ float FNBoneComponentVisualizer::GetCachedWorldPenetration(const UNBoneComponent
 		// FNRawMeshUtils::ComputePointDepthInsideNonConvex exactly but visits only the geometry near each corner. The
 		// convex / non-triangle degenerate cases (trivial single-body test levels) keep the original exact path, whose
 		// convex face-plane metric the BVH does not replicate.
-		if (!FNWorldCollisionCache::IsPublishedMeshConvex() && !FNWorldCollisionCache::PublishedMeshHasNonTris())
+		if (!FNWorldCollisionCache::IsPublishedMeshConvex(World) && !FNWorldCollisionCache::PublishedMeshHasNonTris(World))
 		{
 			for (const FVector& Corner : CornerPoints)
 			{
@@ -107,6 +115,7 @@ float FNBoneComponentVisualizer::GetCachedWorldPenetration(const UNBoneComponent
 	Entry.KeyTransform = CurrentTransform;
 	Entry.KeySocketSize = CurrentSocketSize;
 	Entry.KeySettingSocketSize = CurrentSettingSocketSize;
+	Entry.KeyResultsGeneration = Generation;
 	Entry.Penetration = WorldPenetration;
 	return WorldPenetration;
 }

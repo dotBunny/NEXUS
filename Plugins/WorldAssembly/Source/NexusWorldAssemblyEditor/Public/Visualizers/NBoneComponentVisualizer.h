@@ -27,6 +27,8 @@ private:
 		FTransform KeyTransform = FTransform::Identity;
 		FIntVector2 KeySocketSize = FIntVector2(0, 0);
 		FVector2D KeySettingSocketSize = FVector2D::ZeroVector;
+		/** The bone's world's published-results generation this was computed against; a mismatch invalidates the entry. */
+		uint32 KeyResultsGeneration = 0;
 		float Penetration = 0.f;
 	};
 
@@ -38,9 +40,11 @@ private:
 	 */
 	static float GetCachedWorldPenetration(const UNBoneComponent* BoneComponent, const UNWorldAssemblySettings* Settings);
 
-	/** Collision-cache generation the memo was last valid for; a mismatch clears the whole map. */
-	static uint32 CachedGeneration;
-
-	/** Per-bone penetration memo. Weak keys make entries for destroyed bones harmless until the next generation clear. */
+	/**
+	 * Per-bone penetration memo, shared across every world this visualizer draws for (level viewport + Blueprint-editor
+	 * preview scenes). Each entry records the world generation it was built against rather than relying on a single
+	 * global counter, so a rebuild in one world never invalidates bones in another. Entries for destroyed bones are
+	 * pruned lazily on the (rare) recompute path via their weak key.
+	 */
 	static TMap<TWeakObjectPtr<const UNBoneComponent>, FCachedPenetration> PenetrationCache;
 };
