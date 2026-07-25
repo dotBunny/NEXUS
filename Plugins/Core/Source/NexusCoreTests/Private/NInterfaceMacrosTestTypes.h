@@ -3,7 +3,9 @@
 
 #pragma once
 
-#if WITH_EDITORONLY_DATA
+// NOTE: Deliberately not wrapped in a preprocessor guard. UHT emits these types into the module's
+// unscoped registration table (sizeof(UNInterfaceMacrosTestSubject) and friends), so any #if around a
+// reflected type breaks non-editor targets where that define is 0. Guard test bodies with WITH_TESTS instead.
 
 #include "CoreMinimal.h"
 #include "Macros/NInterfaceMacros.h"
@@ -81,5 +83,3 @@ public:
 	N_INTERFACE_INVOKE_METHOD_OneParam(NInterfaceMacrosTestSubject, OnOneArg, OnOneArgEvent, int32, Value)
 	N_INTERFACE_INVOKE_METHOD_TwoParams(NInterfaceMacrosTestSubject, OnTwoArgs, OnTwoArgsEvent, int32, Value, const FString&, Text)
 };
-
-#endif // WITH_EDITORONLY_DATA

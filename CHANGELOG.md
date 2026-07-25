@@ -16,6 +16,7 @@
 - `UNPickerSettings` project settings (Project Settings > NEXUS > Picker, stored in `DefaultNexusGame.ini`) exposing point-projection configuration: `Trace Complex`, `Nav Query Extent`, `Nav Agent Radius`, and `Nav Agent Height`.
 - `UNCell` validator checks for `UNCellJunctionComponent` that are attached to non-static movability Actors/components.
 - `UNCellJunctionComponent` now has additional filling options related to toggling cell/level specific actors based on its status.
+- `NexusActorPoolsEditorTests` (`Editor`) module, hosting the Actor Pools editor-context unit and performance suites. `NexusActorPoolsTests` (`DeveloperTool`) now carries only coverage that can run outside the editor, so game targets no longer compile editor-only tests they can never execute.
 
 ### Changed
 
@@ -48,6 +49,7 @@
 - `UNMultiplayerTestSubsystem` now always removes its `BeginStandaloneLocalPlay` delegate binding when stopping, including on the editor teardown path where the previous guard skipped cleanup.
 - `UNBlueprintValidator` now guards against a null `Blueprint` cast and null `Node` entries while iterating graph nodes, matching `UNLevelBlueprintValidator`.
 - Ramps in blockout now have simple collision.
+- Non-editor targets no longer fail to compile. Reflected test-helper types (`ANTestPooledActor`, `UNInterfaceMacrosTestSubject`) were wrapped in `#if WITH_EDITORONLY_DATA`, but UHT writes every reflected type into its module's package registration table *unguarded* — so in a Development or Debug **game** target, where `DeveloperTool` test modules still build but `WITH_EDITORONLY_DATA` is `0`, the generated code referenced types the preprocessor had stripped. Reflected test types are now unguarded; only test bodies carry `#if WITH_TESTS`. Editor targets never reproduced this, so it only surfaced when packaging.
 
 ### Removed
 

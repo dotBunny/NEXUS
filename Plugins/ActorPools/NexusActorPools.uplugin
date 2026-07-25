@@ -39,6 +39,16 @@
 				"Linux",
 				"Win64"
 			]
+		},
+		{
+			"Name": "NexusActorPoolsEditorTests",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
 		}
 	],
 	"Plugins": [

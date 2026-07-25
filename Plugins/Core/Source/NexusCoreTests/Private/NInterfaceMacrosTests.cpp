@@ -1,7 +1,7 @@
 // Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#if WITH_EDITORONLY_DATA
+#if WITH_TESTS
 
 #include "NInterfaceMacrosTestTypes.h"
 #include "Macros/NTestMacros.h"
@@ -70,4 +70,4 @@ N_TEST_MEDIUM(NInterfaceMacrosTests_InvokeAcrossArities_AccumulatesIndependently
 	CHECK_MESSAGE(TEXT("Two-args string should match the last forwarded text."), Subject->TwoArgsText == TEXT("payload"))
 }
 
-#endif // WITH_EDITORONLY_DATA
+#endif //WITH_TESTS
