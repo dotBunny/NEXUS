@@ -593,6 +593,25 @@ TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByAllTags(const FGameplayTagCo
 		}
 	}
 
+	// Hash each of the other buckets once, then probe them in constant time. Testing membership with
+	// TArray::Contains instead made this O(smallest x others x bucket size) — on three 250-object buckets that is
+	// ~125k comparisons per query, and is why this ran an order of magnitude slower than GetObjectsByAnyTags over
+	// the same data. Building the sets is linear in the objects they hold, so the whole intersection now is too.
+	TArray<TSet<TWeakObjectPtr<UObject>>> OtherLookups;
+	OtherLookups.SetNum(Collections.Num());
+	for (int32 i = 0; i < Collections.Num(); ++i)
+	{
+		if (i == SmallestIndex) continue;
+
+		TSet<TWeakObjectPtr<UObject>>& Lookup = OtherLookups[i];
+		Lookup.Reserve(Collections[i]->Objects.Num());
+		for (const TWeakObjectPtr<UObject>& ObjPtr : Collections[i]->Objects)
+		{
+			Lookup.Add(ObjPtr);
+		}
+	}
+
+	// Still driven by the smallest bucket in its existing order, so the result's contents and ordering are unchanged.
 	const FNDynamicRefCollection* Smallest = Collections[SmallestIndex];
 	Result.Reserve(Smallest->Objects.Num());
 	for (const TWeakObjectPtr<UObject>& ObjPtr : Smallest->Objects)
@@ -604,7 +623,7 @@ TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByAllTags(const FGameplayTagCo
 		for (int32 i = 0; i < Collections.Num(); ++i)
 		{
 			if (i == SmallestIndex) continue;
-			if (!Collections[i]->Objects.Contains(WeakObject))
+			if (!OtherLookups[i].Contains(WeakObject))
 			{
 				bInAll = false;
 				break;

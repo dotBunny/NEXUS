@@ -525,10 +525,46 @@ bool FNVirtualOrganContext::IsGatedByMatchingRotation(const FRotator& Required,
 		!JunctionConstraints.IsMatchingRotationAllowed(Required.Roll, Required.Pitch, Required.Yaw);
 }
 
+void FNVirtualOrganContext::EnsureSocketIndex()
+{
+	if (SocketIndexCellCount == CellInputData.Num())
+	{
+		return;
+	}
+
+	CellsBySocketSize.Reset();
+
+	// Ascending cell order, so each bucket preserves the order a full pool walk would have visited candidates in.
+	for (int32 i = 0; i < CellInputData.Num(); i++)
+	{
+		const FNVirtualCellData& CellData = CellInputData[i];
+		for (const TPair<int32, FNCellJunctionDetails>& Pair : CellData.Junctions)
+		{
+			TArray<int32>& Bucket = CellsBySocketSize.FindOrAdd(Pair.Value.SocketSize);
+			// A cell with several junctions of one size belongs in that bucket once.
+			if (Bucket.Num() == 0 || Bucket.Last() != i)
+			{
+				Bucket.Add(i);
+			}
+		}
+	}
+
+	SocketIndexCellCount = CellInputData.Num();
+}
+
 void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
 {
 	CellIndices.Reset();
 	JunctionIndices.Reset();
+
+	// Only cells carrying a junction of the requested socket size can ever survive, so skip straight to them rather
+	// than running every gate on the whole pool and rejecting the rest at the end for an empty junction result.
+	EnsureSocketIndex();
+	const TArray<int32>* SocketBucket = CellsBySocketSize.Find(Filter.SocketSize);
+	if (SocketBucket == nullptr)
+	{
+		return;
+	}
 
 	// Resolve which bad-neighbor groups the source cell belongs to once up front; any candidate sharing one of
 	// these groups cannot be placed beside it. Stays empty when there is no source node (e.g. the start-node
@@ -571,14 +607,13 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 	constexpr int32 MaxCachedRotations = 16;
 	TArray<TPair<FQuat, FRotator>, TInlineAllocator<MaxCachedRotations>> RequiredRotations;
 
-	for (int32 i = 0; i < CellInputData.Num(); i++)
+	for (const int32 i : *SocketBucket)
 	{
 		const FNVirtualCellData* CellData = &CellInputData[i];
 
 		// Early out on some simple filters. Deliberately the cell-level gates only (empty/maximum-count/unique) —
 		// the socket-size variant additionally walks the junction map to answer "is there a matching socket", which
-		// the collection loop below has to walk anyway. A candidate with no matching junction still falls out there,
-		// via an empty GoodJunctions, so the pre-check would only be paying to learn the same thing twice.
+		// the bucket above has already answered and the collection loop below has to walk anyway.
 		if (!CellData->IsValidSelection()) continue;
 
 

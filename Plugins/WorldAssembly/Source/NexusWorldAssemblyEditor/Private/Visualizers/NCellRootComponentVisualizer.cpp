@@ -262,15 +262,29 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 		RootComponent->Details.HullSettings.bCalculateOnSave = false;
 		RootComponent->Details.Hull.bIsChaosGenerated = false;
 
+		// Moved through SetVertex rather than by assigning into Vertices: a direct write leaves the convexity flags
+		// and the face-plane cache describing the pre-drag hull, so the next penetration query measures against
+		// surfaces that have already moved.
+		//
+		// Neither branch calls Validate() explicitly. SetVertex marks the derived state dirty, so the convexity
+		// gate below re-evaluates on read and any later reader of the restored hull does the same. An eager
+		// Validate here would only duplicate that: CheckConvex is O(vertices * faces) and runs on every mouse-move
+		// frame of a drag, so on a dense hull each redundant call is a measurable slice of the frame.
 		const FVector PreviousPosition = RootComponent->Details.Hull.Vertices[VertexIndex];
-		RootComponent->Details.Hull.Vertices[VertexIndex] += DeltaTranslate;
-		RootComponent->Details.Hull.Validate();
+		RootComponent->Details.Hull.SetVertex(VertexIndex, PreviousPosition + DeltaTranslate);
+
+		// Ahead of the gate: CheckConvex scales its planarity tolerances by the mesh extent, so it wants Bounds
+		// describing the geometry it is about to judge.
 		RootComponent->Details.Hull.CalculateCenterAndBounds();
 
-		// If we're not allowing convex move it back
+		// If we're not allowing convex move it back. Restoring the vertex through SetVertex is what makes the
+		// discarded verdict safe: previously the reverted hull kept the non-convex result computed for the position
+		// being thrown away, latching a convex hull as non-convex until the next CalculateHull or reload and
+		// quietly pushing every later query onto the slower non-convex path.
 		if (!RootComponent->Details.HullSettings.bAllowNonConvex && !RootComponent->Details.Hull.IsConvex())
 		{
-			RootComponent->Details.Hull.Vertices[VertexIndex] = PreviousPosition;
+			RootComponent->Details.Hull.SetVertex(VertexIndex, PreviousPosition);
+			RootComponent->Details.Hull.CalculateCenterAndBounds();
 		}
 
 		if (ANCellActor* CellActor = RootComponent->GetNCellActor())

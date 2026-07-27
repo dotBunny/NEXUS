@@ -408,6 +408,29 @@ public:
 	/** @return Number of retries consumed so far. */
 	int32 GetRetryCount() const { return RetryCount; }
 private:
+	/**
+	 * Rebuild CellsBySocketSize if it does not describe the current pool.
+	 *
+	 * Staleness is detected by CellInputData's length, because callers append cells after constructing the context.
+	 * That is sufficient because a cell's junction set is immutable once it is in the pool — the build only mutates
+	 * UsedCount — so the only way the mapping can change is for the pool itself to grow or shrink.
+	 */
+	void EnsureSocketIndex();
+
+	/**
+	 * Cell indices bucketed by the socket sizes their junctions expose; a cell appears in one bucket per distinct
+	 * socket size among its junctions. Lets FilterCellInputData visit only the candidates that could host the
+	 * requested socket instead of running every gate on the whole pool.
+	 *
+	 * Each bucket is built in ascending cell index order, so candidates still reach the weighted output array in
+	 * the order a full walk produced. The builder draws from that array with the deterministic RNG, so reordering
+	 * it would change generation output for a given seed.
+	 */
+	TMap<FIntVector2, TArray<int32>> CellsBySocketSize;
+
+	/** The CellInputData length CellsBySocketSize was built for; a mismatch rebuilds it. INDEX_NONE until built. */
+	int32 SocketIndexCellCount = INDEX_NONE;
+
 	/** Number of retries consumed so far. */
 	int32 RetryCount = 0;
 

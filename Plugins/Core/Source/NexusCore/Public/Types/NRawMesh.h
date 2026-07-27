@@ -314,6 +314,32 @@ struct NEXUSCORE_API FNRawMesh
 	/**
 	 * Recomputes Center as the mean of Vertices and Bounds as the AABB enclosing them.
 	 */
+	/**
+	 * Moves a single vertex and invalidates everything cached from it.
+	 *
+	 * Vertices is public, so a caller can assign into it directly — but a direct write bypasses every mutator and
+	 * leaves the convexity / non-tri / bounds flags and the face-plane cache describing the geometry as it was,
+	 * with nothing downstream able to tell. That is a silent wrong answer rather than a slow one: a stale
+	 * bIsConvex routes queries down the wrong algorithm, and stale face planes make the convex depth test measure
+	 * against surfaces that have moved. Route per-vertex edits through here instead.
+	 *
+	 * @param Index Vertex to move. Out-of-range indices are ignored.
+	 * @param Position New position, in the mesh's own space.
+	 * @note Center and Bounds are NOT recomputed — they are O(vertices) and callers editing several vertices should
+	 *       pay that once. Call CalculateCenterAndBounds when they matter.
+	 */
+	void SetVertex(const int32 Index, const FVector& Position)
+	{
+		if (!Vertices.IsValidIndex(Index))
+		{
+			return;
+		}
+
+		Vertices[Index] = Position;
+		InvalidateValidation();
+		InvalidateCachedFacePlanes();
+	}
+
 	void CalculateCenterAndBounds()
 	{
 		FVector CenterCalc = FVector::ZeroVector;

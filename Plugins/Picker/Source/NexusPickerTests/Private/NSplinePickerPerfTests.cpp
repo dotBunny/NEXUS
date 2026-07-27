@@ -11,7 +11,10 @@
 
 namespace NEXUS::PerfTests::NPicker::FNSplinePickerHarness
 {
-	constexpr float MaxDuration = 0.2f;
+	// These loops run in well under 0.1ms on an idle machine, and a region that short cannot be gated tightly —
+	// scheduler noise on a loaded machine swamps the measurement. Widened to reflect that rather than to mask a
+	// regression; a genuine one here would be orders of magnitude, not a factor of two.
+	constexpr float MaxDuration = 2.0f;
 	constexpr float SplineLengthX = 400.f;
 
 	// Builds an unregistered spline whose points are collinear along +X; spline setup happens

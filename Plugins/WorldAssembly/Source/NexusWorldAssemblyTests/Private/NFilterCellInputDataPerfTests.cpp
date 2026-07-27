@@ -32,6 +32,7 @@ namespace NEXUS::PerfTests::NWorldAssembly::FNFilterCellInputDataHarness
 	// MaxDuration values are in milliseconds and bound the total cost of the inner loop (NOT per call).
 	constexpr float SmallPoolMaxDuration = 130.0f;
 	constexpr float LargePoolMaxDuration = 500.0f;
+	constexpr float MixedSocketsMaxDuration = 500.0f;
 
 	/** The socket size every junction and filter shares, so no candidate is rejected on socket mismatch. */
 	static FIntVector2 MatchingSocket() { return FIntVector2(2, 4); }
@@ -62,6 +63,27 @@ namespace NEXUS::PerfTests::NWorldAssembly::FNFilterCellInputDataHarness
 		}
 		return Cell;
 	}
+
+	/**
+	 * @return A cell whose junctions all carry a socket size the filter never asks for.
+	 * @note Stands in for the realistic case the uniform pools above miss: a tissue holding several socket classes,
+	 *       where most of the pool can never host the junction being filled. Those cells reach the end of the gate
+	 *       pipeline only to be rejected for having no matching junction, which is exactly what bucketing avoids —
+	 *       and a pool where every cell matches cannot show that, because the bucket is then the whole pool.
+	 */
+	static FNVirtualCellData MakeNonMatchingCell(const int32 Variant)
+	{
+		FNVirtualCellData Cell = MakeCell();
+		const FIntVector2 OtherSocket(8 + Variant, 16 + Variant);
+		for (TPair<int32, FNCellJunctionDetails>& Pair : Cell.Junctions)
+		{
+			Pair.Value.SocketSize = OtherSocket;
+		}
+		return Cell;
+	}
+
+	/** Share of a mixed pool that can actually host the requested socket. */
+	constexpr int32 MatchingShareDivisor = 4;
 
 	static FNCellInputDataFilter MakeFilter()
 	{
@@ -126,7 +148,42 @@ public:
 			NTestTimer.ManualStop();
 		}
 	}
+
+	/** A large pool where only a quarter of the cells carry the requested socket size. */
+	static void FilterCellInputData_MixedSockets()
+	{
+		using namespace NEXUS::PerfTests::NWorldAssembly::FNFilterCellInputDataHarness;
+
+		FNVirtualOrganContext Context(1234ull, TEXT("FilterPerf"));
+		for (int32 i = 0; i < LargePoolSize; ++i)
+		{
+			Context.CellInputData.Add(i % MatchingShareDivisor == 0 ? MakeCell() : MakeNonMatchingCell(i));
+		}
+		const FNCellInputDataFilter Filter = MakeFilter();
+
+		FNWeightedIntegerArray CellIndices;
+		TMap<int32, TArray<int32>> JunctionIndices;
+
+		// TEST
+		{
+			N_TEST_TIMER_SCOPE(FNVirtualOrganContext_FilterCellInputData_MixedSockets, MixedSocketsMaxDuration)
+			for (int32 i = 0; i < Iterations; ++i)
+			{
+				Context.FilterCellInputData(Filter, CellIndices, JunctionIndices);
+			}
+			NTestTimer.ManualStop();
+		}
+	}
 };
+
+N_TEST_PERF(FNFilterCellInputDataPerfTests_MixedSockets,
+	"NEXUS::PerfTests::NWorldAssembly::FNVirtualOrganContext::FilterCellInputData_MixedSockets",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	N_TESTS_PERF_START_LATENT_TEST
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNFilterCellInputDataPerfTests::FilterCellInputData_MixedSockets));
+	N_TESTS_PERF_FINISH_LATENT_TEST
+}
 
 N_TEST_PERF(FNFilterCellInputDataPerfTests_SmallPool,
 	"NEXUS::PerfTests::NWorldAssembly::FNVirtualOrganContext::FilterCellInputData_SmallPool",
