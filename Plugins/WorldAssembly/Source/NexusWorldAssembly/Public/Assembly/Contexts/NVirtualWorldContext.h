@@ -5,6 +5,7 @@
 
 #include "Assembly/NAssemblyOperationSettings.h"
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
+#include "Math/NBoundsBVH.h"
 #include "Types/NRawMesh.h"
 
 /**
@@ -26,13 +27,31 @@ public:
 	/** Per-element simple-collision meshes gathered from the target world during preprocess, stored in element-local space. */
 	TArray<FNRawMesh> WorldCollisionMeshes;
 
+	/**
+	 * Broadphase over WorldCollisionMeshes' baked bounds, indexing into that array. Built once by
+	 * FNProcessVirtualWorldTask after the meshes are baked, and immutable after — so every organ builder in every
+	 * pass shares it without synchronisation, exactly as they share the baked meshes themselves.
+	 */
+	FNBoundsBVH WorldCollisionBVH;
+
+	/**
+	 * Indices into WorldCollisionMeshes whose bounds are invalid, and which therefore cannot be broadphased:
+	 * FNRawMeshUtils::GetIntersectDepth skips its AABB rejection when either mesh lacks bounds, so these must be
+	 * tested on every candidate to stay equivalent to the original linear scan. Empty for well-formed input.
+	 */
+	TArray<int32> UnboundedWorldCollisionIndices;
+
 	/** Initial captured transforms before baking */
 	TArray<FTransform> WorldCollisionTransforms;
 
 	/** Cell nodes already placed by earlier passes; each entry has matching mesh/location/rotation. */
 	TArray<FNAssemblyGraphCellNode*> NodeIndex;
 
-	/** Per-cell-node collision hulls, parallel array to NodeIndex. */
+	/**
+	 * Per-cell-node collision hulls, parallel array to NodeIndex. Grows between passes only; a builder reads the
+	 * prefix it snapshots at task start (see FNVirtualOrganContext::NodeCollisionSnapshotCount), which never mutates
+	 * underneath it.
+	 */
 	TArray<FNRawMesh> NodeCollisionMeshes;
 
 	/** World collision capture settings carried from the operation, controlling which actors are treated as collision sources. */

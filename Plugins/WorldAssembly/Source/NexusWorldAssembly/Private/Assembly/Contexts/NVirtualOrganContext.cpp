@@ -512,8 +512,13 @@ bool FNVirtualOrganContext::IsGatedByJunctionRotation(const FQuat& SourceQuat, c
 bool FNVirtualOrganContext::IsGatedByJunctionRotationPrepared(const FQuat& SourceFlippedQuat, const FQuat& JunctionInverseQuat,
 	const FNRotationConstraints& CellConstraints, const FNRotationConstraints& JunctionConstraints)
 {
-	const FRotator Required = GetRequiredJunctionRotationPrepared(SourceFlippedQuat, JunctionInverseQuat);
+	return IsGatedByMatchingRotation(GetRequiredJunctionRotationPrepared(SourceFlippedQuat, JunctionInverseQuat),
+		CellConstraints, JunctionConstraints);
+}
 
+bool FNVirtualOrganContext::IsGatedByMatchingRotation(const FRotator& Required,
+	const FNRotationConstraints& CellConstraints, const FNRotationConstraints& JunctionConstraints)
+{
 	// Both the cell and the junction get a veto: either can independently disable enforcement, but whichever side
 	// has bEnforceMatchingRotation set must have the required rotation fall inside its Min/Max range.
 	return !CellConstraints.IsMatchingRotationAllowed(Required.Roll, Required.Pitch, Required.Yaw) ||
@@ -549,12 +554,32 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		DirectionReferencePoint = CellGraph->GetCellCentroid();
 	}
 
+	// Reused across candidates rather than declared per iteration: this held one heap allocation per surviving
+	// candidate, and Reset keeps the buffer for the whole call.
+	TArray<int32> GoodJunctions;
+
+	// With SourceFlippedQuat fixed for the call, the required junction rotation is a pure function of the junction's
+	// inverse quat — and junction orientations repeat heavily across a tissue's cells, since every cell tends to
+	// carry junctions facing the same handful of directions. Memoize within the call so a pool of N cells sharing a
+	// few orientations pays for a few quaternion->rotator conversions instead of one per junction per cell. That
+	// conversion is an asin plus two atan2 and dominated this loop.
+	//
+	// Keys are compared exactly: junctions authored at the same orientation produce identical quats, and an inexact
+	// match simply misses and recomputes, so this can never yield a rotation different from computing it directly.
+	// Capped so a pool with many distinct orientations degrades to the direct computation instead of growing an
+	// unbounded scratch buffer.
+	constexpr int32 MaxCachedRotations = 16;
+	TArray<TPair<FQuat, FRotator>, TInlineAllocator<MaxCachedRotations>> RequiredRotations;
+
 	for (int32 i = 0; i < CellInputData.Num(); i++)
 	{
 		const FNVirtualCellData* CellData = &CellInputData[i];
 
-		// Early out on some simple filters
-		if (!CellData->IsValidSelection(Filter.SocketSize)) continue;
+		// Early out on some simple filters. Deliberately the cell-level gates only (empty/maximum-count/unique) —
+		// the socket-size variant additionally walks the junction map to answer "is there a matching socket", which
+		// the collection loop below has to walk anyway. A candidate with no matching junction still falls out there,
+		// via an empty GoodJunctions, so the pre-check would only be paying to learn the same thing twice.
+		if (!CellData->IsValidSelection()) continue;
 
 
 		// CONTEXT TAGS
@@ -636,17 +661,44 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 
 		const FNRotationConstraints& CellRotationConstraints = CellData->CellDetails.RotationConstraints;
 
-		// Parse Junctions
-		TArray<int32> GoodJunctions;
-		for (auto Pair : CellData->Junctions)
+		// Parse Junctions. Iterated by const reference: FNCellJunctionDetails is a ~150-byte struct and this loop
+		// reads two fields of it, so taking it by value copied close to a kilobyte per six-junction candidate.
+		GoodJunctions.Reset();
+		for (const TPair<int32, FNCellJunctionDetails>& Pair : CellData->Junctions)
 		{
 			if (Pair.Value.SocketSize == Filter.SocketSize)
 			{
 				// Determine the rotation this junction would have to take on to match Filter.SourceQuat, then veto it
 				// against both the cell's and the junction's matching-rotation constraints. Both rotation terms are
-				// precomputed (SourceFlippedQuat hoisted above, CachedInverseWorldQuat built with the virtual data).
+				// precomputed (SourceFlippedQuat hoisted above, CachedInverseWorldQuat built with the virtual data),
+				// and the composition itself is memoized per distinct junction orientation.
 				// Covered by NJunctionRotationTests.cpp.
-				if (IsGatedByJunctionRotationPrepared(SourceFlippedQuat, Pair.Value.CachedInverseWorldQuat, CellRotationConstraints, Pair.Value.RotationConstraints))
+				const FQuat& JunctionInverseQuat = Pair.Value.CachedInverseWorldQuat;
+				const FRotator* CachedRequired = nullptr;
+				for (const TPair<FQuat, FRotator>& Entry : RequiredRotations)
+				{
+					if (Entry.Key == JunctionInverseQuat)
+					{
+						CachedRequired = &Entry.Value;
+						break;
+					}
+				}
+
+				FRotator Required;
+				if (CachedRequired != nullptr)
+				{
+					Required = *CachedRequired;
+				}
+				else
+				{
+					Required = GetRequiredJunctionRotationPrepared(SourceFlippedQuat, JunctionInverseQuat);
+					if (RequiredRotations.Num() < MaxCachedRotations)
+					{
+						RequiredRotations.Emplace(JunctionInverseQuat, Required);
+					}
+				}
+
+				if (IsGatedByMatchingRotation(Required, CellRotationConstraints, Pair.Value.RotationConstraints))
 				{
 					continue;
 				}
@@ -660,12 +712,9 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 			// Add weighting
 			CellIndices.Add(i, CellData->Weighting);
 
-			// Fill out selectable junctions
-			TArray<int32>& Junctions = JunctionIndices.Add(i, TArray<int32>());
-			for (auto Index : GoodJunctions)
-			{
-				Junctions.Add(Index);
-			}
+			// Fill out selectable junctions. Copy-constructed in one go rather than appended element by element,
+			// so the map's array is sized exactly once instead of growing.
+			JunctionIndices.Add(i, GoodJunctions);
 		}
 	}
 }

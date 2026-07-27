@@ -12,7 +12,6 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(const FNAssemblyGraphNodeParams
 	// Copy InputData to disconnect from reference
 	InputDataPtr = InputData;
 	TemplatePtr = InputDataPtr->Template; // Might not need in future
-	FreeJunctionKeys = InputDataPtr->GetJunctionKeys();
 
 	// Create a new WorldBounds reflecting the rotation in the world, this will make an AABB that will exceed the actual space,
 	// but will follow the defined bounds previously defined at author-time, but rotated.
@@ -42,21 +41,50 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(const FNAssemblyGraphNodeParams
 	//WorldVoxel = InputData->CellDetails.VoxelData;
 	//WorldVoxel.RotateAroundPivot(Position, Rotation, VoxelSize);
 
+	// Junction data is deliberately NOT built here — see EnsureJunctions. The placement tests never read it, and
+	// most candidates are rejected, so filling it up front was work thrown away on the majority of constructions.
+}
+
+void FNAssemblyGraphCellNode::EnsureJunctions() const
+{
+	if (bJunctionsBuilt)
+	{
+		return;
+	}
+
+	// Latch before filling so a re-entrant read from inside this function cannot recurse.
+	bJunctionsBuilt = true;
+
+	if (InputDataPtr == nullptr)
+	{
+		// The builder reference was released before anything asked for junctions. CleanupBuilderReferences forces
+		// the fill before nulling it, so reaching here means a node was cleaned up by some other route; leaving the
+		// containers empty matches what a node with no junctions would report.
+		return;
+	}
+
+	FreeJunctionKeys = InputDataPtr->GetJunctionKeys();
+
+	const FRotator NodeRotation = GetWorldRotation();
+	const FVector NodePosition = GetWorldPosition();
+	const FQuat NodeQuat = NodeRotation.Quaternion();
+
 	// We need to copy all the template junction data into our own local copy of the details that we will manipulate
 	for (int32 i = 0; i < FreeJunctionKeys.Num(); i++)
 	{
 		const int32 JunctionKey = FreeJunctionKeys[i];
-		FNCellJunctionDetails& Details = WorldJunctions.Add(JunctionKey, InputData->Junctions[JunctionKey]);
+		FNCellJunctionDetails& Details = WorldJunctions.Add(JunctionKey, InputDataPtr->Junctions[JunctionKey]);
 
 		// Compose with quaternions - (was adding the Rotation previously, but this better?)
-		Details.WorldRotation = (Params.WorldRotation.Quaternion() * Details.WorldRotation.Quaternion()).Rotator();
-		Details.WorldLocation = FNVectorUtils::RotatedAroundPivot(Details.WorldLocation + Params.WorldPosition,
-			Params.WorldPosition, Params.WorldRotation);
+		Details.WorldRotation = (NodeQuat * Details.WorldRotation.Quaternion()).Rotator();
+		Details.WorldLocation = FNVectorUtils::RotatedAroundPivot(Details.WorldLocation + NodePosition,
+			NodePosition, NodeRotation);
 	}
 }
 
 bool FNAssemblyGraphCellNode::HasOpenJunctions() const
 {
+	EnsureJunctions();
 	// Reports whether any junction is free at all; for the Required-only variant the builder/validator wants,
 	// see FindUnconnectedRequiredJunctionKey.
 	return FreeJunctionKeys.Num() > 0;
@@ -64,6 +92,7 @@ bool FNAssemblyGraphCellNode::HasOpenJunctions() const
 
 int32 FNAssemblyGraphCellNode::FindUnconnectedRequiredJunctionKey() const
 {
+	EnsureJunctions();
 	// FreeJunctionKeys holds exactly the unconnected junctions, so a Required junction appearing here means the
 	// graph left a mandatory connection open.
 	for (const int32 JunctionKey : FreeJunctionKeys)
@@ -78,6 +107,7 @@ int32 FNAssemblyGraphCellNode::FindUnconnectedRequiredJunctionKey() const
 
 TMap<int32, FNCellJunctionDetails*> FNAssemblyGraphCellNode::GetOpenJunctions()
 {
+	EnsureJunctions();
 	TMap<int32, FNCellJunctionDetails*> Junctions;
 	const int32 FreeCount = FreeJunctionKeys.Num();
 	for (int32 i = 0; i < FreeCount; i++)
@@ -89,11 +119,13 @@ TMap<int32, FNCellJunctionDetails*> FNAssemblyGraphCellNode::GetOpenJunctions()
 }
 const TMap<int32, FNCellJunctionDetails>& FNAssemblyGraphCellNode::GetJunctions() const
 {
+	EnsureJunctions();
 	return WorldJunctions;
 }
 
 FNCellJunctionDetails* FNAssemblyGraphCellNode::GetJunctionDetails(const int32 JunctionKey)
 {
+	EnsureJunctions();
 	if (!WorldJunctions.Contains(JunctionKey))
 	{
 		return nullptr;
@@ -160,6 +192,7 @@ bool FNAssemblyGraphCellNode::IsHullInside(const FBox& Bounds) const
 
 void FNAssemblyGraphCellNode::GenerateLinkDetails()
 {
+	EnsureJunctions();
 	if (LinkDetails.Num() > 0) return;
 
 	// One entry per junction, in WorldJunctions map order so it stays aligned with the JunctionDetails
@@ -203,6 +236,7 @@ void FNAssemblyGraphCellNode::GenerateLinkDetails()
 
 void FNAssemblyGraphCellNode::LinkJunction(const int32 JunctionKey, FNAssemblyGraphNode* Node)
 {
+	EnsureJunctions();
 	if (!FreeJunctionKeys.Contains(JunctionKey))
 	{
 		UE_LOG(LogNexusWorldAssembly, Error, TEXT("Cannot link junction key %d to node, key is not free"), JunctionKey);
@@ -227,6 +261,7 @@ int32 FNAssemblyGraphCellNode::FindJunctionKeyLinkedTo(const FNAssemblyGraphNode
 
 void FNAssemblyGraphCellNode::UnlinkJunction(const int32 JunctionKey)
 {
+	EnsureJunctions();
 	if (!Links.Contains(JunctionKey))
 	{
 		UE_LOG(LogNexusWorldAssembly, Error, TEXT("Cannot unlink junction key %d from node, key is not linked"), JunctionKey);

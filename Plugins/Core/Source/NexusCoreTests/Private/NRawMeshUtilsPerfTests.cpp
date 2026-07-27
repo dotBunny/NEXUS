@@ -118,6 +118,73 @@ namespace NEXUS::PerfTests::NCore::FNRawMeshUtilsHarness
 		Mesh.Validate();
 		return Mesh;
 	}
+
+	/**
+	 * Dense triangulated non-convex closed manifold: a star prism whose alternating inner radius creates reflex
+	 * edges all the way around. Triangle count is 8 * Points, so unlike the 16-triangle MakeNonConvexPrism above
+	 * it scales far enough to expose the asymptotic cost of the paths a concave cell hull falls back to — the
+	 * parity-raycast containment probe (per queried point) and the tri-tri sweep (per mesh pair).
+	 * @param OuterRadius Radius of the star's points.
+	 * @param InnerRadius Radius of the valleys between them; must be under OuterRadius for the shape to be concave.
+	 * @param Height Extrusion along +Z.
+	 * @param Points Number of star points; the perimeter carries 2 * Points vertices per level.
+	 */
+	static FNRawMesh MakeStarPrism(const double OuterRadius, const double InnerRadius, const double Height, const int32 Points)
+	{
+		FNRawMesh Mesh;
+		const int32 PerimeterCount = Points * 2;
+		Mesh.Vertices.Reserve(PerimeterCount * 2 + 2);
+
+		// Perimeter ring at z=0 occupies [0, PerimeterCount); the ring at z=Height follows it.
+		for (int32 Level = 0; Level < 2; ++Level)
+		{
+			const double Z = (Level == 0) ? 0.0 : Height;
+			for (int32 i = 0; i < PerimeterCount; ++i)
+			{
+				const double Radius = (i % 2 == 0) ? OuterRadius : InnerRadius;
+				const double Theta = 2.0 * PI * i / PerimeterCount;
+				Mesh.Vertices.Add(FVector(Radius * FMath::Cos(Theta), Radius * FMath::Sin(Theta), Z));
+			}
+		}
+		const int32 BottomCenter = Mesh.Vertices.Add(FVector(0.0, 0.0, 0.0));
+		const int32 TopCenter = Mesh.Vertices.Add(FVector(0.0, 0.0, Height));
+
+		Mesh.Loops.Reserve(Points * 8);
+		for (int32 i = 0; i < PerimeterCount; ++i)
+		{
+			const int32 Next = (i + 1) % PerimeterCount;
+			const int32 TopI = PerimeterCount + i;
+			const int32 TopNext = PerimeterCount + Next;
+
+			Mesh.Loops.Add(FNRawMeshLoop(BottomCenter, Next, i));
+			Mesh.Loops.Add(FNRawMeshLoop(TopCenter, TopI, TopNext));
+			Mesh.Loops.Add(FNRawMeshLoop(i, Next, TopNext));
+			Mesh.Loops.Add(FNRawMeshLoop(i, TopNext, TopI));
+		}
+
+		Mesh.CalculateCenterAndBounds();
+		Mesh.Validate();
+		return Mesh;
+	}
+
+	// Star-prism sizing. 64 points yields 512 triangles / 258 vertices — a plausible stand-in for a hand-edited
+	// concave cell hull, and dense enough for the O(V * T) and O(L * R) behaviour to dominate the measurement.
+	constexpr int32 StarPoints = 64;
+	constexpr double StarOuterRadius = 100.0;
+	constexpr double StarInnerRadius = 45.0;
+	constexpr double StarHeight = 40.0;
+
+	// The non-convex sweeps are orders of magnitude slower than their convex counterparts, so they run far fewer
+	// iterations to keep the suite's runtime sane. That gap is the finding, not a workaround: measured against the
+	// 224-triangle convex sphere cases above, the 512-triangle star costs ~24x more per GetIntersectDepth pair,
+	// ~18x more per DoesIntersect pair, and ~15x more per point query.
+	constexpr int32 NonConvexPairIterations = 20;
+	constexpr int32 NonConvexPointIterations = 2000;
+
+	constexpr float NonConvexDepthMaxDuration = 150.0f;
+	// Widest gate of the three: at 20 iterations of a ~400us call this scenario shows the most run-to-run spread.
+	constexpr float NonConvexIntersectMaxDuration = 45.0f;
+	constexpr float NonConvexPointDepthMaxDuration = 50.0f;
 }
 
 class FNRawMeshUtilsPerfTests
@@ -493,6 +560,83 @@ public:
 			NTestTimer.ManualStop();
 		}
 	}
+
+	/**
+	 * GetIntersectDepth between two dense overlapping non-convex hulls — the shape FNAssemblyGraphCellNode's
+	 * GetHullIntersectDepth takes whenever a cell hull has been hand-edited concave. Every vertex of each mesh
+	 * that lands inside the other's AABB pays a parity raycast over all triangles plus a distance sweep over all
+	 * triangles, so the whole query is O(V * T) in each direction.
+	 */
+	static void GetIntersectDepth_NonConvexVsNonConvex_Overlap()
+	{
+		using namespace NEXUS::PerfTests::NCore::FNRawMeshUtilsHarness;
+		const FNRawMesh Left = MakeStarPrism(StarOuterRadius, StarInnerRadius, StarHeight, StarPoints);
+		FNRawMesh Right = MakeStarPrism(StarOuterRadius, StarInnerRadius, StarHeight, StarPoints);
+		// Shift so the two stars genuinely interpenetrate rather than coincide.
+		Right.ApplyTransform(FTransform(FRotator::ZeroRotator, FVector(StarOuterRadius * 0.5, 0.0, 0.0)));
+
+		// TEST
+		{
+			N_TEST_TIMER_SCOPE(FNRawMeshUtilsPerfTests_GetIntersectDepth_NonConvexVsNonConvex_Overlap,
+				NonConvexDepthMaxDuration)
+			for (int32 i = 0; i < NonConvexPairIterations; ++i)
+			{
+				FNRawMeshUtils::GetIntersectDepth(Left, Right);
+			}
+			NTestTimer.ManualStop();
+		}
+	}
+
+	/**
+	 * DoesIntersect between two dense non-convex hulls whose AABBs overlap but whose surfaces never touch — the
+	 * worst case for the boolean test, because no early exit can fire and the full tri-tri sweep runs to
+	 * completion. Convex inputs would have been separated by the SAT fast path; concave ones cannot use it.
+	 */
+	static void DoesIntersect_NonConvexVsNonConvex_AABBHitMeshMiss()
+	{
+		using namespace NEXUS::PerfTests::NCore::FNRawMeshUtilsHarness;
+		const FNRawMesh Left = MakeStarPrism(StarOuterRadius, StarInnerRadius, StarHeight, StarPoints);
+		FNRawMesh Right = MakeStarPrism(StarOuterRadius, StarInnerRadius, StarHeight, StarPoints);
+		// Diagonal offset just under twice the outer radius: the AABB corners overlap, but the star geometry in
+		// that corner sits at the inner radius, so no triangle pair actually intersects.
+		Right.ApplyTransform(FTransform(FRotator::ZeroRotator,
+			FVector(StarOuterRadius * 1.9, StarOuterRadius * 1.9, 0.0)));
+
+		// TEST
+		{
+			N_TEST_TIMER_SCOPE(FNRawMeshUtilsPerfTests_DoesIntersect_NonConvexVsNonConvex_AABBHitMeshMiss,
+				NonConvexIntersectMaxDuration)
+			for (int32 i = 0; i < NonConvexPairIterations; ++i)
+			{
+				FNRawMeshUtils::DoesIntersect(Left, Right);
+			}
+			NTestTimer.ManualStop();
+		}
+	}
+
+	/**
+	 * Single-point depth against a dense non-convex hull — the per-socket-corner query the junction and bone
+	 * visualizers issue. This is the exact shape FNMeshBVH already accelerates for the world-collision mesh, and
+	 * the measurement that decides whether a cached per-hull BVH is worth it for concave cell hulls too.
+	 */
+	static void GetIntersectDepth_NonConvexVsPoint()
+	{
+		using namespace NEXUS::PerfTests::NCore::FNRawMeshUtilsHarness;
+		const FNRawMesh Mesh = MakeStarPrism(StarOuterRadius, StarInnerRadius, StarHeight, StarPoints);
+		// Inside the body, off-axis, so both the containment probe and the surface-distance sweep run in full.
+		const FVector Point(StarInnerRadius * 0.4, StarInnerRadius * 0.3, StarHeight * 0.5);
+
+		// TEST
+		{
+			N_TEST_TIMER_SCOPE(FNRawMeshUtilsPerfTests_GetIntersectDepth_NonConvexVsPoint,
+				NonConvexPointDepthMaxDuration)
+			for (int32 i = 0; i < NonConvexPointIterations; ++i)
+			{
+				FNRawMeshUtils::GetIntersectDepth(Mesh, Point);
+			}
+			NTestTimer.ManualStop();
+		}
+	}
 };
 
 N_TEST_PERF(FNRawMeshUtilsPerfTests_DoesIntersect_BoxVsBox_Hit,
@@ -639,6 +783,38 @@ N_TEST_PERF(FNRawMeshUtilsPerfTests_ToConvexHull_PointCloud,
 	AddExpectedMessage(TEXT("No vertices or loops were found in the FNRawMesh"), ELogVerbosity::Warning);
 	N_TESTS_PERF_START_LATENT_TEST
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNRawMeshUtilsPerfTests::ToConvexHull_PointCloud));
+	N_TESTS_PERF_FINISH_LATENT_TEST
+}
+
+//
+// Dense non-convex cases. The existing non-convex coverage uses a 16-triangle prism, which is too small to show
+// what a hand-edited concave cell hull actually costs on these paths.
+//
+
+N_TEST_PERF(FNRawMeshUtilsPerfTests_GetIntersectDepth_NonConvexVsNonConvex_Overlap,
+	"NEXUS::PerfTests::NCore::FNRawMeshUtils::GetIntersectDepth_NonConvexVsNonConvex_Overlap",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	N_TESTS_PERF_START_LATENT_TEST
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNRawMeshUtilsPerfTests::GetIntersectDepth_NonConvexVsNonConvex_Overlap));
+	N_TESTS_PERF_FINISH_LATENT_TEST
+}
+
+N_TEST_PERF(FNRawMeshUtilsPerfTests_DoesIntersect_NonConvexVsNonConvex_AABBHitMeshMiss,
+	"NEXUS::PerfTests::NCore::FNRawMeshUtils::DoesIntersect_NonConvexVsNonConvex_AABBHitMeshMiss",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	N_TESTS_PERF_START_LATENT_TEST
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNRawMeshUtilsPerfTests::DoesIntersect_NonConvexVsNonConvex_AABBHitMeshMiss));
+	N_TESTS_PERF_FINISH_LATENT_TEST
+}
+
+N_TEST_PERF(FNRawMeshUtilsPerfTests_GetIntersectDepth_NonConvexVsPoint,
+	"NEXUS::PerfTests::NCore::FNRawMeshUtils::GetIntersectDepth_NonConvexVsPoint",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	N_TESTS_PERF_START_LATENT_TEST
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNRawMeshUtilsPerfTests::GetIntersectDepth_NonConvexVsPoint));
 	N_TESTS_PERF_FINISH_LATENT_TEST
 }
 

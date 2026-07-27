@@ -4,6 +4,9 @@
 #pragma once
 
 #include "NAssemblyGraphNode.h"
+#include "Math/NBoundsBVH.h"
+
+class FNAssemblyGraphCellNode;
 
 /**
  * In-memory graph describing a single organ's generated layout.
@@ -37,6 +40,21 @@ public:
 
 	/** @return All nodes currently in the graph, in registration order. */
 	const TArray<FNAssemblyGraphNode*>& GetNodes() const { return Nodes; }
+
+	/**
+	 * Collects every Cell-type node whose world bounds intersect Bounds.
+	 *
+	 * Equivalent to walking GetNodes(), skipping non-cells, and keeping those whose bounds intersect — but served
+	 * from a spatial index rather than a linear scan. That scan was the builder's largest per-candidate cost on a
+	 * large organ: it runs once per candidate placement and grows with the graph, so an organ build paid for it
+	 * quadratically.
+	 * @param QueryBounds World-space box to test against.
+	 * @param OutNodes Receives the matching cell nodes. Reset, not reallocated.
+	 * @note Order is unspecified (indexed nodes arrive in traversal order, ahead of any unindexed tail) but is
+	 *       deterministic for a given graph state. The builder filters this set and tests it for emptiness, so
+	 *       order does not affect placement.
+	 */
+	void QueryCellNodesByBounds(const FBox& QueryBounds, TArray<FNAssemblyGraphCellNode*>& OutNodes) const;
 
 	/** Take ownership of Node and add it to the graph. */
 	void RegisterNode(FNAssemblyGraphNode* Node);
@@ -95,6 +113,39 @@ private:
 
 	/** Cached count of Cell-type nodes, kept in sync by Register/UnregisterNode to avoid O(N) recounts. */
 	int32 CellNodeCount = 0;
+
+	/**
+	 * Cell-type nodes only, kept in sync by Register/UnregisterNode. Separate from Nodes so a bounds query neither
+	 * walks bone/null nodes nor pays a virtual GetNodeType call per entry to skip them.
+	 */
+	TArray<FNAssemblyGraphCellNode*> CellNodes;
+
+	/**
+	 * Spatial index over CellNodes[0, IndexedCellNodeCount). The graph grows while it is being queried, so rather
+	 * than rebuilding on every insertion the tree covers a prefix and the remainder is scanned linearly; the tree
+	 * is rebuilt once that tail grows past CellNodeIndexTailThreshold. Node bounds never change after construction,
+	 * so an indexed entry stays valid for as long as it is registered.
+	 */
+	mutable FNBoundsBVH CellNodeBVH;
+
+	/** How many leading entries of CellNodes the tree covers; the rest are scanned. */
+	mutable int32 IndexedCellNodeCount = 0;
+
+	/**
+	 * Set when a node is unregistered. Removal would leave a dangling entry in the tree, and patching one out is
+	 * not worth the bookkeeping when removals are rare next to insertions — so the whole index is dropped and
+	 * rebuilt on the next query instead.
+	 */
+	mutable bool bCellNodeIndexDirty = false;
+
+	/**
+	 * Rebuild the tree once the unindexed tail exceeds this many nodes. Bounds the linear part of a query while
+	 * keeping rebuilds amortised: each costs O(N log N) and buys another threshold's worth of insertions.
+	 */
+	static constexpr int32 CellNodeIndexTailThreshold = 64;
+
+	/** Bring CellNodeBVH up to date if it was invalidated or the unindexed tail has grown too long. */
+	void EnsureCellNodeIndex() const;
 
 	/**
 	 * Running sum of every Cell-type node's world bounds center, kept in sync by Register/UnregisterNode. Stored as

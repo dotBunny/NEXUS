@@ -214,16 +214,12 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const F
 
 		const FNRawMesh& Hull = CellRoot->Details.Hull;
 
-		TArray<FVector> CornerPoints = GetWorldCornerPoints(Settings->SocketSize);
-		float MaximumDepth = 0;
-		for (int i = 0; i < CornerPoints.Num(); i++)
-		{
-			const float Depth = FNRawMeshUtils::GetIntersectDepth(Hull,FVector::Zero(), FRotator::ZeroRotator,  CornerPoints[i]);
-			if (Depth > MaximumDepth)
-			{
-				MaximumDepth = Depth;
-			}
-		}
+		// Memoized: the ed mode redraws every registered junction each frame, but the sweep below only changes when
+		// the hull, this junction's transform, or the socket sizing does. A hit also skips rebuilding the corner
+		// points, which is two heap allocations per junction per frame on its own.
+		float MaximumDepth = 0.f;
+		double LowestZ = 0.0;
+		GetCachedHullPenetration(Hull, Settings->SocketSize, MaximumDepth, LowestZ);
 
 		if (MaximumDepth > Settings->AssemblyJunctionMatchingCellHullPenetration)
 		{
@@ -236,13 +232,6 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const F
 			// Always draw the readout upright in world space, directly beneath the junction. Using only the junction's
 			// yaw (zero pitch/roll) keeps the glyphs world-upright no matter how the junction is oriented, so the text
 			// never ends up upside down. Anchoring at the socket's lowest world-Z corner keeps it clear of the socket.
-
-			double LowestZ = ComponentLocation.Z;
-			for (const FVector& Corner : CornerPoints)
-			{
-				LowestZ = FMath::Min(LowestZ, Corner.Z);
-			}
-
 			const FVector TextPosition(ComponentLocation.X, ComponentLocation.Y, LowestZ - 4.0f);
 			const FRotator TextRotation(0.0, ComponentRotation.Yaw, 0.0);
 
@@ -419,6 +408,75 @@ void UNCellJunctionComponent::PostEditImport()
 }
 
 #endif // WITH_EDITOR
+
+float UNCellJunctionComponent::ComputeMaximumHullPenetration(const FNRawMesh& Hull, const TArray<FVector>& CornerPoints)
+{
+	float MaximumDepth = 0.f;
+	for (const FVector& Corner : CornerPoints)
+	{
+		// Corners outside the hull come back as the -1 sentinel, which never beats the 0 seed — so a junction
+		// entirely clear of the hull reports 0 rather than a negative depth.
+		const float Depth = FNRawMeshUtils::GetIntersectDepth(Hull, FVector::Zero(), FRotator::ZeroRotator, Corner);
+		if (Depth > MaximumDepth)
+		{
+			MaximumDepth = Depth;
+		}
+	}
+	return MaximumDepth;
+}
+
+void UNCellJunctionComponent::GetCachedHullPenetration(const FNRawMesh& Hull, const FVector2D& SettingsSocketSize,
+	float& OutMaximumDepth, double& OutLowestCornerZ) const
+{
+	const FVector ComponentLocation = GetComponentLocation();
+	const FRotator ComponentRotation = GetComponentRotation();
+
+	// Identify the hull by its contents rather than by a version counter on the cell root: the hull is mutated from
+	// several places and can be swapped wholesale by undo/redo, and a CRC over the vertex buffer stays correct
+	// without each of those paths having to remember to invalidate us. It also catches the case a cheaper
+	// vertex-count/bounds check would miss — a vertex dragged inward while others still define the AABB.
+	const uint32 HullVertexCrc = Hull.Vertices.IsEmpty()
+		? 0u
+		: FCrc::MemCrc32(Hull.Vertices.GetData(), Hull.Vertices.Num() * sizeof(FVector));
+	const int32 HullLoopCount = Hull.Loops.Num();
+
+	if (CachedHullPenetration.bValid
+		&& CachedHullPenetration.KeyHullVertexCrc == HullVertexCrc
+		&& CachedHullPenetration.KeyHullLoopCount == HullLoopCount
+		&& CachedHullPenetration.KeyLocation == ComponentLocation
+		&& CachedHullPenetration.KeyRotation == ComponentRotation
+		&& CachedHullPenetration.KeyUnitSocketSize == Details.SocketSize
+		&& CachedHullPenetration.KeySettingSocketSize == SettingsSocketSize)
+	{
+		OutMaximumDepth = CachedHullPenetration.MaximumDepth;
+		OutLowestCornerZ = CachedHullPenetration.LowestCornerZ;
+		return;
+	}
+
+	const TArray<FVector> CornerPoints = GetWorldCornerPoints(SettingsSocketSize);
+	const float MaximumDepth = ComputeMaximumHullPenetration(Hull, CornerPoints);
+
+	// Seeded from the component location (not from the first corner) so the readout never floats above the
+	// junction itself when every corner sits higher — preserving the anchor the draw path has always used.
+	double LowestCornerZ = ComponentLocation.Z;
+	for (const FVector& Corner : CornerPoints)
+	{
+		LowestCornerZ = FMath::Min(LowestCornerZ, Corner.Z);
+	}
+
+	CachedHullPenetration.KeyHullVertexCrc = HullVertexCrc;
+	CachedHullPenetration.KeyHullLoopCount = HullLoopCount;
+	CachedHullPenetration.KeyLocation = ComponentLocation;
+	CachedHullPenetration.KeyRotation = ComponentRotation;
+	CachedHullPenetration.KeyUnitSocketSize = Details.SocketSize;
+	CachedHullPenetration.KeySettingSocketSize = SettingsSocketSize;
+	CachedHullPenetration.MaximumDepth = MaximumDepth;
+	CachedHullPenetration.LowestCornerZ = LowestCornerZ;
+	CachedHullPenetration.bValid = true;
+
+	OutMaximumDepth = MaximumDepth;
+	OutLowestCornerZ = LowestCornerZ;
+}
 
 TArray<FVector> UNCellJunctionComponent::GetWorldCornerPoints(const FVector2D& SocketSize) const
 {

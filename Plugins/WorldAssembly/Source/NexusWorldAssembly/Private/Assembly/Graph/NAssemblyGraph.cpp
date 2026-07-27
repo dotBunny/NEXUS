@@ -104,8 +104,10 @@ FNAssemblyGraph::FNAssemblyGraph(FNAssemblyGraphNode* RootNodePtr, const FVector
 	// Root is added directly rather than through RegisterNode, so seed the cached cell count and position sum to match.
 	if (RootNodePtr != nullptr && RootNodePtr->GetNodeType() == ENAssemblyGraphNodeType::Cell)
 	{
+		FNAssemblyGraphCellNode* RootCellNode = static_cast<FNAssemblyGraphCellNode*>(RootNodePtr);
 		CellNodeCount++;
-		CellPositionSum += static_cast<FNAssemblyGraphCellNode*>(RootNodePtr)->GetWorldBoundsCenter();
+		CellPositionSum += RootCellNode->GetWorldBoundsCenter();
+		CellNodes.Add(RootCellNode);
 	}
 	Nodes.Add(RootNodePtr);
 }
@@ -135,6 +137,8 @@ void FNAssemblyGraph::RegisterNode(FNAssemblyGraphNode* Node)
 		FNAssemblyGraphCellNode* CellNode = static_cast<FNAssemblyGraphCellNode*>(Node);
 		CellNodeCount++;
 		CellPositionSum += CellNode->GetWorldBoundsCenter();
+		// Appended, not indexed: the new entry joins the unindexed tail and is picked up by the next rebuild.
+		CellNodes.Add(CellNode);
 		if (FNVirtualCellData* InputData = CellNode->GetInputDataPtr())
 		{
 			InputData->UsedCount++;
@@ -153,6 +157,10 @@ void FNAssemblyGraph::UnregisterNode(FNAssemblyGraphNode* Node)
 		FNAssemblyGraphCellNode* CellNode = static_cast<FNAssemblyGraphCellNode*>(Node);
 		CellNodeCount--;
 		CellPositionSum -= CellNode->GetWorldBoundsCenter();
+		CellNodes.Remove(CellNode);
+		// Removal shifts every index past this one, so the tree no longer describes CellNodes. Drop it rather than
+		// patch it; removals are rare next to insertions and a full rebuild on next query is simpler to be sure of.
+		bCellNodeIndexDirty = true;
 		if (FNVirtualCellData* InputData = CellNode->GetInputDataPtr())
 		{
 			InputData->UsedCount--;
@@ -160,6 +168,58 @@ void FNAssemblyGraph::UnregisterNode(FNAssemblyGraphNode* Node)
 	}
 
 	Nodes.Remove(Node);
+}
+
+void FNAssemblyGraph::EnsureCellNodeIndex() const
+{
+	if (bCellNodeIndexDirty)
+	{
+		bCellNodeIndexDirty = false;
+		IndexedCellNodeCount = 0;
+		CellNodeBVH = FNBoundsBVH();
+	}
+
+	// Everything past IndexedCellNodeCount is scanned linearly by the query. Rebuild once that tail is long enough
+	// to be worth the O(N log N); below the threshold the scan is cheaper than the rebuild would be.
+	if (CellNodes.Num() - IndexedCellNodeCount <= CellNodeIndexTailThreshold)
+	{
+		return;
+	}
+
+	TArray<FBox> CellBounds;
+	CellBounds.Reserve(CellNodes.Num());
+	for (const FNAssemblyGraphCellNode* CellNode : CellNodes)
+	{
+		CellBounds.Add(CellNode->GetWorldBounds());
+	}
+	CellNodeBVH = FNBoundsBVH(CellBounds);
+	IndexedCellNodeCount = CellNodes.Num();
+}
+
+void FNAssemblyGraph::QueryCellNodesByBounds(const FBox& QueryBounds, TArray<FNAssemblyGraphCellNode*>& OutNodes) const
+{
+	OutNodes.Reset();
+
+	EnsureCellNodeIndex();
+
+	if (IndexedCellNodeCount > 0)
+	{
+		TArray<int32, TInlineAllocator<32>> Overlaps;
+		CellNodeBVH.QueryOverlaps(QueryBounds, Overlaps);
+		for (const int32 Index : Overlaps)
+		{
+			OutNodes.Add(CellNodes[Index]);
+		}
+	}
+
+	// Nodes registered since the last rebuild are not in the tree yet; the threshold keeps this short.
+	for (int32 i = IndexedCellNodeCount; i < CellNodes.Num(); i++)
+	{
+		if (CellNodes[i]->CheckBoundsIntersects(QueryBounds))
+		{
+			OutNodes.Add(CellNodes[i]);
+		}
+	}
 }
 
 TArray<FNAssemblyGraphNode*> FNAssemblyGraph::GetNodesWithOpenJunctions()

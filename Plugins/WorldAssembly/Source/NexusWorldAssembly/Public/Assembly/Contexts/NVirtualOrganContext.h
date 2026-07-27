@@ -9,6 +9,7 @@
 #include "Assembly/Data/NVirtualCellData.h"
 #include "Collections/NWeightedIntegerArray.h"
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
+#include "Math/NBoundsBVH.h"
 #include "Organ/NOrganComponent.h"
 #include "Types/NCardinalDirection.h"
 #include "Types/NRotationConstraints.h"
@@ -78,6 +79,34 @@ public:
 
 	/** Allowed penetration, in world units, between a placed cell hull and existing world collision before it is rejected. */
 	float WorldHullPenetration = 1.f;
+
+	/**
+	 * Broadphase over the previously-placed cell hulls this organ's build can see, covering exactly the prefix of
+	 * FNVirtualWorldContext::NodeCollisionMeshes that FNOrganGraphBuilderTask snapshots at task start.
+	 *
+	 * Deliberately per-organ rather than shared on the world context. The shared array only grows between passes,
+	 * so one tree per pass would serve every organ in it — but the only place with the right lifetime to build that
+	 * is FNProcessPassTask, and building it there would couple this to a change already in flight. Building it per
+	 * organ instead costs one redundant construction per organ in a pass (sub-millisecond even at thousands of
+	 * hulls) and buys strict isolation: no builder can observe another's tree, so there is nothing to synchronise.
+	 * Worth revisiting as a single shared tree if organ counts per pass ever grow large.
+	 */
+	FNBoundsBVH NodeCollisionBVH;
+
+	/**
+	 * How many entries of FNVirtualWorldContext::NodeCollisionMeshes this organ's build may consider — the prefix
+	 * placed by earlier passes, snapshotted when the builder task starts. Lives here next to the tree that indexes
+	 * it precisely because the two must describe the same set; separating them invites one to be updated without
+	 * the other.
+	 */
+	int32 NodeCollisionSnapshotCount = 0;
+
+	/**
+	 * Indices into FNVirtualWorldContext::NodeCollisionMeshes whose bounds are invalid and which therefore cannot
+	 * be broadphased — FNRawMeshUtils::GetIntersectDepth performs no AABB rejection when either mesh lacks bounds.
+	 * Tested unconditionally on every candidate. Empty for well-formed input.
+	 */
+	TArray<int32> UnboundedNodeCollisionIndices;
 
 	/** Maximum absolute degree deviation a candidate's bearing may have from its required cardinal direction. */
 	float AssemblyDirectionTolerance = 15.f;
@@ -341,6 +370,19 @@ public:
 	 * @return true if the required rotation is disallowed by either constraint set and the junction must be skipped.
 	 */
 	static bool IsGatedByJunctionRotationPrepared(const FQuat& SourceFlippedQuat, const FQuat& JunctionInverseQuat,
+		const FNRotationConstraints& CellConstraints, const FNRotationConstraints& JunctionConstraints);
+
+	/**
+	 * The veto half of IsGatedByJunctionRotationPrepared, taking the required rotation already computed.
+	 *
+	 * Split out so FilterCellInputData can reuse one rotation across the many junctions that share an orientation
+	 * without duplicating the veto rule and letting the two drift apart.
+	 * @param Required The rotation the candidate must take on, from GetRequiredJunctionRotationPrepared.
+	 * @param CellConstraints The candidate cell's matching-rotation constraints.
+	 * @param JunctionConstraints The candidate junction's own matching-rotation constraints.
+	 * @return true when either side enforces matching rotation and Required falls outside its range.
+	 */
+	static bool IsGatedByMatchingRotation(const FRotator& Required,
 		const FNRotationConstraints& CellConstraints, const FNRotationConstraints& JunctionConstraints);
 
 	/**

@@ -18,6 +18,7 @@ class ANCellLevelInstance;
 class UNCellRootComponent;
 class ALevelInstance;
 class UNCell;
+struct FNRawMesh;
 
 /**
  * Scene component marking a junction on a cell — a connection point that lets one cell attach to another during generation.
@@ -126,6 +127,31 @@ public:
 	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
 #endif // WITH_EDITOR
 
+	/**
+	 * @return The deepest penetration of any point in CornerPoints into Hull, or 0 when none of them are inside.
+	 * @param Hull Cell hull to measure against, in the same space as CornerPoints.
+	 * @param CornerPoints Socket corner points to sample.
+	 * @note Points outside the hull report a GetIntersectDepth sentinel of -1, which this collapses to 0 so the
+	 *       result reads as "no penetration" rather than a negative depth.
+	 */
+	static float ComputeMaximumHullPenetration(const FNRawMesh& Hull, const TArray<FVector>& CornerPoints);
+
+	/**
+	 * Memoized socket-corner penetration of this junction into its cell's hull, plus the lowest world-Z across
+	 * those corners (which anchors the depth readout).
+	 *
+	 * The ed mode redraws every registered junction on every viewport frame, so this is what stops an idle
+	 * viewport from rebuilding the corner points and re-sweeping the hull per junction per frame. Recomputes
+	 * only when the hull geometry, this junction's transform, or the socket sizing changes.
+	 * @param Hull Cell hull to measure against.
+	 * @param SettingsSocketSize Project-wide socket size used to scale the junction's unit socket size.
+	 * @param OutMaximumDepth Receives the deepest corner penetration, or 0 when none penetrate.
+	 * @param OutLowestCornerZ Receives the lowest world-Z across the socket corners, floored at this junction's
+	 *        own component-location Z (matching the readout anchor the draw path has always used).
+	 */
+	void GetCachedHullPenetration(const FNRawMesh& Hull, const FVector2D& SettingsSocketSize,
+		float& OutMaximumDepth, double& OutLowestCornerZ) const;
+
 	/** Draw the junction's debug visualization through the supplied PDI. */
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI,
 		const FLinearColor& ValidColor, const FLinearColor& Invalid, bool bShowDepth = false,
@@ -180,6 +206,39 @@ private:
 	void FinalizeFillerSpawn(AActor* SpawnedActor, ANCellLevelInstance* CellLevelInstance);
 
 	void ProcessAdditionalActors(bool bConnected, bool bSkipAdditionalFilledActors = false);
+
+	/** One junction's memoized hull penetration plus the inputs it was computed for; reused while those are unchanged. */
+	struct FCachedHullPenetration
+	{
+		/**
+		 * CRC over the cell hull's vertex buffer. Used in place of a version counter on the cell root because the
+		 * hull is mutated from several places (ANCellActor::CalculateHull / SplitHullEdge, the vertex drag in
+		 * FNCellRootComponentVisualizer) and can also be swapped wholesale by undo/redo — a content hash stays
+		 * correct without every one of those paths remembering to bump something.
+		 */
+		uint32 KeyHullVertexCrc = 0;
+		/** Hull loop count, so a topology-only change that leaves the vertex buffer identical still invalidates. */
+		int32 KeyHullLoopCount = INDEX_NONE;
+		FVector KeyLocation = FVector::ZeroVector;
+		FRotator KeyRotation = FRotator::ZeroRotator;
+		FIntVector2 KeyUnitSocketSize = FIntVector2(0, 0);
+		FVector2D KeySettingSocketSize = FVector2D::ZeroVector;
+
+		/** Deepest penetration of any socket corner into the hull. */
+		float MaximumDepth = 0.f;
+		/** Lowest world-Z across the socket corners; anchors the depth readout beneath the socket. */
+		double LowestCornerZ = 0.0;
+		/** False until the first computation populates the entry, so a genuine all-zero result still counts as a hit. */
+		bool bValid = false;
+	};
+
+	/**
+	 * Memo backing GetCachedHullPenetration. Lives on the component (rather than in a static map keyed by weak
+	 * pointer, as FNBoneComponentVisualizer does) because DrawDebugPDI is the shared entry point for both the
+	 * ed-mode render path and FNCellJunctionComponentVisualizer — and because component lifetime then prunes the
+	 * entry for free. Mutable so the const draw path can populate it.
+	 */
+	mutable FCachedHullPenetration CachedHullPenetration;
 
 	N_WORLD_ICON_HEADER()
 };

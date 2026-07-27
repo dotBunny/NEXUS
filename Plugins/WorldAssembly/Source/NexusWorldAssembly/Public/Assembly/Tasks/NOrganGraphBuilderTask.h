@@ -46,10 +46,30 @@ struct FNOrganGraphBuilderTask
 	 */
 	NEXUSWORLDASSEMBLY_API void EnsureFinisherMinimums(FNMersenneTwister& Random) const;
 
-private:
-	/** Count of placed-cell hulls in the shared world context visible to this organ, captured at task start; the shared array only grows between passes. */
-	int32 ExistingNodeCollisionMeshCount = 0;
+	/**
+	 * @return true when CellNode's hull intersects any of the shared world-collision meshes (immutable after
+	 *         FNProcessVirtualWorldTask) and exceeds the penetration threshold.
+	 * @note Public so the perf tests can measure the real scan rather than a hand-rolled copy of its loop.
+	 *       Scans every world-collision mesh, so its cost is O(world meshes) for every candidate placement.
+	 */
+	NEXUSWORLDASSEMBLY_API bool DoesWorldCollide(const FNAssemblyGraphCellNode* CellNode) const;
 
+	/**
+	 * @return Every existing cell whose world bounds intersect NewNode's.
+	 * @note Public for the same reason as DoesWorldCollide. Walks every node in the organ graph (not just the
+	 *       cells), so its cost grows with the organ as it is built.
+	 */
+	NEXUSWORLDASSEMBLY_API TArray<FNAssemblyGraphCellNode*> CheckNodeBounds(const FNAssemblyGraphCellNode* NewNode) const;
+
+	/**
+	 * @return true when CellNode's hull intersects any placed-cell hull visible to this organ and exceeds the
+	 *         penetration threshold.
+	 * @note Public for the same reason as DoesWorldCollide. Reads its extent and broadphase from the organ context
+	 *       (NodeCollisionSnapshotCount / NodeCollisionBVH), so a caller that populates those can drive it directly.
+	 */
+	NEXUSWORLDASSEMBLY_API bool DoesExistingNodeWorldCollide(const FNAssemblyGraphCellNode* CellNode) const;
+
+private:
 	/** Per-organ input data and output graph reference. */
 	TSharedRef<FNVirtualOrganContext> OrganContextPtr;
 
@@ -67,15 +87,6 @@ private:
 
 	/** Seed the graph with the organ's bones and the root node. */
 	void StartGraph(FNMersenneTwister& Random);
-
-	/** @return true when CellNode's hull intersects any of the shared world-collision meshes (immutable after FNProcessVirtualWorldTask) and exceeds the penetration threshold. */
-	bool DoesWorldCollide(const FNAssemblyGraphCellNode* CellNode) const;
-
-	/** @return true when CellNode's hull intersects any of the shared node-collision meshes visible at task start and exceeds the penetration threshold. */
-	bool DoesExistingNodeWorldCollide(const FNAssemblyGraphCellNode* CellNode) const;
-
-	/** @return Every existing cell whose world bounds intersect NewNode's. */
-	TArray<FNAssemblyGraphCellNode*> CheckNodeBounds(const FNAssemblyGraphCellNode* NewNode) const;
 
 	/** @return Every existing cell whose hull intersects NewNode's hull. */
 	TArray<FNAssemblyGraphCellNode*> CheckNodeHull(FNAssemblyGraphCellNode* NewNode) const;

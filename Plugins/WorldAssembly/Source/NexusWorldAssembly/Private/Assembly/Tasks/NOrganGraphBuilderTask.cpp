@@ -63,7 +63,27 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	// are read straight from the shared context instead of copied per organ (FNRawMesh copies drop the face-plane cache).
 	// The node hulls grow between passes, so snapshot how many exist now; entries below the count never mutate, and
 	// FNProcessPassTask's appends never overlap a builder thanks to the pass dependency chain.
-	ExistingNodeCollisionMeshCount = WorldContextPtr->NodeCollisionMeshes.Num();
+	OrganContextPtr->NodeCollisionSnapshotCount = WorldContextPtr->NodeCollisionMeshes.Num();
+
+	// Broadphase over exactly that snapshot, so the tree and the count can never disagree about what this build can
+	// see. Built here rather than shared because the array only grows between passes and nothing else in this task's
+	// lifetime can mutate the prefix; see FNVirtualOrganContext::NodeCollisionBVH for why per-organ over shared.
+	{
+		OrganContextPtr->UnboundedNodeCollisionIndices.Reset();
+		TArray<FBox> NodeBounds;
+		NodeBounds.Reserve(OrganContextPtr->NodeCollisionSnapshotCount);
+		for (int32 i = 0; i < OrganContextPtr->NodeCollisionSnapshotCount; i++)
+		{
+			const FNRawMesh& Mesh = WorldContextPtr->NodeCollisionMeshes[i];
+			const bool bHasBounds = Mesh.HasBounds();
+			NodeBounds.Add(bHasBounds ? Mesh.Bounds : FBox(ForceInit));
+			if (!bHasBounds)
+			{
+				OrganContextPtr->UnboundedNodeCollisionIndices.Add(i);
+			}
+		}
+		OrganContextPtr->NodeCollisionBVH = FNBoundsBVH(NodeBounds);
+	}
 
 	// Capture our context tags, base that we cant avoid, and our working copy
 	OrganContextPtr->BaseContextTags = WorldContextPtr->ContextTags;
@@ -416,22 +436,65 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 	while (OrganContextPtr->CellGraph == nullptr);
 }
 
+namespace
+{
+	/**
+	 * The per-mesh collision verdict, lifted verbatim out of the original scan loop so the broadphase and
+	 * full-sweep paths below cannot drift apart.
+	 * @return true when CellNode's hull collides with Mesh by the caller's penetration rule.
+	 */
+	bool TestCollisionMesh(const FNAssemblyGraphCellNode* CellNode, const FNRawMesh& Mesh, const float MaxPenetration)
+	{
+		const float PenetrationDepth = CellNode->GetHullIntersectDepth(Mesh, MaxPenetration);
+		if (PenetrationDepth == 0.0f)
+		{
+			// Depth of exactly zero means the AABBs overlap but no vertex of either hull is inside the other;
+			// only a surface-crossing test can settle it.
+			return CellNode->CheckHullIntersects(Mesh);
+		}
+		return PenetrationDepth >= MaxPenetration;
+	}
+}
+
 bool FNOrganGraphBuilderTask::DoesWorldCollide(const FNAssemblyGraphCellNode* CellNode) const
 {
 	const float WorldHullPenetration = OrganContextPtr->WorldHullPenetration;
-	const TArray<FNRawMesh>& WorldCollisionMeshes = WorldContextPtr->WorldCollisionMeshes;
-	for (int32 i = 0; i < WorldCollisionMeshes.Num(); i++)
+
+	// Meshes that carry no bounds get no AABB rejection inside GetIntersectDepth, so a broadphase cannot speak for
+	// them; test them first, unconditionally. Empty for well-formed input, so this is normally a single Num() read.
+	for (const int32 MeshIndex : WorldContextPtr->UnboundedWorldCollisionIndices)
 	{
-		const float PenetrationDepth = CellNode->GetHullIntersectDepth(WorldCollisionMeshes[i], WorldHullPenetration);
-		if (PenetrationDepth == 0.0f)
+		if (TestCollisionMesh(CellNode, WorldContextPtr->WorldCollisionMeshes[MeshIndex], WorldHullPenetration))
 		{
-			if (CellNode->CheckHullIntersects(WorldCollisionMeshes[i]))
+			return true;
+		}
+	}
+
+	// A candidate whose own hull has no bounds is in the same position — GetIntersectDepth would skip its AABB
+	// rejection against every mesh — so fall back to the full sweep rather than trusting an invalid query box.
+	const FBox& CandidateBounds = CellNode->GetHullBounds();
+	if (!CandidateBounds.IsValid)
+	{
+		const int32 MeshCount = WorldContextPtr->WorldCollisionMeshes.Num();
+		for (int32 i = 0; i < MeshCount; i++)
+		{
+			if (TestCollisionMesh(CellNode, WorldContextPtr->WorldCollisionMeshes[i], WorldHullPenetration))
 			{
 				return true;
 			}
-			continue;
 		}
-		if (PenetrationDepth >= WorldHullPenetration)
+		return false;
+	}
+
+	// Broadphase. Every mesh the query excludes has a non-overlapping AABB — precisely the case GetIntersectDepth
+	// already rejected with its -1 early-out — so the same set of meshes reaches the deep test as before. The
+	// result is a bool and no RNG is drawn here, so visiting the survivors in traversal order cannot change it.
+	// The inline allocator keeps the per-candidate query off the heap for any realistic overlap count.
+	TArray<int32, TInlineAllocator<32>> Overlaps;
+	WorldContextPtr->WorldCollisionBVH.QueryOverlaps(CandidateBounds, Overlaps);
+	for (const int32 MeshIndex : Overlaps)
+	{
+		if (TestCollisionMesh(CellNode, WorldContextPtr->WorldCollisionMeshes[MeshIndex], WorldHullPenetration))
 		{
 			return true;
 		}
@@ -443,18 +506,36 @@ bool FNOrganGraphBuilderTask::DoesExistingNodeWorldCollide(const FNAssemblyGraph
 {
 	const float CellHullPenetration = OrganContextPtr->CellHullPenetration;
 	const TArray<FNRawMesh>& ExistingNodeCollisionMeshes = WorldContextPtr->NodeCollisionMeshes;
-	for (int32 i = 0; i < ExistingNodeCollisionMeshCount; i++)
+
+	// Same structure, and the same equivalence argument, as DoesWorldCollide: hulls without bounds cannot be
+	// broadphased and are always tested, a candidate without bounds falls back to the full sweep, and everything
+	// the query excludes would have been rejected by GetIntersectDepth's own AABB early-out.
+	for (const int32 MeshIndex : OrganContextPtr->UnboundedNodeCollisionIndices)
 	{
-		const float PenetrationDepth = CellNode->GetHullIntersectDepth(ExistingNodeCollisionMeshes[i], CellHullPenetration);
-		if (PenetrationDepth == 0.0f)
+		if (TestCollisionMesh(CellNode, ExistingNodeCollisionMeshes[MeshIndex], CellHullPenetration))
 		{
-			if (CellNode->CheckHullIntersects(ExistingNodeCollisionMeshes[i]))
+			return true;
+		}
+	}
+
+	const FBox& CandidateBounds = CellNode->GetHullBounds();
+	if (!CandidateBounds.IsValid)
+	{
+		for (int32 i = 0; i < OrganContextPtr->NodeCollisionSnapshotCount; i++)
+		{
+			if (TestCollisionMesh(CellNode, ExistingNodeCollisionMeshes[i], CellHullPenetration))
 			{
 				return true;
 			}
-			continue;
 		}
-		if (PenetrationDepth >= CellHullPenetration)
+		return false;
+	}
+
+	TArray<int32, TInlineAllocator<32>> Overlaps;
+	OrganContextPtr->NodeCollisionBVH.QueryOverlaps(CandidateBounds, Overlaps);
+	for (const int32 MeshIndex : Overlaps)
+	{
+		if (TestCollisionMesh(CellNode, ExistingNodeCollisionMeshes[MeshIndex], CellHullPenetration))
 		{
 			return true;
 		}
@@ -464,17 +545,10 @@ bool FNOrganGraphBuilderTask::DoesExistingNodeWorldCollide(const FNAssemblyGraph
 
 TArray<FNAssemblyGraphCellNode*> FNOrganGraphBuilderTask::CheckNodeBounds(const FNAssemblyGraphCellNode* NewNode) const
 {
+	// Served from the graph's spatial index rather than a walk of every node. Same set, and the caller filters it
+	// and tests it for emptiness, so the order the index reports them in cannot affect placement.
 	TArray<FNAssemblyGraphCellNode*> HitNodes;
-	for (const auto RegisteredNode : OrganContextPtr->CellGraph->GetNodes())
-	{
-		if (RegisteredNode->GetNodeType() != ENAssemblyGraphNodeType::Cell) continue;
-
-		FNAssemblyGraphCellNode* SourceNode = static_cast<FNAssemblyGraphCellNode*>(RegisteredNode);
-		if (SourceNode->CheckBoundsIntersects(NewNode))
-		{
-			HitNodes.Add(SourceNode);
-		}
-	}
+	OrganContextPtr->CellGraph->QueryCellNodesByBounds(NewNode->GetWorldBounds(), HitNodes);
 	return HitNodes;
 }
 
