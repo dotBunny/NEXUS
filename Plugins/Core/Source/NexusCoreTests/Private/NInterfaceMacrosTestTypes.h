@@ -34,6 +34,7 @@ public:
 	virtual void OnTwoArgs(int32 Value, const FString& Text) {}
 
 	// Blueprint fallback hooks — UFUNCTIONs reached via Execute_<EventName> when the implementer is BP-only.
+	// Exempt from the K2_ prefix rule: interface events, and this type is test-only so no asset ever binds them.
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnZeroArgEvent();
 

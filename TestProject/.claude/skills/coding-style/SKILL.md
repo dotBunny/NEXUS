@@ -103,6 +103,35 @@ UFUNCTION(BlueprintCallable, DisplayName="Get Actor", Category = "NEXUS|Actor Po
 - `Category` format is `"NEXUS|<PluginName>"` (no spaces around `|`)
 - `DisplayName` is human-readable, title case, no "N" prefix
 
+## Blueprint Event Hooks (`K2_` prefix)
+
+`BlueprintImplementableEvent` / `BlueprintNativeEvent` functions **declared as `UCLASS` members** — where C++ calls *into* Blueprint — take a `K2_` prefix on the C++ symbol plus a `DisplayName` that drops it:
+
+```cpp
+/** Blueprint hook fired once the pool has handed this actor out. */
+UFUNCTION(BlueprintImplementableEvent, Category = "NEXUS|Actor Pools", DisplayName = "On Spawned From Pool")
+void K2_OnSpawnedFromPool();
+```
+
+`K2_` ("Kismet 2", Epic's internal name for Blueprint) carries no compiler meaning. It keeps the Blueprint-facing symbol from colliding with, or reading ambiguously against, the native function or delegate covering the same concept, and marks "Blueprint-only hook" as distinct from a C++ override seam. Mirrors Epic's own `K2_DestroyActor` / `K2_SetActorLocation`.
+
+- **Event hooks only.** `BlueprintCallable` / `BlueprintPure` functions stay unprefixed (`GetActor`, `IsRegistered`).
+- **Always pair with `DisplayName`.** Without it the node label reads "K2 On Spawned From Pool" — UE's auto-prettifier does not strip the prefix. This is the only reason the `DisplayName` is mandatory here; for an unprefixed symbol it would just restate what auto-prettification already produces.
+- **`Receive*` is an accepted equivalent for actor lifecycle hooks.** Epic's `AActor` uses it (`ReceiveBeginPlay`, `ReceiveTick`, `ReceiveActorBeginOverlap`), and it does the same job as `K2_`: `ReceivePrepareTest` disambiguates against native `PrepareTest()` just as `K2_PrepareTest` would. Pair it with a prefix-dropping `meta=(DisplayName="...")` on the same terms. Do not mix the two conventions inside one type — `ANSamplesDisplayActor` (`Samples/Shared/`) is the established `Receive*` type and stays that way. Prefer `K2_` for new code unless the hook mirrors an `AActor` lifecycle event.
+- **`UINTERFACE` events are exempt** — they stay unprefixed. UHT generates `Execute_<Name>` and `<Name>_Implementation` for interface events, so `IFoo::Execute_Name(...)` already qualifies the symbol and cannot collide with a native member. Prefixing would push `K2_` into every call site (`Execute_K2_Name`) and into the `_Implementation` override that framework consumers write. NEXUS's existing interface events (`INCellJunctionFiller`, `INCellJunctionBeginPlay`, `INCellInitialized`, `INListViewEntry`) follow this exemption.
+- **Renaming an existing event breaks Blueprints that implement it** — Blueprint binds by `UFunction` name, so the node silently orphans. Before applying the prefix retroactively, check for bindings in both content roots:
+
+  ```bash
+  grep -rla "<OldName>" Samples/ TestProject/Content/ --include="*.uasset" --include="*.umap"
+  ```
+
+  If anything hits, add a redirect under `[CoreRedirects]` in `TestProject/Config/DefaultEngine.ini` and note the rename in `CHANGELOG.md`:
+
+  ```ini
+  [CoreRedirects]
+  +FunctionRedirects=(OldName="/Script/Nexus<Plugin>.N<Class>.<OldName>",NewName="/Script/Nexus<Plugin>.N<Class>.K2_<OldName>")
+  ```
+
 ## Editor-Only Members
 
 Wrap editor-only fields and methods in `#if WITH_EDITOR`:

@@ -30,7 +30,7 @@ public:
 	};
 
 	/** Blueprint hook invoked with the owning UNListView; implement to cache the reference. */
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintImplementableEvent, Category = "NEXUS|UI")
 	// ReSharper disable once CppUEBlueprintImplementableEventNotImplemented
 	void OnSetOwnerListView(UNListView* Owner);
 };

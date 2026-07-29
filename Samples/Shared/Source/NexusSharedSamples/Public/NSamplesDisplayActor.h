@@ -108,7 +108,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UNSamplesDisplayTest> TestInstance;
 	
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintImplementableEvent, Category = "NEXUS|Samples Display")
 	void OnTimerExpired();
 	
 private:
