@@ -89,7 +89,8 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 
 	/**
 	 * Relative weight for preferred selection.
-	 * @note Higher values increase the probability of this junction being filled.
+	 * @note Higher values increase the probability of the graph builder picking this junction to extend from;
+	 *       Required junctions have this doubled automatically (see FNOrganGraphBuilderTask).
 	 */
 	UPROPERTY(EditInstanceOnly)
 	int32 Weighting = 1;

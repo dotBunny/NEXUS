@@ -16,7 +16,7 @@ class NEXUSWORLDASSEMBLY_API UNCellJunctionBeginPlay : public UInterface
 /**
  * Interface implemented by actors that need to react when a cell junction begins play.
  *
- * Actors assigned to a junction's BeginPlay callback list (UNCellJunctionComponent::OnBeginPlayCallback) are notified
+ * Actors assigned to a junction's BeginPlay callback list (UNCellJunctionComponent::OnBeginPlayTargets) are notified
  * during the junction component's BeginPlay: for each assigned actor that implements this interface, OnJunctionBeginPlay
  * is invoked with the junction's resolved link details. This lets gameplay actors react to how the junction was wired up
  * during assembly — in particular whether it connected to another cell and which cell and junction it links to.
