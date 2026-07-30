@@ -128,13 +128,8 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Clients|Network Simulation", meta = (DisplayName = "Receive Out Of Order", Tooltip = "Forces network packets to be recieved out of order."))
 	bool bClientSimulateReceiveOutOfOrderPackets = false;
 
-	/**
-	 * Capture a server-side network profile (.nprof).
-	 * @remark EditConditionHides only hides this field while client profiling is on — the stored value is
-	 *         still honoured by GetMultiplayerTestServerArguments, so a previously-enabled server profile
-	 *         stays active while invisible.
-	 */
-	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Server", meta = (EditCondition="!bClientGenerateNetworkProfile", EditConditionHides, DisplayName = "Generate Network Profile", Tooltip = "Hidden while client profiling is enabled, but a stored value still applies to the server. Profiles will be stored in <PROJECT_DIRECTORY>/Saved/Profiling/<PROJECT_NAME>-<TIMESTAMP>.nprof"))
+	/** Capture a server-side network profile (.nprof). */
+	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Server", meta = (DisplayName = "Generate Network Profile", Tooltip = "Profiles will be stored in <PROJECT_DIRECTORY>/Saved/Profiling/<PROJECT_NAME>-<TIMESTAMP>.nprof"))
 	bool bServerGenerateNetworkProfile = false;
 
 	/** Spawn a dedicated server for the test clients. */
