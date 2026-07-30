@@ -12,6 +12,7 @@
  *
  * Useful for grid-aligned gameplay that only needs 16-wind orientations. Conversion helpers
  * produce either unsigned [0, 360) or normalized [-180, 180) degree representations.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/cardinal-rotation/">FNCardinalRotation</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNCardinalRotation
@@ -53,11 +54,11 @@ struct NEXUSCORE_API FNCardinalRotation
 	FRotator ToRotator() const
 	{
 		FRotator Result;
-		
+
 		Result.Roll = FNCardinalDirectionUtils::ToDecimalDegrees(Roll);
 		Result.Pitch = FNCardinalDirectionUtils::ToDecimalDegrees(Pitch);
 		Result.Yaw = FNCardinalDirectionUtils::ToDecimalDegrees(Yaw);
-		
+
 		return Result;
 	}
 
@@ -65,11 +66,11 @@ struct NEXUSCORE_API FNCardinalRotation
 	FRotator ToRotatorNormalized() const
 	{
 		FRotator Result;
-		
+
 		Result.Roll = FNCardinalDirectionUtils::ToDecimalDegreesNormalized(Roll);
 		Result.Pitch = FNCardinalDirectionUtils::ToDecimalDegreesNormalized(Pitch);
 		Result.Yaw = FNCardinalDirectionUtils::ToDecimalDegreesNormalized(Yaw);
-		
+
 		return Result;
 	}
 
@@ -109,14 +110,14 @@ struct NEXUSCORE_API FNCardinalRotation
 	static FNCardinalRotation CreateFrom(const FRotator& InRotator)
 	{
 		FNCardinalRotation Result;
-		
+
 		Result.Roll = FNCardinalDirectionUtils::ToCardinalDirection(InRotator.Roll);
 		Result.Pitch = FNCardinalDirectionUtils::ToCardinalDirection(InRotator.Pitch);
 		Result.Yaw = FNCardinalDirectionUtils::ToCardinalDirection(InRotator.Yaw);
-		
+
 		return Result;
 	}
-	
+
 	/**
 	 * Builds an FNCardinalRotation by snapping each component of InRotator (signed degrees) to its nearest cardinal.
 	 * @param InRotator Signed-degree rotation to snap.
@@ -124,15 +125,15 @@ struct NEXUSCORE_API FNCardinalRotation
 	static FNCardinalRotation CreateFromNormalized(const FRotator& InRotator)
 	{
 		FNCardinalRotation Result;
-		
+
 		Result.Roll = FNCardinalDirectionUtils::ToCardinalDirectionNormalized(InRotator.Roll);
 		Result.Pitch = FNCardinalDirectionUtils::ToCardinalDirectionNormalized(InRotator.Pitch);
 		Result.Yaw = FNCardinalDirectionUtils::ToCardinalDirectionNormalized(InRotator.Yaw);
-		
+
 		return Result;
 	}
-	
-	
+
+
 	/**
 	 * Rotates a 2D unit-size footprint (0, UnitSizeX, UnitSizeY) by CardinalDirection.
 	 * @param CardinalDirection The cardinal rotation to apply.

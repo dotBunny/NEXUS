@@ -6,6 +6,7 @@
 /**
  * Output format selector used by FNReport's emit methods to choose between human-readable
  * plain text and Markdown.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/report-output-format/">ENReportOutputFormat</a>
  */
 enum class ENReportOutputFormat : uint8
 {

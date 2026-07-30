@@ -12,6 +12,7 @@
  * UCommonListView subclass that invokes INListViewEntry::SetOwnerListView on each generated
  * entry widget. Also exposes a weak ReferenceObject slot so an outer object can be stashed on
  * the list and retrieved from inside entry widgets (e.g. to bind to a view-model).
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/components/list-view/">UNListView</a>
  */
 UCLASS(DisplayName = "NEXUS | ListView", ClassGroup = UI, meta = (Category = "NEXUS"))
 class NEXUSUI_API UNListView : public UCommonListView
@@ -19,17 +20,19 @@ class NEXUSUI_API UNListView : public UCommonListView
 	GENERATED_BODY()
 
 public:
-	
+
 #if WITH_EDITOR
 	virtual const FText GetPaletteCategory() override {  return NEXUS::UIEditor::PaletteCategory; }
 #endif // WITH_EDITOR
 
 	/** Stash an arbitrary outer reference on the list so entries can retrieve it during construction. */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/components/list-view/#set-reference-object"))
 	void SetReferenceObject(UObject* Object) { ReferenceObject = Object; }
 
 	/** @return the previously-stashed reference object, or nullptr if it has been GC'd. */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/components/list-view/#get-reference-object"))
 	UObject* GetReferenceObject() const
 	{
 		if (ReferenceObject.IsValid())

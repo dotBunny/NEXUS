@@ -29,35 +29,84 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	const int32 StatusChannel = TaskGraphContextPtr->OpenStatusChannel(OrganContextPtr->GetName());
 
 	N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderStart)
-	N_ASSEMBLY_ANALYTICS_FIVE_PARAM(OrganGraphBuilder_Init, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, OrganContextPtr->GetName(), 
+	N_ASSEMBLY_ANALYTICS_FIVE_PARAM(OrganGraphBuilder_Init, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, OrganContextPtr->GetName(),
 		OrganContextPtr->MinimumCellCount, OrganContextPtr->MaximumCellCount, OrganContextPtr->MaximumRetryCount)
-	
+
 	// The context was not validated during creation, so we cannot process it
 	if (!OrganContextPtr->IsValid())
 	{
 		N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetFailure, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, 0,
 			FString(TEXT("Organ context failed validation; build was not attempted.")))
 		N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
+		// Drive the per-organ channel to a terminal state so its overlay row doesn't linger mid-build.
+		TaskGraphContextPtr->SetChannelStatus(StatusChannel, TEXT("Unsuccessful"), 0.f);
+		TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
 		return;
 	}
-	
+
+	// Cooperative cancellation — the operation may have been cancelled before this organ's build started.
+	if (TaskGraphContextPtr->IsCancelled())
+	{
+		N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetFailure, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, 0,
+			FString(TEXT("Operation was cancelled before the organ build started.")))
+		N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
+		// Drive the per-organ channel to a terminal state so its overlay row doesn't linger mid-build.
+		TaskGraphContextPtr->SetChannelStatus(StatusChannel, TEXT("Cancelled"), 0.f);
+		TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
+		return;
+	}
+
 	// Create our deterministic random for the task which will get passed byref to sub-methods
 	FNMersenneTwister Random(OrganContextPtr->GetSeed());
-	
-	// We're going to copy the state of world collision at the start here, we know they're filled cause of dep chain.
-	WorldCollisionMeshes = WorldContextPtr->WorldCollisionMeshes;
-	ExistingNodeCollisionMeshes = WorldContextPtr->NodeCollisionMeshes;
-	
+
+	// World-collision hulls are baked (and face-plane cached) by FNProcessVirtualWorldTask and immutable after, so they
+	// are read straight from the shared context instead of copied per organ (FNRawMesh copies drop the face-plane cache).
+	// The node hulls grow between passes, so snapshot how many exist now; entries below the count never mutate, and
+	// FNProcessPassTask's appends never overlap a builder thanks to the pass dependency chain.
+	OrganContextPtr->NodeCollisionSnapshotCount = WorldContextPtr->NodeCollisionMeshes.Num();
+
+	// Broadphase over exactly that snapshot, so the tree and the count can never disagree about what this build can
+	// see. Built here rather than shared because the array only grows between passes and nothing else in this task's
+	// lifetime can mutate the prefix; see FNVirtualOrganContext::NodeCollisionBVH for why per-organ over shared.
+	{
+		OrganContextPtr->UnboundedNodeCollisionIndices.Reset();
+		TArray<FBox> NodeBounds;
+		NodeBounds.Reserve(OrganContextPtr->NodeCollisionSnapshotCount);
+		for (int32 i = 0; i < OrganContextPtr->NodeCollisionSnapshotCount; i++)
+		{
+			const FNRawMesh& Mesh = WorldContextPtr->NodeCollisionMeshes[i];
+			const bool bHasBounds = Mesh.HasBounds();
+			NodeBounds.Add(bHasBounds ? Mesh.Bounds : FBox(ForceInit));
+			if (!bHasBounds)
+			{
+				OrganContextPtr->UnboundedNodeCollisionIndices.Add(i);
+			}
+		}
+		OrganContextPtr->NodeCollisionBVH = FNBoundsBVH(NodeBounds);
+	}
+
 	// Capture our context tags, base that we cant avoid, and our working copy
 	OrganContextPtr->BaseContextTags = WorldContextPtr->ContextTags;
 	OrganContextPtr->BaseTagCounter = WorldContextPtr->TagCounter;
 	OrganContextPtr->TagCounter = OrganContextPtr->BaseTagCounter;
 	OrganContextPtr->ContextTags = OrganContextPtr->BaseContextTags;
-	
+
+	// Cache reproduction information
+
+	FNMersenneTwisterState SavedRandomState;
 	while (!OrganContextPtr->IsSuccessful())
 	{
+		// Cache before we start doing anything so that we can maybe use this in the future to skip over the failed iterations on save/load/restore?
+		SavedRandomState = Random.SaveState();
+
+		// Cooperative cancellation — stop retrying and fall through to the unsuccessful teardown below.
+		if (TaskGraphContextPtr->IsCancelled())
+		{
+			break;
+		}
+
 		TaskGraphContextPtr->SetChannelStatus(StatusChannel, FString::Printf(TEXT("Iteration %i/%i"), OrganContextPtr->GetRetryCount(), OrganContextPtr->MaximumRetryCount));
-		
+
 		// Coarse attempt-based progress for the per-organ channel; success drives it to 100% below.
 		const int32 MaxRetries = FMath::Max(OrganContextPtr->MaximumRetryCount, 1);
 		TaskGraphContextPtr->SetChannelStatus(StatusChannel,
@@ -66,13 +115,17 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 
 		// Find the bone and build our starting cell
 		StartGraph(Random);
-	
+
 		// Check for start placement and that it was a node too
 		if (OrganContextPtr->CellGraph == nullptr)
 		{
 			N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetFailure, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, 0,
 				FString(TEXT("Unable to place a starting cell (no valid starter cell available or every candidate collided).")))
+			N_ASSEMBLY_ANALYTICS_TWO_PARAM(OrganGraphBuilder_SetDrawCount, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, Random.GetCallCounter())
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
+			// Drive the per-organ channel to a terminal state so its overlay row doesn't linger mid-build.
+			TaskGraphContextPtr->SetChannelStatus(StatusChannel, TEXT("Unsuccessful"), 0.f);
+			TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
 			return;
 		}
 		int32 NodeCount = OrganContextPtr->CellGraph->GetNodeCount();
@@ -80,7 +133,11 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		{
 			N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetFailure, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, 0,
 				FString(TEXT("Starting graph contained no nodes after placement.")))
+			N_ASSEMBLY_ANALYTICS_TWO_PARAM(OrganGraphBuilder_SetDrawCount, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, Random.GetCallCounter())
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
+			// Drive the per-organ channel to a terminal state so its overlay row doesn't linger mid-build.
+			TaskGraphContextPtr->SetChannelStatus(StatusChannel, TEXT("Unsuccessful"), 0.f);
+			TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
 			return;
 		}
 
@@ -91,10 +148,14 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetFailure, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX,
 				OrganContextPtr->CellGraph->GetCellNodeCount(),
 				FString(TEXT("Starter cell has no open junctions; the graph cannot grow past it.")))
+			N_ASSEMBLY_ANALYTICS_TWO_PARAM(OrganGraphBuilder_SetDrawCount, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, Random.GetCallCounter())
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
+			// Drive the per-organ channel to a terminal state so its overlay row doesn't linger mid-build.
+			TaskGraphContextPtr->SetChannelStatus(StatusChannel, TEXT("Unsuccessful"), 0.f);
+			TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
 			return;
 		}
-		
+
 		const int32 MinCellCount = FMath::Max(OrganContextPtr->MinimumCellCount, 1);
 		const int32 MaxCellCount = OrganContextPtr->MaximumCellCount;
 		// MaximumCellCount <= 0 means "no upper limit": BFS expands unbounded and the target degrades to a floor
@@ -108,6 +169,10 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		TArray<FNAssemblyGraphNode*> Frontier = ProcessNode(Random, OrganContextPtr->CellGraph->GetLastNode());
 		while (Frontier.Num() > 0)
 		{
+			if (TaskGraphContextPtr->IsCancelled())
+			{
+				break;
+			}
 			if (MaxCellCount > 0 && OrganContextPtr->CellGraph->GetCellNodeCount() >= MaxCellCount)
 			{
 				break;
@@ -128,6 +193,8 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		// If still below minimum, try filling remaining open junctions
 		while (OrganContextPtr->CellGraph->GetCellNodeCount() < TargetCellCount)
 		{
+			if (TaskGraphContextPtr->IsCancelled()) break;
+
 			TArray<FNAssemblyGraphNode*> OpenNodes = OrganContextPtr->CellGraph->GetNodesWithOpenJunctions();
 			if (OpenNodes.IsEmpty()) break;
 
@@ -141,8 +208,18 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			if (OrganContextPtr->CellGraph->GetCellNodeCount() == CountBefore) break;
 		}
 
+		// Cooperative cancellation — skip the finishing passes and validation; the result will not be used.
+		if (TaskGraphContextPtr->IsCancelled())
+		{
+			break;
+		}
+
+		// Guarantee finisher-eligible cells reach their MinimumCount before the opportunistic cap below claims the
+		// remaining open junctions. No-op unless such a cell is actually short, so non-finisher tissues are unchanged.
+		EnsureFinisherMinimums(Random);
+
 		CapBranchesWithFinishers(Random);
-		
+
 		EnforceNotFinisherConstraint();
 
 		// At this point we need to validate the graph against the overall requirements from the input settings.
@@ -169,13 +246,16 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetResult, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, true, OrganContextPtr->CellGraph->GetCellNodeCount())
 		}
 	}
-	
+
+	// Record the total random draws this build consumed (across every retry iteration) for the report.
+	N_ASSEMBLY_ANALYTICS_TWO_PARAM(OrganGraphBuilder_SetDrawCount, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, Random.GetCallCounter())
+
 	// Clean up graph of pointers that can't be kept
 	if (OrganContextPtr->CellGraph != nullptr)
 	{
 		OrganContextPtr->CellGraph->CleanupBuilderReferences();
 	}
-	
+
 	// Only hand off graph and the context tag collection if it's good
 	// TODO: Would we do something here if we wanted required to apply ACROSS organs?
 	if (OrganContextPtr->IsSuccessful())
@@ -184,6 +264,12 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		TaskGraphContextPtr->SetChannelStatus(StatusChannel,
 			FString::Printf(TEXT("Built (%i cells)"), OrganContextPtr->CellGraph->GetCellNodeCount()), 1.f);
 		TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
+
+		// Report findings for later
+		TaskGraphContextPtr->SetOrganCellCount(OrganContextPtr->GetIdentifier(), OrganContextPtr->CellGraph->GetCellNodeCount());
+
+		// Hand back the random-stream position the winning attempt started from so the source component can record it.
+		TaskGraphContextPtr->SetOrganRandomState(OrganContextPtr->GetIdentifier(), SavedRandomState);
 
 		// Hand off only this organ's contribution. The working TagCounter was seeded with BaseTagCounter so
 		// constraints could gate against absolute counts, but the base already lives in the world/task-graph
@@ -194,6 +280,24 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			OrganContextPtr->ContextTags,
 			OrganContextPtr->TagCounter.GetDifference(OrganContextPtr->BaseTagCounter));
 	}
+	else
+	{
+		// Ensure we close the channel
+		if (TaskGraphContextPtr->IsCancelled())
+		{
+			TaskGraphContextPtr->SetChannelStatus(StatusChannel,TEXT("Cancelled"), 0.f);
+		}
+		else if (OrganContextPtr->IsRequired())
+		{
+			TaskGraphContextPtr->SetChannelStatus(StatusChannel,TEXT("Unsuccessful"), 0.f);
+		}
+		else
+		{
+			TaskGraphContextPtr->SetChannelStatus(StatusChannel,TEXT("Unsuccessful (Not Required)"), 1.f);
+		}
+		TaskGraphContextPtr->SetOrganCellCount(OrganContextPtr->GetIdentifier(), 0);
+		TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
+	}
 
 	N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
 }
@@ -202,7 +306,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 {
 	// TODO: We haven't resolved yet how we might join multiple generation points yet so we are just going to use the first bone.
 	FNVirtualBoneData& BoneData = OrganContextPtr->BoneInputData[0];
-	
+
 	FNCellInputDataFilter PreFilter;
 	PreFilter.NodeDepth = 0;
 	PreFilter.SocketSize = BoneData.SocketSize;
@@ -213,15 +317,15 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 	FNWeightedIntegerArray WeightedStartIndices;
 	TMap<int32, TArray<int32>> ValidJunctions;
 	OrganContextPtr->FilterCellInputData(PreFilter, WeightedStartIndices, ValidJunctions);
-	
+
 	// Unable to generate
 	if (WeightedStartIndices.WeightedCount() == 0)
 	{
 		UE_LOG(LogNexusWorldAssembly, Error, TEXT("Unable to place starting cell, due to no valid cells available."));
 		return;
 	}
-	
-	
+
+
 	// Our starting placement has to happen
 	do
 	{
@@ -263,21 +367,19 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 
 			// Create our graph
 			OrganContextPtr->CellGraph = MakeUnique<FNAssemblyGraph>(
-				BoneNode, OrganContextPtr->Origin, OrganContextPtr->Bounds, OrganContextPtr->bUnbounded);
+				BoneNode, OrganContextPtr->Origin, OrganContextPtr->Bounds, OrganContextPtr->bUnbound);
 
 
 			// Create our first cell node, attaching it to the bone node
 			FNAssemblyGraphNodeParams NodeParams;
-			NodeParams.ContextTagsState = OrganContextPtr->ContextTags;
 			NodeParams.ContextTagsAdded = StartCellInputData->ContextTagsAdded;
-			NodeParams.TagCounterState = OrganContextPtr->TagCounter;
 			NodeParams.AssemblyTags = StartCellInputData->AssemblyTags;
 			NodeParams.Seed = Random.UnsignedInteger64();
 			NodeParams.WorldPosition = CellWorldPosition;
 			NodeParams.WorldRotation = CellWorldRotation;
 			FNAssemblyGraphCellNode* StartNode = FNAssemblyGraphNodeFactory::CreateCellNode(NodeParams, StartCellInputData, OrganContextPtr->VoxelSize);
-			
-			
+
+
 			if (DoesWorldCollide(StartNode))
 			{
 				delete StartNode;
@@ -334,21 +436,65 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 	while (OrganContextPtr->CellGraph == nullptr);
 }
 
+namespace
+{
+	/**
+	 * The per-mesh collision verdict, lifted verbatim out of the original scan loop so the broadphase and
+	 * full-sweep paths below cannot drift apart.
+	 * @return true when CellNode's hull collides with Mesh by the caller's penetration rule.
+	 */
+	bool TestCollisionMesh(const FNAssemblyGraphCellNode* CellNode, const FNRawMesh& Mesh, const float MaxPenetration)
+	{
+		const float PenetrationDepth = CellNode->GetHullIntersectDepth(Mesh, MaxPenetration);
+		if (PenetrationDepth == 0.0f)
+		{
+			// Depth of exactly zero means the AABBs overlap but no vertex of either hull is inside the other;
+			// only a surface-crossing test can settle it.
+			return CellNode->CheckHullIntersects(Mesh);
+		}
+		return PenetrationDepth >= MaxPenetration;
+	}
+}
+
 bool FNOrganGraphBuilderTask::DoesWorldCollide(const FNAssemblyGraphCellNode* CellNode) const
 {
 	const float WorldHullPenetration = OrganContextPtr->WorldHullPenetration;
-	for (int32 i = 0; i < WorldCollisionMeshes.Num(); i++)
+
+	// Meshes that carry no bounds get no AABB rejection inside GetIntersectDepth, so a broadphase cannot speak for
+	// them; test them first, unconditionally. Empty for well-formed input, so this is normally a single Num() read.
+	for (const int32 MeshIndex : WorldContextPtr->UnboundedWorldCollisionIndices)
 	{
-		const float PenetrationDepth = CellNode->GetHullIntersectDepth(WorldCollisionMeshes[i], WorldHullPenetration);
-		if (PenetrationDepth == 0.0f)
+		if (TestCollisionMesh(CellNode, WorldContextPtr->WorldCollisionMeshes[MeshIndex], WorldHullPenetration))
 		{
-			if (CellNode->CheckHullIntersects(WorldCollisionMeshes[i]))
+			return true;
+		}
+	}
+
+	// A candidate whose own hull has no bounds is in the same position — GetIntersectDepth would skip its AABB
+	// rejection against every mesh — so fall back to the full sweep rather than trusting an invalid query box.
+	const FBox& CandidateBounds = CellNode->GetHullBounds();
+	if (!CandidateBounds.IsValid)
+	{
+		const int32 MeshCount = WorldContextPtr->WorldCollisionMeshes.Num();
+		for (int32 i = 0; i < MeshCount; i++)
+		{
+			if (TestCollisionMesh(CellNode, WorldContextPtr->WorldCollisionMeshes[i], WorldHullPenetration))
 			{
 				return true;
 			}
-			continue;
 		}
-		if (PenetrationDepth >= WorldHullPenetration)
+		return false;
+	}
+
+	// Broadphase. Every mesh the query excludes has a non-overlapping AABB — precisely the case GetIntersectDepth
+	// already rejected with its -1 early-out — so the same set of meshes reaches the deep test as before. The
+	// result is a bool and no RNG is drawn here, so visiting the survivors in traversal order cannot change it.
+	// The inline allocator keeps the per-candidate query off the heap for any realistic overlap count.
+	TArray<int32, TInlineAllocator<32>> Overlaps;
+	WorldContextPtr->WorldCollisionBVH.QueryOverlaps(CandidateBounds, Overlaps);
+	for (const int32 MeshIndex : Overlaps)
+	{
+		if (TestCollisionMesh(CellNode, WorldContextPtr->WorldCollisionMeshes[MeshIndex], WorldHullPenetration))
 		{
 			return true;
 		}
@@ -359,18 +505,37 @@ bool FNOrganGraphBuilderTask::DoesWorldCollide(const FNAssemblyGraphCellNode* Ce
 bool FNOrganGraphBuilderTask::DoesExistingNodeWorldCollide(const FNAssemblyGraphCellNode* CellNode) const
 {
 	const float CellHullPenetration = OrganContextPtr->CellHullPenetration;
-	for (int32 i = 0; i < ExistingNodeCollisionMeshes.Num(); i++)
+	const TArray<FNRawMesh>& ExistingNodeCollisionMeshes = WorldContextPtr->NodeCollisionMeshes;
+
+	// Same structure, and the same equivalence argument, as DoesWorldCollide: hulls without bounds cannot be
+	// broadphased and are always tested, a candidate without bounds falls back to the full sweep, and everything
+	// the query excludes would have been rejected by GetIntersectDepth's own AABB early-out.
+	for (const int32 MeshIndex : OrganContextPtr->UnboundedNodeCollisionIndices)
 	{
-		const float PenetrationDepth = CellNode->GetHullIntersectDepth(ExistingNodeCollisionMeshes[i], CellHullPenetration);
-		if (PenetrationDepth == 0.0f)
+		if (TestCollisionMesh(CellNode, ExistingNodeCollisionMeshes[MeshIndex], CellHullPenetration))
 		{
-			if (CellNode->CheckHullIntersects(ExistingNodeCollisionMeshes[i]))
+			return true;
+		}
+	}
+
+	const FBox& CandidateBounds = CellNode->GetHullBounds();
+	if (!CandidateBounds.IsValid)
+	{
+		for (int32 i = 0; i < OrganContextPtr->NodeCollisionSnapshotCount; i++)
+		{
+			if (TestCollisionMesh(CellNode, ExistingNodeCollisionMeshes[i], CellHullPenetration))
 			{
 				return true;
 			}
-			continue;
 		}
-		if (PenetrationDepth >= CellHullPenetration)
+		return false;
+	}
+
+	TArray<int32, TInlineAllocator<32>> Overlaps;
+	OrganContextPtr->NodeCollisionBVH.QueryOverlaps(CandidateBounds, Overlaps);
+	for (const int32 MeshIndex : Overlaps)
+	{
+		if (TestCollisionMesh(CellNode, ExistingNodeCollisionMeshes[MeshIndex], CellHullPenetration))
 		{
 			return true;
 		}
@@ -380,18 +545,11 @@ bool FNOrganGraphBuilderTask::DoesExistingNodeWorldCollide(const FNAssemblyGraph
 
 TArray<FNAssemblyGraphCellNode*> FNOrganGraphBuilderTask::CheckNodeBounds(const FNAssemblyGraphCellNode* NewNode) const
 {
+	// Served from the graph's spatial index rather than a walk of every node. Same set, and the caller filters it
+	// and tests it for emptiness, so the order the index reports them in cannot affect placement.
 	TArray<FNAssemblyGraphCellNode*> HitNodes;
-	for (const auto RegisteredNode : OrganContextPtr->CellGraph->GetNodes())
-	{
-		if (RegisteredNode->GetNodeType() != ENAssemblyGraphNodeType::Cell) continue;
-
-		FNAssemblyGraphCellNode* SourceNode = static_cast<FNAssemblyGraphCellNode*>(RegisteredNode);
-		if (SourceNode->CheckBoundsIntersects(NewNode))
-		{
-			HitNodes.Add(SourceNode);
-		}
-	}
-	return MoveTemp(HitNodes);
+	OrganContextPtr->CellGraph->QueryCellNodesByBounds(NewNode->GetWorldBounds(), HitNodes);
+	return HitNodes;
 }
 
 TArray<FNAssemblyGraphCellNode*> FNOrganGraphBuilderTask::CheckNodeHull(FNAssemblyGraphCellNode* NewNode) const
@@ -407,7 +565,7 @@ TArray<FNAssemblyGraphCellNode*> FNOrganGraphBuilderTask::CheckNodeHull(FNAssemb
 			HitNodes.Add(SourceNode);
 		}
 	}
-	return MoveTemp(HitNodes);
+	return HitNodes;
 }
 
 TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessNode(FNMersenneTwister& Random, FNAssemblyGraphNode* SourceNode, const bool bIsEndNode) const
@@ -431,16 +589,24 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 	FNWeightedIntegerArray WeightedOpenJunctionKeys;
 	for (const auto Junction : OpenJunctions)
 	{
-		WeightedOpenJunctionKeys.Add(Junction.Key, Junction.Value->Weighting);
+		// Double the likelihood of using a required junction
+		if (Junction.Value->Requirements == ENCellJunctionRequirements::Required)
+		{
+			WeightedOpenJunctionKeys.Add(Junction.Key, Junction.Value->Weighting * 2);
+		}
+		else
+		{
+			WeightedOpenJunctionKeys.Add(Junction.Key, Junction.Value->Weighting);
+		}
 	}
 	const int32 OpenJunctionCount = OpenJunctions.Num();
-	
+
 	TArray<FNAssemblyGraphNode*> NewNodes;
-	
+
 	FNWeightedIntegerArray CellInputWeightedIndices;
 	TMap<int32, TArray<int32>> ValidJunctions;
-	
-	
+
+
 	for (int32 i = 0; i < OpenJunctionCount; ++i)
 	{
 		if (OrganContextPtr->MaximumCellCount > 0 &&
@@ -455,7 +621,7 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 
 		// We're going to need the desired target rotation so that when we generate our possible list we account for the rotational allowance
 		FQuat SourceJunctionWorldQuat = SourceJunctionValue->WorldRotation.Quaternion();
-		
+
 		// Build our possible list of cells (and cache out the valid junctions)
 		FNCellInputDataFilter NodeFilter;
 		NodeFilter.NodeDepth = SourceCellNode->GetNodeDepth();
@@ -470,166 +636,177 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		NodeFilter.bIsEndNode = bIsEndNode;
 
 		OrganContextPtr->FilterCellInputData(NodeFilter, CellInputWeightedIndices, ValidJunctions);
-		
+
 		// We don't have any cell input data able OR junctions to fill this spot, so we have to null it out. We will add a NullNode to the graph and connect it up.
 		if (CellInputWeightedIndices.WeightedCount() == 0 || ValidJunctions.IsEmpty())
 		{
 			// TODO: We will later go back and fill this with something.
 			FNAssemblyGraphNullNode* NullNode = FNAssemblyGraphNodeFactory::CreateNullNode(SourceJunctionValue->WorldLocation, SourceJunctionValue->WorldRotation);
-			
+
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_AddNullNode)
-			
+
 			OrganContextPtr->CellGraph->RegisterNode(NullNode);
 			SourceCellNode->LinkJunction(SourceJunctionKey, NullNode);
 			NullNode->Link(SourceCellNode);
 			SourceCellNode->Connect(NullNode);
 			continue;
 		}
-		
+
 		// Pick our cell to use to spawn
 		const int32 CellInputIndex = CellInputWeightedIndices.TwistedValue(Random);
 		FNVirtualCellData* CellInputData = &OrganContextPtr->CellInputData[CellInputIndex];
-		
+
 		// Pick the junction of the cell we are going to use
 		TArray<int32>& ValidJunctionIndices = ValidJunctions[CellInputIndex];
 		if (ValidJunctionIndices.IsEmpty())
 		{
 			UE_LOG(LogNexusWorldAssembly, Error, TEXT("Cell input index produced no valid junctions. Adding null node?"));
-			
+
 			// TODO: We will later go back and fill this with something.
 			FNAssemblyGraphNullNode* NullNode = FNAssemblyGraphNodeFactory::CreateNullNode(SourceJunctionValue->WorldLocation, SourceJunctionValue->WorldRotation);
-			
+
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_AddNullNode)
-			
+
 			OrganContextPtr->CellGraph->RegisterNode(NullNode);
 			SourceCellNode->LinkJunction(SourceJunctionKey, NullNode);
 			NullNode->Link(SourceCellNode);
 			SourceCellNode->Connect(NullNode);
 			continue;
-			
+
 		}
-		
-		const int32 TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
-		// Source guarantees this will find something.
-		const int32 TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
-		const FNCellJunctionDetails* TargetJunctionDetails = CellInputData->Junctions.Find(TargetJunctionKey);
-		
-		// Unlike matching to a Bone, when trying to resolve the rotation of a matching one junction to another, we need to find the
-		// rotation which makes them face the opposite directions. We flip 180 degrees around the up axis to reverse the forward
-		// direction, then inverse the target's local rotation to undo it before applying the world rotation (same pattern as bone-to-junction).
-		FQuat TargetJunctionLocalQuat = TargetJunctionDetails->WorldRotation.Quaternion();
-		FQuat RequiredRotationQuat = SourceJunctionWorldQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
-		FRotator RequiredRotation = RequiredRotationQuat.Rotator(); 
-		
-		FVector TargetJunctionWorldOffset = RequiredRotationQuat.RotateVector(TargetJunctionDetails->WorldLocation);
-		FVector TargetJunctionWorldPosition = SourceJunctionValue->WorldLocation - TargetJunctionWorldOffset;
-	
-		FNAssemblyGraphNodeParams NodeParams;
-		NodeParams.ContextTagsState = OrganContextPtr->ContextTags;
-		NodeParams.TagCounterState = OrganContextPtr->TagCounter;
-		NodeParams.ContextTagsAdded = CellInputData->ContextTagsAdded;
-		NodeParams.AssemblyTags = CellInputData->AssemblyTags;
-		NodeParams.Seed = Random.UnsignedInteger64();
-		NodeParams.WorldPosition = TargetJunctionWorldPosition;
-		NodeParams.WorldRotation = RequiredRotation;
-		FNAssemblyGraphCellNode* TargetCellNode = FNAssemblyGraphNodeFactory::CreateCellNode(NodeParams, CellInputData, OrganContextPtr->VoxelSize);
-		
-		// Reject the node if it falls outside the organ's bounds. Check the AABB first (cheap), then fall back to the
-		// tighter hull check. If neither fits inside Context->Bounds we discard and move on, skip the whole thing if the organ was unbounded.
-		if (!OrganContextPtr->bUnbounded)
+
+		// Resolve geometry, run spatial validation, and link the chosen candidate. Shared with the finisher-minimum
+		// guarantee pass so both placement paths apply identical rotation/bounds/collision rules.
+		FNAssemblyGraphCellNode* TargetCellNode = TryAttachCellToJunction(
+			Random, SourceCellNode, SourceJunctionKey, SourceJunctionValue, SourceJunctionWorldQuat, CellInputData, ValidJunctionIndices);
+		if (TargetCellNode != nullptr)
 		{
-			const FBox ContextBoundsBox = OrganContextPtr->Bounds.GetBox();
-			if (!TargetCellNode->IsBoundsInside(ContextBoundsBox) && !TargetCellNode->IsHullInside(ContextBoundsBox))
-			{
-				N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardOutOfBoundsCellNode)
-				delete TargetCellNode;
-				continue;
-			}
+			NewNodes.Add(TargetCellNode);
 		}
-		
-		// Check world collision
-		if (DoesWorldCollide(TargetCellNode))
+	}
+
+	return NewNodes;
+}
+
+FNAssemblyGraphCellNode* FNOrganGraphBuilderTask::TryAttachCellToJunction(FNMersenneTwister& Random, FNAssemblyGraphCellNode* SourceCellNode,
+	const int32 SourceJunctionKey, const FNCellJunctionDetails* SourceJunctionValue, const FQuat& SourceJunctionWorldQuat,
+	FNVirtualCellData* CellInputData, const TArray<int32>& ValidJunctionIndices) const
+{
+	const int32 TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
+	// Source guarantees this will find something.
+	const int32 TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
+	const FNCellJunctionDetails* TargetJunctionDetails = CellInputData->Junctions.Find(TargetJunctionKey);
+
+	// Unlike matching to a Bone, when trying to resolve the rotation of a matching one junction to another, we need to find the
+	// rotation which makes them face the opposite directions. We flip 180 degrees around the up axis to reverse the forward
+	// direction, then inverse the target's local rotation to undo it before applying the world rotation (same pattern as bone-to-junction).
+	FQuat TargetJunctionLocalQuat = TargetJunctionDetails->WorldRotation.Quaternion();
+	FQuat RequiredRotationQuat = SourceJunctionWorldQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
+	FRotator RequiredRotation = RequiredRotationQuat.Rotator();
+
+	FVector TargetJunctionWorldOffset = RequiredRotationQuat.RotateVector(TargetJunctionDetails->WorldLocation);
+	FVector TargetJunctionWorldPosition = SourceJunctionValue->WorldLocation - TargetJunctionWorldOffset;
+
+	FNAssemblyGraphNodeParams NodeParams;
+	NodeParams.ContextTagsAdded = CellInputData->ContextTagsAdded;
+	NodeParams.AssemblyTags = CellInputData->AssemblyTags;
+	NodeParams.Seed = Random.UnsignedInteger64();
+	NodeParams.WorldPosition = TargetJunctionWorldPosition;
+	NodeParams.WorldRotation = RequiredRotation;
+	FNAssemblyGraphCellNode* TargetCellNode = FNAssemblyGraphNodeFactory::CreateCellNode(NodeParams, CellInputData, OrganContextPtr->VoxelSize);
+
+	// Reject the node if it falls outside the organ's bounds. Check the AABB first (cheap), then fall back to the
+	// tighter hull check. If neither fits inside Context->Bounds we discard and move on, skip the whole thing if the organ was unbounded.
+	if (!OrganContextPtr->bUnbound)
+	{
+		const FBox ContextBoundsBox = OrganContextPtr->Bounds.GetBox();
+		if (!TargetCellNode->IsBoundsInside(ContextBoundsBox) && !TargetCellNode->IsHullInside(ContextBoundsBox))
 		{
-			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardWorldCollidingCellNode)
+			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardOutOfBoundsCellNode)
 			delete TargetCellNode;
-			continue;
+			return nullptr;
 		}
-		
-		// Check previous pass existing node world collision (this doesn't check concurrent pass as they have been already filtered as outside its collision)
-		if (DoesExistingNodeWorldCollide(TargetCellNode))
+	}
+
+	// Check world collision
+	if (DoesWorldCollide(TargetCellNode))
+	{
+		N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardWorldCollidingCellNode)
+		delete TargetCellNode;
+		return nullptr;
+	}
+
+	// Check previous pass existing node world collision (this doesn't check concurrent pass as they have been already filtered as outside its collision)
+	if (DoesExistingNodeWorldCollide(TargetCellNode))
+	{
+		N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode)
+		delete TargetCellNode;
+		return nullptr;
+	}
+
+	// Now check the bounds of other existing nodes
+	TArray<FNAssemblyGraphCellNode*> BoundsIntersectingNodes = CheckNodeBounds(TargetCellNode);
+	const float CellHullPenetration = OrganContextPtr->CellHullPenetration;
+	for (int32 j = BoundsIntersectingNodes.Num() - 1; j >= 0; j--)
+	{
+		if (BoundsIntersectingNodes[j] == SourceCellNode)
 		{
-			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode)
-			delete TargetCellNode;
-			continue;
-		}
-		
-		// Now check the bounds of other existing nodes
-		TArray<FNAssemblyGraphCellNode*> BoundsIntersectingNodes = CheckNodeBounds(TargetCellNode);
-		const float CellHullPenetration = OrganContextPtr->CellHullPenetration;
-		for (int32 j = BoundsIntersectingNodes.Num() - 1; j >= 0; j--)
-		{
-			if (BoundsIntersectingNodes[j] == SourceCellNode)
-			{
-				// Junction-connected pair: tolerate overlap up to CellHullPenetration
-				const float PenetrationDepth = SourceCellNode->GetHullIntersectDepth(TargetCellNode, CellHullPenetration);
-				if (PenetrationDepth < CellHullPenetration)
-				{
-					BoundsIntersectingNodes.RemoveAt(j);
-				}
-			}
-			else if (!BoundsIntersectingNodes[j]->CheckHullIntersects(TargetCellNode))
+			// Junction-connected pair: tolerate overlap up to CellHullPenetration
+			const float PenetrationDepth = SourceCellNode->GetHullIntersectDepth(TargetCellNode, CellHullPenetration);
+			if (PenetrationDepth < CellHullPenetration)
 			{
 				BoundsIntersectingNodes.RemoveAt(j);
 			}
 		}
-		
-		// Only build when we are not colliding with anything
-		if (BoundsIntersectingNodes.IsEmpty())
+		else if (!BoundsIntersectingNodes[j]->CheckHullIntersects(TargetCellNode))
 		{
-			// Our cell has unique tags that need to get added to the used
-			if (CellInputData->AssemblyTags.HasAnyExact(OrganContextPtr->CellInputDataSummary.GroupTags.UniqueTags))
-			{
-				OrganContextPtr->PlacedTagGroups.UniqueTags.AppendTags(
-					OrganContextPtr->CellInputDataSummary.GroupTags.UniqueTags.FilterExact(CellInputData->AssemblyTags));
-			}
-			if (CellInputData->AssemblyTags.HasAnyExact(OrganContextPtr->CellInputDataSummary.GroupTags.RequiredAnyTags))
-			{
-				OrganContextPtr->PlacedTagGroups.RequiredAnyTags.AppendTags(
-					OrganContextPtr->CellInputDataSummary.GroupTags.RequiredAnyTags.FilterExact(CellInputData->AssemblyTags));
-			}
-			
-			// Add tags to context
-			if (!CellInputData->ContextTagsAdded.IsEmpty())
-			{
-				OrganContextPtr->ContextTags.AppendTags(CellInputData->ContextTagsAdded);
-			}
-			
-			// Apply this cell's counter operations in author order. Reversed 1:1 in RemoveCellNode,
-			// so operations are expected to be Add/Subtract only (Multiply/Divide are not invertible).
-			for (int32 j = 0; j < CellInputData->TagCounterOperations.Num(); j++)
-			{
-				OrganContextPtr->TagCounter.ApplyOperation(CellInputData->TagCounterOperations[j]);
-			}
-			
-			// We've passed validation, lets register it and move on
-			OrganContextPtr->CellGraph->RegisterNode(TargetCellNode);
-			
-			SourceCellNode->LinkJunction(SourceJunctionKey, TargetCellNode);
-			TargetCellNode->LinkJunction(TargetJunctionKey, SourceCellNode);
-			
-			SourceCellNode->Connect(TargetCellNode);
-			
-			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_AddCellNode)
-			NewNodes.Add(TargetCellNode);
-		}
-		else
-		{
-			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardIntersectingCellNode)
-			delete TargetCellNode;
+			BoundsIntersectingNodes.RemoveAt(j);
 		}
 	}
-	
-	return MoveTemp(NewNodes);
+
+	// Only build when we are not colliding with anything
+	if (BoundsIntersectingNodes.IsEmpty())
+	{
+		// Our cell has unique tags that need to get added to the used
+		if (CellInputData->AssemblyTags.HasAnyExact(OrganContextPtr->CellInputDataSummary.GroupTags.UniqueTags))
+		{
+			OrganContextPtr->PlacedTagGroups.UniqueTags.AppendTags(
+				OrganContextPtr->CellInputDataSummary.GroupTags.UniqueTags.FilterExact(CellInputData->AssemblyTags));
+		}
+		if (CellInputData->AssemblyTags.HasAnyExact(OrganContextPtr->CellInputDataSummary.GroupTags.RequiredAnyTags))
+		{
+			OrganContextPtr->PlacedTagGroups.RequiredAnyTags.AppendTags(
+				OrganContextPtr->CellInputDataSummary.GroupTags.RequiredAnyTags.FilterExact(CellInputData->AssemblyTags));
+		}
+
+		// Add tags to context
+		if (!CellInputData->ContextTagsAdded.IsEmpty())
+		{
+			OrganContextPtr->ContextTags.AppendTags(CellInputData->ContextTagsAdded);
+		}
+
+		// Apply this cell's counter operations in author order. Reversed 1:1 in RemoveCellNode,
+		// so operations are expected to be Add/Subtract only (Multiply/Divide are not invertible).
+		for (int32 j = 0; j < CellInputData->TagCounterOperations.Num(); j++)
+		{
+			OrganContextPtr->TagCounter.ApplyOperation(CellInputData->TagCounterOperations[j]);
+		}
+
+		// We've passed validation, lets register it and move on
+		OrganContextPtr->CellGraph->RegisterNode(TargetCellNode);
+
+		SourceCellNode->LinkJunction(SourceJunctionKey, TargetCellNode);
+		TargetCellNode->LinkJunction(TargetJunctionKey, SourceCellNode);
+
+		SourceCellNode->Connect(TargetCellNode);
+
+		N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_AddCellNode)
+		return TargetCellNode;
+	}
+
+	N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardIntersectingCellNode)
+	delete TargetCellNode;
+	return nullptr;
 }
 
 void FNOrganGraphBuilderTask::CapBranchesWithFinishers(FNMersenneTwister& Random) const
@@ -646,16 +823,108 @@ void FNOrganGraphBuilderTask::CapBranchesWithFinishers(FNMersenneTwister& Random
 #endif // !UE_BUILD_SHIPPING
 	for (int32 j = 0; j < OpenNodes.Num(); j++)
 	{
-#if !UE_BUILD_SHIPPING		
+#if !UE_BUILD_SHIPPING
 		CapNum += ProcessNode(Random, OpenNodes[j], true).Num();
 #else
 		ProcessNode(Random, OpenNodes[j], true);
-#endif // !UE_BUILD_SHIPPING		
+#endif // !UE_BUILD_SHIPPING
 	}
 #if !UE_BUILD_SHIPPING
 	N_ASSEMBLY_ANALYTICS_TWO_PARAM(OrganGraphBuilder_CappedWithFinisher, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, CapNum);
 #endif // !UE_BUILD_SHIPPING
-	
+
+}
+
+void FNOrganGraphBuilderTask::EnsureFinisherMinimums(FNMersenneTwister& Random) const
+{
+	// Cells governed by a combined Unique + RequiredAny group are validated by the RequiredAny check rather than
+	// their per-cell minimum (mirrors CheckGraph), so they are not candidates for forcing.
+	const FGameplayTagContainer UniqueAndRequiredTags =
+		OrganContextPtr->CellInputDataSummary.GroupTags.UniqueTags.FilterExact(OrganContextPtr->CellInputDataSummary.GroupTags.RequiredAnyTags);
+
+	// Gather targets first — no RNG, no graph mutation. When nothing needs forcing this whole pass is a true no-op,
+	// so tissues that never pair a finisher with a MinimumCount keep byte-identical generation.
+	TArray<int32> TargetCellIndices;
+	for (int32 i = 0; i < OrganContextPtr->CellInputData.Num(); i++)
+	{
+		if (FNVirtualOrganContext::IsUnmetFinisherMinimum(OrganContextPtr->CellInputData[i], UniqueAndRequiredTags))
+		{
+			TargetCellIndices.Add(i);
+		}
+	}
+	if (TargetCellIndices.IsEmpty())
+	{
+		return;
+	}
+
+	for (const int32 TargetCellIndex : TargetCellIndices)
+	{
+		const FNVirtualCellData& TargetCell = OrganContextPtr->CellInputData[TargetCellIndex];
+		while (TargetCell.UsedCount < TargetCell.MinimumCount)
+		{
+			// Respect cooperative cancellation and the global cell ceiling, matching the rest of the build.
+			if (TaskGraphContextPtr->IsCancelled()) return;
+			if (OrganContextPtr->MaximumCellCount > 0 &&
+				OrganContextPtr->CellGraph->GetCellNodeCount() >= OrganContextPtr->MaximumCellCount)
+			{
+				break;
+			}
+
+			// No open junction can currently host this cell. CheckGraph will then reject the graph and the build
+			// retries from a fresh attempt — the correct outcome for a layout that genuinely cannot place it.
+			if (!TryPlaceTargetCellOnce(Random, TargetCellIndex))
+			{
+				break;
+			}
+		}
+	}
+}
+
+bool FNOrganGraphBuilderTask::TryPlaceTargetCellOnce(FNMersenneTwister& Random, const int32 TargetCellIndex) const
+{
+	const TArray<FNAssemblyGraphNode*> OpenNodes = OrganContextPtr->CellGraph->GetNodesWithOpenJunctions();
+	for (FNAssemblyGraphNode* OpenNode : OpenNodes)
+	{
+		if (OpenNode->GetNodeType() != ENAssemblyGraphNodeType::Cell) continue;
+		FNAssemblyGraphCellNode* SourceCellNode = static_cast<FNAssemblyGraphCellNode*>(OpenNode);
+
+		for (const TPair<int32, FNCellJunctionDetails*>& Junction : SourceCellNode->GetOpenJunctions())
+		{
+			const int32 SourceJunctionKey = Junction.Key;
+			FNCellJunctionDetails* SourceJunctionValue = Junction.Value;
+
+			// End-node filter so Finisher/FinisherOnly cells are eligible; reuses every geometry/tag/Max/Unique gate.
+			FNCellInputDataFilter NodeFilter;
+			NodeFilter.NodeDepth = SourceCellNode->GetNodeDepth();
+			NodeFilter.SocketSize = SourceJunctionValue->SocketSize;
+			NodeFilter.SourceQuat = SourceJunctionValue->WorldRotation.Quaternion();
+			NodeFilter.SourceCellInputData = SourceCellNode->GetInputDataPtr();
+			NodeFilter.SourceCellNode = SourceCellNode;
+			NodeFilter.WorldPosition = SourceJunctionValue->WorldLocation;
+			NodeFilter.bIsEndNode = true;
+
+			FNWeightedIntegerArray CellInputWeightedIndices;
+			TMap<int32, TArray<int32>> ValidJunctions;
+			OrganContextPtr->FilterCellInputData(NodeFilter, CellInputWeightedIndices, ValidJunctions);
+
+			// Only proceed when the target cell itself is a valid candidate for this specific junction. Filtering
+			// consumes no RNG, so probing junctions that cannot host the cell leaves the stream untouched.
+			const TArray<int32>* ValidJunctionIndices = ValidJunctions.Find(TargetCellIndex);
+			if (ValidJunctionIndices == nullptr || ValidJunctionIndices->IsEmpty())
+			{
+				continue;
+			}
+
+			const FQuat SourceJunctionWorldQuat = SourceJunctionValue->WorldRotation.Quaternion();
+			FNVirtualCellData* TargetCellInputData = &OrganContextPtr->CellInputData[TargetCellIndex];
+			if (TryAttachCellToJunction(Random, SourceCellNode, SourceJunctionKey, SourceJunctionValue,
+				SourceJunctionWorldQuat, TargetCellInputData, *ValidJunctionIndices) != nullptr)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) const
@@ -689,8 +958,19 @@ void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) 
 			OrganContextPtr->CellGraph->UnregisterNode(NullNode);
 			delete NullNode;
 		}
+		else if (LinkedNode->GetNodeType() == ENAssemblyGraphNodeType::Bone)
+		{
+			// The bone is a pre-placed anchor the graph keeps, so we free its socket and sever the
+			// connection but never unregister/delete it. Releasing the bone's Linked pointer here is
+			// essential: EnforceNotFinisherConstraint can prune the start cell, and without this the
+			// bone is left pointing at (and marked linked to) the freed node.
+			FNAssemblyGraphBoneNode* BoneNode = static_cast<FNAssemblyGraphBoneNode*>(LinkedNode);
+			BoneNode->Unlink();
+			CellNode->UnlinkJunction(JunctionKey);
+			CellNode->Disconnect(BoneNode);
+		}
 	}
-	
+
 	// Reverse unique-tag tracking so the cell template becomes eligible again
 	FNVirtualCellData* InputData = CellNode->GetInputDataPtr();
 	if (InputData != nullptr && InputData->AssemblyTags.HasAnyExact(OrganContextPtr->CellInputDataSummary.GroupTags.UniqueTags))
@@ -741,7 +1021,7 @@ void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) 
 			OrganContextPtr->ContextTags.RemoveTags(UncoveredContextTags);
 		}
 	}
-	
+
 	// Undo this cell's counter operations in reverse author order, mirroring the apply in ProcessCellNode.
 	// Valid only because operations are restricted to Add/Subtract, which are exact inverses; per-cell
 	// reversal of Multiply/Divide would not restore the prior value.

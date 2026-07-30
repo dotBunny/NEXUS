@@ -23,6 +23,8 @@ struct NEXUSCORE_API FNWorldActorFilterSettings
 	 */
 	bool bIncludePlayerStarts = false;
 
+	TArray<FName> WorldCollisionActorIgnoreTags;
+
 	/**
 	 * Optional caller-supplied predicate evaluated per actor. Return true to keep the actor, false to exclude it.
 	 * @note Owned by value, so safe to assign a temporary lambda. Leave default-constructed (empty) to skip the predicate check entirely.
@@ -36,8 +38,9 @@ struct NEXUSCORE_API FNWorldActorFilterSettings
  * The FNActorUtils class provides static utility functions for common Actor-related
  * operations in Unreal Engine. These functions are designed to simplify working
  * with Actor instances, particularly focusing on component access and manipulation.
- * Unlike UNActorLibrary, these utilities are only accessible from C++ code and not 
+ * Unlike UNActorLibrary, these utilities are only accessible from C++ code and not
  * exposed to Blueprints.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/actor-utils/">FNActorUtils</a>
  */
 class NEXUSCORE_API FNActorUtils
 {

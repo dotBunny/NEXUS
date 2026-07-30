@@ -8,7 +8,7 @@
 
 FText UAssetDefinition_NActorPoolSet::GetAssetDisplayName() const
 {
-	static const FText DisplayName = NSLOCTEXT("NexusActorPoolsEditor", "AssetTypeActions_NActorPoolSet", "NActorPool Set"); 
+	static const FText DisplayName = NSLOCTEXT("NexusActorPoolsEditor", "AssetTypeActions_NActorPoolSet", "NActorPool Set");
 	return DisplayName;
 }
 
@@ -29,11 +29,11 @@ FText UAssetDefinition_NActorPoolSet::GetAssetDescription(const FAssetData& Asse
 
 EDataValidationResult UAssetDefinition_NActorPoolSet::ValidateAsset(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context)
 {
-	UNActorPoolSet* ActorPoolSet = Cast<UNActorPoolSet>(InAsset);
+	const UNActorPoolSet* ActorPoolSet = Cast<UNActorPoolSet>(InAsset);
 	if (!ActorPoolSet) return EDataValidationResult::NotValidated;
 
 	EDataValidationResult Result = EDataValidationResult::Valid;
-	for (FNActorPoolDefinition& Definition : ActorPoolSet->ActorPools)
+	for (const FNActorPoolDefinition& Definition : ActorPoolSet->ActorPools)
 	{
 		if (Definition.ActorClass == nullptr)
 		{

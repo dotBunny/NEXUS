@@ -10,7 +10,7 @@
 #include "NEditorDefaults.h"
 #include "NEditorUtils.h"
 #include "NKillZoneActor.h"
-#include "NPooledActor.h"
+#include "NPooledActorBase.h"
 #include "NPropertySections.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
@@ -31,20 +31,23 @@ void FNActorPoolsEditorModule::ShutdownModule()
 	{
 		GUnrealEd->UnregisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName());
 	}
+	// No-op in practice: the startup callback(s) are bound via CreateStatic (no `this` owner
+	// for RemoveAll to match) and RegisterStartupCallback usually runs them immediately. Kept
+	// for symmetry with Epic's module template; the real menu teardown is below.
 	UToolMenus::UnRegisterStartupCallback(this);
 	N_TOOLS_MENU_ENTRY_EUW_METHOD_UNREGISTER(EUW_NActorPools)();
 	FNActorPoolsEditorCommands::RemoveMenuEntries();
-	
+
 	// Teardown Placement
 	N_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
-	
+
 	FNActorPoolsEditorStyle::Shutdown();
 }
 
 void FNActorPoolsEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;
-	
+
 	FNActorPoolsEditorStyle::Initialize();
 
 	// Initialize Tool Menu
@@ -53,14 +56,14 @@ void FNActorPoolsEditorModule::OnPostEngineInit()
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(&N_TOOLS_MENU_ENTRY_EUW_METHOD_REGISTER(EUW_NActorPools)));
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(&FNActorPoolsEditorCommands::AddMenuEntries));
 	}
-	
+
 	if (GUnrealEd)
 	{
 		const TSharedPtr<FComponentVisualizer> ActorPoolSpawnerComponentVisualizer = MakeShared<FNActorPoolSpawnerComponentVisualizer>();
 		GUnrealEd->RegisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName(), ActorPoolSpawnerComponentVisualizer);
 		ActorPoolSpawnerComponentVisualizer->OnRegister();
 	}
-	
+
 	// Handle Placement Definitions
 	if (const FPlacementCategoryInfo* Info = FNEditorDefaults::GetPlacementCategory())
 	{
@@ -72,16 +75,8 @@ void FNActorPoolsEditorModule::OnPostEngineInit()
 		TOptional<FLinearColor>(),
 		TOptional<int32>(),
 		NSLOCTEXT("NexusActorPoolsEditor", "Placement_NKillZoneActor", "KillZone Actor"))));
-		PlacementActors.Add(IPlacementModeModule::Get().RegisterPlaceableItem(Info->UniqueHandle, MakeShared<FPlaceableItem>(
-			*ANPooledActor::StaticClass(),
-			FAssetData(ANPooledActor::StaticClass()),
-			NAME_None,
-			NAME_None,
-			TOptional<FLinearColor>(),
-			TOptional<int32>(),
-			NSLOCTEXT("NexusActorPoolsEditor", "Placement_NPooledActor", "Pooled Actor"))));
 	}
-	
+
 	// Inspector Category Filter
 	FNPropertySections::AddActorComponentCategory("Actor Pool Spawner");
 	FNPropertySections::AddActorComponentCategory("Kill Zone");

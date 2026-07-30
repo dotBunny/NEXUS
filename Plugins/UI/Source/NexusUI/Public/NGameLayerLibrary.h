@@ -17,7 +17,7 @@ UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Game Layer Library")
 class UNGameLayerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-	
+
 public:
 	/**
 	 * Changes a layer's visibility from the GameLayerManager.
@@ -26,6 +26,7 @@ public:
 	 * @param Visibility The visibility you want to set the layer to.
 	 * @return True if the layer was successfully set, false otherwise.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|User Interface", DisplayName = "Set Layer Visibility")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|User Interface", DisplayName = "Set Layer Visibility",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-layer-library/#set-layer-visibility"))
 	static bool SetLayerVisibility(UPARAM(ref) ULocalPlayer* LocalPlayer, const FName Name, ESlateVisibility Visibility);
 };

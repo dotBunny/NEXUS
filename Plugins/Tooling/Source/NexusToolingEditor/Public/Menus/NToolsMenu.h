@@ -24,8 +24,5 @@ private:
 
 	/** All registered menu entries keyed by their stable identifier. */
 	static TMap<FName, FNMenuEntry> Entries;
-
-	/** Display names for each section identifier referenced by Entries. */
-	static TMap<FName, FText> Sections;
 };
 

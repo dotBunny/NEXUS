@@ -21,7 +21,7 @@ class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlay : public UNDeveloperOverl
 	GENERATED_BODY()
 
 public:
-	
+
 	/** Subscribe to the actor-pool subsystem hosted by World so its pool-added events drive this overlay. */
 	virtual void BindWorld(UWorld* World) override;
 	/** Drop the subscription to the actor-pool subsystem hosted by World. */

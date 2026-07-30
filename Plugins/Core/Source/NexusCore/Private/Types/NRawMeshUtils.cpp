@@ -370,7 +370,7 @@ float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FNRawMe
 	return MaxDepth;
 }
 
-float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation, const FVector& WorldPosition, float EarlyExitDepth)
+float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation, const FVector& WorldPosition)
 {
 	if (LeftMesh.HasBounds())
 	{
@@ -396,13 +396,13 @@ float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector
 	return ComputePointDepthInside(LeftMesh, LeftLocal);
 }
 
-float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& WorldPosition, float EarlyExitDepth)
+float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& WorldPosition)
 {
 	// LeftMesh has already had its transform baked into its vertices (and Bounds), so it lives in the world
 	// frame and WorldPosition can be tested against it directly. Delegate to the transform-aware point-depth
 	// query with an identity transform — the local-space conversion of WorldPosition reduces to the identity,
 	// so the point is measured against the mesh as-is.
-	return GetIntersectDepth(LeftMesh, FVector::ZeroVector, FRotator::ZeroRotator, WorldPosition, EarlyExitDepth);
+	return GetIntersectDepth(LeftMesh, FVector::ZeroVector, FRotator::ZeroRotator, WorldPosition);
 }
 
 TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, const TArray<FNRawMesh>& Meshes, const TArray<FTransform>& Transforms,  UMaterialInterface* MaterialInterface, bool bSingleActor, bool bProcessMeshes)
@@ -417,18 +417,18 @@ TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, co
 		{
 			CombineMesh(BaseTransform, BaseMesh, Transforms[i], Meshes[i]);
 		}
-		
+
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Name = MakeUniqueObjectName(World, ANDebugActor::StaticClass(), FName("RawMeshVisualizer"));
-#if WITH_EDITOR	
+#if WITH_EDITOR
 		const FString Label = SpawnParams.Name.ToString();
 		SpawnParams.InitialActorLabel = Label;
 #endif // WITH_EDITOR
 		SpawnParams.ObjectFlags |= RF_Transient;
-		
+
 		ANDebugActor* DebugActor = World->SpawnActor<ANDebugActor>(ANDebugActor::StaticClass(), BaseTransform, SpawnParams);
-		if (DebugActor == nullptr) return MoveTemp(DebugActors);
-		
+		if (DebugActor == nullptr) return DebugActors;
+
 		DebugActor->OverrideWithDynamicMesh(BaseMesh.CreateDynamicMesh(bProcessMeshes), MaterialInterface);
 		DebugActors.Add(DebugActor);
 	}
@@ -451,7 +451,7 @@ TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, co
 			DebugActors.Add(DebugActor);
 		}
 	}
-	return MoveTemp(DebugActors);
+	return DebugActors;
 }
 
 FNRawMesh FNRawMeshUtils::ToConvexHull(const FNRawMesh& Mesh)
@@ -466,7 +466,7 @@ FNRawMesh FNRawMeshUtils::ToConvexHull(const FNRawMesh& Mesh)
 	if (Mesh.Vertices.Num() < 4)
 	{
 		UE_LOG(LogNexusCore, Warning, TEXT("Cannot build a convex hull from fewer than 4 vertices; returning empty mesh."));
-		return MoveTemp(Result);
+		return Result;
 	}
 
 	// Feed the source vertex cloud into Chaos's hull builder; the source loops are discarded.
@@ -481,14 +481,14 @@ FNRawMesh FNRawMeshUtils::ToConvexHull(const FNRawMesh& Mesh)
 	TArray<TArray<int32>> OutFaceIndices;
 	TArray<Chaos::FConvex::FVec3Type> OutVertices;
 	Chaos::FConvex::FAABB3Type OutLocalBounds;
-	Chaos::FConvexBuilder::Build(InputVertices, OutPlanes, OutFaceIndices, OutVertices, OutLocalBounds, 
+	Chaos::FConvexBuilder::Build(InputVertices, OutPlanes, OutFaceIndices, OutVertices, OutLocalBounds,
 		Chaos::FConvexBuilder::EBuildMethod::Original); // Use the original
 	const int32 VerticesCount = OutVertices.Num();
 	const int32 LoopCount = OutFaceIndices.Num();
 	if (VerticesCount == 0 || LoopCount == 0)
 	{
 		UE_LOG(LogNexusCore, Warning, TEXT("Convex hull build returned no geometry; returning empty mesh."));
-		return MoveTemp(Result);
+		return Result;
 	}
 
 	Result.Vertices.Reserve(VerticesCount);
@@ -525,7 +525,7 @@ FNRawMesh FNRawMeshUtils::ToConvexHull(const FNRawMesh& Mesh)
 	Result.ConvertToTriangles();
 	Result.bHasNonTris = false;
 
-	return MoveTemp(Result);
+	return Result;
 }
 
 FNRawMesh FNRawMeshUtils::MakeBoxHull(const FBox& Box)
@@ -743,7 +743,7 @@ bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FVe
 	{
 		RightVerticesWorld.Add(FNVectorUtils::TransformPoint(Vertex, RightOrigin, RightRotation));
 	}
-	
+
 	const int32 LeftLoopCount = LeftMesh.Loops.Num();
 	const int32 RightLoopCount = RightMesh.Loops.Num();
 

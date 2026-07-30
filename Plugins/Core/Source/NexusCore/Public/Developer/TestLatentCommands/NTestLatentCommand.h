@@ -7,9 +7,18 @@
 
 #include "Misc/AutomationTest.h"
 
+/**
+ * Latent automation command that invokes a parameterless static method once on the next automation tick.
+ *
+ * The base building block for deferring test work until after the engine has ticked; used by the N_TEST_PERF
+ * macros and any test that needs its body to run outside the immediate registration call. Use the _WithBase
+ * variant when the deferred method must raise assertions through an FAutomationTestBase.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/test-latent-commands/test-latent-command/">FNTestLatentCommand</a>
+ */
 class FNTestLatentCommand : public IAutomationLatentCommand
 {
 public:
+	/** @param StaticMethod Parameterless callable executed when the command ticks. */
 	FNTestLatentCommand(TFunction<void()> StaticMethod)
 		: TestFunctionality(StaticMethod)
 	{

@@ -28,9 +28,16 @@
 #include "NWorldAssemblyEditorToolMenu.h"
 #include "NWorldAssemblyEditorUndo.h"
 #include "NWorldAssemblyEdMode.h"
+#include "NWorldCollisionCache.h"
 #include "UnrealEdGlobals.h"
 #include "Customizations/NOrganComponentCustomization.h"
+#include "Customizations/NWorldAssemblyEditorUserSettingsCustomization.h"
+#include "NWorldAssemblyEditorUserSettings.h"
+#include "PropertyEditorModule.h"
+#include "ToolMenus.h"
+#include "Customizations/NCellJunctionComponentCustomization.h"
 #include "Editor/UnrealEdEngine.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Macros/NEditorModuleMacros.h"
 #include "Organ/NBoneActor.h"
 #include "Organ/NBoneComponent.h"
@@ -45,6 +52,32 @@ void FNWorldAssemblyEditorModule::StartupModule()
 void FNWorldAssemblyEditorModule::ShutdownModule()
 {
 	N_MODULE_REMOVE_POST_ENGINE_INIT()
+
+	// Remove the world-collision cache's async ticker and drain any in-flight background build before the module (and
+	// the static function it ticks into) can be unloaded — otherwise Live Coding / editor shutdown would dangle it.
+	FNWorldCollisionCache::Shutdown();
+
+	// Drop the asset-registry hooks registered in OnPostEngineInit. Use the module pointer so we don't force the
+	// AssetRegistry module to load during shutdown if it's already gone.
+	if (const FAssetRegistryModule* AssetRegistryModule =
+		FModuleManager::GetModulePtr<FAssetRegistryModule>(FName("AssetRegistry")))
+	{
+		IAssetRegistry& AssetRegistry = AssetRegistryModule->Get();
+		AssetRegistry.OnAssetRenamed().Remove(AssetRenamedHandle);
+		AssetRegistry.OnAssetRemoved().Remove(AssetRemovedHandle);
+	}
+	AssetRenamedHandle.Reset();
+	AssetRemovedHandle.Reset();
+
+	// Drop the world save hooks registered in OnPostEngineInit.
+	FEditorDelegates::PreSaveWorldWithContext.Remove(PreSaveWorldHandle);
+	FEditorDelegates::PostSaveWorldWithContext.Remove(PostSaveWorldHandle);
+	PreSaveWorldHandle.Reset();
+	PostSaveWorldHandle.Reset();
+
+	// No-op in practice: the startup callback(s) are bound via CreateStatic (no `this` owner
+	// for RemoveAll to match) and RegisterStartupCallback usually runs them immediately. Kept
+	// for symmetry with Epic's module template; the real menu teardown is below.
 	UToolMenus::UnRegisterStartupCallback(this);
 	FEditorModeRegistry::Get().UnregisterMode(FNWorldAssemblyEdMode::Identifier);
 
@@ -66,14 +99,24 @@ void FNWorldAssemblyEditorModule::ShutdownModule()
 		PropertyModule.UnregisterCustomClassLayout(ANCellActor::StaticClass()->GetFName());
 		PropertyModule.UnregisterCustomClassLayout(ANCellProxy::StaticClass()->GetFName());
 		PropertyModule.UnregisterCustomClassLayout(UNOrganComponent::StaticClass()->GetFName());
+		PropertyModule.UnregisterCustomClassLayout(UNWorldAssemblyEditorUserSettings::StaticClass()->GetFName());
 
 		PropertyModule.NotifyCustomizationModuleChanged();
 	}
-	
+
 	N_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
 	N_TOOLS_MENU_ENTRY_EUW_METHOD_UNREGISTER(EUW_NWorldAssemblySystem)();
-	
+
 	FNWorldAssemblyEditorToolMenu::RemoveMenuEntries();
+
+	// Mirror the Register() in OnPostEngineInit. RemoveMenuEntries() above has already detached the global
+	// actions that hold the command list alive, so it's now safe to drop the singleton. IsRegistered() skips
+	// the headless cook/commandlet path, where Register() never ran.
+	if (FNWorldAssemblyEditorCommands::IsRegistered())
+	{
+		FNWorldAssemblyEditorCommands::Unregister();
+	}
+
 	FNWorldAssemblyEditorStyle::Shutdown();
 
 	// Remove Undo handler
@@ -90,20 +133,21 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 	{
 		UndoHandler = MakeShared<FNWorldAssemblyEditorUndo>();
 	}
-	
+
 	// Configure Style
 	FNWorldAssemblyEditorStyle::Initialize();
-	
+
 	// Setup Asset Monitoring
 	const FAssetRegistryModule& AssetRegistryModule =
 		FModuleManager::LoadModuleChecked<FAssetRegistryModule>(FName("AssetRegistry"));
-	
-	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
-	
-	AssetRegistry.OnAssetRenamed().AddStatic(&UAssetDefinition_NCell::OnAssetRenamed);
-	AssetRegistry.OnAssetRemoved().AddStatic(&UAssetDefinition_NCell::OnAssetRemoved);
 
-	FEditorDelegates::PreSaveWorldWithContext.AddStatic(&UAssetDefinition_NCell::OnPreSaveWorldWithContext);
+	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+
+	AssetRenamedHandle = AssetRegistry.OnAssetRenamed().AddStatic(&UAssetDefinition_NCell::OnAssetRenamed);
+	AssetRemovedHandle = AssetRegistry.OnAssetRemoved().AddStatic(&UAssetDefinition_NCell::OnAssetRemoved);
+
+	PreSaveWorldHandle = FEditorDelegates::PreSaveWorldWithContext.AddStatic(&UAssetDefinition_NCell::OnPreSaveWorldWithContext);
+	PostSaveWorldHandle = FEditorDelegates::PostSaveWorldWithContext.AddStatic(&UAssetDefinition_NCell::OnPostSaveWorldWithContext);
 
 	// Initialize Tool Menu
 	if (FSlateApplication::IsInitialized())
@@ -121,14 +165,19 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 	// Visualizers
 	if (GUnrealEd != nullptr)
 	{
+		// Only the cell-root visualizer is retained as a module member: the tool menu (Hull_SplitEdge etc.)
+		// calls back into it through the derived type for selection state (GetEdgeSelection/ClearSelection/
+		// GetMode/HasEdgeSelected), none of which exist on the base FComponentVisualizer interface. The
+		// junction and bone visualizers are only ever used through the base interface, so locals suffice —
+		// UnrealEd holds its own shared ref once registered. The member is released in ShutdownModule().
 		RootComponentVisualizer = MakeShared<FNCellRootComponentVisualizer>();
 		GUnrealEd->RegisterComponentVisualizer(UNCellRootComponent::StaticClass()->GetFName(), RootComponentVisualizer);
 		RootComponentVisualizer->OnRegister();
-	
+
 		const TSharedPtr<FComponentVisualizer> JunctionComponentVisualizer = MakeShared<FNCellJunctionComponentVisualizer>();
 		GUnrealEd->RegisterComponentVisualizer(UNCellJunctionComponent::StaticClass()->GetFName(), JunctionComponentVisualizer);
 		JunctionComponentVisualizer->OnRegister();
-		
+
 		const TSharedPtr<FComponentVisualizer> BoneComponentVisualizer = MakeShared<FNBoneComponentVisualizer>();
 		GUnrealEd->RegisterComponentVisualizer(UNBoneComponent::StaticClass()->GetFName(), BoneComponentVisualizer);
 		BoneComponentVisualizer->OnRegister();
@@ -136,18 +185,24 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 
 	// Register Customizations
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	
+
 	PropertyModule.RegisterCustomClassLayout(ANCellProxy::StaticClass()->GetFName(),
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNCellProxyCustomization::MakeInstance));
 
 	PropertyModule.RegisterCustomClassLayout(UNCellRootComponent::StaticClass()->GetFName(),
 			FOnGetDetailCustomizationInstance::CreateStatic(&FNCellRootComponentCustomization::MakeInstance));
 
+	PropertyModule.RegisterCustomClassLayout(UNCellJunctionComponent::StaticClass()->GetFName(),
+			FOnGetDetailCustomizationInstance::CreateStatic(&FNCellJunctionComponentCustomization::MakeInstance));
+
 	PropertyModule.RegisterCustomClassLayout(UNOrganComponent::StaticClass()->GetFName(),
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNOrganComponentCustomization::MakeInstance));
 
+	PropertyModule.RegisterCustomClassLayout(UNWorldAssemblyEditorUserSettings::StaticClass()->GetFName(),
+		FOnGetDetailCustomizationInstance::CreateStatic(&FNWorldAssemblyEditorUserSettingsCustomization::MakeInstance));
+
 	PropertyModule.NotifyCustomizationModuleChanged();
-	
+
 	// Handle Placement Definitions
 	if (const FPlacementCategoryInfo* Info = FNEditorDefaults::GetPlacementCategory())
 	{
@@ -159,7 +214,7 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 		TOptional<FLinearColor>(),
 		TOptional<int32>(),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "NBoneActorPlacement", "Bone Actor"))));
-		
+
 		PlacementActors.Add(IPlacementModeModule::Get().RegisterPlaceableItem(Info->UniqueHandle, MakeShared<FPlaceableItem>(
 		*ANOrganVolume::StaticClass(),
 		FAssetData(ANOrganVolume::StaticClass()),
@@ -169,7 +224,7 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 		TOptional<int32>(),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "NOrganVolumePlacement", "Organ Volume"))));
 	}
-	
+
 	// Inspector Category Filter
 	FNPropertySections::AddActorCategory("Cell Actor");
 	FNPropertySections::AddActorCategory("Cell Proxy");
@@ -177,7 +232,15 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 	FNPropertySections::AddActorComponentCategory("Organ Component");
 	FNPropertySections::AddSceneComponentCategory("Cell Root");
 	FNPropertySections::AddSceneComponentCategory("Cell Junction");
+	FNPropertySections::AddSceneComponentCategory("Cell Junction Visualizer");
+
 	FNPropertySections::AddSceneComponentCategory("Bone Component");
+
+	FNPropertySections::AddSceneComponentCategory("Assembly Operation");
+
+
+	// Cache stuff
+	FNWorldAssemblyEdMode::CacheUserSettings();
 }
 
 IMPLEMENT_MODULE(FNWorldAssemblyEditorModule, NexusWorldAssemblyEditor)

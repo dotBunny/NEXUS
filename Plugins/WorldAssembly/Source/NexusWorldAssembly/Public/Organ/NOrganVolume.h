@@ -14,6 +14,7 @@
  * Dropping one of these into a level is the fastest way to declare a region that World Assembly
  * should populate — the organ component supplies tissue/cell rules and the bone component
  * supplies the spatial skeleton used during graph construction.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/organ-volume/">ANOrganVolume</a>
  */
 UCLASS(BlueprintType, ClassGroup = "NEXUS", DisplayName = "NEXUS | Organ Volume", HideCategories=(Tags, Activation, Cooking,
 	AssetUserData, Navigation, Actor, Input))

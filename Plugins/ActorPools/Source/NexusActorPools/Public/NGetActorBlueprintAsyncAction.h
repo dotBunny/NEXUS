@@ -9,10 +9,13 @@
 #include "Engine/StreamableManager.h"
 #include "NGetActorBlueprintAsyncAction.generated.h"
 
+class UNActorPoolSubsystem;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGetActorAsyncOutputPin, AActor*, SpawnedActor);
 
 /**
  * Async Blueprint action that soft-loads an AActor class and then gets an instance of it from the Actor Pool subsystem.
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/get-actor-async/">UNGetActorBlueprintAsyncAction</a>
  */
 UCLASS()
 class NEXUSACTORPOOLS_API UNGetActorBlueprintAsyncAction : public UBlueprintAsyncActionBase
@@ -24,6 +27,7 @@ class NEXUSACTORPOOLS_API UNGetActorBlueprintAsyncAction : public UBlueprintAsyn
 	friend class UNGetActorBlueprintAsyncActionTests_OnHasPool_MismatchedTemplate;
 	friend class UNGetActorBlueprintAsyncActionTests_HandleCleanup_OnDestroy;
 	friend class UNGetActorBlueprintAsyncActionTests_OnLoaded_FailedLoad;
+	friend class UNGetActorBlueprintAsyncActionTests_OnLoaded_ExpiredContext;
 #endif // WITH_TESTS
 
 public:
@@ -31,11 +35,11 @@ public:
 	 * Gets an actor from a given pool asynchronously, creating a pool as necessary.
 	 * @note Primarily used to decouple hard references to Actors.
 	 * @param WorldContextObject Context used to resolve the Actor Pool subsystem.
-	 * @param ActorClass The soft class to load and then spawn from the pool.	
+	 * @param ActorClass The soft class to load and then spawn from the pool.
 	 * @return The async action instance that BP will attach its output pins to.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Actor Async", Category = "NEXUS|Actor Pools",
-		meta = (BlueprintInternalUseOnly = "true", WorldContext = "WorldContextObject"))
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/get-actor-async/#get-actor-async", BlueprintInternalUseOnly = "true", WorldContext = "WorldContextObject"))
 	static UNGetActorBlueprintAsyncAction* GetActorAsync(UObject* WorldContextObject, TSoftClassPtr<AActor> ActorClass);
 
 	/** Fires once the class has been loaded and the pooled actor has been spawned. SpawnedActor is null on failure. */
@@ -50,7 +54,16 @@ private:
 	TWeakObjectPtr<UObject> WorldContext;
 	TSoftClassPtr<AActor> ActorClass;
 	TSharedPtr<FStreamableHandle> StreamingHandle;
-	
+
+	/**
+	 * Resolves the Actor Pool subsystem from the (weak) world context, tolerating an expired context.
+	 * @return The subsystem, or null if the context/world has gone away (e.g. a level transition completed
+	 *         while the class was still streaming in).
+	 * @note Async actions outlive their world context via the game instance, so this must never assume the
+	 *       context is still valid — unlike N_GET_WORLD_FROM_CONTEXT, whose shipping arm dereferences it raw.
+	 */
+	UNActorPoolSubsystem* ResolveActorPoolSubsystem() const;
+
 	void OnLoaded();
 	void OnHasPool(FNActorPool* ActorPool);
 };

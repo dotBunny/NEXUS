@@ -15,6 +15,8 @@
  *
  * Duplication is disabled because a cell side-car is tied to a specific world and a specific cell
  * actor; copying the asset without rebinding would produce a phantom reference.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-types/asset-definitions/asset-definition-cell/">UAssetDefinition_NCell</a>
  */
 UCLASS()
 class UAssetDefinition_NCell : public UAssetDefinitionDefault
@@ -37,8 +39,18 @@ public:
 	/** Asset registry hook: move the side-car alongside its host world when that world is renamed. */
 	static void OnAssetRenamed(const FAssetData& AssetData, const FString& String);
 
-	/** World pre-save hook: flush any in-memory cell data into the side-car before the world is written. */
+	/**
+	 * World pre-save hook: sync any in-memory cell data into the side-car (in-memory) before the world is written, so the
+	 * recalculated actor state is captured by this level save. The side-car's own disk write is deferred to the matching
+	 * post-save hook — writing a package from inside a pre-save broadcast is a re-entrant save and is unsafe.
+	 */
 	static void OnPreSaveWorldWithContext(UWorld* World, FObjectPreSaveContext ObjectPreSaveContext);
+
+	/**
+	 * World post-save hook: flush the side-car package that OnPreSaveWorldWithContext dirtied for this world to disk, now
+	 * that the world's own save has completed and a fresh top-level SavePackage is safe.
+	 */
+	static void OnPostSaveWorldWithContext(UWorld* World, FObjectPostSaveContext ObjectPostSaveContext);
 
 	//~UAssetDefinition
 	virtual FText GetAssetDisplayName() const override;
@@ -47,8 +59,8 @@ public:
 	virtual TConstArrayView<FAssetCategoryPath> GetAssetCategories() const override;
 	virtual FText GetAssetDescription(const FAssetData& AssetData) const override;
 	virtual bool GetThumbnailActionOverlay(const FAssetData& InAssetData, FAssetActionThumbnailOverlayInfo& OutActionOverlayInfo) const override;
-	
-	
+
+
 	// We do not want NCells to be duplicated as they are tied to a specific world.
 	virtual FAssetSupportResponse CanDuplicate(const FAssetData& InAsset) const override { return FAssetSupportResponse::NotSupported(); }
 	//End UAssetDefinition

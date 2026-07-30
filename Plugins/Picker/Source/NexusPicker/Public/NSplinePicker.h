@@ -8,6 +8,7 @@
 #include "NRandom.h"
 #include "NSplinePickerParams.h"
 #include "Components/SplineComponent.h"
+#include "Math/NMersenneTwister.h"
 
 /**
  * Provides various functions for generating points along a USplineComponent spline using different
@@ -17,20 +18,13 @@
 class NEXUSPICKER_API FNSplinePicker
 {
 public:
-	
-	/**
-	 * Generate deterministic points on a spline.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param OutLocations An array to store the generated points.
-	 * @param Params The parameters for the point generation.
-	 */
-	static void Next(TArray<FVector>& OutLocations, const FNSplinePickerParams& Params);
 
 	/**
 	 * Generate random points on a spline.
 	 * Uses the non-deterministic random generator for true randomness.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Params The parameters for the point generation.
+	 * @note Not thread-safe; all pickers share a single non-deterministic FRandomStream (FNRandom::GetNonDeterministic()). Only call from the Game-thread.
 	 */
 	static void Random(TArray<FVector>& OutLocations, const FNSplinePickerParams& Params);
 
@@ -54,19 +48,19 @@ public:
 	 * @param Seed The random seed to start with, and update.
 	 * @param Params The parameters for the point generation.
 	 */
-	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNSplinePickerParams& Params);	
-	
+	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNSplinePickerParams& Params);
+
 	/**
-	 * Generates random points on a spline using a provided Mersenne Twister.	 
+	 * Generates random points on a spline using a provided Mersenne Twister.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Random The Mersenne Twister to query for random.
 	 * @param Params The parameters for the point generation.
 	 */
-	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSplinePickerParams& Params);
-	
+	static void Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSplinePickerParams& Params);
+
 	/**
 	 * Checks if a point is on a spline within a specified tolerance.
-	 * Uses the N_PICKER_TOLERANCE defined in NPickerUtils.h for proximity checking.
+	 * Uses NEXUS::Picker::SplinePointTolerance defined in NPickerMinimal.h for proximity checking.
 	 * @param SplineComponent The spline component to check against.
 	 * @param Point The point to check.
 	 * @return True if the point is on the spline within the tolerance, false otherwise.
@@ -82,7 +76,7 @@ public:
 		const float Distance = FVector::Distance(Point, ClosestLocationOnSpline);
 		return Distance <= NEXUS::Picker::SplinePointTolerance;
 	}
-	
+
 	/**
 	 * Checks if multiple points are on a spline within a specified tolerance.
 	 * @param Points The array of points to check.
@@ -93,11 +87,11 @@ public:
 	{
 		TArray<bool> OutResults;
 		OutResults.Reserve(Points.Num());
-		
+
 		for (const FVector& Point : Points)
 		{
 			OutResults.Add(IsPointOn(SplineComponent, Point));
 		}
-		return MoveTemp(OutResults);
+		return OutResults;
 	}
 };

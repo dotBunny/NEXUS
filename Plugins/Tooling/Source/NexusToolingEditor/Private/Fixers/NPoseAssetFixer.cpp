@@ -25,20 +25,20 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 	TArray<FString> SelectedPaths;
 	TArray<UObject*> PoseAssets;
 	TArray<UPackage*> CleanupPackages;
-	
+
 	if (bIsContextMenu)
 	{
 		MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step1", "Collecting ..."));
 		PoseAssets = UEditorUtilityLibrary::GetSelectedAssetsOfClass(UPoseAsset::StaticClass());
-		
+
 		// The Pose Assets will be loaded from the selection, so for the sake of consistency we'll also add them to be unloaded after the operation.
 		for (UObject* Object : PoseAssets)
 		{
 			CleanupPackages.AddUnique(Object->GetOutermost());
 		}
-		
+
 		SelectedPaths = FNEditorUtils::GetSelectedContentBrowserPaths();
-		for (FString AdditionalPath : UEditorUtilityLibrary::GetSelectedPathViewFolderPaths())
+		for (const FString& AdditionalPath : UEditorUtilityLibrary::GetSelectedPathViewFolderPaths())
 		{
 			SelectedPaths.AddUnique(AdditionalPath);
 		}
@@ -61,20 +61,20 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 			UE_LOG(LogNexusToolingEditor, Warning, TEXT("Skipping /All as it is not a valid path. Make sure to select the Content folder if you are wanting to search project wide."));
 			continue;
 		}
-		
+
 		// Plugins should be their root path
 		SelectedPaths[i].RemoveFromStart("/All/Plugins");
 		// We just don't want the /All, just in case.
 		SelectedPaths[i].RemoveFromStart("/All");
-		
+
 		ScanTask.EnterProgressFrame(1, FText::Format(NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step2_Item", "Scanning {0}"), FText::FromString(SelectedPaths[i])));
-	
+
 		if (SelectedPaths[i].Len() == 0 || !EditorAssetSubsystem->DoesDirectoryExist(SelectedPaths[i]))
 		{
 			continue;
 		}
 
-		for (FString AssetPath : EditorAssetSubsystem->ListAssets(SelectedPaths[i], true))
+		for (const FString& AssetPath : EditorAssetSubsystem->ListAssets(SelectedPaths[i], true))
 		{
 			FAssetData AssetData = AssetRegistry.GetAssetByObjectPath(FSoftObjectPath(AssetPath));
 			if (AssetData.IsValid() && AssetData.AssetClassPath == UPoseAsset::StaticClass()->GetClassPathName())
@@ -88,7 +88,7 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 			}
 		}
 	}
-	
+
 	if (PoseAssets.IsEmpty())
 	{
 		UE_LOG(LogNexusToolingEditor, Log, TEXT("No pose assets found to update."));
@@ -125,20 +125,20 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 		if (!IsValid(PoseAsset))
 		{
 			FixTask.EnterProgressFrame(1, NSLOCTEXT("NexusToolingEditor", "OutOfDateAnimationSource_Fix_Item_Bad", "Skipping Bad Asset ..."));
-			
+
 			// Bad asset check
 			continue;
 		}
-		
+
 		FixTask.EnterProgressFrame(1, FText::Format(NSLOCTEXT("NexusToolingEditor", "OutOfDateAnimationSource_Fix_Item", "Processing {0}"), FText::FromString(PoseAssets[i]->GetName())));
 
 		UE_LOG(LogNexusToolingEditor, Log, TEXT("Updating out-of-date UPose(%s)."), *PoseAsset->GetName());
-		
+
 		if (UpdatePoseAsset(EditorAssetSubsystem, PoseAsset, CleanupPackages))
 		{
 			ProblemsFixed++;
 		}
-		
+
 		if (GWarn->ReceivedUserCancel())
 		{
 			FixTask.Destroy();
@@ -152,26 +152,29 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 	UPackageTools::UnloadPackages(CleanupPackages);
 }
 
-bool FNPoseAssetFixer::CanExecuteOutOfDataAnimationSource()
+bool FNPoseAssetFixer::CanExecuteOutOfDateAnimationSource()
 {
 	TArray<FString>SelectedPaths = FNEditorUtils::GetSelectedContentBrowserPaths();
-	for (FString AdditionalPath : UEditorUtilityLibrary::GetSelectedPathViewFolderPaths())
+	for (const FString& AdditionalPath : UEditorUtilityLibrary::GetSelectedPathViewFolderPaths())
 	{
 		SelectedPaths.AddUnique(AdditionalPath);
 	}
-	
+
 	// Nothing selected, don't allow execution.
 	if (SelectedPaths.IsEmpty())
 	{
 		return false;
 	}
-	
+
 	// We cannot operate on /All
-	if (SelectedPaths[0] == "/All")
+	for (const FString& SelectedPath : SelectedPaths)
 	{
-		return false;
+		if (SelectedPath == "/All")
+		{
+			return false;
+		}
 	}
-	
+
 	return true;
 }
 
@@ -181,7 +184,7 @@ bool FNPoseAssetFixer::UpdatePoseAsset(UEditorAssetSubsystem* EditorAssetSubsyst
 	{
 		return false;
 	}
-	
+
 	if(PoseAsset->SourceAnimation->HasAnyFlags(RF_NeedLoad))
 	{
 		FLinkerLoad* Linker = PoseAsset->SourceAnimation->GetLinker();
@@ -192,23 +195,23 @@ bool FNPoseAssetFixer::UpdatePoseAsset(UEditorAssetSubsystem* EditorAssetSubsyst
 		CleanupPackages.AddUnique(PoseAsset->SourceAnimation->GetOutermost());
 	}
 	PoseAsset->SourceAnimation->ConditionalPostLoad();
-		
+
 	const IAnimationDataModel* DataModel = PoseAsset->SourceAnimation->GetDataModel();
 	if (DataModel == nullptr)
 	{
 		UE_LOG(LogNexusToolingEditor, Warning, TEXT("PoseAsset(%s) source animation has no data model; skipping."), *PoseAsset->GetName());
 		return false;
 	}
-	
+
 	if (PoseAsset->SourceAnimationRawDataGUID.IsValid() && PoseAsset->SourceAnimationRawDataGUID != DataModel->GenerateGuid())
 	{
 		PoseAsset->UpdatePoseFromAnimation(PoseAsset->SourceAnimation);
-		
+
 		// ReSharper disable once CppExpressionWithoutSideEffects
 		PoseAsset->MarkPackageDirty();
 		EditorAssetSubsystem->SaveLoadedAsset(PoseAsset);
 		return true;
 	}
-	
+
 	return false;
 }

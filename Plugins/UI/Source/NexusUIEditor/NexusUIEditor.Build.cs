@@ -32,11 +32,9 @@ namespace UnrealBuildTool.Rules
 					"JsonUtilities",
 					"LevelEditor",
 					"Projects",
-					"ScriptableEditorWidgets",
 					"Slate",
 					"SlateCore",
 					"ToolMenus",
-					"UnrealEd",
 					"UMG",
 					"UMGEditor"
 				]

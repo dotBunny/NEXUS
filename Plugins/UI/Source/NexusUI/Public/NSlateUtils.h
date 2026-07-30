@@ -7,6 +7,7 @@
 
 /**
  * A utility methods collection for Slate
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/slate-utils/">FNSlateUtils</a>
  */
 class NEXUSUI_API FNSlateUtils
 {
@@ -18,8 +19,8 @@ public:
 	 * @param WidgetType The type of widget to find.
 	 * @return The found widget or nullptr if not found.
 	 */
-	static TSharedPtr<SWidget> FindFirstWidgetByType(TSharedPtr<SWidget> ParentWidget, const FName& WidgetType);
-	
+	static TSharedPtr<SWidget> FindFirstWidgetByType(const TSharedPtr<SWidget>& ParentWidget, const FName& WidgetType);
+
 	/**
 	 * Attempts to find any SWidgets by type within a parent widget and its children.
 	 * @param OutWidgets The found widgets array.
@@ -27,8 +28,8 @@ public:
 	 * @param WidgetType The type of widget to find.
 	 * @param WidgetTypeStop The type of widget to stop recursively searching at.
 	 */
-	static void FindWidgetsByType(TArray<TSharedPtr<SWidget>>& OutWidgets, TSharedPtr<SWidget> ParentWidget, const FName& WidgetType, const FName& WidgetTypeStop = NAME_None);
-	
+	static void FindWidgetsByType(TArray<TSharedPtr<SWidget>>& OutWidgets, const TSharedPtr<SWidget>& ParentWidget, const FName& WidgetType, const FName& WidgetTypeStop = NAME_None);
+
 	/**
 	 * Attempt to find the SDockTab for a given SWidget.
 	 * @param BaseWidget The SWidget to search upward from.

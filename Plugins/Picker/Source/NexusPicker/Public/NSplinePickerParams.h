@@ -8,7 +8,7 @@
 #include "NSplinePickerParams.generated.h"
 
 /**
- * Parameters for the spline picker functionality, used to define boundaries for generating points within a 
+ * Parameters for the spline picker functionality, used to define boundaries for generating points within a
  * specified spline.
  */
 USTRUCT(BlueprintType)

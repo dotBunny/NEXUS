@@ -14,11 +14,11 @@ FNObjectSnapshot FNObjectSnapshotUtils::Snapshot()
 {
 	check(IsInGameThread());
 	FGCScopeGuard Guard;
-	
+
 	// Create our Snapshot struct
 	FNObjectSnapshot Snapshot(FNDeveloperUtils::GetCurrentObjectCount());
 	Snapshot.Ticket = TakeTicket();
-	
+
 	FChunkedFixedUObjectArray& Objects = GUObjectArray.GetObjectItemArrayUnsafe();
 	for (int32 i = 0; i < GUObjectArray.GetObjectArrayNum(); i++)
 	{
@@ -38,7 +38,7 @@ FNObjectSnapshot FNObjectSnapshotUtils::Snapshot()
 	}
 
 	// Send it back
-	return MoveTemp(Snapshot);
+	return Snapshot;
 }
 
 FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(const FNObjectSnapshot& OldSnapshot, const FNObjectSnapshot& NewSnapshot, const bool bRemoveKnownLeaks)
@@ -100,7 +100,7 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(const FNObjectSnapshot& OldSnap
 		RemoveKnownLeaks(Diff);
 	}
 
-	return MoveTemp(Diff);
+	return Diff;
 }
 
 void FNObjectSnapshotUtils::RemoveKnownLeaks(FNObjectSnapshotDiff& Diff)
@@ -125,7 +125,7 @@ void FNObjectSnapshotUtils::RemoveKnownLeaks(FNObjectSnapshotDiff& Diff)
 			Diff.AddedCount--;
 		}
 	}
-	
+
 	// Keep the churn total consistent with the now-reduced added count.
 	Diff.ChangeCount = Diff.AddedCount + Diff.RemovedCount;
 }

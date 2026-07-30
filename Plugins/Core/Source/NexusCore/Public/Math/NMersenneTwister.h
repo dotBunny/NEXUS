@@ -8,9 +8,43 @@
 #include "NSeedGenerator.h"
 
 /**
+ * A minimal, portable snapshot of an FNMersenneTwister's position within its sequence.
+ *
+ * Holds the originating seed plus the exact number of engine draws taken since that seed was set.
+ * RestoreState reproduces the precise state by re-seeding and replaying, so a snapshot is fully
+ * deterministic across platforms/compilers yet small enough to store or transmit as two numbers.
+ * @see FNMersenneTwisterFriendlyState for a Blueprint-exposable, hexadecimal-string form.
+ */
+struct NEXUSCORE_API FNMersenneTwisterState
+{
+	/** The seed the engine was initialized with. */
+	uint64 InitialSeed = 0;
+
+	/** The exact number of engine draws taken since the seed was set. */
+	uint64 DrawCount = 0;
+
+	/** @return true if this snapshot's draw count is within the bounds RestoreState will replay. */
+	bool IsValid() const;
+
+	/**
+	 * Serializes the snapshot to a compact hexadecimal token suitable for logging or storage.
+	 * @return a string of the form "<SeedHex>-<DrawCountHex>".
+	 */
+	FString ToString() const;
+
+	/**
+	 * Parses a snapshot previously produced by ToString.
+	 * @param InState The token to parse.
+	 * @return the parsed snapshot; a zeroed snapshot if the token is malformed.
+	 */
+	static FNMersenneTwisterState FromString(const FString& InState);
+};
+
+/**
  * Mersenne Twister based FRandomStream-like API with some extras!
  * Implements the std::mt19937_64 engine to produce high-quality uint64 random numbers.
  * Guaranteed behavior across platforms/compilers by avoiding using std::*_distribution.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/mersenne-twister/">FNMersenneTwister</a>
  */
 class NEXUSCORE_API FNMersenneTwister
 {
@@ -28,7 +62,7 @@ public:
 	 * @param Seed The seed to initialize the engine with.
 	 */
 	void Initialize(const uint64 Seed);
-	
+
 	/**
 	 * Returns a pseudo random bool value based on chance (0-1 roll), if the result is included.
 	 * @param Chance The 0-1 percent chance of success
@@ -42,6 +76,7 @@ public:
 	 * @param Count The number of results to generate.
 	 * @param Chance The 0-1 percent chance of success
 	 * @param StartIndex The index to start writing at.
+	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
 	void Bias(TArray<bool>& OutArray, const int32 Count, const float Chance, const int32 StartIndex = 0);
 
@@ -56,6 +91,7 @@ public:
 	 * @param OutArray A pre-allocated array to fill with the results.
 	 * @param Count The number of results to generate.
 	 * @param StartIndex The index to start writing at.
+	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
 	void Bool(TArray<bool>& OutArray, const int32 Count, const int32 StartIndex = 0);
 
@@ -70,18 +106,19 @@ public:
 	 * @param OutArray A pre-allocated array to fill with the results.
 	 * @param Count The number of results to generate.
 	 * @param StartIndex The index to start writing at.
+	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
 	void Double(TArray<double>& OutArray, const int32 Count, const int32 StartIndex = 0);
-	
+
 	/**
 	 * Generate a random double between minimum and maximum.
 	 * @param MinimumValue The lowest possible value.
 	 * @param MaximumValue The highest possible value.
 	 * @return a pseudo random double.
 	 */
-	double DoubleRange(const double MinimumValue = MIN_dbl, const double MaximumValue = MAX_dbl);
+	double DoubleRange(const double MinimumValue = -MIN_dbl, const double MaximumValue = MAX_dbl);
 	/** Alias for DoubleRange, matching UE's FMath::RandRange naming. @return a pseudo random double between MinimumValue and MaximumValue. */
-	FORCEINLINE double RandRange(const double MinimumValue = MIN_dbl, const double MaximumValue = MAX_dbl)
+	FORCEINLINE double RandRange(const double MinimumValue = -MIN_dbl, const double MaximumValue = MAX_dbl)
 	{
 		return DoubleRange(MinimumValue, MaximumValue);
 	}
@@ -93,9 +130,10 @@ public:
 	 * @param MinimumValue The lowest possible value.
 	 * @param MaximumValue The highest possible value.
 	 * @param StartIndex The index to start writing at.
+	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
-	void DoubleRange(TArray<double>& OutArray, const int32 Count, const double MinimumValue = MIN_dbl, const double MaximumValue = MAX_dbl, const int32 StartIndex = 0);
-	
+	void DoubleRange(TArray<double>& OutArray, const int32 Count, const double MinimumValue = -MIN_dbl, const double MaximumValue = MAX_dbl, const int32 StartIndex = 0);
+
 	/**
 	 * Returns a pseudo random float between 0 and 1.
 	 * @return a pseudo random float.
@@ -107,6 +145,7 @@ public:
 	 * @param OutArray A pre-allocated array to fill with the results.
 	 * @param Count The number of results to generate.
 	 * @param StartIndex The index to start writing at.
+	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
 	void Float(TArray<float>& OutArray, const int32 Count, const int32 StartIndex = 0);
 
@@ -116,9 +155,9 @@ public:
 	 * @param MaximumValue The highest possible value.
 	 * @return a pseudo random float.
 	 */
-	float FloatRange(const float MinimumValue = MIN_flt, const float MaximumValue = MAX_flt);
+	float FloatRange(const float MinimumValue = -MIN_flt, const float MaximumValue = MAX_flt);
 	/** Alias for FloatRange, matching UE's FMath::RandRange naming. @return a pseudo random float between MinimumValue and MaximumValue. */
-	FORCEINLINE float RandRange(const float MinimumValue = MIN_flt, const float MaximumValue = MAX_flt)
+	FORCEINLINE float RandRange(const float MinimumValue = -MIN_flt, const float MaximumValue = MAX_flt)
 	{
 		return FloatRange(MinimumValue, MaximumValue);
 	}
@@ -130,8 +169,9 @@ public:
 	 * @param MinimumValue The lowest possible value.
 	 * @param MaximumValue The highest possible value.
 	 * @param StartIndex The index to start writing at.
+	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
-	void FloatRange(TArray<float>& OutArray, const int32 Count, const float MinimumValue = MIN_flt, const float MaximumValue = MAX_flt, const int32 StartIndex = 0);
+	void FloatRange(TArray<float>& OutArray, const int32 Count, const float MinimumValue = -MIN_flt, const float MaximumValue = MAX_flt, const int32 StartIndex = 0);
 
 	/**
 	* Generate a pseudo random integer between minimum and maximum.
@@ -153,6 +193,7 @@ public:
 	 * @param MinimumValue The lowest possible value.
 	 * @param MaximumValue The highest possible value.
 	 * @param StartIndex The index to start writing at.
+	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
 	void IntegerRange(TArray<int32>& OutArray, const int32 Count, const int32 MinimumValue = MIN_int32, const int32 MaximumValue = MAX_int32, const int32 StartIndex = 0);
 
@@ -176,6 +217,7 @@ public:
 	 * @param MinimumValue The lowest possible value.
 	 * @param MaximumValue The highest possible value.
 	 * @param StartIndex The index to start writing at.
+	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
 	void UnsignedIntegerRange(TArray<uint32>& OutArray, const int32 Count,const uint32 MinimumValue = MIN_uint32, const uint32 MaximumValue = MAX_uint32, const int32 StartIndex = 0);
 
@@ -185,8 +227,8 @@ public:
 	 * @param MaximumRange  The maximum X, Y, Z range.
 	 * @return The random FVector.
 	 */
-	FVector Vector(const float MinimumRange = MIN_flt, const float MaximumRange = MAX_flt);
-	
+	FVector Vector(const float MinimumRange = -MIN_flt, const float MaximumRange = MAX_flt);
+
 	/**
 	 * Generate a pseudo random normalized FVector.
 	 * @return A normalized random FVector.
@@ -206,12 +248,14 @@ public:
 		while(L > 1.0f || L < UE_KINDA_SMALL_NUMBER);
 		return Result * (1.0f / FGenericPlatformMath::Sqrt(L));
 	}
-	
+
 	/**
-	 * Returns the number of times the FMersenneTwister has been called since the seed has been set.
-	 * @return the number of times the FMersenneTwister has been called.
+	 * Returns the exact number of engine draws taken since the seed has been set.
+	 * @return the engine draw count.
+	 * @note This is a true draw count: rejection-sampled and array draws each count individually, so
+	 *       it is suitable as the replay offset used by SaveState/RestoreState.
 	 */
-	uint32 GetCallCounter() const
+	uint64 GetCallCounter() const
 	{
 		return this->CallCounter;
 	}
@@ -232,10 +276,9 @@ public:
 	 */
 	uint64 UnsignedInteger64()
 	{
-		this->CallCounter++;
-		return this->Engine();
+		return this->Draw();
 	}
-	
+
 	/**
 	 * Returns the seed that was last set as a hexadecimal FString.
 	 * @return the last set seed.
@@ -251,16 +294,56 @@ public:
 		Initialize(this->InitialSeed);
 	}
 
+	/**
+	 * Upper bound on the draw count RestoreState will replay.
+	 * @note Natural overflow of the uint64 draw count is infeasible (centuries of continuous drawing);
+	 *       this instead guards against a corrupt or hand-edited snapshot whose huge draw count would
+	 *       make the O(n) discard() effectively hang. Raise it if a legitimate workload exceeds it.
+	 */
+	static constexpr uint64 MaxRestoreDrawCount = 1000000000000000000ULL;
+
+	/**
+	 * Captures the engine's current position so it can be restored to this exact point later.
+	 * @return a snapshot { InitialSeed, draw count } sufficient to reproduce the exact sequence from here.
+	 * @see RestoreState
+	 */
+	FNMersenneTwisterState SaveState() const
+	{
+		return FNMersenneTwisterState{ this->InitialSeed, this->CallCounter };
+	}
+
+	/**
+	 * Restores the engine to a previously captured state by re-seeding and replaying.
+	 * @param State The snapshot produced by SaveState.
+	 * @return true if restored; false if State.DrawCount exceeds MaxRestoreDrawCount, in which case the engine is left unchanged.
+	 * @note O(DrawCount): replays the engine forward from the seed via discard(). The result is identical
+	 *       across platforms/compilers because both the engine and discard() are fully standard-defined.
+	 * @see SaveState
+	 */
+	bool RestoreState(const FNMersenneTwisterState& State);
+
 private:
 
-	/** The number of times the Mersenne Twister has been called since the seed has been set. */
-	uint32 CallCounter;
+	/** The exact number of engine draws taken since the seed was set; doubles as the replay offset for SaveState/RestoreState. */
+	uint64 CallCounter;
 
 	/** Single instance of the 64-bit Mersenne Twister pseudo random engine. */
 	std::mt19937_64 Engine;
 
 	/** The last seed set on the Mersenne Twister. */
 	uint64 InitialSeed;
+
+	/**
+	 * Advances the engine exactly once and accounts the draw.
+	 * @return the raw uint64 produced by the engine.
+	 * @note All random output must route through this so CallCounter stays an exact draw count, which
+	 *       SaveState/RestoreState rely on to replay to the precise position.
+	 */
+	FORCEINLINE uint64 Draw()
+	{
+		++this->CallCounter;
+		return this->Engine();
+	}
 
 	/**
 	 * Maps a raw engine draw to a float in the half-open range [0, 1).

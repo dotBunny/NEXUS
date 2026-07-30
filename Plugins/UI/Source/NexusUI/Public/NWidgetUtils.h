@@ -7,6 +7,7 @@
 
 /**
  * Thin adapter helpers that bridge between UMG wrapper types and raw Slate equivalents.
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/widget-utils/">FNWidgetUtils</a>
  */
 class FNWidgetUtils
 {

@@ -5,7 +5,6 @@
 #include "NActorPoolSubsystem.h"
 #include "Engine/AssetManager.h"
 #include "Engine/Engine.h"
-#include "Macros/NWorldMacros.h"
 
 UNGetActorBlueprintAsyncAction* UNGetActorBlueprintAsyncAction::GetActorAsync(UObject* WorldContextObject, TSoftClassPtr<AActor> ActorClass)
 {
@@ -36,27 +35,35 @@ void UNGetActorBlueprintAsyncAction::BeginDestroy()
 {
 	if (OnCreatedPoolHandle.IsValid())
 	{
-		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContext.Get());
-		UNActorPoolSubsystem* ActorPoolSubsystem = UNActorPoolSubsystem::Get(World);
-		if (ActorPoolSubsystem)
+		if (UNActorPoolSubsystem* ActorPoolSubsystem = ResolveActorPoolSubsystem())
 		{
 			ActorPoolSubsystem->OnActorPoolAdded.Remove(OnCreatedPoolHandle);
 		}
+	}
+
+	// Cancel any load still in flight on teardown (e.g. PIE-end / level transition) rather than leaving the
+	// streamable request to run to completion and the handle to be released only at GC.
+	if (StreamingHandle.IsValid())
+	{
+		StreamingHandle->CancelHandle();
+		StreamingHandle.Reset();
 	}
 	Super::BeginDestroy();
 }
 
 void UNGetActorBlueprintAsyncAction::OnLoaded()
 {
-	const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContext.Get());
-	UNActorPoolSubsystem* ActorPoolSubsystem = UNActorPoolSubsystem::Get(World);
+	UNActorPoolSubsystem* ActorPoolSubsystem = ResolveActorPoolSubsystem();
 	if (!ActorPoolSubsystem)
 	{
-		UE_LOG(LogNexusActorPools, Error, TEXT("Unable to complete Spawn Actor Async as ActorPoolSubsystem is NULL"));
+		// The world context expired (or carries no pool subsystem) while the class streamed in — the level
+		// changed mid-load. Complete with null so the latent node releases instead of hanging, then tear down.
+		UE_LOG(LogNexusActorPools, Warning, TEXT("Get Actor Async completed after its world context expired; completing with null."));
+		Completed.Broadcast(nullptr);
 		SetReadyToDestroy();
 		return;
 	}
-	
+
 	UClass* ActorLoaded = ActorClass.Get();
 	if (ActorLoaded == nullptr)
 	{
@@ -75,7 +82,7 @@ void UNGetActorBlueprintAsyncAction::OnLoaded()
 		OnHasPool(ActorPoolSubsystem->GetActorPool(ActorLoaded));
 		return;
 	}
-	
+
 	// Setup callback for when pool is added.
 	OnCreatedPoolHandle = ActorPoolSubsystem->OnActorPoolAdded.AddUObject(this, &UNGetActorBlueprintAsyncAction::OnHasPool);
 	ActorPoolSubsystem->CreateActorPool(ActorLoaded, ActorPoolSubsystem->GetDefaultSettings(ActorLoaded));
@@ -85,20 +92,17 @@ void UNGetActorBlueprintAsyncAction::OnHasPool(FNActorPool* ActorPool)
 {
 	// Not for me!
 	if (ActorPool == nullptr || ActorPool->GetTemplate() != ActorClass.Get()) return;
-	
+
 	// Unregister callback
 	if (OnCreatedPoolHandle.IsValid())
 	{
-		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContext.Get());
-		// Guard the subsystem lookup (the world/context may have gone away by now) — matches the
-		// SpawnActorAsync twin, which already null-checks here.
-		if (UNActorPoolSubsystem* ActorPoolSubsystem = UNActorPoolSubsystem::Get(World))
+		if (UNActorPoolSubsystem* ActorPoolSubsystem = ResolveActorPoolSubsystem())
 		{
 			ActorPoolSubsystem->OnActorPoolAdded.Remove(OnCreatedPoolHandle);
 		}
 		OnCreatedPoolHandle.Reset();
 	}
-	
+
 	AActor* SpawnedActor = nullptr;
 	if (const TSubclassOf<AActor> Class = ActorClass.Get(); Class && WorldContext.IsValid() && ActorPool != nullptr)
 	{
@@ -107,4 +111,20 @@ void UNGetActorBlueprintAsyncAction::OnHasPool(FNActorPool* ActorPool)
 
 	Completed.Broadcast(SpawnedActor);
 	SetReadyToDestroy();
+}
+
+UNActorPoolSubsystem* UNGetActorBlueprintAsyncAction::ResolveActorPoolSubsystem() const
+{
+	// WorldContext is a weak pointer that legitimately expires when the level changes while the class is
+	// still streaming in — the exact scenario async loading exists for. Resolve defensively (ReturnNull in
+	// every build) instead of via N_GET_WORLD_FROM_CONTEXT, whose shipping arm dereferences a null context,
+	// and never feed a null world into Get(), which dereferences it unconditionally.
+	if (UObject* Context = WorldContext.Get())
+	{
+		if (const UWorld* World = GEngine->GetWorldFromContextObject(Context, EGetWorldErrorMode::ReturnNull))
+		{
+			return UNActorPoolSubsystem::Get(World);
+		}
+	}
+	return nullptr;
 }

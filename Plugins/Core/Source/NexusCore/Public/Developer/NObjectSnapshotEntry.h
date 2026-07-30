@@ -15,6 +15,7 @@
  * keys entries by ObjectPtr; because TWeakObjectPtr identity is the object's index and serial
  * number, that key already distinguishes objects (and survives garbage collection) without a
  * separate serial-number comparison.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/object-snapshot-entry/">FNObjectSnapshotEntry</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNObjectSnapshotEntry

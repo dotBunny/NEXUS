@@ -22,6 +22,7 @@ namespace UnrealBuildTool.Rules
 			PrivateDependencyModuleNames.AddRange(
 				[
 					"AssetDefinition",
+					"AssetRegistry",
 					"AssetTools",
 					"Chaos",
 					"ContentBrowser",
@@ -34,13 +35,13 @@ namespace UnrealBuildTool.Rules
 					"GameplayTags",
 					"InputCore",
 					"LevelEditor",
+					"PCG",
 					"Projects",
 					"Slate",
 					"SlateCore",
 					"ToolMenus",
 					"UMG",
-					"UMGEditor",
-					"UnrealEd"
+					"UMGEditor"
 				]
 			);
 			
@@ -48,7 +49,7 @@ namespace UnrealBuildTool.Rules
 			
 			// NEXUS
 			PublicDependencyModuleNames.AddRange(["NexusCoreEditor", "NexusWorldAssembly"]);
-			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusCoreEditor", "NexusToolingEditor", "NexusUI", "NexusUIEditor", "NexusWorldAssembly"]);
+			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusToolingEditor", "NexusUI", "NexusUIEditor"]);
 
 			ShortName = "NexusWorldAssemblyEditor";						
 		}

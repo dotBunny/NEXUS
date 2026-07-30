@@ -17,11 +17,11 @@ void UNUpdateCheckDelayedEditorTask::Create()
 
 	//  Check if settings enabled, don't bother making the object if it's not.
 	if (!Settings->bUpdatesCheck) return;
-	
+
 	// Let's check the last time we actually looked so that were not hammering
 	const UNEditorUserSettings* UserSettings = UNEditorUserSettings::Get();
 	const FTimespan TimeDifference = FDateTime::Now() - UserSettings->UpdatesLastChecked;
-	
+
 	if (TimeDifference.GetDays() < Settings->UpdatesFrequency)
 	{
 		UE_LOG(LogNexusCoreEditor, Log, TEXT("Next update check in %i days."), (Settings->UpdatesFrequency - TimeDifference.GetDays()));
@@ -44,10 +44,10 @@ void UNUpdateCheckDelayedEditorTask::Execute()
 	HttpRequest->SetTimeout(5.0f);
 	HttpRequest->AppendToHeader(TEXT("UpdateURI"), GetUpdateURI());
 	HttpRequest->OnProcessRequestComplete().BindStatic(OnUpdateQueryResponse);
-	
+
 	// Start processing the request, triggering our response handler.
 	HttpRequest->ProcessRequest();
-	
+
 	// Update last checked
 	UNEditorUserSettings* UserSettings = UNEditorUserSettings::GetMutable();
 	UserSettings->UpdatesLastChecked = FDateTime::Now();
@@ -55,7 +55,7 @@ void UNUpdateCheckDelayedEditorTask::Execute()
 	Release();
 }
 
-void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bProcessedSuccessfull)
+void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bProcessedSuccessfully)
 {
 	// Editor may have started shutting down between Execute() releasing this task and the HTTP
 	// response landing. Avoid touching settings or opening dialogs once exit has been requested.
@@ -64,7 +64,7 @@ void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Reque
 		return;
 	}
 
-	if (!bProcessedSuccessfull)
+	if (!bProcessedSuccessfully)
 	{
 		UE_LOG(LogNexusCoreEditor, Warning, TEXT("The update check web request was unable to be processed."));
 		return;
@@ -74,11 +74,11 @@ void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Reque
 		UE_LOG(LogNexusCoreEditor, Warning, TEXT("The update check web request response was invalid."));
 		return;
 	}
-	
+
 	TArray<FString> Lines;
 	FString TargetVersion = TEXT("");
 	Response->GetContentAsString().ParseIntoArrayLines(Lines, true);
-	
+
 	for (int32 i = Lines.Num() - 1; i >= 0; i--)
 	{
 		if (Lines[i].TrimStart().StartsWith(TEXT("constexpr int32 Number")))
@@ -94,18 +94,18 @@ void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Reque
 		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to find remote plugin version for update."));
 		return;
 	}
-	
+
 	// Grab a changable version of the settings
 	UNEditorSettings* Settings = UNEditorSettings::GetMutable();
-	
+
 	// Check for a previously saved ignored version, and bump it up to current
 	if (Settings->UpdatesIgnoreVersion < NEXUS::Version::Number)
 	{
-		
+
 		Settings->UpdatesIgnoreVersion = NEXUS::Version::Number;
 		Settings->SaveConfig();
 	}
-	
+
 	// We need to clean up the line and look just for the number
 	TargetVersion = TargetVersion.Replace(TEXT("constexpr int32 Number ="), TEXT(""));
 	TargetVersion = TargetVersion.Replace(TEXT(";"), TEXT(""));

@@ -36,7 +36,7 @@ EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromString(const FStri
 
 EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromText(const FText& Selection)
 {
-#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX	
+#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 	if (Selection.EqualTo(DisplayModeTexts[2]))
 	{
 		return EWindowMode::Type::Windowed;
@@ -59,19 +59,27 @@ TArray<FString> UNGameUserSettingsLibrary::GetWindowModeStringSelections()
 	{
 		Selections.Add(Text.ToString());
 	}
-	return MoveTemp(Selections);
+	return Selections;
 }
 
 FString UNGameUserSettingsLibrary::GetSelectionStringFromCurrentWindowMode()
 {
-	// @remark: We are going to assume the GEngine exists at this point; no check!
-	return GetSelectionStringFromWindowMode(GEngine->GetGameUserSettings()->GetFullscreenMode());
+	const UGameUserSettings* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr;
+	if (Settings == nullptr)
+	{
+		return DisplayModeTexts[0].ToString();
+	}
+	return GetSelectionStringFromWindowMode(Settings->GetFullscreenMode());
 }
 
 FText UNGameUserSettingsLibrary::GetSelectionTextFromCurrentWindowMode()
 {
-	// @remark: We are going to assume the GEngine exists at this point; no check!
-	return GetSelectionTextFromWindowMode(GEngine->GetGameUserSettings()->GetFullscreenMode());
+	const UGameUserSettings* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr;
+	if (Settings == nullptr)
+	{
+		return DisplayModeTexts[0];
+	}
+	return GetSelectionTextFromWindowMode(Settings->GetFullscreenMode());
 }
 
 FString UNGameUserSettingsLibrary::GetSelectionStringFromWindowMode(const EWindowMode::Type Mode)
@@ -93,7 +101,7 @@ FString UNGameUserSettingsLibrary::GetSelectionStringFromWindowMode(const EWindo
 
 FText UNGameUserSettingsLibrary::GetSelectionTextFromWindowMode(EWindowMode::Type Mode)
 {
-#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX	
+#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 	switch(Mode)
 	{
 	case EWindowMode::WindowedFullscreen:
@@ -110,8 +118,12 @@ FText UNGameUserSettingsLibrary::GetSelectionTextFromWindowMode(EWindowMode::Typ
 
 FString UNGameUserSettingsLibrary::GetSelectionFromCurrentDisplayResolution()
 {
-	// @remark: We are going to assume the GEngine exists at this point; no check!
-	return GetSelectionFromDisplayResolution(GEngine->GetGameUserSettings()->GetScreenResolution());
+	const UGameUserSettings* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr;
+	if (Settings == nullptr)
+	{
+		return FString();
+	}
+	return GetSelectionFromDisplayResolution(Settings->GetScreenResolution());
 }
 
 FString UNGameUserSettingsLibrary::GetSelectionFromDisplayResolution(const FIntPoint Resolution)
@@ -122,16 +134,16 @@ FString UNGameUserSettingsLibrary::GetSelectionFromDisplayResolution(const FIntP
 FIntPoint UNGameUserSettingsLibrary::GetDisplayResolutionFromSelection(const FString& Selection)
 {
 	TArray<FString> Resolution;
-	
+
 	// Parse
 	const int32 ElementCount = Selection.ParseIntoArray(Resolution, TEXT("x"), true);
-	
+
 	// Ensure we can convert to a FIntPoint (in-case the provided string isn't one we made)
 	if (ElementCount < 2)
 	{
 		return FIntPoint(-1,-1);
 	}
-	
+
 	// Return our value
 	return FIntPoint(
 		FCString::Atoi(*Resolution[0].TrimStartAndEnd()),
@@ -148,12 +160,12 @@ TArray<FString> UNGameUserSettingsLibrary::GetSupportedDisplayResolutions()
 	{
 		SupportedResolutions.Add(FString::Printf(TEXT("%ix%i"), Resolution.X, Resolution.Y));
 	}
-	return MoveTemp(SupportedResolutions);
+	return SupportedResolutions;
 }
 
 void UNGameUserSettingsLibrary::InitializeWindowModeComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent)
 {
-	N_VALIDATE_RETURN_VOID(LogNexusUI, ComboBox)
+	N_VALIDATE_RETURN_VOID(LogNexusUI, ComboBox);
 	ComboBox->ClearOptions();
 	for (const FText& Text : DisplayModeTexts)
 	{
@@ -167,7 +179,7 @@ void UNGameUserSettingsLibrary::InitializeWindowModeComboBoxString(UNComboBoxStr
 
 void UNGameUserSettingsLibrary::InitializeDisplayResolutionComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent)
 {
-	N_VALIDATE_RETURN_VOID(LogNexusUI, ComboBox)
+	N_VALIDATE_RETURN_VOID(LogNexusUI, ComboBox);
 	ComboBox->ClearOptions();
 	for (auto& Resolution : GetSupportedDisplayResolutions())
 	{

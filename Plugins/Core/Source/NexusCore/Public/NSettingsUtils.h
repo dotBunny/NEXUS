@@ -8,6 +8,7 @@
  * developer and project settings under. Use these accessors rather than duplicating
  * the string literals so that all NEXUS settings appear under a single, consistent
  * section in the Project Settings UI.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/settings-utils/">FNSettingsUtils</a>
  */
 class FNSettingsUtils
 {

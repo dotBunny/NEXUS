@@ -15,6 +15,7 @@ class UNWorldAssemblySubsystem;
  * Lives invisibly on every client as the server's handle for that player — the server pushes
  * operation lifecycle events into it (Started/Finished/Destroyed) and answers "what level
  * instances are around this player right now?" via the nearby-cells RPC exchange.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-relay/">ANWorldAssemblyRelay</a>
  */
 UCLASS(NotPlaceable, HideDropdown, Hidden, Transient, ClassGroup = "NEXUS", DisplayName = "NEXUS | World Assembly Relay")
 class NEXUSWORLDASSEMBLY_API ANWorldAssemblyRelay : public AActor
@@ -27,6 +28,8 @@ public:
 
 	/** @return true when the server has answered the nearby-cells RPC at least once and no operations the client has been notified about are pending. */
 	bool IsReady();
+
+	FIntVector2 GetRemainingStatus() const;
 
 	/**
 	 * Refresh the cached nearby-cell list by re-asking the server.
@@ -50,6 +53,7 @@ protected:
 	//~AActor
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void OnRep_Owner() override;
 	//End AActor
 
 	/**
@@ -67,12 +71,18 @@ protected:
 	void Client_ReceiveNearbyCells(const TArray<FNCellLevelInstanceLocator>& Results);
 
 private:
-	
-	/** Handle for the delegate wiring this relay into the registry's nearby-request pipeline. */
-	FDelegateHandle OnRequestNearbyHandle;
 
 	/** True when CachedNearbyCellLevelInstances has been populated by the server at least once. */
 	bool bHasNearbyCellLevelInstances = false;
+
+	/** True between dispatching a nearby-cells request and receiving its reply; coalesces overlapping refreshes. */
+	bool bNearbyCellsRequestInFlight = false;
+
+	/** True when UpdateNearbyCells was called while a request was in flight; drives a single trailing refresh. */
+	bool bNearbyCellsUpdatePending = false;
+
+	/** bIsLevelLoaded value captured from the most recent UpdateNearbyCells call that coalesced into a pending refresh. */
+	bool bPendingIsLevelLoaded = true;
 
 	/** Most recently received nearby-cell payload. */
 	TArray<FNCellLevelInstanceLocator> CachedNearbyCellLevelInstances;
@@ -82,6 +92,13 @@ private:
 
 	/** @return true if a nearby-cell payload is currently cached. */
 	bool HasNearbyCellLevelInstances();
-	
+
+	/**
+	 * Register this relay as the subsystem's local relay and kick an initial nearby-cell query.
+	 * No-ops unless the owner is the local player controller; safe to call more than once.
+	 * @remark Driven from both BeginPlay and OnRep_Owner so registration survives owner-replication ordering on clients.
+	 */
+	void TryRegisterAsLocalRelay();
+
 	TObjectPtr<UNWorldAssemblySubsystem> Subsystem;
 };

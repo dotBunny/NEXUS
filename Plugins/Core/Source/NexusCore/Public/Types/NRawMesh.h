@@ -15,6 +15,7 @@
  * Stores a shared vertex buffer plus one or more ordered loops that reference into it. Supports
  * convexity / non-tri validation, rigid-body rotation around a pivot, and conversion into
  * Unreal Engine's FDynamicMesh3 for richer geometry work.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/raw-mesh/">FNRawMesh</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNRawMesh
@@ -33,10 +34,10 @@ struct NEXUSCORE_API FNRawMesh
 	/** The relative center of the mesh. */
 	UPROPERTY(VisibleAnywhere)
 	FVector Center = FVector::ZeroVector;
-	
+
 	/** Relative AABB **/
 	UPROPERTY(VisibleAnywhere)
-	FBox Bounds;
+	FBox Bounds = FBox(ForceInit);
 
 	/**
 	 * Ordered shape-edge definition.
@@ -256,7 +257,7 @@ struct NEXUSCORE_API FNRawMesh
 		InvalidateCachedFacePlanes();
 		InvalidateValidation();
 	}
-	
+
 	/**
 	 * Bakes a full transform (translation, rotation, scale) into every vertex and the center, then
 	 * refreshes Bounds from the transformed vertices. No-op when Transform is the identity.
@@ -268,15 +269,15 @@ struct NEXUSCORE_API FNRawMesh
 
 		FBox NewBounds(ForceInit);
 		const int32 Count = Vertices.Num();
-		FVector CenterCalc;
-		
+		FVector CenterCalc(ForceInitToZero);
+
 		for (int32 i = 0; i < Count; i++)
 		{
 			Vertices[i] = Transform.TransformPosition(Vertices[i]);
 			NewBounds += Vertices[i];
 			CenterCalc += Vertices[i];
 		}
-		
+
 		// Ensure that we never divide by zero
 		if (Vertices.Num() > 0)
 		{
@@ -286,7 +287,7 @@ struct NEXUSCORE_API FNRawMesh
 		{
 			Center = FVector::ZeroVector;
 		}
-		
+
 		Bounds = NewBounds;
 		bHasBounds = (Count > 0);
 		InvalidateCachedFacePlanes();
@@ -314,6 +315,32 @@ struct NEXUSCORE_API FNRawMesh
 	/**
 	 * Recomputes Center as the mean of Vertices and Bounds as the AABB enclosing them.
 	 */
+	/**
+	 * Moves a single vertex and invalidates everything cached from it.
+	 *
+	 * Vertices is public, so a caller can assign into it directly — but a direct write bypasses every mutator and
+	 * leaves the convexity / non-tri / bounds flags and the face-plane cache describing the geometry as it was,
+	 * with nothing downstream able to tell. That is a silent wrong answer rather than a slow one: a stale
+	 * bIsConvex routes queries down the wrong algorithm, and stale face planes make the convex depth test measure
+	 * against surfaces that have moved. Route per-vertex edits through here instead.
+	 *
+	 * @param Index Vertex to move. Out-of-range indices are ignored.
+	 * @param Position New position, in the mesh's own space.
+	 * @note Center and Bounds are NOT recomputed — they are O(vertices) and callers editing several vertices should
+	 *       pay that once. Call CalculateCenterAndBounds when they matter.
+	 */
+	void SetVertex(const int32 Index, const FVector& Position)
+	{
+		if (!Vertices.IsValidIndex(Index))
+		{
+			return;
+		}
+
+		Vertices[Index] = Position;
+		InvalidateValidation();
+		InvalidateCachedFacePlanes();
+	}
+
 	void CalculateCenterAndBounds()
 	{
 		FVector CenterCalc = FVector::ZeroVector;
@@ -438,7 +465,11 @@ private:
 	 * InvalidateValidation() after touching Loops or Vertices.
 	 */
 	mutable bool bValidationDirty = false;
-	
+
+	/**
+	 * Editor-visible diagnostic flag intended to record that a world transform has been baked into Vertices.
+	 * Preserved across copies/assignment; currently informational only — no mutator sets it true.
+	 */
 	UPROPERTY(VisibleAnywhere)
 	mutable bool bHasAppliedTransform = false;
 

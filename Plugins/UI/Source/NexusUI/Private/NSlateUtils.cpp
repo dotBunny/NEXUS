@@ -6,18 +6,18 @@
 const FName FNSlateUtils::SDockingTabStackName = FName("SDockingTabStack");
 const FName FNSlateUtils::SDockTabName = FName("SDockTab");
 
-TSharedPtr<SWidget> FNSlateUtils::FindFirstWidgetByType(TSharedPtr<SWidget> ParentWidget, const FName& WidgetType)
+TSharedPtr<SWidget> FNSlateUtils::FindFirstWidgetByType(const TSharedPtr<SWidget>& ParentWidget, const FName& WidgetType)
 {
 	if (!ParentWidget.IsValid())
 	{
 		return nullptr;
 	}
-	
+
 	if (ParentWidget->GetType() == WidgetType)
 	{
 		return ParentWidget;
 	}
-	
+
 	FChildren* Children = ParentWidget->GetChildren();
 	for (int32 i = 0; i < Children->Num(); ++i)
 	{
@@ -27,23 +27,23 @@ TSharedPtr<SWidget> FNSlateUtils::FindFirstWidgetByType(TSharedPtr<SWidget> Pare
 			return Found;
 		}
 	}
-	
+
 	return nullptr;
 }
 
-void FNSlateUtils::FindWidgetsByType(TArray<TSharedPtr<SWidget>>& OutWidgets, TSharedPtr<SWidget> ParentWidget, const FName& WidgetType, const FName& WidgetTypeStop)
+void FNSlateUtils::FindWidgetsByType(TArray<TSharedPtr<SWidget>>& OutWidgets, const TSharedPtr<SWidget>& ParentWidget, const FName& WidgetType, const FName& WidgetTypeStop)
 {
 	if (!ParentWidget.IsValid() || (WidgetTypeStop != NAME_None && ParentWidget->GetType() == WidgetTypeStop))
 	{
 		return;
 	}
-	
+
 	if (ParentWidget->GetType() == WidgetType)
 	{
 		OutWidgets.Add(ParentWidget);
 		return;
 	}
-	
+
 	FChildren* Children = ParentWidget->GetChildren();
 	for (int32 i = 0; i < Children->Num(); ++i)
 	{
@@ -77,11 +77,11 @@ TSharedPtr<SDockTab> FNSlateUtils::FindDockTabWithLabel(const TSharedPtr<SWidget
 					}
 				}
 			}
-			
+
 			// Not going to go up at this point cause we already hit the container above me
 			return nullptr;
 		}
-		
+
 		// Floating Tab
 		if (Widget->GetType() == SDockTabName)
 		{
@@ -93,11 +93,11 @@ TSharedPtr<SDockTab> FNSlateUtils::FindDockTabWithLabel(const TSharedPtr<SWidget
 			// Reached our containing tab and it isn't the target; let the caller fall back to identifier lookup.
 			return nullptr;
 		}
-		
+
 		// Goes up
 		Widget = Widget->GetParentWidget();
 	}
-	
+
 	// So if we've reached here, we are probably not actually a visible tab.
 	return nullptr;
 }

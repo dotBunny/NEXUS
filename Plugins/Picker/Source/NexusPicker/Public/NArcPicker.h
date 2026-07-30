@@ -15,20 +15,13 @@
 class NEXUSPICKER_API FNArcPicker
 {
 public:
-	
-	/**
-	 * Generate deterministic points as part of an arc.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param OutLocations An array to store the generated points.
-	 * @param Params The parameters for the point generation.
-	 */
-	static void Next(TArray<FVector>& OutLocations, const FNArcPickerParams& Params);
 
 	/**
 	 * Generate random points as part of an arc.
 	 * Uses the non-deterministic random generator for true randomness.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Params The parameters for the point generation.
+	 * @note Not thread-safe; all pickers share a single non-deterministic FRandomStream (FNRandom::GetNonDeterministic()). Only call from the Game-thread.
 	 */
 	static void Random(TArray<FVector>& OutLocations, const FNArcPickerParams& Params);
 
@@ -44,7 +37,7 @@ public:
 		int32 DuplicateSeed = Seed;
 	 	Tracked(OutLocations, DuplicateSeed, Params);
 	}
-	
+
 	/**
 	 * Generate random points as part of an arc.
 	 * Updates the seed value to enable sequential random point generation.
@@ -53,39 +46,40 @@ public:
 	 * @param Params The parameters for the point generation.
 	 */
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNArcPickerParams& Params);
-	
+
 	/**
-	 * Generate random points as part of an arc using a provided Mersenne Twister.	 
+	 * Generate random points as part of an arc using a provided Mersenne Twister.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Random The Mersenne Twister to query for random.
 	 * @param Params The parameters for the point generation.
 	 */
-	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNArcPickerParams& Params);
-	
+	static void Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNArcPickerParams& Params);
+
 	/**
-	 * Checks if a point is inside or on the surface of the axis-aligned FBox.
-	 * @param Origin The center point of the FBox.
+	 * Checks if a point is inside or on the arc.
+	 * @param Origin The center point of the arc.
 	 * @param Rotation The base rotation of the arc.
 	 * @param Degrees The angle of the arc in degrees.
 	 * @param MinimumDistance The minimum distance of the arc.
 	 * @param MaximumDistance The maximum distance of the arc.
 	 * @param Point The point to check.
-	 * @return True if the point is inside or on the surface of the FBox, false otherwise.
+	 * @return True if the point is inside or on the arc, false otherwise.
+	 * @note Closed annulus sector: points on the inner OR outer distance (and on the angular edges) are included; only points strictly inside MinimumDistance (the hole) are excluded. When MinimumDistance is 0 there is no hole, so the center is included.
 	 */
 	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const FRotator& Rotation, const float& Degrees, const float& MinimumDistance, const float& MaximumDistance, const FVector& Point)
 	{
 		const FVector Direction = Point - Origin;
 		const float DistanceSquared = Direction.SizeSquared();
-		if (DistanceSquared > (MaximumDistance * MaximumDistance) || 
-			DistanceSquared < (MinimumDistance * MinimumDistance)) 
+		if (DistanceSquared > (MaximumDistance * MaximumDistance) ||
+			DistanceSquared < (MinimumDistance * MinimumDistance))
 		{
 			return false;
 		}
-		
+
 		const float DotProduct = FVector::DotProduct(Rotation.Vector(), Direction.GetSafeNormal());
 		const float AngleRadians = FMath::Acos(DotProduct);
 		const float AngleDegrees = FMath::RadiansToDegrees(AngleRadians);
-    
+
 		return AngleDegrees <= (Degrees * 0.5f);
 	}
 
@@ -103,11 +97,11 @@ public:
 	{
 		TArray<bool> OutResults;
 		OutResults.Reserve(Points.Num());
-		
+
 		for (const FVector& Point : Points)
 		{
 			OutResults.Add(IsPointInsideOrOn(Origin, Rotation, Degrees, MinimumDistance, MaximumDistance, Point));
 		}
-		return MoveTemp(OutResults);
+		return OutResults;
 	}
 };

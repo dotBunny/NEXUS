@@ -31,6 +31,9 @@ struct FNOrganGraphBuilderAnalytics
 	/** Cell-node count of the produced graph; on failure, the count from the final attempt. */
 	int32 FinalCellNodeCount = 0;
 
+	/** Total random-stream draws consumed by the whole build, across every retry iteration. */
+	uint64 DrawCount = 0;
+
 	/** Lower bound on cell count required for success, captured from the organ context; -1 disables the check. */
 	int32 MinimumCellCount = -1;
 
@@ -66,13 +69,13 @@ struct FNOrganGraphBuilderAnalytics
 
 	/** Candidate cell nodes rejected because they collided with another organ's existing nodes. */
 	FNIterationCounter DiscardExistingNodeWorldCollidingCellNode;
-	
+
 	/** Candidate cell nodes rejected because the finisher constraint required a finisher cell and this candidate was not one. */
 	FNIterationCounter DiscardDueToNonFinisherConstraint;
 
 	/** Number of graph branches closed off by placing a finisher cell. */
 	FNIterationCounter CappedWithFinisher;
-	
+
 	TMap<int32, TArray<FString>> IterationMessages = {
 		{ 0, TArray<FString>() }
 	};
@@ -83,8 +86,8 @@ struct FNOrganGraphBuilderAnalytics
 		Iterations++;
 		IterationsIndex++;
 		IterationMessages.Add(IterationsIndex, TArray<FString>());
-		
-		
+
+
 		AddNullNodes.NextIteration();
 		AddCellNodes.NextIteration();
 

@@ -11,7 +11,7 @@ N_EDITOR_STYLE(FNActorPoolsEditorStyle)
 TSharedRef<FSlateStyleSet> FNActorPoolsEditorStyle::Create()
 {
 	N_EDITOR_STYLE_CREATE
-	
+
 	// NPooledActor
 	Style.Set("ClassIcon.NPooledActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NPooledActor"), Icon16x16));
 	Style.Set("ClassThumbnail.NPooledActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NPooledActor"), Icon128x128));
@@ -33,6 +33,6 @@ TSharedRef<FSlateStyleSet> FNActorPoolsEditorStyle::Create()
 	Style.Set("ClassThumbnail.NKillZoneComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NKillZoneComponent"), Icon128x128));
 	Style.Set("ClassIcon.NKillZoneActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NKillZoneComponent"), Icon16x16));
 	Style.Set("ClassThumbnail.NKillZoneActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NKillZoneComponent"), Icon128x128));
-	
+
 	return StyleRef;
 }

@@ -10,6 +10,7 @@
 #include "IAssetTools.h"
 #include "Cell/NCellActor.h"
 #include "NEditorDefaults.h"
+#include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEditorStyle.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyUtils.h"
@@ -52,6 +53,13 @@ namespace
 			}
 		}));
 	}
+
+	/**
+	 * Side-cars dirtied by OnPreSaveWorldWithContext that still need their own SavePackage. The flush is deferred to the
+	 * matching OnPostSaveWorldWithContext so the write happens as a fresh top-level save, never re-entrantly inside the
+	 * host world's pre-save broadcast. Held as weak pointers so a side-car GC'd between pre- and post-save simply drops out.
+	 */
+	TSet<TWeakObjectPtr<UNCell>> PendingSidecarFlushes;
 
 	/** @return the full object path of the side-car asset within the given side-car package. */
 	FSoftObjectPath MakeSidecarObjectPath(const FString& SidecarPackage)
@@ -160,8 +168,14 @@ FText UAssetDefinition_NCell::GetAssetDescription(const FAssetData& AssetData) c
 
 bool UAssetDefinition_NCell::GetThumbnailActionOverlay(const FAssetData& InAssetData, FAssetActionThumbnailOverlayInfo& OutActionOverlayInfo) const
 {
+	// NCell displays a custom static overlay brush rather than a play/stop toggle. UE 5.8 deprecated
+	// ActionImageWidget in favor of IsActionPlayingDelegate, but that path is hard-wired to the engine
+	// Play/Stop icons and cannot render a custom brush, so we keep the still-honored widget path and
+	// locally silence the deprecation — mirroring how the engine's own SAssetThumbnail continues to use it.
+	PRAGMA_DISABLE_DEPRECATION_WARNINGS
 	OutActionOverlayInfo.ActionImageWidget = SNew(SImage)
 		.Image(FNWorldAssemblyEditorStyle::Get().GetBrush("AssetOverlay.NCell"));
+	PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 	OutActionOverlayInfo.ActionButtonArgs = SButton::FArguments()
 		.ToolTipText(NSLOCTEXT("NexusWorldAssemblyEditor", "NCell_SelectInContentBrowser", "Select Level in Content Browser"))
@@ -184,14 +198,14 @@ bool UAssetDefinition_NCell::GetThumbnailActionOverlay(const FAssetData& InAsset
 			ContentBrowser.Get().SyncBrowserToAssets({ WorldAssetData });
 			return FReply::Handled();
 		});
-	
+
 	return true;
 }
 
 FText UAssetDefinition_NCell::GetAssetDisplayName() const
 {
-	static const FText DisplayName = NSLOCTEXT("NexusWorldAssemblyEditor", "AssetTypeActions_NCell", "NCell"); 
-	return DisplayName; 
+	static const FText DisplayName = NSLOCTEXT("NexusWorldAssemblyEditor", "AssetTypeActions_NCell", "NCell");
+	return DisplayName;
 }
 
 UNCell* UAssetDefinition_NCell::GetOrCreatePackage(UWorld* World)
@@ -211,12 +225,17 @@ UNCell* UAssetDefinition_NCell::GetOrCreatePackage(UWorld* World)
 	// Create Asset
 	IAssetTools& AssetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
 	UNCell* Asset = Cast<UNCell>(AssetTools.CreateAsset(ShortName, *PackagePath, UNCell::StaticClass(), Factory));
+	if (Asset == nullptr)
+	{
+		UE_LOG(LogNexusWorldAssemblyEditor, Warning, TEXT("Failed to create UNCell side-car package at %s."), *FullName);
+		return nullptr;
+	}
 
 	Asset->World = TSoftObjectPtr<UWorld>(World);
-	
+
 	// Write to disk first
 	UEditorAssetLibrary::SaveLoadedAsset(Asset, false);
-	
+
 	FAssetRegistryModule::AssetCreated(Asset);
 	return Asset;
 }
@@ -270,12 +289,50 @@ void UAssetDefinition_NCell::OnPreSaveWorldWithContext(UWorld* World, FObjectPre
 
 	// We don't have a cell actor, get out of here!
 	if (CellActor == nullptr) return;
-	
+
 	// Ensure CellActor settings
 	FNWorldAssemblyEditorUtils::EnsureCellInitializedCallbackActors(World, CellActor);
 
-	// Create or get our package for the world
-	FNWorldAssemblyEditorUtils::SaveCell(World, CellActor);
+	// Sync the cell data into its side-car now (in-memory), so the recalculated actor state is captured by this level
+	// save, but defer the side-car's own disk write to OnPostSaveWorldWithContext rather than running a re-entrant
+	// SavePackage inside this pre-save broadcast.
+	if (UNCell* Cell = FNWorldAssemblyEditorUtils::SyncCell(World, CellActor))
+	{
+		PendingSidecarFlushes.Add(Cell);
+	}
+}
+
+void UAssetDefinition_NCell::OnPostSaveWorldWithContext(UWorld* World, FObjectPostSaveContext ObjectPostSaveContext)
+{
+	// Nothing is queued during a cook save (OnPreSaveWorldWithContext bails first); mirror the guard for symmetry.
+	if (ObjectPostSaveContext.IsCooking())
+	{
+		return;
+	}
+
+	const ANCellActor* CellActor = FNWorldAssemblyUtils::GetCellActorFromWorld(World, true);
+	if (CellActor == nullptr) return;
+
+	// Flush this world's side-car if its pre-save pass dirtied it. The world package is fully written by now, so this is
+	// a safe top-level save; SaveLoadedAsset routes through SavePackages, which checks the package out (p4 edit) or marks
+	// a freshly created one for add (p4 add) under source control. Only dequeue on success so a failed checkout (offline,
+	// exclusively locked) retries on the next save rather than being silently dropped.
+	UNCell* Cell = CellActor->Sidecar.Get();
+	if (Cell != nullptr && PendingSidecarFlushes.Contains(Cell))
+	{
+		if (UEditorAssetLibrary::SaveLoadedAsset(Cell))
+		{
+			PendingSidecarFlushes.Remove(Cell);
+		}
+		else
+		{
+			// Kept queued for a retry on the next save. Surface it so a source-control failure (not checked out,
+			// exclusively locked, offline) isn't silently swallowed mid level-save — the data is safe in memory.
+			UE_LOG(LogNexusWorldAssemblyEditor, Warning,
+				TEXT("Failed to write the UNCell side-car '%s' to disk after saving world '%s'. It may not be checked out in source control; the change is kept in memory and will be retried on the next save."),
+				*Cell->GetName(), *World->GetName());
+		}
+	}
 }
 
 EDataValidationResult UAssetDefinition_NCell::ValidateAsset(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context)
@@ -302,7 +359,7 @@ EDataValidationResult UAssetDefinition_NCell::ValidateAsset(const FAssetData& In
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_HullNoVertices", "Cell {0} hull has no vertices."), FText::FromString(Cell->GetName())));
 	}
-	
+
 	if (!Cell->Root.HullSettings.bAllowNonConvex && !Cell->Root.Hull.IsConvex())
 	{
 		Result = EDataValidationResult::Invalid;
@@ -314,6 +371,6 @@ EDataValidationResult UAssetDefinition_NCell::ValidateAsset(const FAssetData& In
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_NoJunctions", "Cell {0} has no junctions."), FText::FromString(Cell->GetName())));
 	}
-	
+
 	return Result;
 }

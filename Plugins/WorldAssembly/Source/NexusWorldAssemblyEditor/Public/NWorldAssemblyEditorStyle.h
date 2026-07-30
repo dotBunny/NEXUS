@@ -4,11 +4,7 @@
 #pragma once
 
 #include "Macros/NEditorStyleMacros.h"
-#include "Templates/SharedPointer.h"
-#include "Interfaces/IPluginManager.h"
-#include "Brushes/SlateImageBrush.h"
-#include "Styling/SlateStyle.h"
-#include "Styling/SlateStyleRegistry.h"
+#include "Textures/SlateIcon.h" // FSlateIcon return types declared below
 
 /**
  * Slate style set for the NexusWorldAssemblyEditor module.
@@ -29,12 +25,15 @@ public:
 
 	/** @return Icon for the "toggle voxel-data overlay" action on the cell-actor toolbar. */
 	static FSlateIcon CellActorToggleDrawVoxelDataIcon();
-	
+
 	/** @return Icon for the "toggle world-collision visualizer" action on the World Assembly toolbar. */
 	static FSlateIcon CollisionVisualizerToggleIcon();
-	
+
 	/** @return Icon for the cell-ignore tagging action. */
 	static FSlateIcon CellIgnoreIcon();
 	/** @return Icon for the world-collision-ignore tagging action. */
 	static FSlateIcon WorldCollisionIgnoreIcon();
+
+	/** @return Cancel icon while the tracked Quick Assembly operation is running, otherwise the start icon. */
+	static FSlateIcon QuickAssemblyOperationIcon();
 };

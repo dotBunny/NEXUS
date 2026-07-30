@@ -21,42 +21,48 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	: Seed(TaskSeed), Name(TaskName)
 {
 	// This is our last chance to read anything off the main-thread
-	//TODO: There is a Seed on the component? What do we do here with it? 
-	
+	//TODO: There is a Seed on the component? What do we do here with it?
+
 	// Cache out some settings
 	MinimumCellCount = WorldOrganContext->SourceComponent->MinimumCellCount;
 	MaximumCellCount = WorldOrganContext->SourceComponent->MaximumCellCount;
+	Identifier = WorldOrganContext->SourceComponent->Identifier;
 	MaximumRetryCount = WorldOrganContext->MaximumRetryCount;
+	bRequired = WorldOrganContext->SourceComponent->bRequired;
 
 	// Seed override
 	if (WorldOrganContext->SourceComponent->Seed != -1)
 	{
 		Seed = WorldOrganContext->SourceComponent->Seed;
 	}
-	
+
 	CellHullPenetration = WorldOrganContext->CellHullPenetration;
 	WorldHullPenetration = WorldOrganContext->WorldHullPenetration;
 	AssemblyDirectionTolerance = WorldOrganContext->AssemblyDirectionTolerance;
+	AssemblyDirectionMode = WorldOrganContext->SourceComponent->DirectionMode;
+
 	VoxelSize = WorldOrganContext->VoxelSize;
-	
+
 	// Keep a local copy of this here
-	bUnbounded = WorldOrganContext->SourceComponent->bUnbounded;
-	
+	bUnbound = WorldOrganContext->SourceComponent->bUnbound;
+	RequiredTagCounters = WorldOrganContext->SourceComponent->TagCounters;
+	RequiredContextTags = WorldOrganContext->SourceComponent->ContextTags;
+
 	// We are going to establish some base understanding of the space, specifically its world origin as well as the bounds.
 	Bounds = WorldOrganContext->Bounds;
 	Origin = WorldOrganContext->Origin;
-	
+
 	// Build a safe reference to all the data so we can operate off-thread without issue
 	TMap<TObjectPtr<UNCell>, FNTissueEntry> TissueMap;
 	CellInputDataSummary = FNVirtualCellDataSummary();
-	
+
 	WorldOrganContext->SourceComponent->GetTissueMap(TissueMap, CellInputDataSummary.GroupTags);
-	
+
 	// We're going to process the input cells to see what behavior we are going to be exercising down the road.
-	
+
 	// Validate the tissue map has a start
 	bool bFoundSomeCells = false;
-	
+
 	for (auto Pair : TissueMap)
 	{
 		// Every cell in the map is a placement candidate (MaximumCount == 0 means unlimited, not disabled); a cell
@@ -68,30 +74,30 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		{
 			CellInputDataSummary.bFoundStarterTagged = true;
 		}
-		
+
 		// bFoundStarterOnlyTagged
 		if (!CellInputDataSummary.bFoundStarterOnlyTagged && Pair.Value.AssemblyTags.HasTag(NWorldAssembly_Behavior_StarterOnly))
 		{
 			CellInputDataSummary.bFoundStarterOnlyTagged = true;
 		}
-		
+
 		// bFoundFinisherTagged
 		if (!CellInputDataSummary.bFoundFinisherTagged && Pair.Value.AssemblyTags.HasTag(NWorldAssembly_Behavior_Finisher))
 		{
 			CellInputDataSummary.bFoundFinisherTagged = true;
 		}
-		
+
 		// bFoundFinisherOnlyTagged
 		if (!CellInputDataSummary.bFoundFinisherOnlyTagged && Pair.Value.AssemblyTags.HasTag(NWorldAssembly_Behavior_FinisherOnly))
 		{
 			CellInputDataSummary.bFoundFinisherOnlyTagged = true;
 		}
-		
+
 		// Early out as there is nothing else we really are looking for
-		if (bFoundSomeCells && 
-			CellInputDataSummary.bFoundStarterTagged && 
-			CellInputDataSummary.bFoundStarterOnlyTagged && 
-			CellInputDataSummary.bFoundFinisherTagged && 
+		if (bFoundSomeCells &&
+			CellInputDataSummary.bFoundStarterTagged &&
+			CellInputDataSummary.bFoundStarterOnlyTagged &&
+			CellInputDataSummary.bFoundFinisherTagged &&
 			CellInputDataSummary.bFoundFinisherOnlyTagged)
 		{
 			break;
@@ -103,7 +109,7 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to validate FNOrganGeneratorTaskContext as no UNCells were provided by the supplied UNTissues. Skipping."));
 		return;
 	}
-	
+
 	// Build CellInputData
 	CellInputData.Reserve(TissueMap.Num());
 	for (const auto& Cell : TissueMap)
@@ -133,10 +139,10 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		CellDetails.MaximumNodeDepth = Cell.Value.MaximumNodeDepth;
 		CellDetails.bHasDirectionConstraint = Cell.Value.bHasDirectionConstraint;
 		CellDetails.DirectionConstraint = Cell.Value.DirectionConstraint;
-		
+
 		// We won't touch this till later
 		CellDetails.Template = Cell.Key;
-		
+
 		Cell.Key->Root.CopyTo(CellDetails.CellDetails);
 		for (const TPair<int32, FNCellJunctionDetails>& Junction :  Cell.Key->Junctions)
 		{
@@ -161,43 +167,47 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 
 		CellInputData.Add(CellDetails); // TODO: Check this is a Move
 	}
-	
+
 	// Need to convert the bone data to something were going to use
 	BoneInputData.Reserve(WorldOrganContext->ContainedBones.Num());
 	for (const auto& Bone : WorldOrganContext->ContainedBones)
 	{
 		FNVirtualBoneData BoneDetails;
-		
+
 		BoneDetails.WorldPosition = Bone->SourceComponent->GetComponentLocation();
 		BoneDetails.WorldRotation = Bone->SourceComponent->GetComponentRotation();
-		
-		BoneDetails.CornerPoints = Bone->CornerPoints;		
-		
+
+		BoneDetails.CornerPoints = Bone->CornerPoints;
+
 		BoneDetails.SocketSize = Bone->SourceComponent->SocketSize;
-		
+
 		BoneInputData.Add(BoneDetails);
 	}
-	
+
 	// Validate that we do have bones
 	if (BoneInputData.IsEmpty())
 	{
 		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to validate FNOrganGeneratorTaskContext as no UNBoneComponents were provided or found. Skipping."));
 		return;
 	}
-	
+
 	// TODO: handle more then 1 bone
 	FNCellInputDataFilter PreFilter;
 	PreFilter.NodeDepth = 0;
 	PreFilter.SocketSize = BoneInputData[0].SocketSize;
 	PreFilter.SourceQuat = FQuat(BoneInputData[0].WorldRotation);
 	PreFilter.bIsStartNode = true;
-	
+
 	// TODO: Odd spot but right now just using one bone
-	SetDirectionTargetPosition(BoneInputData[0].WorldPosition);
-	
+	// Seed the directional-constraint reference point per the configured mode. StartBone uses the start bone;
+	// OrganCenter uses the volume center; DynamicCentroid seeds to the start bone here and is overridden each
+	// filter pass once cells are placed (see FilterCellInputData). Both DynamicCentroid (pre-placement) and
+	// unbound OrganCenter fall back to the start bone.
+	SetDirectionTargetPosition(ResolveDirectionTargetPosition(AssemblyDirectionMode, bUnbound, Bounds, BoneInputData[0].WorldPosition));
+
 	FNWeightedIntegerArray PreIndices;
 	TMap<int32, TArray<int32>> ValidJunctions;
-	
+
 	FilterCellInputData(PreFilter, PreIndices, ValidJunctions);
 
 	if (PreIndices.WeightedCount() == 0)
@@ -205,8 +215,8 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to validate FNOrganGeneratorTaskContext as no starting junctions are sized to the provided UNBoneComponent."));
 		return;
 	}
-	
-	
+
+
 	// We got to the end so we have validated things so far at this point.
 	bIsValid = true;
 }
@@ -223,14 +233,14 @@ bool FNVirtualOrganContext::CheckGraph()
 {
 	// We're going to look over all the nodes
 	int32 CellNodeCount = 0;
-	
+
 	// If we don't have a graph it's a fail
 	if (!CellGraph)
 	{
 		N_VIRTUAL_ORGAN_MESSAGE("CheckGraph FAILED: Graph was null.")
 		return false;
 	}
-	
+
 	for (const auto Pair : CellGraph->GetNodes())
 	{
 		if (Pair->GetNodeType() == ENAssemblyGraphNodeType::Cell)
@@ -246,7 +256,7 @@ bool FNVirtualOrganContext::CheckGraph()
 			TEXT("CheckGraph FAILED: CellNodeCount(%i) < MinimumCellCount(%i)"), CellNodeCount, MinimumCellCount))
 		return false;
 	}
-	
+
 	// Enforce check for maximum amount of cells wanted
 	if (MaximumCellCount > 0 && CellNodeCount > MaximumCellCount)
 	{
@@ -254,18 +264,42 @@ bool FNVirtualOrganContext::CheckGraph()
 			TEXT("CheckGraph FAILED: CellNodeCount(%i) > MaximumCellCount(%i)"), CellNodeCount, MaximumCellCount))
 		return false;
 	}
-	
+
+	// Enforce TagCounter Constraints
+	if (RequiredTagCounters.Num() > 0)
+	{
+		for (int i = 0; i < RequiredTagCounters.Num(); i++)
+		{
+			if (!RequiredTagCounters[i].DoesPassComparison(TagCounter))
+			{
+
+				N_VIRTUAL_ORGAN_MESSAGE(TEXT("CheckGraph FAILED: RequiredTagCounters were not met"));
+				return false;
+			}
+		}
+	}
+
+	// Enforce ContextTag Requirements
+	if (!RequiredContextTags.IsEmpty() && !ContextTags.HasAllExact(RequiredContextTags))
+	{
+		N_VIRTUAL_ORGAN_MESSAGE(FString::Printf(
+			TEXT("CheckGraph FAILED: RequiredContextTags(%s) not met (%s)"),
+			*RequiredContextTags.ToStringSimple(), *ContextTags.ToStringSimple()))
+		return false;
+	}
+
+
 	// We need to check that each of the RequiredAny groups are met
-	if (!CellInputDataSummary.GroupTags.RequiredAnyTags.IsEmpty() && 
+	if (!CellInputDataSummary.GroupTags.RequiredAnyTags.IsEmpty() &&
 		!PlacedTagGroups.RequiredAnyTags.HasAllExact(CellInputDataSummary.GroupTags.RequiredAnyTags))
 	{
 		// Could log analytics about rejection based on required
 		N_VIRTUAL_ORGAN_MESSAGE(FString::Printf(
-			TEXT("CheckGraph FAILED: HasAllRequiredAnyTags(%s) != PlacedGroupTags(%s)"), 
+			TEXT("CheckGraph FAILED: HasAllRequiredAnyTags(%s) != PlacedGroupTags(%s)"),
 			*CellInputDataSummary.GroupTags.RequiredAnyTags.ToStringSimple(), *PlacedTagGroups.RequiredAnyTags.ToStringSimple()))
 		return false;
 	}
-	
+
 	// Enforce per-cell MinimumCount. UsedCount is kept aligned with placed instances by the graph's
 	// Register/UnregisterNode, so by here it reflects exactly how many times each cell landed in the graph.
 	//
@@ -292,6 +326,23 @@ bool FNVirtualOrganContext::CheckGraph()
 		{
 			N_VIRTUAL_ORGAN_MESSAGE(FString::Printf(
 				TEXT("CheckGraph FAILED: Cell UsedCount(%i) < MinimumCount(%i)"), Cell.UsedCount, Cell.MinimumCount))
+			return false;
+		}
+	}
+
+	// Every placed cell must have all of its Required junctions connected to another junction. An unconnected
+	// Required junction means the graph is structurally incomplete, so reject it.
+	for (const FNAssemblyGraphNode* Node : CellGraph->GetNodes())
+	{
+		if (Node->GetNodeType() != ENAssemblyGraphNodeType::Cell) continue;
+
+		const FNAssemblyGraphCellNode* CellNode = static_cast<const FNAssemblyGraphCellNode*>(Node);
+		const int32 UnconnectedKey = CellNode->FindUnconnectedRequiredJunctionKey();
+		if (UnconnectedKey != INDEX_NONE)
+		{
+			N_VIRTUAL_ORGAN_MESSAGE(FString::Printf(
+				TEXT("CheckGraph FAILED: Cell node %i has an unconnected Required junction (key %i)"),
+				Node->GetNodeIdentifier(), UnconnectedKey))
 			return false;
 		}
 	}
@@ -366,6 +417,27 @@ bool FNVirtualOrganContext::IsGatedByFinisherTags(const bool bIsEndNode, const F
 	return bIsEndNode && CandidateTags.HasTag(NWorldAssembly_Behavior_NotFinisher);
 }
 
+bool FNVirtualOrganContext::IsUnmetFinisherMinimum(const FNVirtualCellData& Cell, const FGameplayTagContainer& UniqueAndRequiredTags)
+{
+	// 0 (and any non-positive) carries no real minimum.
+	if (Cell.MinimumCount <= 0) return false;
+
+	// Unsatisfiable configuration: a minimum greater than a positive maximum can never be reached. CheckGraph skips
+	// these too, so forcing them would loop without ever succeeding.
+	if (Cell.MaximumCount > 0 && Cell.MinimumCount > Cell.MaximumCount) return false;
+
+	// Already satisfied — nothing to force.
+	if (Cell.UsedCount >= Cell.MinimumCount) return false;
+
+	// Cells governed by a combined Unique + RequiredAny group are validated by the RequiredAny check rather than
+	// their per-cell minimum (matches CheckGraph), so they are not a target here.
+	if (!UniqueAndRequiredTags.IsEmpty() && Cell.AssemblyTags.HasAnyExact(UniqueAndRequiredTags)) return false;
+
+	// Only finisher-eligible cells can be placed at cap time; anything else gets its chances during normal expansion
+	// and would be gated out of the end-node placement this guarantee performs.
+	return Cell.AssemblyTags.HasTag(NWorldAssembly_Behavior_Finisher) || Cell.AssemblyTags.HasTag(NWorldAssembly_Behavior_FinisherOnly);
+}
+
 bool FNVirtualOrganContext::IsGatedByTagCounterConstraints(const FNVirtualCellData& Candidate, const FNGameplayTagCounter& TagCounter)
 {
 	// The candidate is only eligible when every one of its constraints passes against the current counter state.
@@ -400,6 +472,20 @@ bool FNVirtualOrganContext::IsGatedByDirectionalConstraint(float Angle, ENCardin
 	return !FNCardinalDirectionUtils::IsCloseToDirection(Direction, Angle, Tolerance);
 }
 
+FVector FNVirtualOrganContext::ResolveDirectionTargetPosition(const ENOrganDirectionConstraintMode Mode,
+	const bool bUnbound, const FBoxSphereBounds& Bounds, const FVector& StartBoneWorldPosition)
+{
+	// OrganCenter measures candidate bearings from the volume's geometric center. Unbound organs carry a degenerate
+	// (near-infinite) bounds whose Origin is meaningless, so they fall back to the start bone. StartBone uses the
+	// start bone directly; DynamicCentroid also resolves to the start bone here as its pre-placement seed/fallback,
+	// and is overridden with the live centroid per filter pass in FilterCellInputData once cells exist.
+	if (Mode == ENOrganDirectionConstraintMode::OrganCenter && !bUnbound)
+	{
+		return Bounds.Origin;
+	}
+	return StartBoneWorldPosition;
+}
+
 FRotator FNVirtualOrganContext::GetRequiredJunctionRotation(const FQuat& SourceQuat, const FRotator& JunctionWorldRotation)
 {
 	// Flip 180 around Up to oppose the source's facing direction, then undo the junction's local rotation so only
@@ -426,18 +512,59 @@ bool FNVirtualOrganContext::IsGatedByJunctionRotation(const FQuat& SourceQuat, c
 bool FNVirtualOrganContext::IsGatedByJunctionRotationPrepared(const FQuat& SourceFlippedQuat, const FQuat& JunctionInverseQuat,
 	const FNRotationConstraints& CellConstraints, const FNRotationConstraints& JunctionConstraints)
 {
-	const FRotator Required = GetRequiredJunctionRotationPrepared(SourceFlippedQuat, JunctionInverseQuat);
+	return IsGatedByMatchingRotation(GetRequiredJunctionRotationPrepared(SourceFlippedQuat, JunctionInverseQuat),
+		CellConstraints, JunctionConstraints);
+}
 
+bool FNVirtualOrganContext::IsGatedByMatchingRotation(const FRotator& Required,
+	const FNRotationConstraints& CellConstraints, const FNRotationConstraints& JunctionConstraints)
+{
 	// Both the cell and the junction get a veto: either can independently disable enforcement, but whichever side
 	// has bEnforceMatchingRotation set must have the required rotation fall inside its Min/Max range.
 	return !CellConstraints.IsMatchingRotationAllowed(Required.Roll, Required.Pitch, Required.Yaw) ||
 		!JunctionConstraints.IsMatchingRotationAllowed(Required.Roll, Required.Pitch, Required.Yaw);
 }
 
+void FNVirtualOrganContext::EnsureSocketIndex()
+{
+	if (SocketIndexCellCount == CellInputData.Num())
+	{
+		return;
+	}
+
+	CellsBySocketSize.Reset();
+
+	// Ascending cell order, so each bucket preserves the order a full pool walk would have visited candidates in.
+	for (int32 i = 0; i < CellInputData.Num(); i++)
+	{
+		const FNVirtualCellData& CellData = CellInputData[i];
+		for (const TPair<int32, FNCellJunctionDetails>& Pair : CellData.Junctions)
+		{
+			TArray<int32>& Bucket = CellsBySocketSize.FindOrAdd(Pair.Value.SocketSize);
+			// A cell with several junctions of one size belongs in that bucket once.
+			if (Bucket.Num() == 0 || Bucket.Last() != i)
+			{
+				Bucket.Add(i);
+			}
+		}
+	}
+
+	SocketIndexCellCount = CellInputData.Num();
+}
+
 void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
 {
 	CellIndices.Reset();
 	JunctionIndices.Reset();
+
+	// Only cells carrying a junction of the requested socket size can ever survive, so skip straight to them rather
+	// than running every gate on the whole pool and rejecting the rest at the end for an empty junction result.
+	EnsureSocketIndex();
+	const TArray<int32>* SocketBucket = CellsBySocketSize.Find(Filter.SocketSize);
+	if (SocketBucket == nullptr)
+	{
+		return;
+	}
 
 	// Resolve which bad-neighbor groups the source cell belongs to once up front; any candidate sharing one of
 	// these groups cannot be placed beside it. Stays empty when there is no source node (e.g. the start-node
@@ -452,12 +579,42 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 	// SourceQuat flipped 180 around Up. The per-junction term is read from the junction's CachedInverseWorldQuat.
 	const FQuat SourceFlippedQuat = Filter.SourceQuat * YawFlipQuat;
 
-	for (int32 i = 0; i < CellInputData.Num(); i++)
+	// Resolve the directional-constraint reference point once for the whole call (it does not vary per candidate).
+	// Static modes (StartBone/OrganCenter) use DirectionTargetPosition seeded at construction. DynamicCentroid
+	// tracks the centroid of placed cells, which shifts as the graph grows; before any cell exists (the start-node
+	// pre-filters, where CellGraph is still null) it falls back to DirectionTargetPosition, i.e. the start bone.
+	FVector DirectionReferencePoint = DirectionTargetPosition;
+	if (AssemblyDirectionMode == ENOrganDirectionConstraintMode::DynamicCentroid &&
+		CellGraph != nullptr && CellGraph->GetCellNodeCount() > 0)
+	{
+		DirectionReferencePoint = CellGraph->GetCellCentroid();
+	}
+
+	// Reused across candidates rather than declared per iteration: this held one heap allocation per surviving
+	// candidate, and Reset keeps the buffer for the whole call.
+	TArray<int32> GoodJunctions;
+
+	// With SourceFlippedQuat fixed for the call, the required junction rotation is a pure function of the junction's
+	// inverse quat — and junction orientations repeat heavily across a tissue's cells, since every cell tends to
+	// carry junctions facing the same handful of directions. Memoize within the call so a pool of N cells sharing a
+	// few orientations pays for a few quaternion->rotator conversions instead of one per junction per cell. That
+	// conversion is an asin plus two atan2 and dominated this loop.
+	//
+	// Keys are compared exactly: junctions authored at the same orientation produce identical quats, and an inexact
+	// match simply misses and recomputes, so this can never yield a rotation different from computing it directly.
+	// Capped so a pool with many distinct orientations degrades to the direct computation instead of growing an
+	// unbounded scratch buffer.
+	constexpr int32 MaxCachedRotations = 16;
+	TArray<TPair<FQuat, FRotator>, TInlineAllocator<MaxCachedRotations>> RequiredRotations;
+
+	for (const int32 i : *SocketBucket)
 	{
 		const FNVirtualCellData* CellData = &CellInputData[i];
 
-		// Early out on some simple filters
-		if (!CellData->IsValidSelection(Filter.SocketSize)) continue;
+		// Early out on some simple filters. Deliberately the cell-level gates only (empty/maximum-count/unique) —
+		// the socket-size variant additionally walks the junction map to answer "is there a matching socket", which
+		// the bucket above has already answered and the collection loop below has to walk anyway.
+		if (!CellData->IsValidSelection()) continue;
 
 
 		// CONTEXT TAGS
@@ -478,7 +635,7 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		{
 			continue;
 		}
-		
+
 		// FILTER BAD NEIGHBORS
 		// Reject candidates that belong to a bad-neighbor group the source cell is also a member of — those
 		// two cells are not allowed to be placed beside each other.
@@ -506,7 +663,7 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		{
 			continue;
 		}
-		
+
 		// Gate by depth. Min/MaxNodeDepth are 1-based graph depths that match a cell's real NodeDepth (bone = 0,
 		// start cell = 1, each hop +1). Filter.NodeDepth is the SOURCE node's depth, so a candidate stepping off
 		// it lands at Filter.NodeDepth + 1 — that prospective depth is what the gates compare against.
@@ -521,34 +678,62 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		{
 			continue;
 		}
-		
-		
+
+
 		// Cardinal Direction Constraint
 		if (CellData->bHasDirectionConstraint)
 		{
-			// Compass bearing from the organ's start point out to the candidate's world position. FVector::Rotation()
+			// Compass bearing from the configured reference point (start bone, organ center, or dynamic centroid;
+			// resolved into DirectionReferencePoint above) out to the candidate's world position. FVector::Rotation()
 			// derives yaw from atan2(Y, X), so North (+X) = 0 and East (+Y) = 90, matching ENCardinalDirection; Z is
 			// ignored, keeping this a purely horizontal heading.
-			const float Angle = (Filter.WorldPosition - DirectionTargetPosition).Rotation().Yaw;
+			const float Angle = (Filter.WorldPosition - DirectionReferencePoint).Rotation().Yaw;
 			if (IsGatedByDirectionalConstraint(Angle, CellData->DirectionConstraint, AssemblyDirectionTolerance))
 			{
 				continue;
 			}
 		}
-		
+
 		const FNRotationConstraints& CellRotationConstraints = CellData->CellDetails.RotationConstraints;
-		
-		// Parse Junctions
-		TArray<int32> GoodJunctions;
-		for (auto Pair : CellData->Junctions)
+
+		// Parse Junctions. Iterated by const reference: FNCellJunctionDetails is a ~150-byte struct and this loop
+		// reads two fields of it, so taking it by value copied close to a kilobyte per six-junction candidate.
+		GoodJunctions.Reset();
+		for (const TPair<int32, FNCellJunctionDetails>& Pair : CellData->Junctions)
 		{
 			if (Pair.Value.SocketSize == Filter.SocketSize)
 			{
 				// Determine the rotation this junction would have to take on to match Filter.SourceQuat, then veto it
 				// against both the cell's and the junction's matching-rotation constraints. Both rotation terms are
-				// precomputed (SourceFlippedQuat hoisted above, CachedInverseWorldQuat built with the virtual data).
+				// precomputed (SourceFlippedQuat hoisted above, CachedInverseWorldQuat built with the virtual data),
+				// and the composition itself is memoized per distinct junction orientation.
 				// Covered by NJunctionRotationTests.cpp.
-				if (IsGatedByJunctionRotationPrepared(SourceFlippedQuat, Pair.Value.CachedInverseWorldQuat, CellRotationConstraints, Pair.Value.RotationConstraints))
+				const FQuat& JunctionInverseQuat = Pair.Value.CachedInverseWorldQuat;
+				const FRotator* CachedRequired = nullptr;
+				for (const TPair<FQuat, FRotator>& Entry : RequiredRotations)
+				{
+					if (Entry.Key == JunctionInverseQuat)
+					{
+						CachedRequired = &Entry.Value;
+						break;
+					}
+				}
+
+				FRotator Required;
+				if (CachedRequired != nullptr)
+				{
+					Required = *CachedRequired;
+				}
+				else
+				{
+					Required = GetRequiredJunctionRotationPrepared(SourceFlippedQuat, JunctionInverseQuat);
+					if (RequiredRotations.Num() < MaxCachedRotations)
+					{
+						RequiredRotations.Emplace(JunctionInverseQuat, Required);
+					}
+				}
+
+				if (IsGatedByMatchingRotation(Required, CellRotationConstraints, Pair.Value.RotationConstraints))
 				{
 					continue;
 				}
@@ -556,18 +741,15 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 				GoodJunctions.Add(Pair.Key);
 			}
 		}
-		
+
 		if (GoodJunctions.Num() > 0)
 		{
 			// Add weighting
 			CellIndices.Add(i, CellData->Weighting);
-			
-			// Fill out selectable junctions
-			TArray<int32>& Junctions = JunctionIndices.Add(i, TArray<int32>());
-			for (auto Index : GoodJunctions)
-			{
-				Junctions.Add(Index);
-			}
+
+			// Fill out selectable junctions. Copy-constructed in one go rather than appended element by element,
+			// so the map's array is sized exactly once instead of growing.
+			JunctionIndices.Add(i, GoodJunctions);
 		}
 	}
 }
@@ -579,25 +761,25 @@ bool FNVirtualOrganContext::ResetForRetry()
 	{
 		CellInputData[i].UsedCount = 0;
 	}
-	
+
 	// Drop everything this attempt placed so a retry starts from the same state as the first attempt.
 	// PlacedTagGroups is a pure accumulator (starts empty, filled as cells are placed), so it clears to
 	// empty; ContextTags and TagCounter genuinely restore to the bases they were seeded from.
 	PlacedTagGroups = FNTissueTagGroups();
 	ContextTags     = BaseContextTags;
 	TagCounter      = BaseTagCounter;
-		
+
 	// Clear Graph
 	if (CellGraph != nullptr)
 	{
 		CellGraph.Reset();
 	}
-	
+
 	RetryCount++;
-#if !UE_BUILD_SHIPPING	
+#if !UE_BUILD_SHIPPING
 	Messages.Reset();
-#endif // !UE_BUILD_SHIPPING	
-	
+#endif // !UE_BUILD_SHIPPING
+
 	if (RetryCount > MaximumRetryCount)
 	{
 		return false;

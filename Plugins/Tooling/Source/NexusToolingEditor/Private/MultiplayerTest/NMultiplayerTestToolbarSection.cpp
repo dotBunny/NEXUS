@@ -25,7 +25,7 @@ bool FNMultiplayerTestToolbarSection::MultiplayerTest_CanExecute()
 void FNMultiplayerTestToolbarSection::AddSection()
 {
 	const UNToolingEditorSettings* Settings = UNToolingEditorSettings::Get();
-	
+
 	if (!Settings->bMultiplayerTestEnabled) return;
 	AddMenuEntry();
 }
@@ -45,7 +45,7 @@ void FNMultiplayerTestToolbarSection::AddMenuEntry()
 		FToolMenuSection& MultiplayerSection = Menu->FindOrAddSection(MultiplayerTestSectionName);
 		MultiplayerSection.Alignment = EToolMenuSectionAlign::Last;
 		MultiplayerSection.AddSeparator(NAME_None);
-		
+
 		FToolMenuEntry MultiplayerTest = FToolMenuEntry::InitToolBarButton(
 				"Toggle Multiplayer Test",
 				FUIAction(
@@ -56,9 +56,9 @@ void FNMultiplayerTestToolbarSection::AddMenuEntry()
 					TAttribute<FText>(),
 					TAttribute<FText>::Create(TAttribute<FText>::FGetter::CreateStatic(&MultiplayerTest_GetTooltip)),
 					TAttribute<FSlateIcon>::Create(TAttribute<FSlateIcon>::FGetter::CreateStatic(&MultiplayerTest_GetIcon)));
-		
+
 		MultiplayerSection.AddEntry(MultiplayerTest);
-		
+
 		FNToolingEditorModule& Module = FNToolingEditorModule::Get();
 		OnTestStartedHandle = Module.OnMultiplayerTestStarted.AddStatic(OnMultiplayerTestStarted);
 		OnTestEndedHandle = Module.OnMultiplayerTestEnded.AddStatic(OnMultiplayerTestEnded);
@@ -77,14 +77,14 @@ void FNMultiplayerTestToolbarSection::RemoveMenuEntry()
 			ToolMenus->RefreshMenuWidget(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser);
 		}
 	}
-	
+
 	FNToolingEditorModule& Module = FNToolingEditorModule::Get();
-	
+
 	if (OnTestStartedHandle.IsValid())
 	{
 		Module.OnMultiplayerTestStarted.Remove(OnTestStartedHandle);
 	}
-	
+
 	if (OnTestEndedHandle.IsValid())
 	{
 		Module.OnMultiplayerTestEnded.Remove(OnTestEndedHandle);

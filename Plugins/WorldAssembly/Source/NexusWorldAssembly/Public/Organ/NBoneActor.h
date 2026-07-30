@@ -10,6 +10,7 @@
 /**
  * Standalone bone actor — a UNBoneComponent wrapped in a static actor so it can be dropped
  * directly into a level without being attached to an ANOrganVolume.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/bone-actor/">ANBoneActor</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Bone Actor")
 class NEXUSWORLDASSEMBLY_API ANBoneActor : public AActor

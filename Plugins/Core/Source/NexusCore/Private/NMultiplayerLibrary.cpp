@@ -18,14 +18,14 @@ float UNMultiplayerLibrary::Ping(const UObject* WorldContextObject)
 
 bool UNMultiplayerLibrary::KickPlayer(UObject* WorldContextObject, APlayerState* PlayerState)
 {
-	N_VALIDATE_RETURN(LogNexusCore, PlayerState, false)
+	N_VALIDATE_RETURN(LogNexusCore, PlayerState, false);
 
 	if (PlayerState->GetPlayerController() != nullptr && PlayerState->GetPlayerController()->HasAuthority())
 	{
 		UE_LOG(LogNexusCore, Error, TEXT("You are unable to kick the host."));
 		return false;
 	}
-	
+
 	if (const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject))
 	{
 		// Not the server, sorry can't kick
@@ -52,8 +52,8 @@ bool UNMultiplayerLibrary::HasRemotePlayers(UObject* WorldContextObject)
 		for (const TObjectPtr<APlayerState> PlayerState : GameMode->GameState->PlayerArray)
 		{
 			if (PlayerState == nullptr) continue;
-			
-			if (PlayerState->GetPlayerController() != nullptr && 
+
+			if (PlayerState->GetPlayerController() != nullptr &&
 				PlayerState->GetPlayerController()->IsLocalController() == false)
 			{
 				return true;

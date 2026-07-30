@@ -9,6 +9,7 @@
  * One ordered index loop within an FNRawMesh (triangle, quad, or n-gon).
  *
  * Indices are stored in winding order and reference entries in the parent mesh's Vertices array.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/raw-mesh-loop/">FNRawMeshLoop</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNRawMeshLoop

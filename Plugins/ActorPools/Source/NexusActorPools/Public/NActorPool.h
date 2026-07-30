@@ -16,23 +16,24 @@ namespace NEXUS::ActorPools::InvokeMethods
 	inline const FName OnReleasedFromActorPool = TEXT("OnReleasedFromActorPool");
 	inline const FName OnReturnToActorPool = TEXT("OnReturnToActorPool");
 	inline const FName OnSpawnedFromActorPool = TEXT("OnSpawnedFromActorPool");
-	
+
 }
 
 /**
  * A runtime-unique controlling object that maintains a pool of spawned actors.
  * @note Not thread-safe, must be used on the game thread due to creating actors.
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool/">FNActorPool</a>
  */
 class NEXUSACTORPOOLS_API FNActorPool
 {
 	// Allow to test w/ deep access
 	friend class UNActorPoolObject;
-#if WITH_TESTS	
+#if WITH_TESTS
 	friend class FNActorPoolTests_Return_StorageLocation;
 	friend class FNActorPoolTests_Create_ActorsAreNotRooted;
 	friend class FNActorPoolTests_Clear_ForceDestroyOnRootedActor_WarnsAndSkips;
-#endif // WITH_TESTS	
-	
+#endif // WITH_TESTS
+
 public:
 	/**
 	 * Create an ActorPool.
@@ -103,7 +104,7 @@ public:
 	void UpdateSettings(const FNActorPoolSettings& InNewSettings);
 
 	/** Does the ActorPool's Template implement the IActorPoolItem interface? */
-	bool ImplementsPoolItemInterface() const { return bImplementsInterface; }
+	bool ImplementsPoolItemInterface() const { return bImplementsPoolItemInterface; }
 
 	/** Will the ActorPool attempt to invoke UFUNCTIONs for events? */
 	bool ShouldInvokeUFunctions() const { return Settings.HasFlag_InvokeUFunctions(); }
@@ -141,7 +142,7 @@ public:
 	 * @remark Intended for debugging and developer overlays; the format is not stable and should not be parsed.
 	 */
 	FText GetDescription() const;
-	
+
 private:
 
 	void PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorClass);
@@ -153,15 +154,36 @@ private:
 	TArray<TObjectPtr<AActor>> OutActors;
 
 	TSubclassOf<AActor> Template;
-	
+
 	bool bStubMode = false;
 
 	bool ApplyStrategy();
 
+	/**
+	 * Create up to MinimumActorCount on demand when a Fixed* pool's time-sliced warm-up never completed.
+	 * @return true if at least one actor was created; false if the pool already holds MinimumActorCount or more.
+	 * @note Fixed strategies create nothing through ApplyStrategy's normal path, so this is their only self-heal if the warm-up Tick() was never delivered (e.g. the pool was created in a world that won't tick again).
+	 */
+	bool WarmUpDeficit();
+
+	/**
+	 * Return the out-actor at a known OutActors index back to the pool (recycle fast path).
+	 * @param OutIndex Index into OutActors of the actor being recycled; must be in range.
+	 * @return true if the actor was recycled; false if the slot held a null reference.
+	 * @note Used only by ApplyStrategy's recycle strategies, which already know the index. Skips the pointer re-scan and external-caller contract checks that Return() performs, and uses an ordered RemoveAt to preserve the FIFO/LIFO ordering those strategies rely on.
+	 */
+	bool ReturnAtIndex(int32 OutIndex);
+
+	/** Shared tail of the return paths: move the actor (already removed from OutActors) into InActors and fire the return callback. */
+	void FinalizeReturn(AActor* Actor);
+
 	bool CreateActors(const int32 Count = 1);
-	
+
+	/** Reserve both staging arrays so each can hold the whole pool population, since churn (Get/Spawn/Return) can move every actor onto either side. */
+	FORCEINLINE void ReserveForPoolSize(const int32 PoolSize);
+
 	FORCEINLINE bool CreateActor(const FActorSpawnParameters& SpawnInfo);
-	
+
 	void ReleaseActor(TObjectPtr<AActor> Actor, bool bForceDestroy) const;
 
 	FORCEINLINE void ApplySpawnState(AActor* Actor, const FVector& InPosition, const FRotator& InRotation) const;
@@ -178,9 +200,9 @@ private:
 	FString Name;
 	static int32 ActorPoolTicket;
 #endif // WITH_EDITOR
-	bool bImplementsInterface = false;
+	bool bImplementsPoolItemInterface = false;
 
-	
+
 	ENToggle SpawnPhysicsSimulation = ENToggle::Default;
 	ECollisionEnabled::Type SpawnPhysicsCollisionSettings;
 };

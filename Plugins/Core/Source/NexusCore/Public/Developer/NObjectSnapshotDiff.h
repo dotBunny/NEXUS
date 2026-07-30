@@ -12,6 +12,7 @@
  * between captures, which persisted across both captures, and which disappeared. It is the
  * primary data surface used by tests, the Guardian overlay, and developer tools to reason
  * about lifetime churn and suspected leaks.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/object-snapshot-diff/">FNObjectSnapshotDiff</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNObjectSnapshotDiff
@@ -77,11 +78,11 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 	 */
 	FString ToDetailedString() const
 	{
-		FStringBuilderBase StringBuilder;
+		TStringBuilder<256> StringBuilder;
 
 		StringBuilder.Appendf(TEXT("Captured %i Objects (%i Changes)\n"), ObjectCount, ChangeCount);
 		StringBuilder.Appendf(TEXT("Previously %i Untracked Objects | Currently %i Untracked Objects\n"), UntrackedObjectCountA, UntrackedObjectCountB);
-		
+
 		StringBuilder.Appendf(TEXT("Added (%d):\n"), AddedCount);
 		for (const FNObjectSnapshotEntry& Entry : Added)
 		{
@@ -102,7 +103,7 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 
 		return StringBuilder.ToString();
 	}
-	
+
 	/**
 	 * Builds a structured report summarizing this diff (captured object count, change count, and the added, removed, and changed entries).
 	 * @return An FNReport populated with the diff contents, ready for output to log or file.
@@ -110,16 +111,16 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 	FNReport ToReport() const
 	{
 		FNReport Report;
-		
+
 		const int32 CapturedObjectsTicket = Report.CreateContentBlock();
 		FNReportContentBlock* CapturedObjectBlock = Report.GetContentBlock(CapturedObjectsTicket);
 		CapturedObjectBlock->SetHeading("FNObjectSnapshotDiff");
-		
+
 		CapturedObjectBlock->AddLine(FString::Printf(TEXT("Captured %i Objects"), ObjectCount));
 		CapturedObjectBlock->AddLine(FString::Printf(TEXT("%i Changes"), ChangeCount));
 		CapturedObjectBlock->AddLine(FString::Printf(TEXT("Previously %i Untracked Objects"), UntrackedObjectCountA));
 		CapturedObjectBlock->AddLine(FString::Printf(TEXT("Currently %i Untracked Objects"), UntrackedObjectCountB));
-		
+
 		// ADDED
 		const int32 AddedObjectsTableTicket = Report.CreateTableBlock(CapturedObjectsTicket);
 		FNReportTableBlock* AddObjectsTableBlock = Report.GetTableBlock(AddedObjectsTableTicket);
@@ -128,12 +129,12 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 		{
 			AddObjectsTableBlock->AddRow({
 				Entry.FullName,
-				FString::FromInt(Entry.RefCount), 
+				FString::FromInt(Entry.RefCount),
 				Entry.bIsRoot ? TEXT("R") : TEXT(""),
 				Entry.bIsGarbage ? TEXT("G") : TEXT("")
 			});
 		}
-		
+
 		// MAINTAINED
 		const int32 MaintainedObjectsTableTicket = Report.CreateTableBlock(CapturedObjectsTicket);
 		FNReportTableBlock* MaintainedObjectsTableBlock = Report.GetTableBlock(MaintainedObjectsTableTicket);
@@ -142,12 +143,12 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 		{
 			MaintainedObjectsTableBlock->AddRow({
 				Entry.FullName,
-				FString::FromInt(Entry.RefCount), 
+				FString::FromInt(Entry.RefCount),
 				Entry.bIsRoot ? TEXT("R") : TEXT(""),
 				Entry.bIsGarbage ? TEXT("G") : TEXT(""),
 			});
 		}
-		
+
 		// REMOVED
 		const int32 RemovedObjectsTableTicket = Report.CreateTableBlock(CapturedObjectsTicket);
 		FNReportTableBlock* RemovedObjectsTableBlock = Report.GetTableBlock(RemovedObjectsTableTicket);
@@ -156,13 +157,13 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 		{
 			RemovedObjectsTableBlock->AddRow({
 				Entry.FullName,
-				FString::FromInt(Entry.RefCount), 
+				FString::FromInt(Entry.RefCount),
 				Entry.bIsRoot ? TEXT("R") : TEXT(""),
 				Entry.bIsGarbage ? TEXT("G") : TEXT("")
 			});
 		}
-		
-		return MoveTemp(Report);
+
+		return Report;
 	}
 
 	/** Writes a detailed summary of the diff to LogNexusCore, one category and one entry per line. */

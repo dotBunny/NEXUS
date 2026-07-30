@@ -8,9 +8,18 @@
 #include "Misc/AutomationTest.h"
 #include "Developer/NTestUtils.h"
 
+/**
+ * Latent automation command that stands up the shared test world and begins play.
+ *
+ * Creates a Game-type UWorld plus game instance, world context, and game mode, stores them on
+ * FNTestUtils::Environment for the world-based latent commands to use, and calls BeginPlay. Paired with
+ * FNTestLatentCommand_CleanupWorld, which tears the same environment back down.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/test-latent-commands/test-latent-command-create-world/">FNTestLatentCommand_CreateWorld</a>
+ */
 class FNTestLatentCommand_CreateWorld : public IAutomationLatentCommand
 {
 public:
+	/** @param TestPtr The automation test used to report a world-creation failure. */
 	explicit FNTestLatentCommand_CreateWorld(FAutomationTestBase* TestPtr)
 		: Test(TestPtr)
 	{
@@ -26,7 +35,7 @@ public:
 		FNTestUtils::Environment.World = UWorld::CreateWorld(EWorldType::Game, false, TEXT("NTestWorld"));
 		UWorld* World = FNTestUtils::Environment.World;
 		World->RemoveStreamingLevels(World->GetStreamingLevels());
-	
+
 		// Test world exists
 		Test->AddErrorIfFalse(World != nullptr, TEXT("World could not be created."));
 
@@ -44,7 +53,7 @@ public:
 		World->InitializeActorsForPlay(URL);
 		World->BeginPlay();
 		World->ClearStreamingLevels();
-	
+
 		return true;
 	}
 

@@ -34,36 +34,42 @@ bool FNGetJunctionDataElement::ExecuteInternal(FPCGContext* Context) const
 {
 	const UNGetJunctionDataSettings* Settings = Context->GetInputSettings<UNGetJunctionDataSettings>();
 	N_PCG_JUNCTION_PREFIX
-	
+
 	const FName ComponentReferenceName = TEXT("ComponentReference");
-	
+
 	// Could have multiple pin inputs
 	for (const FPCGTaggedData& Input : Context->InputData.GetInputsByPin(PCGPinConstants::DefaultInputLabel))
 	{
 		const UPCGParamData* ParamData = Cast<UPCGParamData>(Input.Data);
-		if (ParamData && ParamData->Metadata)
+		if (ParamData == nullptr || ParamData->Metadata == nullptr)
 		{
-			for (int64 i = 0; i < ParamData->Metadata->GetItemCountForChild(); ++i)
+			continue;
+		}
+
+		const FPCGMetadataAttribute<FSoftObjectPath>* ComponentAttr =
+			ParamData->Metadata->GetConstTypedAttribute<FSoftObjectPath>(ComponentReferenceName);
+		if (ComponentAttr == nullptr)
+		{
+			continue;
+		}
+
+		for (int64 i = 0; i < ParamData->Metadata->GetItemCountForChild(); ++i)
+		{
+			const FSoftObjectPath ComponentSoftObjectPath = ComponentAttr->GetValueFromItemKey(i);
+			if (ComponentSoftObjectPath.IsValid())
 			{
-				const FPCGMetadataAttribute<FSoftObjectPath>* ComponentAttr = 
-					ParamData->Metadata->GetConstTypedAttribute<FSoftObjectPath>(ComponentReferenceName);
-				
-				FSoftObjectPath ComponentSoftObjectPath = ComponentAttr->GetValueFromItemKey(i);
-				if (ComponentSoftObjectPath.IsValid())
+				UNCellJunctionComponent* JunctionComponent = Cast<UNCellJunctionComponent>(ComponentSoftObjectPath.ResolveObject());
+				if (JunctionComponent != nullptr)
 				{
-					UNCellJunctionComponent* JunctionComponent = Cast<UNCellJunctionComponent>(ComponentSoftObjectPath.ResolveObject());
-					if (JunctionComponent != nullptr)
-					{
-						N_PCG_JUNCTION_DATA
-					}
+					N_PCG_JUNCTION_DATA
 				}
 			}
 		}
 	}
-	
+
 	FPCGTaggedData& TaggedData = Outputs.Emplace_GetRef();
 	TaggedData.Data = OutputData;
-	TaggedData.Pin = Settings->JunctionsAttribute; 
-	
+	TaggedData.Pin = Settings->JunctionsAttribute;
+
 	return true;
 }

@@ -3,11 +3,14 @@
 
 #pragma once
 
+#include "NWorldAssemblySettings.h"
 #include "Assembly/Data/NVirtualBoneData.h"
 #include "Assembly/Graph/NAssemblyGraph.h"
 #include "Assembly/Data/NVirtualCellData.h"
 #include "Collections/NWeightedIntegerArray.h"
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
+#include "Math/NBoundsBVH.h"
+#include "Organ/NOrganComponent.h"
 #include "Types/NCardinalDirection.h"
 #include "Types/NRotationConstraints.h"
 
@@ -50,7 +53,8 @@ struct FNCellInputDataFilter
 
 	/** Orientation applied to the candidate's junction to match the source. */
 	FQuat SourceQuat = FQuat();
-	
+
+	/** World position the candidate would occupy; its bearing from the directional reference point drives the cardinal-direction constraint. */
 	FVector WorldPosition;
 };
 
@@ -66,32 +70,76 @@ class FNVirtualOrganContext
 	friend struct FNOrganGeneratorBuildGraphTask;
 
 public:
-	
+
+	/** Stable identifier copied from the source organ component this context was built from. */
+	FGuid Identifier;
+
 	/** Allowed penetration, in world units, between adjacent cell hulls before they are treated as overlapping. */
 	float CellHullPenetration = 10.f;
 
 	/** Allowed penetration, in world units, between a placed cell hull and existing world collision before it is rejected. */
 	float WorldHullPenetration = 1.f;
 
+	/**
+	 * Broadphase over the previously-placed cell hulls this organ's build can see, covering exactly the prefix of
+	 * FNVirtualWorldContext::NodeCollisionMeshes that FNOrganGraphBuilderTask snapshots at task start.
+	 *
+	 * Deliberately per-organ rather than shared on the world context. The shared array only grows between passes,
+	 * so one tree per pass would serve every organ in it — but the only place with the right lifetime to build that
+	 * is FNProcessPassTask, and building it there would couple this to a change already in flight. Building it per
+	 * organ instead costs one redundant construction per organ in a pass (sub-millisecond even at thousands of
+	 * hulls) and buys strict isolation: no builder can observe another's tree, so there is nothing to synchronise.
+	 * Worth revisiting as a single shared tree if organ counts per pass ever grow large.
+	 */
+	FNBoundsBVH NodeCollisionBVH;
+
+	/**
+	 * How many entries of FNVirtualWorldContext::NodeCollisionMeshes this organ's build may consider — the prefix
+	 * placed by earlier passes, snapshotted when the builder task starts. Lives here next to the tree that indexes
+	 * it precisely because the two must describe the same set; separating them invites one to be updated without
+	 * the other.
+	 */
+	int32 NodeCollisionSnapshotCount = 0;
+
+	/**
+	 * Indices into FNVirtualWorldContext::NodeCollisionMeshes whose bounds are invalid and which therefore cannot
+	 * be broadphased — FNRawMeshUtils::GetIntersectDepth performs no AABB rejection when either mesh lacks bounds.
+	 * Tested unconditionally on every candidate. Empty for well-formed input.
+	 */
+	TArray<int32> UnboundedNodeCollisionIndices;
+
+	/** Maximum absolute degree deviation a candidate's bearing may have from its required cardinal direction. */
 	float AssemblyDirectionTolerance = 15.f;
-	
+
+	/** Configured mode for resolving the world-space reference point that directional-constraint bearings are measured from. */
+	ENOrganDirectionConstraintMode AssemblyDirectionMode = ENOrganDirectionConstraintMode::StartBone;
+
 	/** World-space size of a single voxel, cached from UNWorldAssemblySettings so placed cells re-voxelize without re-reading settings. */
 	FVector VoxelSize = FVector(100.f, 100.f, 100.f);
 
-	/** Lower bound on cell count; -1 disables the check. */
-	int32 MinimumCellCount = -1;
+	/** When false, the organ can produce no results and still be considered a successful assembly operation. */
+	bool bRequired = true;
 
-	/** Upper bound on cell count; -1 disables the check. */
-	int32 MaximumCellCount = -1;
+	/** Lower bound on cell count; 0 disables the check. */
+	int32 MinimumCellCount = 0;
+
+	/** Upper bound on cell count; 0 disables the check. */
+	int32 MaximumCellCount = 0;
 
 	/** Number of retries this organ is allowed before giving up. */
 	int32 MaximumRetryCount = 0;
 
+	/** Context tags the finished graph must carry (HasAllExact) to pass CheckGraph. */
+	FGameplayTagContainer RequiredContextTags;
+
+	/** Tag-counter constraints the finished graph's TagCounter must satisfy to pass CheckGraph. */
+	TArray<FNGameplayTagCounterConstraint> RequiredTagCounters;
+
 	/** When true, the graph may extend past Bounds. */
-	bool bUnbounded = false;
+	bool bUnbound = false;
 
 	/** Spatial bounds the graph must stay within unless bUnbounded. */
-	FBoxSphereBounds Bounds;
+	FBoxSphereBounds Bounds = FBoxSphereBounds(ForceInit);
 
 	/** World origin of the organ used as the graph root. */
 	FVector Origin;
@@ -101,13 +149,13 @@ public:
 
 	/** Context tags present at the start of organ build, used to ensure we do not lose context as cells get removed. */
 	FGameplayTagContainer BaseContextTags;
-	
+
 	/** Context tags currently active, updated as cells are placed into the graph. */
 	FGameplayTagContainer ContextTags;
-	
+
 	/** TagCounter present at the start of organ build, used to ensure we can reset our state. */
 	FNGameplayTagCounter BaseTagCounter;
-	
+
 	/** TagCounter values currently in-flight of this attempt. */
 	FNGameplayTagCounter TagCounter;
 
@@ -116,13 +164,21 @@ public:
 
 	/** Candidate cells the builder may pull from. */
 	TArray<FNVirtualCellData> CellInputData;
-	
+
 	/** Cached classification summary of CellInputData (starter/finisher availability and tag groups). */
 	FNVirtualCellDataSummary CellInputDataSummary;
 
 	/** Output graph, owned by this context until handed off to the task-graph context. */
 	TUniquePtr<FNAssemblyGraph> CellGraph = nullptr;
 
+	/**
+	 * Production constructor. Snapshots everything the build needs off the source organ component while still on the
+	 * game thread (settings, bounds, tags, bones, and the cell pool) so the rest of the build can run off-thread, then
+	 * runs an initial pre-filter pass that sets IsValid.
+	 * @param WorldOrganContext Source organ data to snapshot; read on the game thread only.
+	 * @param TaskSeed Fallback seed (overridden by the component's own Seed when set) driving this organ's random stream.
+	 * @param TaskName Human-readable task name reported through GetName.
+	 */
 	FNVirtualOrganContext(const FNWorldOrganData* WorldOrganContext, uint64 TaskSeed, FString TaskName);
 	NEXUSWORLDASSEMBLY_API ~FNVirtualOrganContext();
 
@@ -140,14 +196,21 @@ public:
 	/** @return Deterministic seed used to drive this organ's random stream. */
 	uint64 GetSeed() const { return Seed; };
 #if !UE_BUILD_SHIPPING
+	/** @return Diagnostic messages accumulated during the build (non-shipping builds only). */
 	const TArray<FString>& GetMessages() const { return Messages; }
-#endif	
+#endif
 
 	/** @return Human-readable task name for logs/debug. */
 	const FString& GetName() { return Name; };
 
+	/** @return Stable identifier copied from the source organ component. */
+	const FGuid& GetIdentifier() const { return Identifier; };
+
 	/** @return true once the builder has produced a valid graph (cell count within bounds, etc.). */
 	bool IsSuccessful() const { return bSuccessful; };
+
+	/** @return true if this organ must produce results for the overall assembly to be considered successful. */
+	bool IsRequired() const { return bRequired; };
 
 	/** @return true if the context is set up well enough to attempt a build. */
 	bool IsValid() const { return bIsValid; };
@@ -197,6 +260,17 @@ public:
 	static NEXUSWORLDASSEMBLY_API bool IsGatedByFinisherTags(bool bIsEndNode, const FNVirtualCellDataSummary& Summary, const FGameplayTagContainer& CandidateTags);
 
 	/**
+	 * @param Cell Candidate cell to evaluate.
+	 * @param UniqueAndRequiredTags Intersection of the pool's Unique and RequiredAny group tags; cells matching one
+	 *        of these are governed by the RequiredAny check rather than their per-cell minimum.
+	 * @return true when Cell is finisher-eligible (Finisher/FinisherOnly) and still short of an enforceable
+	 *         MinimumCount — i.e. a cell the finisher-minimum guarantee pass should try to place. The minimum skips
+	 *         mirror FNVirtualOrganContext::CheckGraph (non-positive minimum, minimum above a positive maximum, and
+	 *         combined Unique + RequiredAny cells).
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsUnmetFinisherMinimum(const FNVirtualCellData& Cell, const FGameplayTagContainer& UniqueAndRequiredTags);
+
+	/**
 	 * @param Candidate Cell being considered for placement.
 	 * @param TagCounter Current tag-counter state to evaluate the candidate's constraints against.
 	 * @return true if any of the candidate's TagCounterConstraints fails its comparison and the candidate must be excluded.
@@ -225,16 +299,31 @@ public:
 	static NEXUSWORLDASSEMBLY_API bool IsGatedByMaximumNodeDepth(int32 MaximumNodeDepth, int32 CandidateNodeDepth);
 
 	/**
-	 * Gate a candidate by its required compass heading. Angle is the candidate's bearing measured from the organ's
-	 * start point (see FilterCellInputData), and the candidate survives only when that bearing lands within
-	 * Tolerance degrees of Direction. Wrapping is handled by FNCardinalDirectionUtils::IsCloseToDirection, so the
-	 * 0/360 seam and out-of-range inputs compare correctly.
+	 * Gate a candidate by its required compass heading. Angle is the candidate's bearing measured from the
+	 * configured directional reference point (see FilterCellInputData and AssemblyDirectionMode), and the candidate
+	 * survives only when that bearing lands within Tolerance degrees of Direction. Wrapping is handled by
+	 * FNCardinalDirectionUtils::IsCloseToDirection, so the 0/360 seam and out-of-range inputs compare correctly.
 	 * @param Angle The candidate's bearing in degrees (any range; normalized internally).
 	 * @param Direction The cardinal heading the candidate is constrained to.
 	 * @param Tolerance Maximum absolute degree deviation (+/-) from Direction that still permits placement.
 	 * @return true if the candidate's bearing is outside the tolerance window and must be gated out.
 	 */
 	static NEXUSWORLDASSEMBLY_API bool IsGatedByDirectionalConstraint(float Angle, ENCardinalDirection Direction, float Tolerance);
+
+	/**
+	 * Resolve the static world-space reference point a directional constraint measures candidate bearings from, per
+	 * the configured mode. StartBone returns the start bone position; OrganCenter returns the organ volume's
+	 * geometric center (Bounds.Origin); DynamicCentroid returns the start bone as its pre-placement seed (the live
+	 * centroid is resolved per filter pass in FilterCellInputData, not here). Unbound organs have a degenerate
+	 * bounds, so OrganCenter falls back to the start bone for them.
+	 * @param Mode The configured directional-constraint mode.
+	 * @param bUnbound True when the organ is unbounded (its Bounds is a degenerate/near-infinite box).
+	 * @param Bounds The organ's spatial bounds; its Origin is the volume's geometric center.
+	 * @param StartBoneWorldPosition World position of the start bone (StartBone reference and the unbound/seed fallback).
+	 * @return The world-space reference point candidate bearings are measured from.
+	 */
+	static NEXUSWORLDASSEMBLY_API FVector ResolveDirectionTargetPosition(ENOrganDirectionConstraintMode Mode,
+		bool bUnbound, const FBoxSphereBounds& Bounds, const FVector& StartBoneWorldPosition);
 
 
 	/**
@@ -284,6 +373,19 @@ public:
 		const FNRotationConstraints& CellConstraints, const FNRotationConstraints& JunctionConstraints);
 
 	/**
+	 * The veto half of IsGatedByJunctionRotationPrepared, taking the required rotation already computed.
+	 *
+	 * Split out so FilterCellInputData can reuse one rotation across the many junctions that share an orientation
+	 * without duplicating the veto rule and letting the two drift apart.
+	 * @param Required The rotation the candidate must take on, from GetRequiredJunctionRotationPrepared.
+	 * @param CellConstraints The candidate cell's matching-rotation constraints.
+	 * @param JunctionConstraints The candidate junction's own matching-rotation constraints.
+	 * @return true when either side enforces matching rotation and Required falls outside its range.
+	 */
+	static bool IsGatedByMatchingRotation(const FRotator& Required,
+		const FNRotationConstraints& CellConstraints, const FNRotationConstraints& JunctionConstraints);
+
+	/**
 	 * Drop the current graph and bump the retry counter.
 	 * @return true if another retry is allowed; false once MaximumRetryCount is exhausted.
 	 */
@@ -293,16 +395,42 @@ public:
 	NEXUSWORLDASSEMBLY_API bool ValidateGraph();
 
 	/**
-	 * Set the world-space point the directional constraint measures candidate bearings from.
+	 * Set the static world-space point the directional constraint measures candidate bearings from. Seeded once per
+	 * mode at construction (see ResolveDirectionTargetPosition); DynamicCentroid overrides the effective reference
+	 * per filter pass and uses this only as its pre-placement fallback.
 	 * @param Location World-space origin for direction-constraint bearings.
 	 */
 	void SetDirectionTargetPosition(const FVector& Location) { DirectionTargetPosition = Location; }
 
-	/** @return The world-space point candidate bearings are measured from for the directional constraint. */
+	/** @return The static world-space point candidate bearings are measured from (the DynamicCentroid fallback). */
 	FVector GetDirectionTargetPosition() const { return DirectionTargetPosition; }
-	
+
+	/** @return Number of retries consumed so far. */
 	int32 GetRetryCount() const { return RetryCount; }
 private:
+	/**
+	 * Rebuild CellsBySocketSize if it does not describe the current pool.
+	 *
+	 * Staleness is detected by CellInputData's length, because callers append cells after constructing the context.
+	 * That is sufficient because a cell's junction set is immutable once it is in the pool — the build only mutates
+	 * UsedCount — so the only way the mapping can change is for the pool itself to grow or shrink.
+	 */
+	void EnsureSocketIndex();
+
+	/**
+	 * Cell indices bucketed by the socket sizes their junctions expose; a cell appears in one bucket per distinct
+	 * socket size among its junctions. Lets FilterCellInputData visit only the candidates that could host the
+	 * requested socket instead of running every gate on the whole pool.
+	 *
+	 * Each bucket is built in ascending cell index order, so candidates still reach the weighted output array in
+	 * the order a full walk produced. The builder draws from that array with the deterministic RNG, so reordering
+	 * it would change generation output for a given seed.
+	 */
+	TMap<FIntVector2, TArray<int32>> CellsBySocketSize;
+
+	/** The CellInputData length CellsBySocketSize was built for; a mismatch rebuilds it. INDEX_NONE until built. */
+	int32 SocketIndexCellCount = INDEX_NONE;
+
 	/** Number of retries consumed so far. */
 	int32 RetryCount = 0;
 
@@ -315,12 +443,16 @@ private:
 	/** Random-stream seed for this organ's build. */
 	uint64 Seed;
 
-	/** World-space target direction-constraint bearings are measured from. */
+	/**
+	 * Static world-space point direction-constraint bearings are measured from, seeded per mode at construction.
+	 * For DynamicCentroid this is only the pre-placement fallback; the live reference is the graph's cell centroid,
+	 * resolved per filter pass in FilterCellInputData.
+	 */
 	FVector DirectionTargetPosition;
 
 	/** Human-readable task name used in logs. */
 	FString Name;
 #if !UE_BUILD_SHIPPING
 	TArray<FString> Messages;
-#endif	
+#endif
 };

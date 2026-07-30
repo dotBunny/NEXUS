@@ -3,16 +3,15 @@
 
 #pragma once
 
-#include "CommonNumericTextBlock.h"
-#include "NGuardianSubsystem.h"
 #include "Widgets/NDeveloperOverlay.h"
 #include "NGuardianDeveloperOverlay.generated.h"
 
-class UNDynamicRefObject;
-class UNListView;
+class UCommonNumericTextBlock;
+class UNGuardianSubsystem;
 
 /**
  * Developer overlay widget that displays the Guardian subsystem's baseline, current count, and next threshold.
+ * @see <a href="https://nexus-framework.com/docs/plugins/guardian/developer-overlay/">UNGuardianDeveloperOverlay</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Guardian Developer Overlay", BlueprintType, Abstract)
 class NEXUSGUARDIAN_API UNGuardianDeveloperOverlay : public UNDeveloperOverlay
@@ -20,12 +19,12 @@ class NEXUSGUARDIAN_API UNGuardianDeveloperOverlay : public UNDeveloperOverlay
 	GENERATED_BODY()
 
 public:
-	
+
 	/** Subscribe to the Guardian subsystem hosted by World so its counters feed this overlay. */
 	virtual void BindWorld(UWorld* World) override;
 	/** Drop the subscription to the Guardian subsystem hosted by World. */
 	virtual void UnbindWorld(const UWorld* World) override;
-	
+
 protected:
 	//~UUserWidget
 	virtual void NativeConstruct() override;

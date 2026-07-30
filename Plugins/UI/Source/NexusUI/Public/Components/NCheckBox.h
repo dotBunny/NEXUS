@@ -8,20 +8,20 @@
 #include "NCheckBox.generated.h"
 
 /**
- * A wrapper around the UNCheckBox class to allow for setting the checked state without broadcasting events.
+ * A wrapper around the UCheckBox class to allow for setting the checked state without broadcasting events.
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/components/check-box/">UNCheckBox</a>
  */
 UCLASS(DisplayName = "NEXUS | CheckBox", ClassGroup = UI, meta = (Category = "NEXUS"))
 class NEXUSUI_API UNCheckBox : public UCheckBox
 {
 	GENERATED_BODY()
-	
+
 public:
 
 #if WITH_EDITOR
 	virtual const FText GetPaletteCategory() override {  return NEXUS::UIEditor::PaletteCategory; }
 #endif // WITH_EDITOR
-	
+
 	/**
 	 * Sets if the UCheckBox is checked without triggering exposed event bindings.
 	 * @param bNewValue The new value.
@@ -31,13 +31,13 @@ public:
 	void SetIsChecked_NoBroadcast(const bool bNewValue);
 
 	/**
-	 * Set the checked state of the UCheckBox without triggering exposed event bindings.	
+	 * Set the checked state of the UCheckBox without triggering exposed event bindings.
 	 * @param NewState The new value.
 	 */
 	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set Checked State (No Broadcast)",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/components/check-box/#set-checkedstate-no-broadcast"))
 	void SetCheckedState_NoBroadcast(const ECheckBoxState NewState);
-	
+
 private:
 	/** Empty OnStateChanged event used to swap in for OnCheckStateChanged to prevent it from being called. */
 	static FOnCheckBoxComponentStateChanged EmptyChangedDelegate;

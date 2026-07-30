@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 13,
-	"VersionName": "0.3.1",
+	"Version": 14,
+	"VersionName": "0.3.2",
 	"FriendlyName": "NEXUS: Guardian",
 	"Description": "A system which monitors metrics and takes action when thresholds are hit.",
 	"Category": "NEXUS",
@@ -23,6 +23,16 @@
 		{
 			"Name": "NexusGuardianEditor",
 			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
+		},
+		{
+			"Name": "NexusGuardianTests",
+			"Type": "DeveloperTool",
 			"LoadingPhase": "Default",
 			"PlatformAllowList": [
 				"Mac",

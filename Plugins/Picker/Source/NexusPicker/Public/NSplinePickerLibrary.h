@@ -9,6 +9,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Macros/NValidationMacros.h"
 #include "Macros/NWorldMacros.h"
+#include "Math/NMersenneTwisterObject.h"
 #include "NSplinePickerLibrary.generated.h"
 
 /**
@@ -23,89 +24,91 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a deterministic point on a spline.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param Params The parameters for the point generation. 
+	 * Uses the provided Mersenne Twister to ensure reproducible results.
+	 * @param Params The parameters for the point generation.
+	 * @param TwisterObject The Mersenne Twister to query for random.
 	 * @param WorldContextObject Object that provides access to the world.
-	 * @returns An array of generated points.	 
+	 * @returns An array of generated points.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Next Point", Category = "NEXUS|Picker|Spline", 
+	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Next Point", Category = "NEXUS|Picker|Spline",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/spline/#next-point", WorldContext = "WorldContextObject"))
-	static TArray<FVector> NextPoint(UPARAM(ref) FNSplinePickerParams& Params, UObject* WorldContextObject)
+	static TArray<FVector> NextPoint(UPARAM(ref) FNSplinePickerParams& Params, UNMersenneTwisterObject* TwisterObject, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
 		if (Params.CachedWorld == nullptr)
 		{
-			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 		}
-		FNSplinePicker::Next(ReturnLocations, Params);
-		return MoveTemp(ReturnLocations);
+		FNSplinePicker::Next(ReturnLocations, TwisterObject->GetTwisterRef(), Params);
+		return ReturnLocations;
 	}
-	
+
 	/**
 	 * Generates a random point on a spline.
 	 * Uses the non-deterministic random generator for true randomness.
-	 * @param Params The parameters for the point generation. 
+	 * @note Not thread-safe. Only call from the Game Thread; all pickers draw from one shared non-deterministic stream.
+	 * @param Params The parameters for the point generation.
 	 * @param WorldContextObject Object that provides access to the world.
-	 * @returns An array of generated points.	 
+	 * @returns An array of generated points.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random Point", Category = "NEXUS|Picker|Spline", 
+	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random Point", Category = "NEXUS|Picker|Spline",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/spline/#random-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> RandomPoint(UPARAM(ref) FNSplinePickerParams& Params, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
 		if (Params.CachedWorld == nullptr)
 		{
-			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 		}
 		FNSplinePicker::Random(ReturnLocations, Params);
-		return MoveTemp(ReturnLocations);
+		return ReturnLocations;
 	}
-	
+
 	/**
 	 * Generates a random point on a spline.
-	 * Updates the seed value to enable sequential random point generation.	 
+	 * Updates the seed value to enable sequential random point generation.
 	 * @param Params The parameters for the point generation.
-	 * @param Seed The random seed to start with, and update.	  
+	 * @param Seed The random seed to start with, and update.
 	 * @param WorldContextObject Object that provides access to the world.
-	 * @returns An array of generated points.	
+	 * @returns An array of generated points.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Tracked Point", Category = "NEXUS|Picker|Spline", 
+	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Tracked Point", Category = "NEXUS|Picker|Spline",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/spline/#tracked-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> TrackedPoint(UPARAM(ref) FNSplinePickerParams& Params, UPARAM(ref) int32& Seed, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
 		if (Params.CachedWorld == nullptr)
 		{
-			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 		}
 		FNSplinePicker::Tracked(ReturnLocations, Seed, Params);
-		return MoveTemp(ReturnLocations);
+		return ReturnLocations;
 	}
-	
+
 	/**
 	 * Generates a random point on a spline.
-	 * Useful for one-time random point generation with reproducible results. 
+	 * Useful for one-time random point generation with reproducible results.
 	 * @param Params The parameters for the point generation.
-	 * @param Seed The random seed to start with, and update.	  
+	 * @param Seed The random seed to start with, and update.
 	 * @param WorldContextObject Object that provides access to the world.
-	 * @returns An array of generated points.	
-	 */	
-	UFUNCTION(BlueprintCallable, DisplayName = "Spline: One-Shot Point", Category = "NEXUS|Picker|Spline", 
+	 * @returns An array of generated points.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName = "Spline: One-Shot Point", Category = "NEXUS|Picker|Spline",
 	meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/spline/#one-shot-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> OneShotPoint(UPARAM(ref) FNSplinePickerParams& Params, const int32 Seed, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
 		if (Params.CachedWorld == nullptr)
 		{
-			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 		}
 		FNSplinePicker::OneShot(ReturnLocations, Seed, Params);
-		return MoveTemp(ReturnLocations);
+		return ReturnLocations;
 	}
 
 	/**
 	 * Checks if a point is on a spline within a specified tolerance.
-	 * Uses the N_PICKER_TOLERANCE defined in NPickerUtils.h for proximity checking.
+	 * Uses NEXUS::Picker::SplinePointTolerance defined in NPickerMinimal.h for proximity checking.
 	 * @param SplineComponent The spline component to check against.
 	 * @param Point The point to check.
 	 * @return True if the point is on the spline within the tolerance, false otherwise.
@@ -113,10 +116,10 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, DisplayName="Spline: Is Point On?", Category = "NEXUS|Picker|Spline")
 	static bool IsPointOn(const USplineComponent* SplineComponent, const FVector& Point)
 	{
-		N_VALIDATE_RETURN(LogNexusPicker, SplineComponent, false)
+		N_VALIDATE_RETURN(LogNexusPicker, SplineComponent, false);
 		return FNSplinePicker::IsPointOn(SplineComponent, Point);
 	}
-	
+
 	/**
 	 * Checks if multiple points are on a spline within a specified tolerance.
 	 * @param Points The array of points to check.
@@ -126,7 +129,7 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, DisplayName="Spline: Is Points On?", Category = "NEXUS|Picker|Spline")
 	static TArray<bool> IsPointsOn(const TArray<FVector>& Points, const USplineComponent* SplineComponent)
 	{
-		N_VALIDATE_RETURN(LogNexusPicker, SplineComponent, TArray<bool>())
+		N_VALIDATE_RETURN(LogNexusPicker, SplineComponent, TArray<bool>());
 		return FNSplinePicker::IsPointsOn(Points, SplineComponent);
 	}
 };

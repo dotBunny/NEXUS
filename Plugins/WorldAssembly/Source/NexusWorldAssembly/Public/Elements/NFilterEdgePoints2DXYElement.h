@@ -21,7 +21,11 @@ struct FNFilterEdgePoints2DParams
 };
 
 /**
- * PCG settings node that keeps only the edge/border points of a filled 2D grid projected onto XY.
+ * PCG settings node that splits a filled 2D grid into its interior and its border, classifying points by
+ * XY neighbour count within Spacing * 1.5 (>= 8 neighbours is interior).
+ *
+ * @remark The border points are emitted on the OutsideFilter pin; InsideFilter carries the interior fill.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/elements/filter-edge-points-2d-xy/">UNFilterEdgePoints2DXYSettings</a>
  */
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
 class UNFilterEdgePoints2DXYSettings : public UPCGSettings

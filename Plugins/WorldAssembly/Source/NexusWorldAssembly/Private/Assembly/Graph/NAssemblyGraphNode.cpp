@@ -13,14 +13,12 @@ FNAssemblyGraphNode::FNAssemblyGraphNode(const uint64 NodeSeed, const FVector& P
 FNAssemblyGraphNode::FNAssemblyGraphNode(const FNAssemblyGraphNodeParams& Params)
 {
 	Seed = Params.Seed;
-	
+
 	WorldPosition = Params.WorldPosition;
 	WorldRotation = Params.WorldRotation;
-	
+
 	ContextTagsAdded = Params.ContextTagsAdded;
-	ContextTagsState = Params.ContextTagsState;
 	AssemblyTags = Params.AssemblyTags;
-	TagCounterState = Params.TagCounterState;
 }
 
 void FNAssemblyGraphNode::SetWorldPosition(const FVector& Position)

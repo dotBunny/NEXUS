@@ -246,7 +246,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	Parts->ScreenshotCameraComponent->SetMobility(EComponentMobility::Movable);
 	Parts->ScreenshotCameraComponent->SetRelativeLocation(FVector(755.f, 0.f, 300.f));
 	Parts->ScreenshotCameraComponent->SetRelativeRotation(FRotator(-20.f, -180.f, 0.f));
-	Parts->ScreenshotCameraComponent->AspectRatio = 1.777778;
+	Parts->ScreenshotCameraComponent->AspectRatio = 1.777778f;
 	Parts->ScreenshotCameraComponent->bConstrainAspectRatio = true;
 }
 
@@ -270,7 +270,6 @@ void ANSamplesDisplayActor::BeginDestroy()
 
 void ANSamplesDisplayActor::BeginPlay()
 {
-	
 	// If we are running in automation, we absolutely do not want timers in other places running, so we disable them
 	if (!GIsAutomationTesting && TimerSettings.bTimerEnabled)
 	{

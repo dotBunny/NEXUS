@@ -7,26 +7,26 @@ TArray<FVector> FNVectorUtils::RotateAndOffsetPoints(const TArray<FVector>& Poin
 {
 	TArray<FVector> ModifiedVertices;
 	ModifiedVertices.Reserve(Points.Num());
-		
+
 	for (const FVector& Vertex : Points)
 	{
 		ModifiedVertices.Add(Rotation.RotateVector(Vertex) + Offset);
 	}
-		
-	return MoveTemp(ModifiedVertices);
+
+	return ModifiedVertices;
 }
 
 TArray<FVector> FNVectorUtils::RotatePoints(const TArray<FVector>& Vectors, const FRotator& Rotation)
 {
 	TArray<FVector> ModifiedVertices;
 	ModifiedVertices.Reserve(Vectors.Num());
-		
+
 	for (const FVector& Vertex : Vectors)
 	{
 		ModifiedVertices.Add(Rotation.RotateVector(Vertex));
 	}
-		
-	return MoveTemp(ModifiedVertices);
+
+	return ModifiedVertices;
 }
 
 TArray<FVector> FNVectorUtils::OffsetPoints(const TArray<FVector>& Vectors, const FVector& Offset)
@@ -38,6 +38,6 @@ TArray<FVector> FNVectorUtils::OffsetPoints(const TArray<FVector>& Vectors, cons
 	{
 		ModifiedVertices.Add(Vertex+Offset);
 	}
-	
-	return MoveTemp(ModifiedVertices);
+
+	return ModifiedVertices;
 }

@@ -4,18 +4,21 @@
 #include "NDynamicRefsDeveloperOverlay.h"
 
 #include "NDynamicRefObject.h"
+#include "NDynamicRefsMinimal.h"
 #include "NDynamicRefSubsystem.h"
 #include "NStyleLibrary.h"
+#include "Components/Border.h"
 #include "Components/NListView.h"
+#include "Macros/NValidationMacros.h"
 
 void UNDynamicRefsDeveloperOverlay::NativeConstruct()
 {
 	Super::NativeConstruct();
-	
-	N_VALIDATE(LogNexusDynamicRefs, DynamicReferencesHeader)
-	N_VALIDATE(LogNexusDynamicRefs, DynamicReferences)
-	N_VALIDATE(LogNexusDynamicRefs, NamedReferencesHeader)
-	N_VALIDATE(LogNexusDynamicRefs, NamedReferences)
+
+	N_VALIDATE(LogNexusDynamicRefs, DynamicReferencesHeader);
+	N_VALIDATE(LogNexusDynamicRefs, DynamicReferences);
+	N_VALIDATE(LogNexusDynamicRefs, NamedReferencesHeader);
+	N_VALIDATE(LogNexusDynamicRefs, NamedReferences);
 }
 
 void UNDynamicRefsDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, const float InDeltaTime)
@@ -59,13 +62,15 @@ void UNDynamicRefsDeveloperOverlay::ReconcileStaleEntries()
 
 void UNDynamicRefsDeveloperOverlay::BindWorld(UWorld* World)
 {
+	if (World == nullptr) return;
+
 	UNDynamicRefSubsystem* System = UNDynamicRefSubsystem::Get(World);
 	if (System == nullptr)
 	{
 		UpdateBanner();
 		return; // System-less world
 	}
-	
+
 	// Get this worlds used references currently
 	TArray<ENDynamicRef> DynamicRefs = System->GetDynamicRefs();
 	for (ENDynamicRef DynamicRef : DynamicRefs)
@@ -79,7 +84,7 @@ void UNDynamicRefsDeveloperOverlay::BindWorld(UWorld* World)
 			DynamicRefObjects[DynamicRef]->AddObject(Object);
 		}
 	}
-	
+
 	TArray<FName> Names = System->GetNames();
 	for (FName Name : Names)
 	{
@@ -92,10 +97,10 @@ void UNDynamicRefsDeveloperOverlay::BindWorld(UWorld* World)
 			NamedObjects[Name]->AddObject(Object);
 		}
 	}
-	
+
 	// We've bound a world check it
 	UpdateBanner();
-	
+
 
 	// Add delegate for future pools
 	OnAddedDelegates.Add(World,System->OnAdded.AddLambda([this] (ENDynamicRef DynamicRef, UObject* Object)
@@ -125,9 +130,9 @@ void UNDynamicRefsDeveloperOverlay::BindWorld(UWorld* World)
 void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 {
 	if (World == nullptr) return;
-	
+
 	UNDynamicRefSubsystem* System = UNDynamicRefSubsystem::Get(World);
-	
+
 	// OnAddedDelegates
 	if (OnAddedDelegates.Contains(World))
 	{
@@ -137,7 +142,7 @@ void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 		}
 		OnAddedDelegates.Remove(World);
 	}
-	
+
 	// OnAddedByNameDelegates
 	if (OnAddedByNameDelegates.Contains(World))
 	{
@@ -147,7 +152,7 @@ void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 		}
 		OnAddedByNameDelegates.Remove(World);
 	}
-	
+
 	// OnRemovedDelegates
 	if (OnRemovedDelegates.Contains(World))
 	{
@@ -157,7 +162,7 @@ void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 		}
 		OnRemovedDelegates.Remove(World);
 	}
-	
+
 	// OnRemovedByNameDelegates
 	if (OnRemovedByNameDelegates.Contains(World))
 	{
@@ -167,28 +172,35 @@ void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 		}
 		OnRemovedByNameDelegates.Remove(World);
 	}
-	
-	if (System != nullptr)
+
+	// Drop only the entries this world registered. Sweeping the wrappers directly (rather than replaying the
+	// subsystem's current objects) keeps a sibling PIE world's entries intact and works even when the subsystem
+	// has already cleared its collections during teardown.
+	//
+	// RemoveObjectsForWorld only matches live objects, so an object destroyed before teardown leaves a stale
+	// (null) entry it can't attribute to this world. We must not gate removal on its return value: GetCount()
+	// compacts stale entries first, so an empty wrapper is dropped whether its last object was removed here or
+	// simply went stale. A wrapper still holding a sibling world's live object keeps GetCount() > 0 and survives.
+	for (auto It = DynamicRefObjects.CreateIterator(); It; ++It)
 	{
-		TArray<ENDynamicRef> DynamicRefs = System->GetDynamicRefs();
-		for (ENDynamicRef DynamicRef : DynamicRefs)
+		It.Value()->RemoveObjectsForWorld(World);
+		if (It.Value()->GetCount() == 0)
 		{
-			for (UObject* Object : System->GetObjects(DynamicRef))
-			{
-				RemoveListItem(DynamicRef, Object);
-			}
-		}
-	
-		TArray<FName> Names = System->GetNames();
-		for (FName Name : Names)
-		{
-			for (UObject* Object : System->GetObjectsByName(Name))
-			{
-				RemoveListItem(Name, Object);
-			}
+			DynamicReferences->RemoveItem(It.Value());
+			It.RemoveCurrent();
 		}
 	}
-	
+
+	for (auto It = NamedObjects.CreateIterator(); It; ++It)
+	{
+		It.Value()->RemoveObjectsForWorld(World);
+		if (It.Value()->GetCount() == 0)
+		{
+			NamedReferences->RemoveItem(It.Value());
+			It.RemoveCurrent();
+		}
+	}
+
 	UpdateBanner();
 }
 
@@ -198,12 +210,12 @@ void UNDynamicRefsDeveloperOverlay::UpdateBanner() const
 		NamedReferences->GetNumItems() > 0);
 	const bool bDynamicReferences = (IsValid(DynamicReferences) &&
 		DynamicReferences->GetNumItems() > 0);
-		
+
 	if (bNamedReferences || bDynamicReferences)
 	{
 		// add check
 		HideContainerBanner();
-		
+
 		if (bNamedReferences)
 		{
 			NamedReferencesHeader->SetVisibility(ESlateVisibility::Visible);
@@ -223,9 +235,9 @@ void UNDynamicRefsDeveloperOverlay::UpdateBanner() const
 		{
 			NamedReferencesHeader->SetVisibility(ESlateVisibility::Collapsed);
 		}
-		
+
 		ShowContainerBanner(NoReferencesFoundText,
-	UNStyleLibrary::GetInfoForegroundColor(), 
+	UNStyleLibrary::GetInfoForegroundColor(),
 	UNStyleLibrary::GetInfoBackgroundColor());
 	}
 }

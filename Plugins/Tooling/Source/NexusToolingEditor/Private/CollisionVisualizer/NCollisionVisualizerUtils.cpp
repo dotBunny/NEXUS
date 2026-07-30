@@ -6,23 +6,23 @@
 #include "NDrawDebugHelpers.h"
 
 #define N_COLLISION_VISUALIZER_COMMON \
-	bool bHit = false; 
+	bool bHit = false;
 
 #define N_COLLISION_VISUALIZER_OBJECT_PARAMS FCollisionObjectQueryParams(UEngineTypes::ConvertToCollisionChannel(Settings.Query.ObjectType))
 #define N_COLLISION_VISUALIZER_HIT_COLOR Settings.Drawing.DrawHitColor
 #define N_COLLISION_VISUALIZER_MID_COLOR Settings.Drawing.DrawMidColor
 #define N_COLLISION_VISUALIZER_MISS_COLOR Settings.Drawing.DrawMissColor
 
-void FNCollisionVisualizerUtils::LineTraceSingle(const FNCollisionVisualizerSettings& Settings, 
+void FNCollisionVisualizerUtils::LineTraceSingle(const FNCollisionVisualizerSettings& Settings,
 	const UWorld* World, const FVector& StartPosition, const FVector& EndPosition)
 {
 	N_COLLISION_VISUALIZER_COMMON
 	FHitResult HitResult;
-	
-	
+
+
 	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
-		bHit = World->LineTraceSingleByChannel(HitResult, StartPosition, EndPosition, 
+		bHit = World->LineTraceSingleByChannel(HitResult, StartPosition, EndPosition,
 			Settings.Query.Channel, Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
@@ -31,48 +31,48 @@ void FNCollisionVisualizerUtils::LineTraceSingle(const FNCollisionVisualizerSett
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
-		bHit = World->LineTraceSingleByProfile(HitResult, StartPosition, EndPosition, 
+		bHit = World->LineTraceSingleByProfile(HitResult, StartPosition, EndPosition,
 			Settings.Query.CollisionProfileName, Settings.Options.GetCollisionQueryParams());
 	}
-		
+
 #if UE_ENABLE_DEBUG_DRAWING
 	if (bHit)
 	{
-		DrawDebugLine(World, StartPosition, HitResult.Location, N_COLLISION_VISUALIZER_HIT_COLOR, 
+		DrawDebugLine(World, StartPosition, HitResult.Location, N_COLLISION_VISUALIZER_HIT_COLOR,
 			false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
-		DrawDebugPoint(World, HitResult.ImpactPoint, Settings.Drawing.DrawPointSize, N_COLLISION_VISUALIZER_HIT_COLOR, 
+		DrawDebugPoint(World, HitResult.ImpactPoint, Settings.Drawing.DrawPointSize, N_COLLISION_VISUALIZER_HIT_COLOR,
 			false, Settings.Drawing.DrawTimer, SDPG_World);
 	}
 	else
 	{
-		DrawDebugLine(World, StartPosition, EndPosition, N_COLLISION_VISUALIZER_MISS_COLOR, 
+		DrawDebugLine(World, StartPosition, EndPosition, N_COLLISION_VISUALIZER_MISS_COLOR,
 			false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 	}
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::LineTraceMulti(const FNCollisionVisualizerSettings& Settings, 
+void FNCollisionVisualizerUtils::LineTraceMulti(const FNCollisionVisualizerSettings& Settings,
 	const UWorld* World, const FVector& StartPosition, const FVector& EndPosition)
 {
 	N_COLLISION_VISUALIZER_COMMON
 	TArray<FHitResult> HitResults;
-	
+
 	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
-		bHit = World->LineTraceMultiByChannel(HitResults, StartPosition, EndPosition, 
+		bHit = World->LineTraceMultiByChannel(HitResults, StartPosition, EndPosition,
 			Settings.Query.Channel, Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
-		bHit = World->LineTraceMultiByObjectType(HitResults, StartPosition, EndPosition, 
+		bHit = World->LineTraceMultiByObjectType(HitResults, StartPosition, EndPosition,
 			N_COLLISION_VISUALIZER_OBJECT_PARAMS, Settings.Options.GetCollisionQueryParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
-		bHit = World->LineTraceMultiByProfile(HitResults, StartPosition, EndPosition, 
+		bHit = World->LineTraceMultiByProfile(HitResults, StartPosition, EndPosition,
 			Settings.Query.CollisionProfileName, Settings.Options.GetCollisionQueryParams());
 	}
-		
+
 #if UE_ENABLE_DEBUG_DRAWING
 	if (bHit)
 	{
@@ -82,37 +82,37 @@ void FNCollisionVisualizerUtils::LineTraceMulti(const FNCollisionVisualizerSetti
 		{
 			TraceEndPosition = EndPosition;
 		}
-		DrawDebugLine(World, StartPosition, TraceEndPosition, N_COLLISION_VISUALIZER_HIT_COLOR, 
+		DrawDebugLine(World, StartPosition, TraceEndPosition, N_COLLISION_VISUALIZER_HIT_COLOR,
 			false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 	}
 	else
 	{
-		DrawDebugLine(World, StartPosition, EndPosition, 
-			HitResults.IsEmpty() ?  N_COLLISION_VISUALIZER_MISS_COLOR : N_COLLISION_VISUALIZER_MID_COLOR, 
+		DrawDebugLine(World, StartPosition, EndPosition,
+			HitResults.IsEmpty() ?  N_COLLISION_VISUALIZER_MISS_COLOR : N_COLLISION_VISUALIZER_MID_COLOR,
 			false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 	}
 	for (const FHitResult& HitResult : HitResults)
 	{
-		DrawDebugPoint(World, HitResult.ImpactPoint, Settings.Drawing.DrawPointSize, 
-			HitResult.bBlockingHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MID_COLOR, 
+		DrawDebugPoint(World, HitResult.ImpactPoint, Settings.Drawing.DrawPointSize,
+			HitResult.bBlockingHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MID_COLOR,
 			false, Settings.Drawing.DrawTimer, SDPG_World);
 	}
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::LineTraceTest(const FNCollisionVisualizerSettings& Settings, 
+void FNCollisionVisualizerUtils::LineTraceTest(const FNCollisionVisualizerSettings& Settings,
                                                 const UWorld* World, const FVector& StartPosition, const FVector& EndPosition)
 {
 	N_COLLISION_VISUALIZER_COMMON
-	
+
 	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
-		bHit = World->LineTraceTestByChannel(StartPosition, EndPosition, 
+		bHit = World->LineTraceTestByChannel(StartPosition, EndPosition,
 			Settings.Query.Channel, Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
-		bHit = World->LineTraceTestByObjectType(StartPosition, EndPosition, N_COLLISION_VISUALIZER_OBJECT_PARAMS, 
+		bHit = World->LineTraceTestByObjectType(StartPosition, EndPosition, N_COLLISION_VISUALIZER_OBJECT_PARAMS,
 			Settings.Options.GetCollisionQueryParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
@@ -121,75 +121,75 @@ void FNCollisionVisualizerUtils::LineTraceTest(const FNCollisionVisualizerSettin
 	}
 
 #if UE_ENABLE_DEBUG_DRAWING
-	DrawDebugLine(World, StartPosition, EndPosition, 
-		bHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR, 
+	DrawDebugLine(World, StartPosition, EndPosition,
+		bHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR,
 		false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
 
 
-void FNCollisionVisualizerUtils::SweepSingle(const FNCollisionVisualizerSettings& Settings, const UWorld* World, 
+void FNCollisionVisualizerUtils::SweepSingle(const FNCollisionVisualizerSettings& Settings, const UWorld* World,
 	const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation)
 {
 	N_COLLISION_VISUALIZER_COMMON
 	const FCollisionShape CollisionShape = Settings.Query.GetCollisionShape();
 	FHitResult HitResult;
-	
+
 	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
-		bHit = World->SweepSingleByChannel(HitResult, StartPosition, EndPosition, Rotation, Settings.Query.Channel, 
+		bHit = World->SweepSingleByChannel(HitResult, StartPosition, EndPosition, Rotation, Settings.Query.Channel,
 			CollisionShape, Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
-		bHit = World->SweepSingleByObjectType(HitResult, StartPosition, EndPosition, Rotation, 
+		bHit = World->SweepSingleByObjectType(HitResult, StartPosition, EndPosition, Rotation,
 			N_COLLISION_VISUALIZER_OBJECT_PARAMS, CollisionShape, Settings.Options.GetCollisionQueryParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
-		bHit = World->SweepSingleByProfile(HitResult, StartPosition, EndPosition, Rotation, Settings.Query.CollisionProfileName, 
+		bHit = World->SweepSingleByProfile(HitResult, StartPosition, EndPosition, Rotation, Settings.Query.CollisionProfileName,
 			CollisionShape, Settings.Options.GetCollisionQueryParams());
 	}
 
 #if UE_ENABLE_DEBUG_DRAWING
 	if (bHit)
 	{
-		DrawDebugPoint(World, HitResult.ImpactPoint, Settings.Drawing.DrawPointSize, N_COLLISION_VISUALIZER_HIT_COLOR, 
+		DrawDebugPoint(World, HitResult.ImpactPoint, Settings.Drawing.DrawPointSize, N_COLLISION_VISUALIZER_HIT_COLOR,
 			false, Settings.Drawing.DrawTimer, SDPG_World);
 		FNDrawDebugHelpers::DrawSweep(World, StartPosition, HitResult.Location, Rotation, CollisionShape,
-			N_COLLISION_VISUALIZER_HIT_COLOR, false, Settings.Drawing.DrawTimer, SDPG_World, 
+			N_COLLISION_VISUALIZER_HIT_COLOR, false, Settings.Drawing.DrawTimer, SDPG_World,
 			Settings.Drawing.DrawLineThickness);
 	}
 	else
 	{
-		FNDrawDebugHelpers::DrawSweep(World, StartPosition, EndPosition, Rotation, CollisionShape, 
-			N_COLLISION_VISUALIZER_MISS_COLOR, false, Settings.Drawing.DrawTimer, SDPG_World, 
+		FNDrawDebugHelpers::DrawSweep(World, StartPosition, EndPosition, Rotation, CollisionShape,
+			N_COLLISION_VISUALIZER_MISS_COLOR, false, Settings.Drawing.DrawTimer, SDPG_World,
 			Settings.Drawing.DrawLineThickness);
 	}
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::SweepMulti(const FNCollisionVisualizerSettings& Settings, const UWorld* World, 
+void FNCollisionVisualizerUtils::SweepMulti(const FNCollisionVisualizerSettings& Settings, const UWorld* World,
 	const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation)
 {
 	N_COLLISION_VISUALIZER_COMMON
 	const FCollisionShape CollisionShape = Settings.Query.GetCollisionShape();
 	TArray<FHitResult> HitResults;
-	
+
 	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
-		bHit = World->SweepMultiByChannel(HitResults, StartPosition, EndPosition, Rotation, Settings.Query.Channel, 
+		bHit = World->SweepMultiByChannel(HitResults, StartPosition, EndPosition, Rotation, Settings.Query.Channel,
 			CollisionShape, Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
-		bHit = World->SweepMultiByObjectType(HitResults, StartPosition, EndPosition, Rotation, 
+		bHit = World->SweepMultiByObjectType(HitResults, StartPosition, EndPosition, Rotation,
 			N_COLLISION_VISUALIZER_OBJECT_PARAMS, CollisionShape, Settings.Options.GetCollisionQueryParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
-		bHit = World->SweepMultiByProfile(HitResults, StartPosition, EndPosition, Rotation, Settings.Query.CollisionProfileName, 
+		bHit = World->SweepMultiByProfile(HitResults, StartPosition, EndPosition, Rotation, Settings.Query.CollisionProfileName,
 			CollisionShape, Settings.Options.GetCollisionQueryParams());
 	}
 
@@ -206,21 +206,21 @@ void FNCollisionVisualizerUtils::SweepMulti(const FNCollisionVisualizerSettings&
 			SweepEnd = EndPosition;
 		}
 
-		FNDrawDebugHelpers::DrawSweep(World, StartPosition, SweepEnd, Rotation, CollisionShape, 
-			N_COLLISION_VISUALIZER_HIT_COLOR, false, Settings.Drawing.DrawTimer, SDPG_World, 
+		FNDrawDebugHelpers::DrawSweep(World, StartPosition, SweepEnd, Rotation, CollisionShape,
+			N_COLLISION_VISUALIZER_HIT_COLOR, false, Settings.Drawing.DrawTimer, SDPG_World,
 			Settings.Drawing.DrawLineThickness);
 	}
 	else
 	{
-		FNDrawDebugHelpers::DrawSweep(World, StartPosition, EndPosition, Rotation, CollisionShape, 
-			HitResults.IsEmpty() ? N_COLLISION_VISUALIZER_MISS_COLOR :  N_COLLISION_VISUALIZER_MID_COLOR, 
+		FNDrawDebugHelpers::DrawSweep(World, StartPosition, EndPosition, Rotation, CollisionShape,
+			HitResults.IsEmpty() ? N_COLLISION_VISUALIZER_MISS_COLOR :  N_COLLISION_VISUALIZER_MID_COLOR,
 			false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 	}
 
 	for (const FHitResult& HitResult : HitResults)
 	{
-		DrawDebugPoint(World, HitResult.ImpactPoint, Settings.Drawing.DrawPointSize, 
-			HitResult.bBlockingHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MID_COLOR, 
+		DrawDebugPoint(World, HitResult.ImpactPoint, Settings.Drawing.DrawPointSize,
+			HitResult.bBlockingHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MID_COLOR,
 			false, Settings.Drawing.DrawTimer, SDPG_World);
 	}
 #endif // UE_ENABLE_DEBUG_DRAWING
@@ -230,26 +230,26 @@ void FNCollisionVisualizerUtils::SweepTest(const FNCollisionVisualizerSettings& 
 {
 	N_COLLISION_VISUALIZER_COMMON
 	const FCollisionShape& CollisionShape = Settings.Query.GetCollisionShape();
-	
+
 	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
-		bHit = World->SweepTestByChannel(StartPosition, EndPosition, Rotation, Settings.Query.Channel, CollisionShape, 
+		bHit = World->SweepTestByChannel(StartPosition, EndPosition, Rotation, Settings.Query.Channel, CollisionShape,
 			Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
-		bHit = World->SweepTestByObjectType(StartPosition, EndPosition, Rotation, N_COLLISION_VISUALIZER_OBJECT_PARAMS, 
+		bHit = World->SweepTestByObjectType(StartPosition, EndPosition, Rotation, N_COLLISION_VISUALIZER_OBJECT_PARAMS,
 			CollisionShape, Settings.Options.GetCollisionQueryParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
-		bHit = World->SweepTestByProfile(StartPosition, EndPosition, Rotation, Settings.Query.CollisionProfileName, 
+		bHit = World->SweepTestByProfile(StartPosition, EndPosition, Rotation, Settings.Query.CollisionProfileName,
 			CollisionShape, Settings.Options.GetCollisionQueryParams());
 	}
 
 #if UE_ENABLE_DEBUG_DRAWING
-	FNDrawDebugHelpers::DrawSweep(World, StartPosition, EndPosition, Rotation, CollisionShape, 
-		bHit ? N_COLLISION_VISUALIZER_HIT_COLOR: N_COLLISION_VISUALIZER_MISS_COLOR, false, 
+	FNDrawDebugHelpers::DrawSweep(World, StartPosition, EndPosition, Rotation, CollisionShape,
+		bHit ? N_COLLISION_VISUALIZER_HIT_COLOR: N_COLLISION_VISUALIZER_MISS_COLOR, false,
 		Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
@@ -259,85 +259,85 @@ void FNCollisionVisualizerUtils::OverlapBlocking(const FNCollisionVisualizerSett
 {
 	N_COLLISION_VISUALIZER_COMMON
 	const FCollisionShape& CollisionShape = Settings.Query.GetCollisionShape();
-	
+
 	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
-		bHit = World->OverlapBlockingTestByChannel(Position, Rotation, Settings.Query.Channel, CollisionShape, 
+		bHit = World->OverlapBlockingTestByChannel(Position, Rotation, Settings.Query.Channel, CollisionShape,
 			Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
-		bHit = World->OverlapAnyTestByObjectType(Position, Rotation, N_COLLISION_VISUALIZER_OBJECT_PARAMS, 
+		bHit = World->OverlapAnyTestByObjectType(Position, Rotation, N_COLLISION_VISUALIZER_OBJECT_PARAMS,
 			CollisionShape, Settings.Options.GetCollisionQueryParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
-		bHit = World->OverlapBlockingTestByProfile(Position, Rotation, Settings.Query.CollisionProfileName, CollisionShape, 
+		bHit = World->OverlapBlockingTestByProfile(Position, Rotation, Settings.Query.CollisionProfileName, CollisionShape,
 			Settings.Options.GetCollisionQueryParams());
 	}
 
 #if UE_ENABLE_DEBUG_DRAWING
-	FNDrawDebugHelpers::DrawCollisionShape(World, Position, Rotation, CollisionShape, 
-		bHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR, false, Settings.Drawing.DrawTimer, 
+	FNDrawDebugHelpers::DrawCollisionShape(World, Position, Rotation, CollisionShape,
+		bHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR, false, Settings.Drawing.DrawTimer,
 		SDPG_World, Settings.Drawing.DrawLineThickness);
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::OverlapAny(const FNCollisionVisualizerSettings& Settings, 
+void FNCollisionVisualizerUtils::OverlapAny(const FNCollisionVisualizerSettings& Settings,
 	const UWorld* World, const FVector& Position, const FQuat& Rotation)
 {
 	N_COLLISION_VISUALIZER_COMMON
 	const FCollisionShape& CollisionShape = Settings.Query.GetCollisionShape();
-	
+
 	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
-		bHit = World->OverlapAnyTestByChannel(Position, Rotation, Settings.Query.Channel, CollisionShape, 
+		bHit = World->OverlapAnyTestByChannel(Position, Rotation, Settings.Query.Channel, CollisionShape,
 			Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
-		bHit = World->OverlapAnyTestByObjectType(Position, Rotation, N_COLLISION_VISUALIZER_OBJECT_PARAMS, 
+		bHit = World->OverlapAnyTestByObjectType(Position, Rotation, N_COLLISION_VISUALIZER_OBJECT_PARAMS,
 			CollisionShape, Settings.Options.GetCollisionQueryParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
-		bHit = World->OverlapAnyTestByProfile(Position, Rotation, Settings.Query.CollisionProfileName, CollisionShape, 
+		bHit = World->OverlapAnyTestByProfile(Position, Rotation, Settings.Query.CollisionProfileName, CollisionShape,
 			Settings.Options.GetCollisionQueryParams());
 	}
 
 #if UE_ENABLE_DEBUG_DRAWING
-	FNDrawDebugHelpers::DrawCollisionShape(World, Position, Rotation, CollisionShape, 
-		bHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR, false, Settings.Drawing.DrawTimer, 
+	FNDrawDebugHelpers::DrawCollisionShape(World, Position, Rotation, CollisionShape,
+		bHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR, false, Settings.Drawing.DrawTimer,
 		SDPG_World, Settings.Drawing.DrawLineThickness);
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::OverlapMulti(const FNCollisionVisualizerSettings& Settings, 
+void FNCollisionVisualizerUtils::OverlapMulti(const FNCollisionVisualizerSettings& Settings,
 	const UWorld* World, const FVector& Position, const FQuat& Rotation)
 {
 	N_COLLISION_VISUALIZER_COMMON
 	TArray<FOverlapResult>OverlapsResults;
 	const FCollisionShape& CollisionShape = Settings.Query.GetCollisionShape();
-	
+
 	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
-		bHit = World->OverlapMultiByChannel(OverlapsResults, Position, Rotation, Settings.Query.Channel, CollisionShape, 
+		bHit = World->OverlapMultiByChannel(OverlapsResults, Position, Rotation, Settings.Query.Channel, CollisionShape,
 			Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
-		bHit = World->OverlapMultiByObjectType(OverlapsResults, Position, Rotation, 
+		bHit = World->OverlapMultiByObjectType(OverlapsResults, Position, Rotation,
 			N_COLLISION_VISUALIZER_OBJECT_PARAMS, CollisionShape, Settings.Options.GetCollisionQueryParams());
 	}
 	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
-		bHit = World->OverlapMultiByProfile(OverlapsResults, Position, Rotation, Settings.Query.CollisionProfileName, 
+		bHit = World->OverlapMultiByProfile(OverlapsResults, Position, Rotation, Settings.Query.CollisionProfileName,
 			CollisionShape, Settings.Options.GetCollisionQueryParams());
 	}
 
 #if UE_ENABLE_DEBUG_DRAWING
-	FNDrawDebugHelpers::DrawCollisionShape(World, Position, Rotation, CollisionShape, 
-		bHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR, false, Settings.Drawing.DrawTimer, 
+	FNDrawDebugHelpers::DrawCollisionShape(World, Position, Rotation, CollisionShape,
+		bHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR, false, Settings.Drawing.DrawTimer,
 		SDPG_World, Settings.Drawing.DrawLineThickness);
 #endif // UE_ENABLE_DEBUG_DRAWING
 }

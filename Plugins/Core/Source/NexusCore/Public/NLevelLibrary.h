@@ -12,6 +12,7 @@
  *
  * The UNLevelLibrary class exposes level-related helpers (such as discovering maps on disk)
  * to Blueprint scripts. For C++ callers, prefer the equivalents in FNLevelUtils.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/level-library/">UNLevelLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Level Library")
 class UNLevelLibrary : public UBlueprintFunctionLibrary
@@ -24,6 +25,7 @@ public:
 	 * @param SearchPaths A list of content-root relative paths (e.g. "/Game/Maps") to scan for maps.
 	 * @return An array of package names of all maps found underneath the search paths.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Get All Map Names", Category = "NEXUS|Level")
+	UFUNCTION(BlueprintCallable, DisplayName = "Get All Map Names", Category = "NEXUS|Level",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/level-library/#get-all-map-names"))
 	static TArray<FString> GetAllMapNames(TArray<FString> SearchPaths);
 };

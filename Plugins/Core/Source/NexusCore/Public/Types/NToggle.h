@@ -18,6 +18,7 @@ enum class ENToggle : uint8
 
 /**
  * A utility class for operating on ENToggle.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/toggle/">FNToggle</a>
  */
 class NEXUSCORE_API FNToggle
 {

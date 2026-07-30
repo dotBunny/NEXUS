@@ -72,16 +72,16 @@ bool FNEditorInputProcessor::IsMouseEventLastSyntheticEvent(const FPointerEvent&
 	{
 		return false;
 	}
-	
+
 	const TSet<FKey>& MouseEventButtons = MouseEvent.GetPressedButtons();
 	const TSet<FKey>& LastSyntheticEventButtons = LastSyntheticEvent.GetPressedButtons();
-	
+
 	// Quick check the counts
 	if (MouseEventButtons.Num() != LastSyntheticEventButtons.Num())
 	{
 		return false;
 	}
-	
+
 	// Loop through and check that the keys are identical
 	for (const FKey& Button : MouseEventButtons)
 	{
@@ -95,27 +95,29 @@ bool FNEditorInputProcessor::IsMouseEventLastSyntheticEvent(const FPointerEvent&
 }
 bool FNEditorInputProcessor::HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
-	if (bCachedGraphNavigationSpaceToPan && bSpaceBar && bLeftMouse && 
+	if (bCachedGraphNavigationSpaceToPan && bSpaceBar && bLeftMouse &&
 		!IsMouseEventLastSyntheticEvent(MouseEvent)) // Dont resend the last synthetic event
 	{
 		IAssetEditorInstance* ForegroundAssetEditor = FNEditorUtils::GetForegroundAssetEditor();
 		if (ForegroundAssetEditor == nullptr) return false;
-		
-		// We're going to make a synthetic mouse event from the current event
-		TSet<FKey> PressedButtons = MouseEvent.GetPressedButtons();
-		PressedButtons.Remove(EKeys::LeftMouseButton);
-		PressedButtons.Add(EKeys::RightMouseButton);
-		
+
+		// We're going to make a synthetic mouse event from the current event.
+		// FPointerEvent only stores a pointer to the button set, so it must outlive the event;
+		// keep it in a member rather than a local that dies when this function returns.
+		LastSyntheticPressedButtons = MouseEvent.GetPressedButtons();
+		LastSyntheticPressedButtons.Remove(EKeys::LeftMouseButton);
+		LastSyntheticPressedButtons.Add(EKeys::RightMouseButton);
+
 		// Build a synthetic event
      	LastSyntheticEvent = FPointerEvent(
-		FSlateApplicationBase::CursorPointerIndex, 
-		MouseEvent.GetScreenSpacePosition(), 
-		MouseEvent.GetLastScreenSpacePosition(), 
-		PressedButtons, 
-		EKeys::RightMouseButton, 
-		MouseEvent.GetWheelDelta(), 
+		FSlateApplicationBase::CursorPointerIndex,
+		MouseEvent.GetScreenSpacePosition(),
+		MouseEvent.GetLastScreenSpacePosition(),
+		LastSyntheticPressedButtons,
+		EKeys::RightMouseButton,
+		MouseEvent.GetWheelDelta(),
 		MouseEvent.GetModifierKeys());
-		
+
 		// The event CANNOT be synthetic for the SNodePanel to capture it.
 		SlateApp.ProcessMouseMoveEvent(LastSyntheticEvent, false);
  		return true;

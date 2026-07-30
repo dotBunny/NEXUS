@@ -17,11 +17,11 @@ void UNActorPoolListViewEntry::NativeOnListItemObjectSet(UObject* ListItemObject
 	if (ListPool != nullptr)
 	{
 		Pool = ListPool;
-		
-		
+
+
 		// Pool Name
 		CenterText->SetText(Pool->GetClassName());
-		
+
 		// Handle Color
 		if (Pool->ImplementsPoolItemInterface())
 		{
@@ -38,9 +38,9 @@ void UNActorPoolListViewEntry::NativeOnListItemObjectSet(UObject* ListItemObject
 			TypeImage->SetBrushTintColor(FLinearColor::Blue);
 			TypeImage->SetToolTipText(FText::FromString("No Callbacks"));
 		}
-		
+
 		ProgressBar->SetToolTipText(Pool->GetDescription());
-	
+
 		Refresh();
 	}
 	else
@@ -62,10 +62,10 @@ void UNActorPoolListViewEntry::Refresh() const
 	const int32 InCount = Pool->GetAvailableCount();
 	const int32 OutCount = Pool->GetSpawnedCount();
 	const int32 Total = InCount + OutCount;
-	
-	LeftText->SetText(FText::AsNumber(InCount));	
+
+	LeftText->SetText(FText::AsNumber(InCount));
 	RightText->SetText(FText::Format(NSLOCTEXT("NexusActorPools", "OutAndTotal", "{0} | {1}"), FText::AsNumber(OutCount), FText::AsNumber(Total)));
-	
+
 	if (Total == 0)
 	{
 		ProgressBar->SetPercent(1.f);

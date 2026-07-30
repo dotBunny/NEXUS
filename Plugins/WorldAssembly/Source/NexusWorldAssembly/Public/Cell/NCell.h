@@ -10,12 +10,13 @@
 /**
  * The data-only representation of a NCellActor and its details.
  * @note The UNCell is effectively a side-car file to NCellActor.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/cell/">UNCell</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Cell")
 class NEXUSWORLDASSEMBLY_API UNCell : public UDataAsset
 {
 	friend class FNWorldAssemblyEditorUtils;
-	
+
 	GENERATED_BODY()
 
 public:
@@ -30,6 +31,12 @@ public:
 	/** Per-junction metadata keyed by junction identifier; populated from NCellJunctionComponents found in the level. */
 	UPROPERTY(VisibleAnywhere)
 	TMap<int32, FNCellJunctionDetails> Junctions;
+
+	/**
+	 * Returns the cell's stored schema version.
+	 * @return The version captured when the data was last written; compare against the current schema to detect stale data.
+	 */
+	int32 GetVersion() const { return Version; }
 
 private:
 	/** Schema version stored alongside the asset so older data can be upgraded after reloads. */

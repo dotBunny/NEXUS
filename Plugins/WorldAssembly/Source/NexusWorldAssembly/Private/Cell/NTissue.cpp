@@ -8,7 +8,7 @@ void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissu
 {
 	OutTagGroups.EnsureBaseTags();
 	OutTagGroups.AppendTags(Tissue->TagGroups);
-	
+
 	// Base level entries
 	for (FNTissueEntry Entry : Tissue->Cells)
 	{
@@ -25,7 +25,7 @@ void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissu
 			FoundEntry->AssemblyTags.AppendTags(Entry.AssemblyTags);
 		}
 	}
-	
+
 
 	// Additional Set Recursion
 	for (auto Additional : Tissue->AdditionalTissue)
@@ -35,7 +35,7 @@ void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissu
 
 		// Add before recursion to stop double
 		OutProcessedSets.Add(AdditionalTissue);
-		
+
 		BuildTissueMap(AdditionalTissue, OutCellMap, OutTagGroups, OutProcessedSets);
 	}
 }

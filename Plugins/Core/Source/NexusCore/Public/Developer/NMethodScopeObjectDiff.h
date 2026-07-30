@@ -13,6 +13,7 @@
  * summary of the objects created and removed during that scope. It is purely a diagnostic aid
  * and should not be left enabled in shipped code.
  * @note Taking two full UObject snapshots is expensive; use only in targeted debug sessions.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/method-scope-object-diff/">FNMethodScopeObjectDiff</a>
  */
 class NEXUSCORE_API FNMethodScopeObjectDiff
 {

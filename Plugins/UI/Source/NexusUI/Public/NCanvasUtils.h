@@ -9,6 +9,7 @@
 
 /**
  * A utility methods collection for Canvas
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/canvas-utils/">FNCanvasUtils</a>
  */
 class NEXUSUI_API FNCanvasUtils
 {

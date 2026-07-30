@@ -8,6 +8,14 @@
 #include "Misc/AutomationTest.h"
 #include "Developer/NTestUtils.h"
 
+/**
+ * Latent automation command that stabilizes the engine immediately before a timed performance test.
+ *
+ * Warms up stack walking, forces a garbage-collection pass, flushes pending logs, and streams in all resources so
+ * that one-time costs do not contaminate the measured region. Runs ahead of the timed body; paired with
+ * FNTestLatentCommand_PostPerformanceTest.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/test-latent-commands/test-latent-command-pre-performance-test/">FNTestLatentCommand_PrePerformanceTest</a>
+ */
 class FNTestLatentCommand_PrePerformanceTest : public IAutomationLatentCommand
 {
 public:
@@ -19,14 +27,14 @@ public:
 	{
 		// Ensure that stack walking is initialized prior to performance testing to avoid library loading, this happens once.
 		FNTestUtils::Environment.InitializeStackWalking();
-	
+
 		// Force garbage collection to ensure a clean slate for performance testing
 		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 
 		// Force the logs to be written to disk prior to the operation
 		GLog->Flush();
 		FVisualLogger::Get().Flush();
-		
+
 		// Ensure everything has been loaded
 		IStreamingManager::Get().StreamAllResources();
 		return true;

@@ -1,24 +1,23 @@
-﻿// Copyright dotBunny Inc. All Rights Reserved.
+// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
 
-#include "CommonTextBlock.h"
 #include "INListViewEntry.h"
 #include "NColor.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Border.h"
 #include "NUIMinimal.h"
-#include "Macros/NValidationMacros.h"
 #include "NTextListViewEntry.generated.h"
 
+class UBorder;
+class UCommonTextBlock;
 
 /**
  * Data model for a single row in a UNListView of text labels. Tracks text plus optional
  * foreground/background color overrides via the bHas* flags so unset colors fall through to
  * the entry widget's defaults.
  */
-UCLASS(BlueprintType)
+UCLASS(BlueprintType, DisplayName = "NEXUS | Text List Entry")
 class NEXUSUI_API UNTextListEntry : public UObject
 {
 	GENERATED_BODY()
@@ -41,7 +40,8 @@ public:
 	 * Sets the background color override and marks it as present so the entry widget applies it.
 	 * @param Color The ENColor value to use for the row's container background.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Text")
+	UFUNCTION(BlueprintCallable, Category = "Text",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/widgets/text-list-view-entry/#set-background-color"))
 	void SetBackgroundColor(const ENColor Color)
 	{
 		bHasBackgroundColor = true;
@@ -77,7 +77,8 @@ public:
 	 * Replaces the text displayed by any entry widget bound to this data object.
 	 * @param InText The text to display.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Text")
+	UFUNCTION(BlueprintCallable, Category = "Text",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/widgets/text-list-view-entry/#set-text"))
 	void SetText(const FText& InText) { Text = InText; }
 
 private:
@@ -92,7 +93,8 @@ private:
 
 /**
  * List-view entry widget that renders a UBorder + UCommonTextBlock driven by a bound
- * UNTextListViewEntryObject. Used as a lightweight label row in UNListView controls.
+ * UNTextListEntry. Used as a lightweight label row in UNListView controls.
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/widgets/text-list-view-entry/">UNTextListViewEntry</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Text ListView Entry", BlueprintType, Blueprintable, HideDropdown)
 class NEXUSUI_API UNTextListViewEntry : public UUserWidget, public INListViewEntry
@@ -100,40 +102,14 @@ class NEXUSUI_API UNTextListViewEntry : public UUserWidget, public INListViewEnt
 	GENERATED_BODY()
 
 protected:
-	
-	virtual void NativeConstruct() override
-	{
-		Super::NativeConstruct();
-		
-		// Will validate it here only to throw a message in log for someone to realize they haven't hooked up the widget correctly.
-		N_VALIDATE(LogNexusUI, Text)
-		N_VALIDATE(LogNexusUI, Container)
-	}
+
+	virtual void NativeConstruct() override;
+
 	//~INListViewEntry
-	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override
-	{
-		const UNTextListEntry* TextObject = Cast<UNTextListEntry>(ListItemObject);
-		if (TextObject != nullptr)
-		{
-			SetText(TextObject->GetText());
+	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 
-			if (TextObject->HasForegroundColor())
-			{
-				SetTextColor(TextObject->GetForegroundColor());
-			}
-			if (TextObject->HasBackgroundColor())
-			{
-				SetBackgroundColor(TextObject->GetBackgroundColor());
-			}
-		}
-	}
-
-public:	
-	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
-	{
-		OwnerListView = Owner;
-		Execute_OnSetOwnerListView(Widget, Owner);
-	}
+public:
+	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override;
 	//End INListViewEntry
 
 
@@ -141,31 +117,25 @@ public:
 	 * Updates the text displayed by the bound UCommonTextBlock.
 	 * @param NewText The text to display in the row.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
-	void SetText(const FText NewText) const
-	{
-		Text->SetText(NewText);
-	}
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/widgets/text-list-view-entry/#set-text"))
+	void SetText(const FText NewText) const;
 
 	/**
 	 * Applies a palette color to the text block's color-and-opacity.
 	 * @param NewColor The ENColor palette entry used to resolve the FLinearColor applied to the text.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
-	void SetTextColor(ENColor NewColor) const
-	{
-		Text->SetColorAndOpacity(FNColor::GetLinearColor(NewColor));
-	}
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/widgets/text-list-view-entry/#set-text-color"))
+	void SetTextColor(ENColor NewColor) const;
 
 	/**
 	 * Applies a palette color to the container border's brush.
 	 * @param NewColor The ENColor palette entry used to resolve the FLinearColor applied to the border.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
-	void SetBackgroundColor(ENColor NewColor) const
-	{
-		Container->SetBrushColor(FNColor::GetLinearColor(NewColor));
-	}
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/widgets/text-list-view-entry/#set-background-color"))
+	void SetBackgroundColor(ENColor NewColor) const;
 
 protected:
 	/** Back-pointer to the list view that owns this entry; set by INListViewEntry::SetOwnerListView. */

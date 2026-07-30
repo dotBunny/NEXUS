@@ -38,6 +38,17 @@ public:
 	virtual void RegisterCommands() override;
 	//End TCommands
 
+	/**
+	 * Appends the Organ command bindings to the supplied (global) command list so their input chords fire
+	 * regardless of which menu has focus.
+	 * @param GlobalActions The level editor's global action list to append to.
+	 * @remark Pair every call with UnregisterGlobalActions on the same list — the bindings reference module statics.
+	 */
+	void RegisterGlobalActions(const TSharedRef<FUICommandList>& GlobalActions) const;
+
+	/** Removes the Organ command bindings previously added by RegisterGlobalActions from GlobalActions. */
+	void UnregisterGlobalActions(const TSharedRef<FUICommandList>& GlobalActions) const;
+
 	/** Toggle the World Assembly editor mode on the active level editor. */
 	static void WorldAssemblyEdMode();
 	/** @return true if the World Assembly-edit-mode entry should be shown in the current context. */
@@ -104,13 +115,13 @@ public:
 	static bool CellToggleBoundsCalculateOnSave_IsActionChecked();
 	/** Toggle whether the focused cell recalculates the hull automatically on world save. */
 	static void CellToggleHullCalculateOnSave();
-	
-	
+
+
 	/** @return checked state of the allow-non-convex-hull toggle for UI binding. */
 	static bool CellToggleHullAllowNonConvex_IsActionChecked();
 	/** Toggle whether the focused cell's hull is allowed to be non-convex. */
 	static void CellToggleHullAllowNonConvex();
-	
+
 	/** @return checked state of the hull-calculate-on-save toggle for UI binding. */
 	static bool CellToggleHullCalculateOnSave_IsActionChecked();
 	/** Toggle whether the focused cell recalculates voxel data automatically on world save. */
@@ -135,6 +146,7 @@ public:
 	static void CellJunctionAddComponent();
 	/** Select the given junction component in the level editor. */
 	static void CellJunctionSelectComponent(UNCellJunctionComponent* Junction);
+	static void CellJunctionCollectComponents();
 
 	/** Select the given organ component in the level editor. */
 	static void OrganSelectComponent(UNOrganComponent* Organ);
@@ -144,8 +156,42 @@ public:
 
 	/** @return true if the active viewport is suitable for thumbnail capture. */
 	static bool CellCaptureThumbnail_CanExecute();
+	/** Toolbar click handler: cancels the tracked Quick Assembly operation if one is running, otherwise starts a new one. */
+	static void QuickAssemblyButtonClicked();
+	/** @return true when the Quick Assembly button can act — always true while running (to allow cancel), else the start preconditions. */
+	static bool QuickAssemblyButton_CanExecute();
 
-private:	
+	/** Start a Quick Assembly operation for the selected Organ and track its ticket for the toggle. */
+	static void StartQuickAssembly();
+	/** @return true if a Quick Assembly operation can be started (valid Organ, not PIE, no operation already running). */
+	static bool StartQuickAssembly_CanExecute();
+	/** Cancel the tracked Quick Assembly operation if it is still running. */
+	static void CancelQuickAssembly();
+
+	/** Toggle UNWorldAssemblyEditorUserSettings::bQuickAssemblyLoadLevelInstances and persist it. */
+	static void QuickAssemblyToggleLoadInstances();
+	/** @return checked state of the load-level-instances toggle for UI binding. */
+	static bool QuickAssemblyToggleLoadInstances_IsActionChecked();
+	/** Toggle UNWorldAssemblyEditorUserSettings::bQuickAssemblyAutoAssembly and persist it. */
+	static void QuickAssemblyToggleAutoAssembly();
+	/** @return checked state of the auto-assembly toggle for UI binding. */
+	static bool QuickAssemblyToggleAutoAssembly_IsActionChecked();
+
+private:
+
+	/**
+	 * One command paired with the delegates it binds to.
+	 */
+	struct FNCommandInfoAction
+	{
+		TSharedPtr<FUICommandInfo> CommandInfo;
+		FExecuteAction Execute;
+		FCanExecuteAction CanExecute;
+	};
+
+	/** @return every Organ command appended to the global action list (see FOrganGlobalAction). */
+	TArray<FNCommandInfoAction> GetGlobalOrganActions() const;
+
 	TSharedPtr<FUICommandList> CommandList_Cell;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCaptureThumbnail;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateAll;
@@ -155,13 +201,17 @@ private:
 	TSharedPtr<FUICommandInfo> CommandInfo_CellResetCell;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellSaveCell;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellRemoveActor;
-	
+
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleBoundsCalculateOnSave;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleHullCalculateOnSave;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleHullAllowNonConvex;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleVoxelCalculateOnSave;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleVoxelData;
-	
+
+	TSharedPtr<FUICommandList> CommandList_QuickAssembly;
+	TSharedPtr<FUICommandInfo> CommandInfo_QuickAssemblyToggleLoadInstances;
+	TSharedPtr<FUICommandInfo> CommandInfo_QuickAssemblyToggleAutoAssembly;
+
 	TSharedPtr<FUICommandList> CommandList_Organ;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganGenerateProxies;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganGenerateAllProxies;
@@ -171,8 +221,9 @@ private:
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganCreateAllLevelInstances;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganUnloadLevelInstances;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganUnloadAllLevelInstances;
-	
+
 	TSharedPtr<FUICommandList> CommandList_CellJunction;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellJunctionAddComponent;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellJunctionSelectComponent;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellJunctionCollectComponents;
 };

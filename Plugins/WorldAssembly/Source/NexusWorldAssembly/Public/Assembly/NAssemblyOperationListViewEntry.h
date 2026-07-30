@@ -24,6 +24,8 @@ struct FNStatusChannelUpdate;
  * current message, and task progress.
  *
  * Binds to the operation's message/task delegates so the row stays in sync without manual polling.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/assembly-operation-list-view-entry/">UNAssemblyOperationListViewEntry</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Assembly Operation ListView Entry", BlueprintType, Blueprintable)
 class NEXUSWORLDASSEMBLY_API UNAssemblyOperationListViewEntry : public UUserWidget, public INListViewEntry
@@ -36,7 +38,7 @@ public:
 		OwnerListView = Owner;
 		Execute_OnSetOwnerListView(Widget, Owner);
 	}
-	
+
 	/** Clear all text fields and the progress bar — used between operations and on destruct. */
 	void Reset() const;
 
@@ -51,15 +53,15 @@ protected:
 	virtual void NativeConstruct() override
 	{
 		Super::NativeConstruct();
-		
+
 		// Will validate it here only to throw a message in log for someone to realize they haven't hooked up the widget correctly.
-		N_VALIDATE(LogNexusWorldAssembly, ChildProgressListView)
-		N_VALIDATE(LogNexusWorldAssembly, ProgressBar)
-		N_VALIDATE(LogNexusWorldAssembly, LeftText)
-		N_VALIDATE(LogNexusWorldAssembly, CenterText)
-		N_VALIDATE(LogNexusWorldAssembly, RightText)
-		N_VALIDATE(LogNexusWorldAssembly, CancelButton)
-		
+		N_VALIDATE(LogNexusWorldAssembly, ChildProgressListView);
+		N_VALIDATE(LogNexusWorldAssembly, ProgressBar);
+		N_VALIDATE(LogNexusWorldAssembly, LeftText);
+		N_VALIDATE(LogNexusWorldAssembly, CenterText);
+		N_VALIDATE(LogNexusWorldAssembly, RightText);
+		N_VALIDATE(LogNexusWorldAssembly, CancelButton);
+
 		if (IsValid(CancelButton))
 		{
 			CancelButton->OnClicked.AddDynamic(this, &UNAssemblyOperationListViewEntry::OnCancelButtonClicked);
@@ -67,7 +69,7 @@ protected:
 	}
 	virtual void NativeDestruct() override;
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
-	
+
 	/** The list view that owns this row. */
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UNListView> OwnerListView;
@@ -91,7 +93,7 @@ protected:
 	/** Right-aligned label (task counts / percentage). */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonTextBlock> RightText;
-	
+
 	/** Left-aligned label (operation display name). */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UButton> CancelButton;
@@ -104,6 +106,7 @@ protected:
 	UFUNCTION()
 	void OnOperationTasksChanged(const int32 CompletedTasks, const int32 TotalTasks);
 
+	/** Delegate callback: the entry's cancel button was clicked. */
 	UFUNCTION()
 	void OnCancelButtonClicked();
 

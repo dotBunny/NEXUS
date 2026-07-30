@@ -23,6 +23,7 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnAssemblyOperationChannelsChanged, UNAsse
  * Components self-register via the Register/Unregister pair during their lifecycle, which lets
  * subsystems and tooling enumerate the active World Assembly graph without walking every actor/component.
  * @note All accessors expect to be called from the game thread.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-registry/">FNWorldAssemblyRegistry</a>
  */
 class NEXUSWORLDASSEMBLY_API FNWorldAssemblyRegistry
 {
@@ -79,7 +80,7 @@ public:
 	 * @return An array of ANCellLevelInstance pointers.
 	 */
 	static TArray<ANCellLevelInstance*> GetCellLevelInstancesInRange(const FVector& Location, double Range, bool bIsLevelLoaded = true, int32 OperationTicket = 0);
-	
+
 	/** @return true if any bone components are currently registered. */
 	static bool HasBoneComponents();
 	/** @return true if any cell root components are currently registered. */
@@ -91,17 +92,21 @@ public:
 	/** @return true if at least one registered organ component belongs to an actor in the supplied world. */
 	static bool HasOrganComponentsInWorld(const UWorld* World);
 	/** @return true if any World Assembly operations are currently known. */
-	static bool HasOperations(bool bIgnoreEditorModeOperation = true);
+	static bool HasOperations();
 	/**
 	 * @param OperationTicket Ticket to scope the query; 0 queries across all operations.
 	 * @param bIsLevelLoaded Consider only level instances whose underlying level has finished loading.
 	 */
 	static bool HasCellLevelInstances(int32 OperationTicket = 0, bool bIsLevelLoaded = true);
+
 	/** Query whether every locator in the supplied set is currently registered. */
 	static bool HasCellLevelInstances(const TArray<FNCellLevelInstanceLocator>& LevelInstances, bool bIsLevelLoaded = true);
+
+	/** Returns an array of FNCellLevelInstanceLocator that have not been sync/registered yet. */
+	static TArray<FNCellLevelInstanceLocator> GetRemainingCellLevelInstancesToSync(const TArray<FNCellLevelInstanceLocator>& LevelInstances, bool bIsLevelLoaded = true);
+
 	/** Query whether a specific (operation, spawn GUID) level instance is registered. */
 	static bool HasCellLevelInstance(int32 OperationTicket, FGuid LevelInstanceSpawnGuid, bool bIsLevelLoaded = true);
-
 
 	/** Register a bone component with the registry. @return true on first registration. */
 	static bool RegisterBoneComponent(UNBoneComponent* Component);
@@ -131,9 +136,9 @@ public:
 
 	/** @return All currently tracked operations. */
 	static TArray<UNAssemblyOperation*>& GetOperations() { return Operations; }
-	
-	/** 
-	 * Scrub any registry entries still associated with World that were not properly unregistered during teardown. 
+
+	/**
+	 * Scrub any registry entries still associated with World that were not properly unregistered during teardown.
 	 * Bound to FWorldDelegates::OnPostWorldCleanup. */
 	static void OnPostWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources);
 
@@ -146,12 +151,23 @@ private:
 		OnOperationStateChanged.Broadcast(Operation, NewState);
 	}
 
+	// These are raw, non-owning pointers; correctness depends on every entry being removed before its object is
+	// freed. The invariant is upheld per registrant type:
+	//   - Component arrays: the engine routes OnUnregister via BeginDestroy -> ExecuteUnregisterEvents for any
+	//     still-registered component (and UnregisterAllComponents when the owning actor is destroyed), so a
+	//     component cannot be GC'd while in these arrays.
+	//   - Operations: UNAssemblyOperation AddToRoot()s while registered and RemoveFromRoot()s on unregister,
+	//     so it is GC-pinned for exactly its registered window.
+	//   - CellLevelInstances: ANCellLevelInstance is an unrooted actor whose EndPlay is not routed on every
+	//     teardown, so it carries an explicit BeginDestroy() backstop to guarantee removal before free.
+	// Any future registrant must provide an equivalent guarantee, or this becomes a use-after-free in the
+	// OnPostWorldCleanup scrub below.
 	static TArray<UNBoneComponent*> Bones;
 	static TArray<UNCellRootComponent*> CellRoots;
 	static TArray<UNCellJunctionComponent*> CellJunctions;
 	static TArray<UNOrganComponent*> Organs;
 	static TArray<UNAssemblyOperation*> Operations;
-	
+
 	/** Level instances keyed by operation ticket; ticket 0 denotes "any operation" in query helpers. */
 	static TMap<int32, TArray<ANCellLevelInstance*>> CellLevelInstances;
 };

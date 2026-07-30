@@ -40,7 +40,7 @@ USceneComponent* FNActorUtils::GetRootComponentFromDefaultObject(const TSubclass
 TArray<AActor*> FNActorUtils::GetWorldActors(const UWorld* World, const FNWorldActorFilterSettings& Settings)
 {
 	TArray<AActor*> ReturnActors;
-	if (World == nullptr) return MoveTemp(ReturnActors);
+	if (World == nullptr) return ReturnActors;
 
 	for (TActorIterator<AActor> WorldActorIterator(World); WorldActorIterator; ++WorldActorIterator)
 	{
@@ -51,7 +51,7 @@ TArray<AActor*> FNActorUtils::GetWorldActors(const UWorld* World, const FNWorldA
 		}
 	}
 
-	return MoveTemp(ReturnActors);
+	return ReturnActors;
 }
 
 bool FNActorUtils::PassesFilter(const AActor* Actor, const FNWorldActorFilterSettings& Settings)
@@ -66,6 +66,15 @@ bool FNActorUtils::PassesFilter(const AActor* Actor, const FNWorldActorFilterSet
 
 	// Exclude when collision is disabled per setting
 	if (Settings.bExcludeNonCollisionEnabledActors && !Actor->GetActorEnableCollision()) return false;
+
+	// Exclude based on Actor Tags
+	for (int i = 0; i < Settings.WorldCollisionActorIgnoreTags.Num(); ++i)
+	{
+		if (Actor->ActorHasTag(Settings.WorldCollisionActorIgnoreTags[i]))
+		{
+			return false;
+		}
+	}
 
 	// Exclude because of filter
 	if (Settings.ExclusionFunction.IsSet() && !Settings.ExclusionFunction(Actor)) return false;

@@ -10,6 +10,7 @@
  *
  * Kept deliberately tiny and unreferenced so it can be created, collected and inspected without
  * dragging in gameplay dependencies. Not intended for gameplay use.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/test-uobject/">UNTestUObject</a>
  */
 UCLASS(NotPlaceable, Hidden, HideDropdown, MinimalAPI)
 class UNTestUObject : public UObject

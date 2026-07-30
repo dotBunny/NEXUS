@@ -6,10 +6,13 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Collections/NGameplayTagCounter.h"
+#include "NCellJunctionDetails.h"
+#include "NCellLinkDetails.h"
 #include "NCellAssemblyData.generated.h"
 
 /**
  * Per-cell assembly metadata recorded on a generated cell, identifying the operation and graph node that produced it.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/cell-assembly-data/">FNCellAssemblyData</a>
  */
 USTRUCT(BlueprintType)
 struct FNCellAssemblyData
@@ -28,6 +31,14 @@ struct FNCellAssemblyData
 	UPROPERTY(VisibleInstanceOnly)
 	uint64 Seed = 0;
 
+	/** Is this cell on the shortest-path hot path (spokes from start)? */
+	UPROPERTY(VisibleInstanceOnly)
+	bool bHotPathShortest = false;
+
+	/** Is this cell on the sequential hot path (nearest-first visiting chain)? */
+	UPROPERTY(VisibleInstanceOnly)
+	bool bHotPathSequential = false;
+
 	/** Assembly tags applied to this cell during the assembly operation. */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	FGameplayTagContainer AssemblyTags;
@@ -35,20 +46,20 @@ struct FNCellAssemblyData
 	/** The final ContextTags for the Assembly Operation. */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	FGameplayTagContainer ContextTags;
-	
-	/** The state of the ContextTags when this cell was added. */
-	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
-	FGameplayTagContainer ContextTagsState;
-	
+
 	/** The ContextTags this cell added. */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	FGameplayTagContainer ContextTagsAdded;
-	
+
 	/** The final TagCounter */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	TArray<FNGameplayTagCount> TagCounter;
-	
-	/** The state of the tag counter when this cell was added. */
+
+	/** World-space details for every junction on this cell, captured from the source graph node. */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
-	TArray<FNGameplayTagCount> TagCounterState;
+	TArray<FNCellJunctionDetails> JunctionDetails;
+
+	/** Per-junction connection state (what each junction linked to, if anything) generated alongside JunctionDetails. */
+	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
+	TArray<FNCellLinkDetails> LinkDetails;
 };

@@ -8,6 +8,7 @@
  *
  * All bounds helpers treat the box portion of FBoxSphereBounds as authoritative; the sphere is
  * used opportunistically as an early-out to avoid the more expensive box check.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/bounds-utils/">FNBoundsUtils</a>
  */
 class NEXUSCORE_API FNBoundsUtils
 {

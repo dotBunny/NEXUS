@@ -41,33 +41,47 @@ struct FNMenuEntry
 	FSlateIcon Icon;
 };
 
-#define N_GENERATE_TOOLS_MENU(Sections, MenuEntries) \
-	for (const auto& Section : Sections) \
+// Sections are derived from the entries themselves at generation time (a section exists only while at
+// least one entry references it), so there is no separate section list that can drift out of sync as
+// entries are added and removed.
+#define N_GENERATE_TOOLS_MENU(MenuEntries) \
 	{ \
-		FToolMenuSection& MenuSection = Menu->AddSection(Section.Key, Section.Value); \
+		TArray<FName> SectionOrder; \
 		for (const auto& Entry : MenuEntries) \
 		{ \
-			if (Entry.Value.Section != Section.Key) continue; \
-			if (Entry.Value.bIsMenuEntry) \
+			SectionOrder.AddUnique(Entry.Value.Section); \
+		} \
+		SectionOrder.Sort([](const FName A, const FName B) \
 			{ \
-				MenuSection.AddSubMenu(Entry.Value.Identifier, Entry.Value.DisplayName, \
-					Entry.Value.Tooltip, Entry.Value.MenuChoice, false, Entry.Value.Icon); \
-			} \
-			else \
+				return A.Compare(B) < 0; \
+			}); \
+		for (const FName& SectionName : SectionOrder) \
+		{ \
+			FToolMenuSection& MenuSection = Menu->AddSection(SectionName, FText::FromName(SectionName)); \
+			for (const auto& Entry : MenuEntries) \
 			{ \
-				FUIAction ButtonAction = FUIAction(Entry.Value.Execute,Entry.Value.CanExecute, \
-					Entry.Value.IsChecked, FIsActionButtonVisible()); \
-				if (Entry.Value.IsChecked.IsBound()) \
+				if (Entry.Value.Section != SectionName) continue; \
+				if (Entry.Value.bIsMenuEntry) \
 				{ \
-					MenuSection.AddMenuEntry(Entry.Value.Identifier,  Entry.Value.DisplayName, \
-						Entry.Value.Tooltip, Entry.Value.Icon, \
-						FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Check); \
+					MenuSection.AddSubMenu(Entry.Value.Identifier, Entry.Value.DisplayName, \
+						Entry.Value.Tooltip, Entry.Value.MenuChoice, false, Entry.Value.Icon); \
 				} \
 				else \
 				{ \
-					MenuSection.AddMenuEntry(Entry.Value.Identifier,  Entry.Value.DisplayName, \
-						Entry.Value.Tooltip, Entry.Value.Icon, \
-						FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Button); \
+					FUIAction ButtonAction = FUIAction(Entry.Value.Execute,Entry.Value.CanExecute, \
+						Entry.Value.IsChecked, FIsActionButtonVisible()); \
+					if (Entry.Value.IsChecked.IsBound()) \
+					{ \
+						MenuSection.AddMenuEntry(Entry.Value.Identifier,  Entry.Value.DisplayName, \
+							Entry.Value.Tooltip, Entry.Value.Icon, \
+							FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Check); \
+					} \
+					else \
+					{ \
+						MenuSection.AddMenuEntry(Entry.Value.Identifier,  Entry.Value.DisplayName, \
+							Entry.Value.Tooltip, Entry.Value.Icon, \
+							FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Button); \
+					} \
 				} \
 			} \
 		} \

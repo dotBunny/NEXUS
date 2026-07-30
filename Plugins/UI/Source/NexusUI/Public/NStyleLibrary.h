@@ -13,12 +13,13 @@
  * Blueprint-visible style constants for NEXUS-branded warning/error/info UI treatments.
  * Returns ENColor values rather than FLinearColor so downstream widgets can look up the exact
  * palette entry via FNColor at the last moment.
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/style-library/">UNStyleLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Style Library")
 class UNStyleLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-	
+
 public:
 	/** @return The canonical warning accent color used by NEXUS UI treatments. */
 	UFUNCTION(BlueprintPure, DisplayName="Get Warning Color", Category = "NEXUS|User Interface|Style")

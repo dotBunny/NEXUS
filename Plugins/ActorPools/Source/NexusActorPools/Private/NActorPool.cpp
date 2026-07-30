@@ -16,7 +16,7 @@ int32 FNActorPool::ActorPoolTicket = 0;
 FNActorPool::FNActorPool(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorClass)
 {
 	PreInitialize(TargetWorld, ActorClass);
-	if (bImplementsInterface)
+	if (bImplementsPoolItemInterface)
 	{
 		AActor* DefaultActor = ActorClass->GetDefaultObject<AActor>();
 		UpdateSettings(Cast<INActorPoolItem>(DefaultActor)->GetActorPoolSettings());
@@ -38,7 +38,7 @@ FNActorPool::FNActorPool(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorCl
 FNActorPool::~FNActorPool()
 {
 	// The world creates and tears down the pools, so we probably dont need to remove it from tickable.
-	
+
 	if (IsValid(LinkedActorPoolObject))
 	{
 		LinkedActorPoolObject->Pool = nullptr;
@@ -57,15 +57,22 @@ FText FNActorPool::GetDescription() const
 	{
 		WorldDetails += TEXT("NULL\n");
 	}
-	
+
 	// Actor Details
 	FString ActorDetails = TEXT("ACTOR:\n");
 #if WITH_EDITOR
 	ActorDetails += TEXT("\tSpawn Prefix: ") + Name + TEXT("\n");
 #endif
-	ActorDetails += FString::Printf(TEXT("\tTemplate Name: %s\n"), *Template->GetName());
-	ActorDetails += FString::Printf(TEXT("\tTemplate Ptr: %p\n"), Template.Get());
-	
+	if (Template != nullptr)
+	{
+		ActorDetails += FString::Printf(TEXT("\tTemplate Name: %s\n"), *Template->GetName());
+		ActorDetails += FString::Printf(TEXT("\tTemplate Ptr: %p\n"), Template.Get());
+	}
+	else
+	{
+		ActorDetails += TEXT("\tTemplate: NULL\n");
+	}
+
 	switch (Settings.Strategy)
 	{
 		using enum ENActorPoolStrategy;
@@ -92,7 +99,7 @@ FText FNActorPool::GetDescription() const
 		break;
 	}
 	ActorDetails += FString::Printf(TEXT("\tSpawn Physics Simulation: %s\n"), *FNToggle::ToString(SpawnPhysicsSimulation));
-	
+
 	// Flags
 	FString FlagDetails = TEXT("FLAGS:\n");
 	if (Settings.HasFlag_BroadcastRelease())
@@ -123,8 +130,8 @@ FText FNActorPool::GetDescription() const
 	{
 		FlagDetails += TEXT("\tSweep Before Setting Location\n");
 	}
-	
-	return FText::Format(NSLOCTEXT("NexusActorPools", "ActorPoolDescription", "{0}\n{1}\n{2}"), 
+
+	return FText::Format(NSLOCTEXT("NexusActorPools", "ActorPoolDescription", "{0}\n{1}\n{2}"),
 		FText::FromString(WorldDetails), FText::FromString(ActorDetails), FText::FromString(FlagDetails));
 }
 
@@ -136,9 +143,9 @@ void FNActorPool::PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& 
 	{
 		return;
 	}
-	
+
 	USceneComponent* RootComponent = FNActorUtils::GetRootComponentFromDefaultObject(ActorClass);
-	bImplementsInterface = Template->ImplementsInterface(UNActorPoolItem::StaticClass());
+	bImplementsPoolItemInterface = Template->ImplementsInterface(UNActorPoolItem::StaticClass());
 
 	// The ActorPool system requires that the root component of its actors be used to determine the physics settings.
 	if (RootComponent != nullptr)
@@ -157,7 +164,7 @@ void FNActorPool::PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& 
 	}
 
 #if WITH_EDITOR
-	// Increments only on the game thread, no real issue with roll over. 
+	// Increments only on the game thread, no real issue with roll over.
 	// If you have that many pools you might have a different problems to answer.
 	ActorPoolTicket++;
 
@@ -186,6 +193,14 @@ AActor* FNActorPool::Get()
 		return nullptr;
 	}
 
+	// ApplyStrategy() reporting success implies a poppable actor for every strategy today, but that contract is
+	// implicit — a future strategy that batches creation could break it. ensure() makes the invariant loud at
+	// dev time while keeping Shipping safe from an empty-array Pop().
+	if (!ensure(!InActors.IsEmpty()))
+	{
+		return nullptr;
+	}
+
 	AActor* ReturnActor = InActors.Pop();
 	OutActors.Add(ReturnActor);
 	return ReturnActor;
@@ -198,11 +213,16 @@ AActor* FNActorPool::Spawn(const FVector& Position, const FRotator& Rotation)
 		return nullptr;
 	}
 
+	if (!ensure(!InActors.IsEmpty()))
+	{
+		return nullptr;
+	}
+
 	AActor* ReturnActor = InActors.Pop();
 	OutActors.Add(ReturnActor);
 	ApplySpawnState(ReturnActor, Position, Rotation);
-	
-	if (bImplementsInterface)
+
+	if (bImplementsPoolItemInterface)
 	{
 		(Cast<INActorPoolItem>(ReturnActor))->OnSpawnedFromActorPool();
 	}
@@ -249,7 +269,7 @@ bool FNActorPool::Return(AActor* Actor)
 		return false;
 	}
 #endif // !UE_BUILD_SHIPPING
-	
+
 	ApplyReturnState(Actor);
 
 	// We have to manage the position a bit based on the strategy.
@@ -266,10 +286,37 @@ bool FNActorPool::Return(AActor* Actor)
 		OutActors.RemoveSwap(Actor, EAllowShrinking::No);
 		break;
 	}
-	
+
+	FinalizeReturn(Actor);
+	return true;
+}
+
+bool FNActorPool::ReturnAtIndex(const int32 OutIndex)
+{
+	// Recycle-only fast path. ApplyStrategy already located the element being recycled, so we remove
+	// it by its known index instead of making Return() re-scan OutActors for a pointer it was just
+	// handed (and skip the external-caller contract checks, which a self-recycle always satisfies).
+	// RemoveAt keeps the surviving elements ordered, preserving the FIFO/LIFO semantics the recycle
+	// strategies depend on; EAllowShrinking::No matches Return() and avoids a realloc on this
+	// (saturated-pool) hot path.
+	AActor* Actor = OutActors[OutIndex];
+	if (Actor == nullptr)
+	{
+		UE_LOG(LogNexusActorPools, Warning, TEXT("Attempted to recycle a NULL reference from a FNActorPool."));
+		return false;
+	}
+
+	ApplyReturnState(Actor);
+	OutActors.RemoveAt(OutIndex, EAllowShrinking::No);
+	FinalizeReturn(Actor);
+	return true;
+}
+
+void FNActorPool::FinalizeReturn(AActor* Actor)
+{
 	InActors.Add(Actor);
 
-	if (bImplementsInterface)
+	if (bImplementsPoolItemInterface)
 	{
 		(Cast<INActorPoolItem>(Actor))->OnReturnToActorPool();
 	}
@@ -281,18 +328,19 @@ bool FNActorPool::Return(AActor* Actor)
 			Actor->ProcessEvent(Function, nullptr);
 		}
 	}
-
-	return true;
 }
 
 void FNActorPool::ReturnAll(bool bSkipCheck)
 {
+	// Stub pools never populate OutActors; mirror Return()'s short-circuit for symmetry.
+	if (bStubMode) return;
+
 	if (!bSkipCheck && !Settings.HasSupportFlag_ReturnAll())
 	{
 		UE_LOG(LogNexusActorPools, Warning, TEXT("ReturnAll called on a FNActorPool(%s) that does not support it."), *Template->GetName());
 		return;
 	}
-	
+
 	for (int i = OutActors.Num() - 1; i >= 0; --i)
 	{
 		Return(OutActors[i]);
@@ -304,10 +352,10 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 	// Ingest flags - and update cached flags
 	Settings.Flags = InNewSettings.Flags;
 	Settings.SupportFlags = InNewSettings.SupportFlags;
-	
+
 	// World may have been torn down out from under a long-lived external pool reference; treat that as non-authoritative.
 	bStubMode = Settings.HasFlag_ServerOnly() && (!IsValid(World) || !World->GetAuthGameMode());
-	
+
 	// Handle change of actor pooling counts. Clamp Maximum to at least 1 — recycle strategies index OutActors[0] / OutActors.Last() and would crash on an empty array if 0 were allowed through.
 	Settings.MinimumActorCount = InNewSettings.MinimumActorCount;
 	const int32 ClampedMaximumActorCount = FMath::Max(1, InNewSettings.MaximumActorCount);
@@ -322,7 +370,7 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 	Settings.Strategy = InNewSettings.Strategy;
 	Settings.StorageTransform = InNewSettings.StorageTransform;
 	Settings.SpawnedTransform = InNewSettings.SpawnedTransform;
-	
+
 	// Update based on if we should tick - test usually don't have access to the system to time-slice
 	UNActorPoolSubsystem* System = IsValid(World) ? UNActorPoolSubsystem::Get(World) : nullptr;
 	if (System != nullptr)
@@ -335,7 +383,7 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 		{
 			System->AddTickableActorPool(this);
 		}
-		
+
 		Settings.CreateObjectsPerTick = InNewSettings.CreateObjectsPerTick;
 	}
 	else
@@ -349,7 +397,7 @@ bool FNActorPool::ApplyStrategy()
 {
 	// Ensure the pool is a stub when WorldAuthority is flagged.
 	if (bStubMode) return false;
-	
+
 	switch (Settings.Strategy)
 	{
 		using enum ENActorPoolStrategy;
@@ -361,33 +409,61 @@ bool FNActorPool::ApplyStrategy()
 		return CreateActors();
 	case CreateRecycleFirst:
 		if (OutActors.Num() >= Settings.MaximumActorCount)
-			return Return(OutActors[0]);
+			return ReturnAtIndex(0);
 		return CreateActors();
 	case CreateRecycleLast:
 		if (OutActors.Num() >= Settings.MaximumActorCount)
-			return Return(OutActors[OutActors.Num() - 1]);
+			return ReturnAtIndex(OutActors.Num() - 1);
 		return CreateActors();
 	case Fixed:
-		return false;
+		// Self-heal: warm-up for a Fixed pool is normally time-sliced by Tick() toward MinimumActorCount.
+		// If that tick was never delivered (e.g. the pool was created in a world that won't tick again),
+		// the pool would otherwise stay permanently empty since Fixed creates nothing on demand. Fill the
+		// remaining deficit here. A warmed-then-exhausted pool has TotalActors == MinimumActorCount and
+		// correctly falls through to return false.
+		return WarmUpDeficit();
 	case FixedRecycleFirst:
-		if (OutActors.IsEmpty()) return false;
-		return Return(OutActors[0]);
+		// OutActors empty means nothing is checked out to recycle: either the pool is under-warmed (fill
+		// the deficit, mirroring Fixed) or genuinely sized to zero, where there is nothing to hand back.
+		if (OutActors.IsEmpty()) return WarmUpDeficit();
+		return ReturnAtIndex(0);
 	case FixedRecycleLast:
-		if (OutActors.IsEmpty()) return false;
-		return Return(OutActors[OutActors.Num() - 1]);
+		if (OutActors.IsEmpty()) return WarmUpDeficit();
+		return ReturnAtIndex(OutActors.Num() - 1);
 	default:
 		return false;
 	}
+}
+
+bool FNActorPool::WarmUpDeficit()
+{
+	// Shared on-demand warm-up for the Fixed* strategies. Mirrors Tick()/Fill() deficit math, but creates the
+	// whole remaining deficit in one shot because the caller (Get/Spawn) needs a poppable actor now rather than
+	// across future ticks. Stub pools never reach here — ApplyStrategy short-circuits them before this call.
+	const int32 Total = InActors.Num() + OutActors.Num();
+	if (Total < Settings.MinimumActorCount)
+	{
+		ReserveForPoolSize(Settings.MinimumActorCount);
+		return CreateActors(Settings.MinimumActorCount - Total);
+	}
+	return false;
+}
+
+void FNActorPool::ReserveForPoolSize(const int32 PoolSize)
+{
+	// Reserve only grows, so this is a no-op once both arrays already hold the target capacity.
+	InActors.Reserve(PoolSize);
+	OutActors.Reserve(PoolSize);
 }
 
 bool FNActorPool::CreateActors(const int32 Count)
 {
 	// Ensure the pool is a stub when WorldAuthority is flagged.
 	if (bStubMode) return true;
-	
+
 	// We didnt make anything
 	if (Count == 0) return false;
-	
+
 	FActorSpawnParameters SpawnInfo;
 	SpawnInfo.Instigator = nullptr;
 	SpawnInfo.ObjectFlags |= RF_Transient;
@@ -395,37 +471,9 @@ bool FNActorPool::CreateActors(const int32 Count)
 	// We need to tell the spawn to occur and not warn about collisions.
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	// Reserve space for the new actors
-	if (Count > 1)
-	{
-		const int32 InActorsMax = InActors.Max();
-		const int32 OutActorsMax = OutActors.Max();
-		
-		if (InActorsMax == 0 || OutActorsMax == 0)
-		{
-			// Initial allocation we really don't know what it's going to look like and given they're pointers,
-			// we will just use a double allocation strategy.
-			InActors.Reserve(Count * 2);
-			OutActors.Reserve(Count * 2);
-			
-		}
-		else
-		{
-			// Since we actually have existing actors, we can look at the usage and try to think of a good way to reasonably grow the array
-			// if it's actually needed.
-			const float OutArrayUsage = static_cast<float>(OutActors.Num()) / static_cast<float>(OutActorsMax);
-			if (OutArrayUsage > 0.75f)
-			{
-				OutActors.Reserve(OutActorsMax + (OutActorsMax * 0.5f));
-			}
-			const float InArrayUsage = static_cast<float>(InActors.Num()) / static_cast<float>(InActorsMax);
-			if (InArrayUsage > 0.85f)
-			{
-				InActors.Reserve(InActorsMax + (InActorsMax * 0.75f));
-			}
-		}
-	}
-	
+	// Array capacity is reserved by the warm-up callers (Fill/Prewarm/Tick) against their known target via
+	// ReserveForPoolSize; the on-demand Count == 1 path relies on TArray's geometric growth.
+
 #if WITH_EDITOR
 	int32 LabelNumber = (InActors.Num() + OutActors.Num());
 #endif // WITH_EDITOR
@@ -455,7 +503,7 @@ bool FNActorPool::CreateActor(const FActorSpawnParameters& SpawnInfo)
 		return false;
 	}
 
-	if (bImplementsInterface)
+	if (bImplementsPoolItemInterface)
 	{
 		INActorPoolItem* ActorItem = Cast<INActorPoolItem>(CreatedActor);
 		ActorItem->InitializeActorPoolItem(this);
@@ -466,14 +514,14 @@ bool FNActorPool::CreateActor(const FActorSpawnParameters& SpawnInfo)
 			CreatedActor->FinishSpawning(Settings.StorageTransform);
 		}
 		ActorItem->OnCreatedByActorPool();
-			
+
 		ApplyReturnState(CreatedActor);
 		ActorItem->OnReturnToActorPool();
 	}
 	else
 	{
 		bool bInvokeFunctions = Settings.HasFlag_InvokeUFunctions();
-		
+
 		if (SpawnInfo.bDeferConstruction && bInvokeFunctions)
 		{
 			UFunction* OnDeferredConstructionFunction = CreatedActor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnDeferredConstruction);
@@ -482,14 +530,14 @@ bool FNActorPool::CreateActor(const FActorSpawnParameters& SpawnInfo)
 				CreatedActor->ProcessEvent(OnDeferredConstructionFunction, nullptr);
 			}
 		}
-		
+
 		if (SpawnInfo.bDeferConstruction)
 		{
 			CreatedActor->FinishSpawning(Settings.StorageTransform);
 		}
-		
-		
-			
+
+
+
 		if (bInvokeFunctions) // SLOW PATH
 		{
 			UFunction* OnCreatedByActorPoolFunction = CreatedActor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnCreatedByActorPool);
@@ -498,7 +546,7 @@ bool FNActorPool::CreateActor(const FActorSpawnParameters& SpawnInfo)
 				CreatedActor->ProcessEvent(OnCreatedByActorPoolFunction, nullptr);
 			}
 		}
-			
+
 		ApplyReturnState(CreatedActor);
 	}
 
@@ -516,7 +564,7 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 
 	// Set Actor Location And Rotation
 	const FTransform SpawnTransform(
-		InRotation.Quaternion() * Settings.SpawnedTransform.GetRotation(), 
+		InRotation.Quaternion() * Settings.SpawnedTransform.GetRotation(),
 		InPosition + Settings.SpawnedTransform.GetLocation(),
 		Settings.SpawnedTransform.GetScale3D());
 
@@ -525,9 +573,9 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 	UE_VLOG_LOCATION(World, LogNexusActorPools, Verbose, InPosition, NEXUS::ActorPools::VLog::PointSize, NEXUS::ActorPools::VLog::RequestedPointColor, TEXT("%s"), *Actor->GetName());
 	UE_VLOG_LOCATION(World, LogNexusActorPools, Verbose, Actor->GetActorLocation(), NEXUS::ActorPools::VLog::PointSize, NEXUS::ActorPools::VLog::ActualPointColor, TEXT("%s"), *Actor->GetName());
 #endif // ENABLE_VISUAL_LOG
-	
+
 	Actor->SetActorTickEnabled(Actor->PrimaryActorTick.bStartWithTickEnabled);
-	
+
 	if (UPrimitiveComponent* PrimitiveComponent = Cast<UPrimitiveComponent>(Actor->GetRootComponent()))
 	{
 		PrimitiveComponent->ResetSceneVelocity();
@@ -539,10 +587,10 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 		{
 			PrimitiveComponent->SetSimulatePhysics(false);
 		}
-		
+
 		PrimitiveComponent->MarkRenderStateDirty();
 	}
-	
+
 	Actor->SetActorHiddenInGame(false);
 	Actor->SetActorEnableCollision(true);
 }
@@ -554,7 +602,7 @@ void FNActorPool::ApplyReturnState(AActor* Actor) const
 	{
 		Actor->SetActorTransform(Settings.StorageTransform, false, nullptr, ETeleportType::ResetPhysics);
 	}
-	
+
 	Actor->SetActorTickEnabled(false);
 	Actor->SetActorHiddenInGame(true);
 
@@ -585,7 +633,7 @@ void FNActorPool::Clear(const bool bForceDestroy)
 	{
 		ReleaseActor(OutActors[i], bForceDestroy);
 	}
-	
+
 	InActors.Reset();
 	OutActors.Reset();
 }
@@ -599,7 +647,7 @@ void FNActorPool::ReleaseActor(const TObjectPtr<AActor> Actor, const bool bForce
 	}
 
 	const bool bBroadcastRelease = Settings.HasFlag_BroadcastRelease();
-	if (bImplementsInterface && bBroadcastRelease)
+	if (bImplementsPoolItemInterface && bBroadcastRelease)
 	{
 		INActorPoolItem* ActorItem = Cast<INActorPoolItem>(Actor);
 		ActorItem->OnReleasedFromActorPool();
@@ -612,7 +660,7 @@ void FNActorPool::ReleaseActor(const TObjectPtr<AActor> Actor, const bool bForce
 			Actor->ProcessEvent(Function, nullptr);
 		}
 	}
-	
+
 	if (bForceDestroy)
 	{
 		if (Actor->IsRooted())
@@ -620,7 +668,7 @@ void FNActorPool::ReleaseActor(const TObjectPtr<AActor> Actor, const bool bForce
 			UE_LOG(LogNexusActorPools, Warning, TEXT("An FNActorPool was told to release AND destroy an Actor(%s) which was rooted. Skipping the destroy, this is probably a mistake."), *Actor->GetName());
 			return;
 		}
-		
+
 		Actor->Destroy();
 	}
 }
@@ -636,6 +684,7 @@ void FNActorPool::Fill()
 	const int32 Deficit = Settings.MinimumActorCount - (InActors.Num() + OutActors.Num());
 	if (Deficit > 0)
 	{
+		ReserveForPoolSize(Settings.MinimumActorCount);
 		UE_LOG(LogNexusActorPools, Verbose, TEXT("Filling FNActorPool(%s) to %i items (+%i)"), *Template->GetName(), Settings.MinimumActorCount, Deficit);
 		CreateActors(Deficit);
 	}
@@ -645,7 +694,8 @@ void FNActorPool::Prewarm(const int32 Count)
 {
 	// Ensure the pool is a stub when WorldAuthority is flagged.
 	if (bStubMode) return;
-	
+
+	ReserveForPoolSize(InActors.Num() + OutActors.Num() + Count);
 	UE_LOG(LogNexusActorPools, Verbose, TEXT("Warming FNActorPool(%s) with %i items."), *Template->GetName(), Count);
 	CreateActors(Count);
 }
@@ -658,6 +708,8 @@ bool FNActorPool::Tick()
 	if (const int32 TotalActors = InActors.Num() + OutActors.Num();
 		TotalActors < Settings.MinimumActorCount)
 	{
+		// Reserve to the final warm-up target once; Reserve is grow-only, so later ticks don't re-allocate.
+		ReserveForPoolSize(Settings.MinimumActorCount);
 		CreateActors(FMath::Min(Settings.CreateObjectsPerTick, (Settings.MinimumActorCount - TotalActors)));
 		return true; // still warming
 	}

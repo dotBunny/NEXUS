@@ -3,7 +3,7 @@
 
 #include "NToolingEditorSettings.h"
 
-#if WITH_EDITOR	
+#if WITH_EDITOR
 
 bool UNToolingEditorSettings::IsAssetIgnored(const FSoftObjectPath& AssetPath) const
 {

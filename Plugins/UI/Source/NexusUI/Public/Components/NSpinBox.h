@@ -17,7 +17,7 @@ class NEXUSUI_API UNSpinBox : public USpinBox
 	GENERATED_BODY()
 
 public:
-	
+
 #if WITH_EDITOR
 	virtual const FText GetPaletteCategory() override {  return NEXUS::UIEditor::PaletteCategory; }
 #endif // WITH_EDITOR
@@ -29,7 +29,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set Value (No Broadcast)",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/components/spin-box/#set-value-no-broadcast"))
 	void SetValue_NoBroadcast(const float NewValue);
-	
+
 private:
 	/** Empty events used to swap in for OnValueChanged / OnValueCommitted to prevent them from being called. */
 	static FOnSpinBoxValueChangedEvent EmptyChangedEvent;

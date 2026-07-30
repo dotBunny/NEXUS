@@ -18,6 +18,7 @@ class UCommonTextBlock;
 
 /**
  * UMG list view entry widget for displaying a single Actor Pool row (used by developer overlays).
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-list-view-entry/">UNActorPoolListViewEntry</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Pools ListView Entry", BlueprintType, Blueprintable)
 class NEXUSACTORPOOLS_API UNActorPoolListViewEntry : public UUserWidget, public INListViewEntry
@@ -25,13 +26,13 @@ class NEXUSACTORPOOLS_API UNActorPoolListViewEntry : public UUserWidget, public 
 	GENERATED_BODY()
 
 public:
-	
+
 	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
 	{
 		OwnerListView = Owner;
 		Execute_OnSetOwnerListView(Widget, Owner);
 	}
-	
+
 	/** Refresh the widget's displayed fields from the current pool state. */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
 	void Refresh() const;
@@ -40,13 +41,13 @@ protected:
 	virtual void NativeConstruct() override
 	{
 		Super::NativeConstruct();
-		
+
 		// Will validate it here only to throw a message in log for someone to realize they haven't hooked up the widget correctly.
-		N_VALIDATE(LogNexusActorPools, TypeImage)
-		N_VALIDATE(LogNexusActorPools, ProgressBar)
-		N_VALIDATE(LogNexusActorPools, LeftText)
-		N_VALIDATE(LogNexusActorPools, CenterText)
-		N_VALIDATE(LogNexusActorPools, RightText)
+		N_VALIDATE(LogNexusActorPools, TypeImage);
+		N_VALIDATE(LogNexusActorPools, ProgressBar);
+		N_VALIDATE(LogNexusActorPools, LeftText);
+		N_VALIDATE(LogNexusActorPools, CenterText);
+		N_VALIDATE(LogNexusActorPools, RightText);
 	}
 	virtual void NativeDestruct() override;
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;

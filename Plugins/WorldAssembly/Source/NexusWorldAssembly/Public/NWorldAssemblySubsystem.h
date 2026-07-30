@@ -10,6 +10,7 @@
 #include "Types/NSimpleDelegates.h"
 #include "NWorldAssemblySubsystem.generated.h"
 
+class UNCellJunctionComponent;
 class UNOrganComponent;
 class ANWorldAssemblyRelay;
 class UNAssemblyOperation;
@@ -27,6 +28,7 @@ class AGameModeBase;
  *
  * Game-only; also implements INAssemblyOperationOwner so it can host operations created via Generate().
  * Spawns one ANWorldAssemblyRelay per connected player controller to carry per-player generation state.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-subsystem/">UNWorldAssemblySubsystem</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | World Assembly Subsystem")
 class NEXUSWORLDASSEMBLY_API UNWorldAssemblySubsystem : public UTickableWorldSubsystem, public INAssemblyOperationOwner
@@ -53,43 +55,66 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Clear", Category = "NEXUS|WorldAssembly")
 	void Clear();
-	
+
 	/** @return Relay associated with the local player, or nullptr if it has not yet been spawned. */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Local Relay", Category = "NEXUS|WorldAssembly")
 	ANWorldAssemblyRelay* GetLocalRelay() const { return LocalRelay; }
 
 	/**
-	 * @return true when the local procgen view is settled relative to the server.
+	 * @param bWaitOnStreaming When true, also report not-ready while any level streaming is still in flight (see FNWorldUtils::IsStreaming). Pass false to ignore streaming and gate purely on operation/relay state.
+	 * @return true when the local WorldAssembly view is settled relative to the server.
 	 * @remark Server path: no operations are currently in flight. Client path: LocalRelay has replicated, the nearby-cell payload has been received, and no operations the client has been notified of are pending.
 	 * @note Does not gate Generate() — that can be called at any time regardless of this value.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Is Ready?", Category = "NEXUS|WorldAssembly")
-	bool IsReady();
-	
-	/**
-	 * Track an externally-owned actor so it will be destroyed by the next Clear() pass.
-	 *
-	 * Stored as a weak reference, so the actor is free to be destroyed by other systems first without leaving a dangling entry.
-	 * Safe to call repeatedly with the same actor — duplicates are ignored.
-	 * @param Actor Actor to enroll in cleanup. Null is tolerated but ignored.
-	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Register Actor For Cleanup", Category = "NEXUS|WorldAssembly")
-	void RegisterActorForCleanup(AActor* Actor);
+	bool IsReady(bool bWaitOnStreaming = true);
+
+	/** @return On clients, the ANCellLevelInstances still to sync as (Remaining, Total); zero on the server. */
+	UFUNCTION(BlueprintCallable, DisplayName="Get Remaining Status", Category = "NEXUS|WorldAssembly", meta=(ToolTip="Gets the remaining Cell Level Instances to sync (Remaining/Total) on clients. Zero if server."))
+	FIntVector2 GetRemainingStatus();
 
 	/**
-	 * Stop tracking an actor for Clear()-driven destruction.
+	 * Track an externally-owned actor under an Operation Ticket so it will be destroyed by the next Clear() pass, or
+	 * by a DestroyActorsForOperation call for that ticket.
+	 *
+	 * Stored as a weak reference, so the actor is free to be destroyed by other systems first without leaving a dangling entry.
+	 * Safe to call repeatedly with the same actor — duplicates within a ticket are ignored.
+	 * @param Actor Actor to enroll in cleanup. Null is tolerated but ignored.
+	 * @param OperationTicket Ticket of the operation that spawned the actor; 0 (the default) is the unassociated bucket.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Register Operation Actor", Category = "NEXUS|WorldAssembly")
+	void RegisterOperationActor(AActor* Actor, int32 OperationTicket = 0);
+
+	/**
+	 * Stop tracking an actor for Clear()-driven destruction, regardless of which ticket it was registered under.
 	 *
 	 * Call when the actor's lifetime is taken over elsewhere, or when it has already been destroyed and the slot should be reclaimed early.
 	 * @param Actor Actor previously passed to RegisterActorForCleanup. A no-op if the actor was never registered.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Unregister Actor For Cleanup", Category = "NEXUS|WorldAssembly")
-	void UnregisterActorForCleanup(AActor* Actor);
+	UFUNCTION(BlueprintCallable, DisplayName="Unregister Operation Actor", Category = "NEXUS|WorldAssembly")
+	void UnregisterOperationActor(AActor* Actor);
+
+	/**
+	 * Stop tracking an actor for cleanup under a specific Operation Ticket — a direct-lookup alternative to
+	 * UnregisterActorForCleanup that avoids scanning every ticket bucket.
+	 * @param Actor Actor previously registered under OperationTicket. A no-op if it was not tracked there.
+	 * @param OperationTicket Ticket the actor was registered under; 0 (the default) is the unassociated bucket.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Unregister Operation Actor (By Ticket)", Category = "NEXUS|WorldAssembly")
+	void UnregisterOperationActorByTicket(AActor* Actor, int32 OperationTicket = 0);
+
+	/**
+	 * Destroy and stop tracking every actor enrolled under a single Operation Ticket, leaving other operations' actors untouched.
+	 * @param OperationTicket Ticket whose tracked actors should be torn down. A no-op if nothing was registered for it.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Destroy Operation Actors", Category = "NEXUS|WorldAssembly")
+	void DestroyOperationActors(int32 OperationTicket);
 
 	//~UTickableWorldSubsystem
 	virtual void Tick(float DeltaTime) override;
 	virtual bool IsTickable() const override;
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
-	virtual void Deinitialize() override;
+	virtual void OnWorldEndPlay(UWorld& InWorld) override;
 	N_TICKABLE_WORLD_SUBSYSTEM_GET_TICKABLE_TICK_TYPE(ETickableTickType::Conditional)
 	//End UTickableWorldSubsystem
 
@@ -106,11 +131,14 @@ public:
 	void RegisterLocalRelay(ANWorldAssemblyRelay* InRelay);
 	/** Drop the local-player relay reference when the relay is being torn down. */
 	void UnregisterLocalRelay(const ANWorldAssemblyRelay* InRelay);
-	
+
 	/** @return true if at least one organ is queued awaiting assembly. */
 	bool HasQueuedOrgansForAssembly() const { return !QueuedOrgansForAssembly.IsEmpty(); }
 	/** Queue an organ component to be assembled on a subsequent tick. */
 	void RegisterOrganForAssembly(TObjectPtr<UNOrganComponent> Organ);
+
+	bool HasQueuedCellJunctionsToFill() const { return !QueuedCellJunctionsToFill.IsEmpty(); }
+	void RegisterCellJunctionToFill(TObjectPtr<UNCellJunctionComponent> CellJunction);
 
 	/** Fired each time a new operation begins being tracked by the subsystem, immediately before its build is kicked off. */
 	UPROPERTY(BlueprintAssignable)
@@ -119,23 +147,53 @@ public:
 	/** Fired when the last tracked operation finishes or is destroyed, i.e. when the tracked set transitions from non-empty to empty. */
 	UPROPERTY(BlueprintAssignable)
 	FNSimpleDynamicMulticastDelegate OnOperationsCompleted;
-	
+
 	/** Fired at the end of Clear() once tracked operations have been canceled and all cell proxies in the world have been destroyed. */
 	UPROPERTY(BlueprintAssignable)
 	FNSimpleDynamicMulticastDelegate OnCleared;
 
+	/** Spawn an ANWorldAssemblyRelay bound to PlayerController and store it in RelayMap. */
+	UFUNCTION(BlueprintCallable, DisplayName="Spawn Relay", Category = "NEXUS|WorldAssembly", meta=(ToolTip="Helpful for seamless travel, on server to spawn relays after a travel."))
+	void SpawnRelay(APlayerController* PlayerController);
+
 private:
+
+	/**
+	 * Cached copy of UNWorldAssemblySettings::bSupportSeamlessTravel, captured on world begin play (authority only).
+	 * The OnPostLogin/OnLogout delegates are always bound and cover fresh connections and late joins, but they never
+	 * fire for players carried across by seamless travel (those route through AGameModeBase::HandleSeamlessTravelPlayer,
+	 * which has no global delegate). When this is true the subsystem stays tickable and polls EnsurePlayerControllerRelays
+	 * (throttled, see SeamlessTravelMonitorInterval) to back-fill relays for those asynchronously-arriving controllers.
+	 */
+	bool bCachedSeamlessTravelMonitor = false;
+
+	/** Seconds between seamless-travel relay polls; a frame-accurate response is unnecessary since SpawnRelay is idempotent. */
+	static constexpr float SeamlessTravelMonitorInterval = 0.5f;
+
+	/** Time accumulated toward the next seamless-travel relay poll; advanced in Tick while bCachedSeamlessTravelMonitor is set. */
+	float SeamlessTravelMonitorAccumulator = 0.f;
+
+	float CachedCellJunctionTimeSlice = 0.5f * 0.001f;
+
 	/** Operations currently known to the subsystem; held strong to keep them alive across their build. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	UPROPERTY()
 	TArray<TObjectPtr<UNAssemblyOperation>> KnownOperations;
-	
+
 	/**
-	 * Externally-owned actors enrolled via RegisterActorForCleanup that should be destroyed on the next Clear() pass.
+	 * Externally-owned actors enrolled via RegisterActorForCleanup, grouped by the Operation Ticket that spawned them,
+	 * destroyed on the next Clear() pass (or per-ticket via DestroyActorsForOperation).
 	 * Held weakly so entries become inert (rather than dangling) if the actor is destroyed by another system first.
+	 * @note Not a UPROPERTY: UHT forbids a TArray nested in a TMap, and TWeakObjectPtr self-nulls so reflection is unneeded.
 	 */
+	TMap<int32, TArray<TWeakObjectPtr<AActor>>> TrackedOperationActors;
+
+	/** Destroy every still-valid actor in Actors (shared by Clear and DestroyActorsForOperation). */
+	void DestroyTrackedActors(const TArray<TWeakObjectPtr<AActor>>& Actors);
+
+	/** Junctions registered for delayed, time-sliced filling; drained a slice at a time each tick (see Junction Time Slice). */
 	UPROPERTY()
-	TArray<TWeakObjectPtr<AActor>> TrackedActorsForCleanup;
+	TArray<TObjectPtr<UNCellJunctionComponent>> QueuedCellJunctionsToFill;
 
 	/**
 	 * Organs waiting to be folded into an assembly operation.
@@ -143,7 +201,7 @@ private:
 	 * into a freshly-created UNAssemblyOperation; the presence of entries keeps the subsystem tickable.
 	 */
 	TArray<TObjectPtr<UNOrganComponent>> QueuedOrgansForAssembly;
-	
+
 	/** Used to track potential operations that will cache data, so that we can clear it. **/
 	TArray<int32> CachedOperationTickets;
 
@@ -164,8 +222,14 @@ private:
 	void OnPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer);
 	/** GameMode::OnLogout handler — destroys the relay associated with Exiting, if any. */
 	void OnLogout(AGameModeBase* GameMode, AController* Exiting);
-	/** Spawn an ANWorldAssemblyRelay bound to PlayerController and store it in RelayMap. */
-	void SpawnRelay(APlayerController* PlayerController);
 	/** Destroy the relay previously spawned for PlayerController and remove it from RelayMap. */
 	void DestroyRelay(APlayerController* PlayerController);
+
+	/**
+	 * Back-fill relays for player controllers that already exist in InWorld, spawning one for any not yet in RelayMap.
+	 * Complements the OnPostLogin path (which only fires for players joining afterward) to cover controllers present
+	 * before the relay machinery is wired up; SpawnRelay is idempotent, so already-served controllers are skipped.
+	 * This is also useful in solving the problem of seamless travel.
+	 */
+	void EnsurePlayerControllerRelays(const UWorld* InWorld);
 };

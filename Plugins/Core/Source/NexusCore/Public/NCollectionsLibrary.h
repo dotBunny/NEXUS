@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Collections/NWeightedIntegerArray.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Math/NMersenneTwisterObject.h"
 #include "NCollectionsLibrary.generated.h"
 
 
@@ -16,6 +17,7 @@
  * and queried from Blueprint graphs. Each entry here is a thin pass-through that exists only because
  * the underlying method is defined on a struct (where UFUNCTION is not available) and therefore
  * cannot be called from Blueprint directly. See the wrapped type's header for the full semantics.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/collections-library/">UNCollectionsLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Collections Library")
 class UNCollectionsLibrary : public UBlueprintFunctionLibrary
@@ -23,7 +25,7 @@ class UNCollectionsLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	
+
 	/**
 	 * Replace the contents of WeightedIntegerArray with the (value, weight) pairs.
 	 *
@@ -34,7 +36,8 @@ public:
 	 * @param WeightedIntegerArray The target array, replaced in place.
 	 * @param PresetValues         Array of FInvVector2 representing Value(X) and Weight(Y).
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Apply Preset")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Apply Preset",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/collections-library/#apply-preset"))
 	static void WeightedIntegerArrayApplyPreset(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray, TArray<FIntVector2> PresetValues)
 	{
 		WeightedIntegerArray.Empty();
@@ -43,14 +46,15 @@ public:
 			WeightedIntegerArray.Add(Pair.X, Pair.Y);
 		}
 	}
-	
+
 	/**
 	 * Insert Weight copies of Value into the weighted array.
 	 * @param WeightedIntegerArray The target array, mutated in place.
 	 * @param Value                The integer value to insert.
 	 * @param Weight               How many copies of Value to insert (the value's relative likelihood of selection).
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Add Value")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Add Value",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/collections-library/#add-value"))
 	static void WeightedIntegerArrayAddValue(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray, const int32 Value, const int32 Weight)
 	{
 		WeightedIntegerArray.Add(Value, Weight);
@@ -60,7 +64,8 @@ public:
 	 * Clear every entry from the weighted array.
 	 * @param WeightedIntegerArray The target array, emptied in place.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Empty")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Empty",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/collections-library/#empty"))
 	static void WeightedIntegerArrayEmpty(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray)
 	{
 		WeightedIntegerArray.Empty();
@@ -71,7 +76,8 @@ public:
 	 * @param WeightedIntegerArray The target array, mutated in place.
 	 * @param Value                The integer value whose copies should all be removed.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Remove")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Remove",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/collections-library/#remove"))
 	static void WeightedIntegerArrayRemove(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray, const int32 Value)
 	{
 		WeightedIntegerArray.Remove(Value);
@@ -83,32 +89,35 @@ public:
 	 * @param Value                The integer value whose copies should be partially removed.
 	 * @param Limit                The maximum number of copies to remove. Defaults to 1.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Remove Some")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Remove Some",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/collections-library/#remove-some"))
 	static void WeightedIntegerArrayRemoveSome(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray, const int32 Value, const int32 Limit = 1)
 	{
 		WeightedIntegerArray.RemoveSome(Value, Limit);
 	}
 
 	/**
-	 * Pick a value using the deterministic FNRandom stream.
+	 * Pick a value deterministically by drawing from the supplied Mersenne Twister.
 	 * @param WeightedIntegerArray The array to pick from.
+	 * @param TwisterObject The twister to draw from; the draw advances its stream.
 	 * @return The picked value.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Next Value")
-	static int32 WeightedIntegerArrayNextValue(const FNWeightedIntegerArray& WeightedIntegerArray)
+	static int32 WeightedIntegerArrayNextValue(const FNWeightedIntegerArray& WeightedIntegerArray, UNMersenneTwisterObject* TwisterObject)
 	{
-		return WeightedIntegerArray.NextValue();
+		return WeightedIntegerArray.TwistedValue(TwisterObject->GetTwisterRef());
 	}
 
 	/**
-	 * Pick a value using the deterministic FNRandom stream and remove every copy of it from the array.
+	 * Pick a value deterministically by drawing from the supplied Mersenne Twister, then remove every copy of it.
 	 * @param WeightedIntegerArray The target array, mutated in place — every copy of the returned value is removed.
+	 * @param TwisterObject The twister to draw from; the draw advances its stream.
 	 * @return The picked value, which will no longer appear in the array on subsequent calls.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Next Value And Remove")
-	static int32 WeightedIntegerArrayNextValueAndRemove(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray)
+	static int32 WeightedIntegerArrayNextValueAndRemove(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray, UNMersenneTwisterObject* TwisterObject)
 	{
-		return WeightedIntegerArray.NextValueAndRemove();
+		return WeightedIntegerArray.TwistedValueAndRemove(TwisterObject->GetTwisterRef());
 	}
 
 	/**
@@ -143,7 +152,7 @@ public:
 	 * @param Seed                 The seed used to construct the FRandomStream for this single pick.
 	 * @return The picked value.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Random One Shot Value")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Random One-Shot Value")
 	static int32 WeightedIntegerArrayRandomOneShotValue(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray, const int32 Seed)
 	{
 		return WeightedIntegerArray.RandomOneShotValue(Seed);
@@ -155,7 +164,7 @@ public:
 	 * @param Seed                 The seed used to construct the FRandomStream for this single pick.
 	 * @return The picked value, which will no longer appear in the array on subsequent calls.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Random One Shot Value And Remove")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Random One-Shot Value And Remove")
 	static int32 WeightedIntegerArrayRandomOneShotValueAndRemove(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray, const int32 Seed)
 	{
 		return WeightedIntegerArray.RandomOneShotValueAndRemove(Seed);

@@ -5,13 +5,15 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "NDoubleRange.h"
+#include "NMersenneTwisterObject.h"
 #include "NDoubleRangeLibrary.generated.h"
 
 /**
  * Blueprint-exposed wrappers around FNDoubleRange's sampling API.
  *
  * Thin passthroughs so that Blueprint authors can reach the same NextValue / RandomValue /
- * PercentageValue helpers that native code uses via N_RANGE.
+ * PercentageValue helpers that native code uses via N_RANGE_BASE.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/double-range-library/">UNDoubleRangeLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Double Range Library")
 class NEXUSCORE_API UNDoubleRangeLibrary : public UBlueprintFunctionLibrary
@@ -20,16 +22,16 @@ class NEXUSCORE_API UNDoubleRangeLibrary : public UBlueprintFunctionLibrary
 
 	/** Deterministic sample from Range's full span. */
 	UFUNCTION(BlueprintCallable, DisplayName="Next Value (Double)", Category = "NEXUS|Core|Range")
-	static double NextValue(const FNDoubleRange& Range)
+	static double NextValue(const FNDoubleRange& Range, UNMersenneTwisterObject* TwisterObject)
 	{
-		return Range.NextValue();
+		return Range.NextValue(TwisterObject->GetTwisterRef());
 	}
 
 	/** Deterministic sample clamped to [MinimumValue, MaximumValue] within Range. */
 	UFUNCTION(BlueprintCallable, DisplayName="Next Value In Sub-Range (Double)",  Category = "NEXUS|Core|Range")
-	static double NextValueInSubRange(const FNDoubleRange& Range, double MinimumValue, double MaximumValue)
+	static double NextValueInSubRange(const FNDoubleRange& Range, UNMersenneTwisterObject* TwisterObject, double MinimumValue, double MaximumValue)
 	{
-		return Range.NextValueInSubRange(MinimumValue, MaximumValue);
+		return Range.NextValueInSubRange(TwisterObject->GetTwisterRef(), MinimumValue, MaximumValue);
 	}
 
 	/** Linearly interpolates between Range's Minimum and Maximum using Percentage (0..1). */
@@ -41,7 +43,7 @@ class NEXUSCORE_API UNDoubleRangeLibrary : public UBlueprintFunctionLibrary
 
 	/** Non-deterministic sample from Range's full span. */
 	UFUNCTION(BlueprintCallable, DisplayName="Random Value (Double)",  Category = "NEXUS|Core|Range")
-	static double RandomValueFromSeed(const FNDoubleRange& Range)
+	static double RandomValue(const FNDoubleRange& Range)
 	{
 		return Range.RandomValue();
 	}
@@ -54,14 +56,14 @@ class NEXUSCORE_API UNDoubleRangeLibrary : public UBlueprintFunctionLibrary
 	}
 
 	/** One-shot seeded sample from Range's full span; does not advance any persistent stream. */
-	UFUNCTION(BlueprintCallable, DisplayName="Random One Shot Value (Double)",  Category = "NEXUS|Core|Range")
-	static double RandomOneShotValue(const FNDoubleRange& Range, double Seed)
+	UFUNCTION(BlueprintCallable, DisplayName="Random One-Shot Value (Double)",  Category = "NEXUS|Core|Range")
+	static double RandomOneShotValue(const FNDoubleRange& Range, const int32 Seed)
 	{
 		return Range.RandomOneShotValue(Seed);
 	}
 
 	/** One-shot seeded sample clamped to [MinimumValue, MaximumValue] within Range. */
-	UFUNCTION(BlueprintCallable, DisplayName="Random One Shot Value In Sub-Range (Double)",  Category = "NEXUS|Core|Range")
+	UFUNCTION(BlueprintCallable, DisplayName="Random One-Shot Value In Sub-Range (Double)",  Category = "NEXUS|Core|Range")
 	static double RandomOneShotValueInSubRange(const FNDoubleRange& Range, int32 Seed, double MinimumValue, double MaximumValue)
 	{
 		return Range.RandomOneShotValueInSubRange(Seed, MinimumValue, MaximumValue);

@@ -30,7 +30,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellHullGenerationSettings
 	/** When true, the hull is recomputed automatically whenever the cell is saved. */
 	UPROPERTY(EditAnywhere)
 	bool bCalculateOnSave = true;
-	
+
 	/** When true, the hull may retain concave regions instead of being forced to a strict convex shape. */
 	UPROPERTY(EditAnywhere)
 	bool bAllowNonConvex = false;
@@ -57,7 +57,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellHullGenerationSettings
 		switch (BuildMethod)
 		{
 			using enum ENullBuildMethod;
-		case Default:	
+		case Default:
 			return Chaos::FConvexBuilder::EBuildMethod::Default;
 		case Original:
 			return Chaos::FConvexBuilder::EBuildMethod::Original;

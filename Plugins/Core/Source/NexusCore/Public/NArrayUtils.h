@@ -9,6 +9,7 @@
  * A collection of templated utility methods for working with TArrays.
  *
  * All helpers are inlined, allocation-free (or minimally allocating), and C++-only.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/array-utils/">FNArrayUtils</a>
  */
 class NEXUSCORE_API FNArrayUtils
 {
@@ -48,6 +49,27 @@ public:
 	}
 
 	/**
+	 * Compares two arrays of differing element types element-by-element and in the same order using a custom equality predicate.
+	 * @param Left The first array to compare.
+	 * @param Right The second array to compare.
+	 * @param Predicate Invoked as Predicate(Left[i], Right[i]); returns true when the two elements are considered equal.
+	 * @return true if both arrays have the same length and every matching pair satisfies Predicate.
+	 */
+	template<typename TLeft, typename TRight, typename TPredicate>
+	FORCEINLINE static bool IsSameOrderedValues(const TArray<TLeft>& Left, const TArray<TRight>& Right, TPredicate Predicate)
+	{
+		if (Left.Num() != Right.Num())
+		{
+			return false;
+		}
+		for (int32 i = 0; i < Left.Num(); i++)
+		{
+			if (!Predicate(Left[i], Right[i])) return false;
+		}
+		return true;
+	}
+
+	/**
 	 * Compares two arrays for equality without regard to ordering. Assumes elements are unique within each array.
 	 * @param Left The first array to compare.
 	 * @param Right The second array to compare.
@@ -75,7 +97,7 @@ public:
 	 * @note Because the combination is a bitwise XOR, duplicate pointers will cancel each other out.
 	 */
 	template<typename T>
-	FORCEINLINE static uint32 GetPointersHash(TArray<T*> Elements)
+	FORCEINLINE static uint32 GetPointersHash(const TArray<T*>& Elements)
 	{
 		uint32 Hash = 0;
 		for (T* Element : Elements)
@@ -90,7 +112,7 @@ public:
 	 * @param Objects The weak pointers to pin.
 	 * @return A matching array of TStrongObjectPtr values; entries corresponding to stale weak pointers will be null.
 	 */
-	FORCEINLINE static TArray<TStrongObjectPtr<UObject>> PinAll(TArray<TWeakObjectPtr<UObject>> Objects)
+	FORCEINLINE static TArray<TStrongObjectPtr<UObject>> PinAll(const TArray<TWeakObjectPtr<UObject>>& Objects)
 	{
 		TArray<TStrongObjectPtr<UObject>> Pinned;
 		Pinned.Reserve(Objects.Num());

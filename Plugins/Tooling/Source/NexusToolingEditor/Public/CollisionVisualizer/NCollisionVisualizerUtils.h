@@ -51,22 +51,4 @@ public:
 	/** Issue a multi-overlap query at Position/Rotation and draw each overlapping primitive. */
 	static void OverlapMulti(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& Position, const FQuat& Rotation);
-
-private:
-	/** Map the visualizer's mobility enum onto the engine's EQueryMobilityType. */
-	static EQueryMobilityType ToQueryMobilityType(const ENCollisionVisualizerMobility Mobility)
-	{
-		switch (Mobility)
-		{
-			using enum ENCollisionVisualizerMobility;
-		case Any: 
-			return EQueryMobilityType::Any;
-		case Static: 
-			return EQueryMobilityType::Static;
-		case Dynamic: 
-			return EQueryMobilityType::Dynamic;
-		default: 
-			return EQueryMobilityType::Any;
-		}
-	}
 };

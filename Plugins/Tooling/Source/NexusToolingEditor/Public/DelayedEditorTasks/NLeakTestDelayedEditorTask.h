@@ -45,7 +45,7 @@ private:
 	{
 		const FNObjectSnapshot AfterSnapshot = FNObjectSnapshotUtils::Snapshot();
 		FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(BeforeSnapshot, AfterSnapshot, true);
-		
+
 		if (Diff.AddedCount > 0)
 		{
 			const FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),

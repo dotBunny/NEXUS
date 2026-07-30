@@ -20,7 +20,7 @@ void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 	IDetailCategoryBuilder& NexusCategory = DetailBuilder.EditCategory(TEXT("Cell Proxy"),
 		FText::FromString("Cell Proxy"), ECategoryPriority::Important);
 
-	// Figure out if we are editing multiple objects, in this case we don't want a special inspector if 
+	// Figure out if we are editing multiple objects, in this case we don't want a special inspector if
 	// more then one of the components is selected.
 	TArray<TWeakObjectPtr<UObject>> Objects;
 	DetailBuilder.GetObjectsBeingCustomized(Objects);
@@ -37,43 +37,61 @@ void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 			}
 		}
 	}
-	
+
+	// Nothing valid to act on, so don't add the Actions row with no-op buttons.
+	if (Proxies.Num() == 0)
+	{
+		return;
+	}
+
 	auto OnCreate = [Proxies]
 	{
-		for (auto & CellProxy : Proxies)
+		for (const TWeakObjectPtr<ANCellProxy>& CellProxy : Proxies)
 		{
-			CellProxy->CreateLevelInstance();
+			if (ANCellProxy* Proxy = CellProxy.Get())
+			{
+				Proxy->CreateLevelInstance();
+			}
 		}
 		return FReply::Handled();
 	};
 
 	auto OnLoad = [Proxies]
 	{
-		for (auto & CellProxy : Proxies)
+		for (const TWeakObjectPtr<ANCellProxy>& CellProxy : Proxies)
 		{
-			CellProxy->LoadLevelInstance();
+			if (ANCellProxy* Proxy = CellProxy.Get())
+			{
+				Proxy->LoadLevelInstance();
+			}
 		}
 		return FReply::Handled();
 	};
 
 	auto OnUnload = [Proxies]
 	{
-		for (auto & CellProxy : Proxies)
+		for (const TWeakObjectPtr<ANCellProxy>& CellProxy : Proxies)
 		{
-			CellProxy->UnloadLevelInstance();
+			if (ANCellProxy* Proxy = CellProxy.Get())
+			{
+				Proxy->UnloadLevelInstance();
+			}
 		}
 		return FReply::Handled();
 	};
 
 	auto OnDestroy = [Proxies]
 	{
-		for (auto & CellProxy : Proxies)
+		for (const TWeakObjectPtr<ANCellProxy>& CellProxy : Proxies)
 		{
-			CellProxy->DestroyLevelInstance(true, true);
+			if (ANCellProxy* Proxy = CellProxy.Get())
+			{
+				Proxy->DestroyLevelInstance(true, true);
+			}
 		}
 		return FReply::Handled();
 	};
-	
+
 	NexusCategory.AddCustomRow(NSLOCTEXT("NexusWorldAssemblyEditor", "ProxyActionsRow", "ActionsRow"))
 		.NameContent()
 		[
@@ -144,6 +162,6 @@ void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 						//.IsEnabled_Lambda()
 					]
 				]
-			
+
 		];
 }

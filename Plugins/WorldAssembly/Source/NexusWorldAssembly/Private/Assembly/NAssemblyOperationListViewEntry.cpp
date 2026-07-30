@@ -63,11 +63,11 @@ void UNAssemblyOperationListViewEntry::Reset() const
 	{
 		LeftText->SetText(FText::GetEmpty());
 		RightText->SetText(FText::GetEmpty());
-		
+
 		CenterText->SetText(FText::GetEmpty());
 		ProgressBar->SetPercent(1.f);
 	}
-	
+
 	UpdateCancelButtonVisibility();
 }
 
@@ -89,7 +89,7 @@ void UNAssemblyOperationListViewEntry::OnOperationTasksChanged(const int32 Compl
 		RightText->SetText(FText::GetEmpty());
 		ProgressBar->SetPercent(1.f);
 	}
-	
+
 	UpdateCancelButtonVisibility();
 }
 

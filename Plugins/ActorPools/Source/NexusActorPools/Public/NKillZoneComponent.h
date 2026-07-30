@@ -10,11 +10,18 @@
 
 class UNActorPoolSubsystem;
 
+/**
+ * Action a UNKillZoneComponent takes on an overlapping Actor that does not implement INActorPoolItem
+ * (see UNKillZoneComponent::UnknownBehaviour).
+ */
 UENUM(BlueprintType)
 enum class ENKillZoneBehavior : uint8
 {
+	/** Leave the Actor untouched. */
 	Ignore,
+	/** Return the Actor to its owning Actor Pool. */
 	ReturnToActorPool,
+	/** Apply the engine's standard "fell out of world" handling to the Actor. */
 	ApplyFellOutOfWorld
 };
 
@@ -92,7 +99,6 @@ private:
 	TObjectPtr<UNActorPoolSubsystem> ActorPoolSubsystem;
 
 
+	/** Damage type passed to the engine's fell-out-of-world handling for the ApplyFellOutOfWorld behavior. */
 	const UDamageType* WorldFallDamageType;
-		
-	
 };

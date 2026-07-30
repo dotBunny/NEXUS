@@ -32,9 +32,15 @@ public:
 
 	/** Cursor into CellNodes tracking how many entries have already been spawned. */
 	int32 CellNodesCreateCurrentIndex = 0;
-	
+
+	/**
+	 * Status-channel id for the spawn pass, opened on the first dispatch and reused across timeslices so
+	 * the progress bar keeps moving while spawning re-dispatches frame to frame. INDEX_NONE until opened.
+	 */
+	int32 SpawnStatusChannelId = INDEX_NONE;
+
 	int32 CellNodesLoadCurrentIndex = 0;
-	
+
 	/** Per-frame time budget for spawning cell proxies, in seconds. */
 	float CellTimeSlice = 0.002f;
 

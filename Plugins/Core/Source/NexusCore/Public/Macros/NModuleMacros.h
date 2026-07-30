@@ -34,15 +34,18 @@ public: \
 	} \
 	else \
 	{ \
-		FCoreDelegates::OnPostEngineInit.AddRaw(this, &Type::Method); \
+		FCoreDelegates::GetOnPostEngineInit().AddRaw(this, &Type::Method); \
 	}
 
 #define N_MODULE_REMOVE_POST_ENGINE_INIT() \
-	FCoreDelegates::OnPostEngineInit.RemoveAll(this);
+	FCoreDelegates::GetOnPostEngineInit().RemoveAll(this);
 
 #define N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE() \
-	static void OnPostEngineInit();
+	static void OnPostEngineInit(); \
 	static FDelegateHandle OnPostEngineInitDelegateHandle;
+
+#define N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE_IMPLEMENTATION(Type) \
+	FDelegateHandle Type::OnPostEngineInitDelegateHandle;
 
 #define N_MODULE_POST_ENGINE_INIT_STATIC(Method) \
 	if (IPluginManager::Get().GetLastCompletedLoadingPhase() >= ELoadingPhase::PostDefault) \
@@ -51,11 +54,15 @@ public: \
 	} \
 	else \
 	{ \
-		FCoreDelegates::OnPostEngineInit.AddStatic(&Method); \
+		OnPostEngineInitDelegateHandle = FCoreDelegates::GetOnPostEngineInit().AddStatic(&Method); \
 	}
 
 #define N_MODULE_REMOVE_POST_ENGINE_INIT_DELEGATE() \
-	FCoreDelegates::OnPostEngineInit.Remove(OnPostEngineInitDelegateHandle);
+	if (OnPostEngineInitDelegateHandle.IsValid()) \
+	{ \
+		FCoreDelegates::GetOnPostEngineInit().Remove(OnPostEngineInitDelegateHandle); \
+		OnPostEngineInitDelegateHandle.Reset(); \
+	}
 
 /**
  * Editor-only: synchronizes a plugin's .uplugin Version / VersionName with NEXUS::Version.
@@ -69,7 +76,7 @@ public: \
 // Only do version updates in the editor
 #if WITH_EDITOR && WITH_EDITORONLY_DATA
 #define N_UPDATE_UPLUGIN(PluginName) \
-	if (const TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(PluginName); Plugin.IsValid()) \
+	if (const TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(PluginName); Plugin.IsValid() && (!IsRunningCommandlet() && !IsRunningCookCommandlet())) \
 	{ \
 		const FPluginDescriptor CurrentDescriptor = Plugin->GetDescriptor(); \
 		FPluginDescriptor UpdatedDescriptor = FPluginDescriptor(CurrentDescriptor); \
@@ -87,7 +94,7 @@ public: \
 		} \
 		if(bIsDirty) \
 		{ \
-			UE_LOG(LogNexusCore, Verbose, TEXT("Updating plugin(%s) definition."), TEXT(PluginName)) \
+			UE_LOG(LogNexusCore, Log, TEXT("Updating plugin(%s) definition."), TEXT(PluginName)) \
 			if (FText FailReason; !Plugin->UpdateDescriptor(UpdatedDescriptor, FailReason)) \
 			{ \
 				UE_LOG(LogNexusCore, Error, TEXT("Failed to update plugin(%s) descriptor: %s"), TEXT(PluginName), *FailReason.ToString()) \

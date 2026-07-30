@@ -41,7 +41,7 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnActorOperationalStateChangedDelegate, co
  *       FNActorPool dispatches via the fast path Cast<INActorPoolItem>(Actor) (see NActorPool.cpp), which only succeeds
  *       for native C++ implementers. A Blueprint that implemented this interface would make UClass::ImplementsInterface()
  *       return true (taking the fast path) while Cast<INActorPoolItem>() returned nullptr - an immediate null deref.
- *       Blueprint actors are supported through other routes instead: derive from ANPooledActor (native interface +
+ *       Blueprint actors are supported through other routes instead: derive from ANPooledActorBase (native interface +
  *       BlueprintAssignable events), or set the InvokeUFunctions pool flag and define matching named UFUNCTIONs.
  */
 UINTERFACE(meta=(CannotImplementInterfaceInBlueprint))
@@ -129,18 +129,18 @@ public:
 	 * @return The previous state.
 	 */
 	ENActorOperationalState GetPreviousActorOperationalState() const { return PreviousActorOperationalState; };
-	
+
 
 	/**
 	 * Delegate fired after a transition has occurred in the operational state.
 	 * @note Multicast delegates are heavy and should only be used when necessary.
 	 */
 	FOnActorOperationalStateChangedDelegate OnActorOperationalStateChanged;
-	
+
 private:
 	/** Was this actor created by an ActorPool? */
 	bool bIsAttachedToActorPool = false;
-	
+
 	/** A reference to the ActorPool that created the Actor. */
 	FNActorPool* OwningActorPool = nullptr;
 

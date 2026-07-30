@@ -55,8 +55,5 @@ private:
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Overwatch;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Roadmap;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Issues;
-	TSharedPtr<FUICommandInfo> CommandInfo_Help_Documentation; 
-
-	TSharedPtr<FUICommandList> CommandList_Node;
-	TSharedPtr<FUICommandInfo> CommandInfo_Node_ExternalDocumentation;
+	TSharedPtr<FUICommandInfo> CommandInfo_Help_Documentation;
 };

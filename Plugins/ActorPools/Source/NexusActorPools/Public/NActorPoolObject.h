@@ -8,12 +8,13 @@
 
 /**
  * UObject wrapper around a native FNActorPool, exposing pool operations to Blueprints and UMG bindings.
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-object/">UNActorPoolObject</a>
  */
 UCLASS(BlueprintType, ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Pool Object")
 class NEXUSACTORPOOLS_API UNActorPoolObject : public UObject
 {
 	friend class FNActorPool;
-	
+
 	GENERATED_BODY()
 
 public:
@@ -24,6 +25,7 @@ public:
 	 * @param ActorPool The native pool this wrapper should reflect.
 	 * @return The pool's existing wrapper if one is already linked, otherwise a newly allocated, linked UNActorPoolObject.
 	 * @note Each FNActorPool may only have a single UNActorPoolObject linked at a time so the pool's destructor has a deterministic back-pointer to clear.
+	 * @note An already-linked wrapper is returned unchanged; its cached ClassName/OwningWorld derive from the pool's immutable template/world, so no refresh is needed.
 	 */
 	static UNActorPoolObject* Create(UObject* Outer, FNActorPool* ActorPool)
 	{
@@ -149,7 +151,7 @@ public:
 		if (Pool == nullptr) return FText::FromString("Pool == nullptr");
 		return Pool->GetDescription();
 	}
-	
+
 	/**
 	 * @return true if this wrapper is still linked to a live native FNActorPool.
 	 * @note Returns false once the pool's destructor has cleared the back-pointer (e.g. after world teardown), so callers can safely skip work that would otherwise dereference a destroyed pool.

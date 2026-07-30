@@ -5,13 +5,15 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "NFloatRange.h"
+#include "NMersenneTwisterObject.h"
 #include "NFloatRangeLibrary.generated.h"
 
 /**
  * Blueprint-exposed wrappers around FNFloatRange's sampling API.
  *
  * Thin passthroughs so that Blueprint authors can reach the same NextValue / RandomValue /
- * PercentageValue helpers that native code uses via N_RANGE.
+ * PercentageValue helpers that native code uses via N_RANGE_BASE.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/float-range-library/">UNFloatRangeLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Float Range Library")
 class NEXUSCORE_API UNFloatRangeLibrary : public UBlueprintFunctionLibrary
@@ -20,16 +22,16 @@ class NEXUSCORE_API UNFloatRangeLibrary : public UBlueprintFunctionLibrary
 
 	/** Deterministic sample from Range's full span. */
 	UFUNCTION(BlueprintCallable, DisplayName="Next Value (Float)", Category = "NEXUS|Core|Range")
-	static float NextValue(const FNFloatRange& Range)
+	static float NextValue(const FNFloatRange& Range, UNMersenneTwisterObject* TwisterObject)
 	{
-		return Range.NextValue();
+		return Range.NextValue(TwisterObject->GetTwisterRef());
 	}
 
 	/** Deterministic sample clamped to [MinimumValue, MaximumValue] within Range. */
 	UFUNCTION(BlueprintCallable, DisplayName="Next Value In Sub-Range (Float)",  Category = "NEXUS|Core|Range")
-	static float NextValueInSubRange(const FNFloatRange& Range, float MinimumValue, float MaximumValue)
+	static float NextValueInSubRange(const FNFloatRange& Range, UNMersenneTwisterObject* TwisterObject, float MinimumValue, float MaximumValue)
 	{
-		return Range.NextValueInSubRange(MinimumValue, MaximumValue);
+		return Range.NextValueInSubRange(TwisterObject->GetTwisterRef(), MinimumValue, MaximumValue);
 	}
 
 	/** Linearly interpolates between Range's Minimum and Maximum using Percentage (0..1). */
@@ -54,14 +56,14 @@ class NEXUSCORE_API UNFloatRangeLibrary : public UBlueprintFunctionLibrary
 	}
 
 	/** One-shot seeded sample from Range's full span; does not advance any persistent stream. */
-	UFUNCTION(BlueprintCallable, DisplayName="Random Value One Shot (Float)",  Category = "NEXUS|Core|Range")
-	static float RandomOneShotValue(const FNFloatRange& Range, float Seed)
+	UFUNCTION(BlueprintCallable, DisplayName="Random One-Shot Value (Float)",  Category = "NEXUS|Core|Range")
+	static float RandomOneShotValue(const FNFloatRange& Range, const int32 Seed)
 	{
 		return Range.RandomOneShotValue(Seed);
 	}
 
 	/** One-shot seeded sample clamped to [MinimumValue, MaximumValue] within Range. */
-	UFUNCTION(BlueprintCallable, DisplayName="Random One Shot Value In Sub-Range (Float)",  Category = "NEXUS|Core|Range")
+	UFUNCTION(BlueprintCallable, DisplayName="Random One-Shot Value In Sub-Range (Float)",  Category = "NEXUS|Core|Range")
 	static float RandomOneShotValueInSubRange(const FNFloatRange& Range, int32 Seed, float MinimumValue, float MaximumValue)
 	{
 		return Range.RandomOneShotValueInSubRange(Seed, MinimumValue, MaximumValue);

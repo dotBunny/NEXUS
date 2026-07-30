@@ -14,6 +14,7 @@
  * Created by FNObjectSnapshotUtils::Snapshot(). Pairs of snapshots can be diffed with
  * FNObjectSnapshotUtils::Diff() to produce an FNObjectSnapshotDiff describing what appeared or
  * disappeared between captures — the core primitive used by the framework's leak-detection tooling.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/object-snapshot/">FNObjectSnapshot</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNObjectSnapshot
@@ -72,7 +73,7 @@ struct NEXUSCORE_API FNObjectSnapshot
 	 */
 	FString ToDetailedString() const
 	{
-		FStringBuilderBase StringBuilder;
+		TStringBuilder<256> StringBuilder;
 		StringBuilder.Appendf(TEXT("Captured %i Objects (%i Untracked)\n"), CapturedObjectCount, UntrackedObjectCount);
 		for (const FNObjectSnapshotEntry& Entry : CapturedObjects)
 		{
@@ -88,28 +89,28 @@ struct NEXUSCORE_API FNObjectSnapshot
 	FNReport ToReport() const
 	{
 		FNReport Report;
-		
+
 		const int32 CapturedObjectsTicket = Report.CreateContentBlock();
 		FNReportContentBlock* CapturedObjectBlock = Report.GetContentBlock(CapturedObjectsTicket);
 		CapturedObjectBlock->SetHeading("FNObjectSnapshot");
 		CapturedObjectBlock->AddLine(FString::Printf(TEXT("Captured %i Objects"), CapturedObjectCount));
 		CapturedObjectBlock->AddLine(FString::Printf(TEXT("%i Untracked"), UntrackedObjectCount));
-		
+
 		const int32 CapturedObjectsTableTicket = Report.CreateTableBlock(CapturedObjectsTicket);
 		FNReportTableBlock* CapturedObjectsTableBlock = Report.GetTableBlock(CapturedObjectsTableTicket);
-		
+
 		CapturedObjectsTableBlock->Initialize({ "Full Name", "References", "Root Set", "Marked Garbage",});
 		for (const FNObjectSnapshotEntry& Entry : CapturedObjects)
 		{
 			CapturedObjectsTableBlock->AddRow({
 				Entry.FullName,
-				FString::FromInt(Entry.RefCount), 
+				FString::FromInt(Entry.RefCount),
 				Entry.bIsRoot ? TEXT("R") : TEXT(""),
 				Entry.bIsGarbage ? TEXT("M") : TEXT("")
 			});
 		}
-		
-		return MoveTemp(Report);
+
+		return Report;
 	}
 
 	/** Writes a detailed summary of the snapshot to LogNexusCore, one entry per line. */

@@ -14,6 +14,7 @@ namespace UnrealBuildTool.Rules
 					"Core",
 					"CoreUObject",
 					"Engine",
+					"GameplayTags",
 					"GeometryCore",
 					"GeometryFramework",
 					"PhysicsCore"
@@ -23,11 +24,8 @@ namespace UnrealBuildTool.Rules
 			PrivateDependencyModuleNames.AddRange(
 				[
 					"Chaos",
-					"CoreUObject",
 					"DeveloperSettings",
-					"GameplayTags",
 					"ModelingComponents",
-					"PhysicsCore",
 					"Projects"
 				]
 			);

@@ -22,67 +22,58 @@
 
 ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	// TODO: Is the proxy sync option doable?
-	// if (UNWorldAssemblySettings::Get()->NetworkingMode == ENWorldAssemblyNetworkMode::AlwaysRelevantCellProxies)
-	// {
-	// 	bReplicates = true;
-	// 	bAlwaysRelevant = true;
-	// }
-	
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
-	
+
 	// Add our physics shape
 	Mesh = CreateDefaultSubobject<UDynamicMeshComponent>(TEXT("Mesh"));
 	SetRootComponent(Mesh);
 	Mesh->Mobility = EComponentMobility::Movable;
-	
+
 	// Mesh Visible-stuff
 	Mesh->SetVisibleInRayTracing(false);
 	Mesh->bExplicitShowWireframe = true;
 	Mesh->WireframeColor = FLinearColor::Gray;
 	Mesh->SetTangentsType(EDynamicMeshComponentTangentsMode::AutoCalculated);
-	
-#if WITH_EDITOR	
+
+#if WITH_EDITOR
 	bCanPlayFromHere = 0;
 #endif // WITH_EDITOR
-	
+
 	N_WORLD_ICON_SCENE_COMPONENT("/NexusWorldAssembly/EditorResources/S_NCellProxy", RootComponent, false, 0.5f)
 }
 
 ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, FNAssemblyGraphCellNode* CellNode, const FNCellAssemblyData& InstanceData, const bool bPreLoadLevel)
 {
 	FActorSpawnParameters SpawnInfo;
-	
-	
+
+
 	SpawnInfo.ObjectFlags |= RF_Transient;
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	
+
 	ANCellProxy* Proxy = World->SpawnActor<ANCellProxy>(CellNode->GetWorldPosition(), CellNode->GetWorldRotation(), SpawnInfo);
-	
+
 	if (Proxy == nullptr)
 	{
 		UE_LOG(LogNexusWorldAssembly, Error, TEXT("ANCellProxy was unable to CreateInstance, returning a nullptr; most likely caused by the World in a bad state."));
 		return nullptr;
 	}
-	
+
+	// Assign data generated from assembly (it will get used by the level instance)
 	Proxy->AssemblyData = InstanceData;
-	
-	// Context initialization
-	Proxy->InitializeFromCellNode(CellNode);
-	
+
 	// Default initialization
 	Proxy->InitializeFromNCell(CellNode->GetTemplate());
-	
+
 	// TODO: Do something with this || this only works on server, clients wont get preload, is it even worth it?
 	if (bPreLoadLevel)
 	{
 		CellNode->GetTemplate()->World.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateLambda(
 			[](const FSoftObjectPath&, UObject* InLoadedObject)
 			{
-			}));	
+			}));
 	}
-	
+
 	// Moving outside this we cant be sure we will have a CellNode again.
 	return Proxy;
 }
@@ -93,45 +84,55 @@ void ANCellProxy::CreateLevelInstance()
 	{
 		return;
 	}
-	
+
 	FActorSpawnParameters SpawnInfo;
-	SpawnInfo.Owner = this; 
+	SpawnInfo.Owner = this;
 	SpawnInfo.ObjectFlags |= RF_Transient;
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnInfo.bDeferConstruction = true;
-	
+	// IMPORTANT for replication
+	SpawnInfo.Name = MakeUniqueObjectName(GetWorld(), ANCellLevelInstance::StaticClass(), "NCellLevelInstance");
+
 	// Spawn Actor
 	const FVector SpawnLocation = this->GetActorLocation();
 	const FRotator SpawnRotation = this->GetActorRotation();
-	
+
 	AActor* SpawnedLevelInstanceActor = GetWorld()->SpawnActor(
 		ANCellLevelInstance::StaticClass(), &SpawnLocation, &SpawnRotation, SpawnInfo);
-	
+
 	// Cache reference to spawned actor
 	LevelInstance = Cast<ANCellLevelInstance>(SpawnedLevelInstanceActor);
-	
+	if (LevelInstance == nullptr)
+	{
+		UE_LOG(LogNexusWorldAssembly, Warning,
+			TEXT("ANCellProxy(%s) failed to spawn its ANCellLevelInstance; the world is likely tearing down."), *GetName());
+		return;
+	}
+
+	// Assign server/owner proxy-mesh reference on CellLevelInstance
+	LevelInstance->SetProxyMesh(Mesh->GetDynamicMesh());
+
 	// Replicated assembly data
 	LevelInstance->AssemblyData = AssemblyData;
-	
-	JunctionsData.GenerateValueArray(LevelInstance->JunctionDetails);
-	LevelInstance->FillJunctionData(); // this is really for the server
-	
+	// Server needs to do its process of the level assembly data (junctions rotate/etc based)
+	LevelInstance->UpdateFromAssemblyData();
+
 	// Apply relevancy flag to created actor
 	if (AssemblyData.AssemblyTags.HasTagExact(NWorldAssembly_Flag_AlwaysRelevant))
 	{
 		LevelInstance->bAlwaysRelevant = true;
 	}
-	
+
 	// Setup actor with our details
 #if WITH_EDITOR
 	LevelInstance->SetWorldAsset(Cell->World);
 	LevelInstance->SetActorLabel(FString::Printf(TEXT("%s_LevelInstance"), *this->GetActorLabel()), false);
 #endif // WITH_EDITOR
 	LevelInstance->CookedWorldAsset = Cell->World;
-	
+
 	// Finalize the spawn, BeginPlay can now be called
 	SpawnedLevelInstanceActor->FinishSpawning(this->GetActorTransform());
-	
+
 	// Register the CellLevelInstance
 	FNWorldAssemblyRegistry::RegisterCellLevelInstance(LevelInstance);
 }
@@ -141,14 +142,15 @@ void ANCellProxy::LoadLevelInstance(const bool bBlocking)
 	if (LevelInstance == nullptr)
 	{
 		CreateLevelInstance();
+		if (LevelInstance == nullptr) return;
 	}
-	
+
 	ULevelInstanceSubsystem* Subsystem = GetWorld()->GetSubsystem<ULevelInstanceSubsystem>();
-		
+
 	// Inflight loading currently
 	if (!Subsystem->IsLoading(LevelInstance))
 	{
-#if WITH_EDITOR		
+#if WITH_EDITOR
 		if (bBlocking)
 		{
 			Subsystem->BlockLoadLevelInstance(LevelInstance);
@@ -159,9 +161,9 @@ void ANCellProxy::LoadLevelInstance(const bool bBlocking)
 		}
 #else
 		LevelInstance->LoadLevelInstance();
-#endif		
+#endif
 	}
-	
+
 	Hide();
 }
 
@@ -171,14 +173,14 @@ void ANCellProxy::UnloadLevelInstance(const bool bTagActorsToIgnore) const
 	{
 		UWorld* World = GetWorld();
 		ULevelInstanceSubsystem* Subsystem = World->GetSubsystem<ULevelInstanceSubsystem>();
-		
+
 		// We are going to iterate the Actors and flag them to be ignored by the next generation
 		// We are going to iterate the Actors and flag them to be ignored by the next generation
 		if (bTagActorsToIgnore)
 		{
 			TagActorsToIgnore();
 		}
-		
+
 #if WITH_EDITOR
 		// Inflight loading currently
 		if (Subsystem->IsLoading(LevelInstance))
@@ -249,7 +251,7 @@ void ANCellProxy::DestroyLevelInstance(const bool bUnregisterCellLevelInstance, 
 		LevelInstance->Destroy(true, false);
 		LevelInstance = nullptr;
 	}
-	
+
 	// If we're tagging the actors that means were making something new right away so lets not show the mesh
 	if (!bTagActorsToIgnore)
 	{
@@ -264,36 +266,31 @@ void ANCellProxy::InitializeFromNCell(UNCell* InCell)
 		UE_LOG(LogNexusWorldAssembly, Error, TEXT("Attempted to initialize an ANCellProxy(%s) with a null UNCell."), *this->GetName());
 		return;
 	}
-	
+
 	Cell = InCell;
 
 	// Prep dynamic mesh for changes
 	Mesh->Modify();
-	
+
 	// Clear anything previous
-#if WITH_EDITOR	
+#if WITH_EDITOR
 	Mesh->ClearAllCachedCookedPlatformData();
 #endif // WITH_EDITOR
 
 	// Convert our mesh data to UE
 	Mesh->SetMesh(Cell->Root.Hull.CreateDynamicMesh(true));
-	
+
 	// Clear all collision
 	SetActorEnableCollision(false);
 	Mesh->SetCanEverAffectNavigation(false);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	
+
 	// Let's rock some colors
 	Mesh->WireframeColor = Cell->Root.ProxyColor;
-	
+
 	// Create the material on placement (CDO settings access = bad)
 	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
 	Streamable.RequestAsyncLoad(UNWorldAssemblySettings::Get()->ProxyMaterial.ToSoftObjectPath(), FStreamableDelegate::CreateUObject(this, &ANCellProxy::OnProxyMaterialLoaded));
-}
-
-void ANCellProxy::InitializeFromCellNode(const FNAssemblyGraphCellNode* CellNode)
-{
-	JunctionsData = CellNode->GetJunctions();
 }
 
 void ANCellProxy::OnProxyMaterialLoaded()
@@ -331,14 +328,14 @@ void ANCellProxy::Hide() const
 void ANCellProxy::TagActorsToIgnore() const
 {
 	if (LevelInstance == nullptr) return;
-	
+
 	ULevel* LoadedLevel = LevelInstance->GetLoadedLevel();
 	if (LoadedLevel == nullptr) return;
-	
+
 	// We are going to iterate the Actors and flag them to be ignored by the next generation
 	for (AActor* Actor : LoadedLevel->Actors)
 	{
 		if (!IsValid(Actor)) continue;
-		Actor->Tags.Add(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
+		Actor->Tags.AddUnique(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
 	}
 }

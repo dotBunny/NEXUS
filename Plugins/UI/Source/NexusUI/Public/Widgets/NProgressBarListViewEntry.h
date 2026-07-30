@@ -19,6 +19,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnProgressBarListEntryChanged);
  * Data model for a single row in a UNListView of progress bars. Carries a label, a status message,
  * and a 0..1 completion percent. Mutating any field broadcasts OnChanged so the bound
  * UNProgressBarListViewEntry can update in place without the owning list rebuilding its rows.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/widgets/progress-bar-list-view-entry/#data-object--unprogressbarlistentry">UNProgressBarListEntry</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | ProgressBar List Entry", BlueprintType)
 class NEXUSUI_API UNProgressBarListEntry : public UObject
@@ -75,6 +77,8 @@ private:
  * List-view entry widget that renders a progress bar plus left/center/right text driven by a bound
  * UNProgressBarListEntry. Binds to the data object's OnChanged delegate so message/percent updates
  * refresh the row in place; the owning list only rebuilds when entries are added or removed.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/widgets/progress-bar-list-view-entry/">UNProgressBarListViewEntry</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | ProgressBar ListView Entry", BlueprintType, Blueprintable)
 class NEXUSUI_API UNProgressBarListViewEntry : public UUserWidget, public INListViewEntry
@@ -85,7 +89,7 @@ public:
 	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
 	{
 		OwnerListView = Owner;
-		Execute_OnSetOwnerListView(Widget, Owner);
+		INListViewEntry::SetOwnerListView(Widget, Owner);
 	}
 
 	/** Clear all text fields and the progress bar — used between operations and on destruct. */
@@ -97,10 +101,10 @@ protected:
 		Super::NativeConstruct();
 
 		// Will validate it here only to throw a message in log for someone to realize they haven't hooked up the widget correctly.
-		N_VALIDATE(LogNexusUI, ProgressBar)
-		N_VALIDATE(LogNexusUI, LeftText)
-		N_VALIDATE(LogNexusUI, CenterText)
-		N_VALIDATE(LogNexusUI, RightText)
+		N_VALIDATE(LogNexusUI, ProgressBar);
+		N_VALIDATE(LogNexusUI, LeftText);
+		N_VALIDATE(LogNexusUI, CenterText);
+		N_VALIDATE(LogNexusUI, RightText);
 	}
 	virtual void NativeDestruct() override;
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
@@ -137,4 +141,11 @@ private:
 	/** The data object backing this row; nulled when the entry is released. */
 	UPROPERTY()
 	TObjectPtr<UNProgressBarListEntry> Data = nullptr;
+
+	/**
+	 * Last whole-percent value pushed into RightText, used to skip redundant SetText (and the Slate
+	 * relayout it triggers) when the coarse OnChanged broadcast fires without the rounded percent changing.
+	 * Seeded to MIN_int32 so the first update always paints, and reset in Reset() so recycled entries repaint.
+	 */
+	mutable int32 LastShownPercent = MIN_int32;
 };

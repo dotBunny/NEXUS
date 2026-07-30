@@ -19,7 +19,7 @@ void FNToolsMenuEntries::AddMenuEntries()
 	LeakCheckMenuEntry.Icon = FSlateIcon(FNToolingEditorStyle::GetStyleSetName(), "Command.LeakCheck");
 	LeakCheckMenuEntry.Execute = FExecuteAction::CreateStatic(&UNLeakTestDelayedEditorTask::Create);
 	FNToolsMenu::AddMenuEntry(LeakCheckMenuEntry);
-	
+
 	// Clean Logs
 	auto CleanLogsMenuEntry = FNMenuEntry();
 	CleanLogsMenuEntry.Identifier = "CleanLogsFolder";

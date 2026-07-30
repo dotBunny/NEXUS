@@ -8,6 +8,13 @@
 #include "Misc/AutomationTest.h"
 #include "Developer/NTestUtils.h"
 
+/**
+ * Latent automation command that tears down the shared test world created by FNTestLatentCommand_CreateWorld.
+ *
+ * Ends play, destroys the world and its game instance/context, and clears the FNTestUtils::Environment pointers
+ * so the next test starts from a clean slate.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/test-latent-commands/test-latent-command-cleanup-world/">FNTestLatentCommand_CleanupWorld</a>
+ */
 class FNTestLatentCommand_CleanupWorld : public IAutomationLatentCommand
 {
 public:
@@ -20,13 +27,13 @@ public:
 		// Cleanup world
 		UWorld* World = FNTestUtils::Environment.World;
 		UGameInstance* GameInstance = FNTestUtils::Environment.GameInstance;
-	
+
 		World->EndPlay(EEndPlayReason::Quit);
 		GEngine->DestroyWorldContext(World);
 		World->DestroyWorld(false);
 		GameInstance->MarkAsGarbage();
-	
-	
+
+
 		FNTestUtils::Environment.GameInstance = nullptr;
 		FNTestUtils::Environment.World = nullptr;
 		FNTestUtils::Environment.WorldContext = nullptr;

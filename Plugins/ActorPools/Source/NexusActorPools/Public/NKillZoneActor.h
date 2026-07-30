@@ -15,7 +15,7 @@ UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Kill Zone Actor")
 class NEXUSACTORPOOLS_API ANKillZoneActor : public AActor
 {
 	GENERATED_BODY()
-	
+
 	explicit ANKillZoneActor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get()) : Super(ObjectInitializer)
 	{
 		KillZoneComponent = CreateDefaultSubobject<UNKillZoneComponent>(TEXT("KillZone"));

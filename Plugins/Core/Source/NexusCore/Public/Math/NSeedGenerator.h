@@ -8,6 +8,7 @@
  *
  * Supports three seed representations: raw 64-bit numeric, hexadecimal text, and human-friendly
  * word-style strings. The From/To helpers convert between forms while sanitizing user input.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/seed-generator/">FNSeedGenerator</a>
  */
 class NEXUSCORE_API FNSeedGenerator
 {
@@ -43,9 +44,12 @@ public:
 	 * Converts a friendly-format seed string back into a numeric seed.
 	 * @param InSeed The human-friendly seed produced by RandomFriendlySeed.
 	 * @return a numeric seed suitable for FNMersenneTwister.
+	 * @note Only the letters a-j (case-insensitive) are read, as the digits 0-9; all other
+	 *       characters are ignored. Only the last 20 digits are used, and hand-typed values
+	 *       above the uint64 maximum wrap mod 2^64.
 	 */
 	static uint64 SeedFromFriendlySeed(const FString& InSeed);
-	
+
 	/**
 	 * Returns a <i>valid</i> numeric seed to be used with the FNMersenneTwister.
 	 * @param InHexSeed - The desired hexadecimal FString to parse
@@ -75,5 +79,5 @@ private:
 	 * @return a cleaned-up version of the provided seed
 	 */
 	static FString SanitizeHexSeed(const FString& InHexSeed);
-	
+
 };

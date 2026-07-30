@@ -35,7 +35,7 @@ void UNDynamicRefListViewEntry::NativeOnEntryReleased()
 		Object->Changed.Unbind();
 		Object = nullptr;
 	}
-	
+
 	INListViewEntry::NativeOnEntryReleased();
 }
 
@@ -52,10 +52,10 @@ void UNDynamicRefListViewEntry::Refresh() const
 	if (IsValid(Object))
 	{
 		Reference->SetText(Object->GetReferenceText());
-		
+
 		// Remake buttons for referenced objects
 		References->ClearListItems();
-		
+
 		for (TWeakObjectPtr ReferenceObject : Object->GetObjects())
 		{
 			UObject* ReferencePtr = ReferenceObject.Get();
@@ -63,7 +63,7 @@ void UNDynamicRefListViewEntry::Refresh() const
 			{
 				UNButtonListEntry* ButtonObject = NewObject<UNButtonListEntry>(
 					Object, UNButtonListEntry::StaticClass(), NAME_None, RF_Transient);
-			
+
 				ButtonObject->SetText(FText::FromName(ReferenceObject->GetFName()));
 				ButtonObject->TargetObject = ReferencePtr;
 				ButtonObject->OnPressedEvent.BindUObject(this, &UNDynamicRefListViewEntry::OnButtonPressed);

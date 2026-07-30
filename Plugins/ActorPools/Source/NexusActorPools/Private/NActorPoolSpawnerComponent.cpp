@@ -5,7 +5,6 @@
 #include "NActorPoolSubsystem.h"
 #include "NBoxPicker.h"
 #include "NCirclePicker.h"
-#include "NCoreMinimal.h"
 #include "NOrientedBoxPicker.h"
 #include "NOrientedBoxPickerParams.h"
 #include "NSpherePicker.h"
@@ -15,8 +14,8 @@
 UNActorPoolSpawnerComponent::UNActorPoolSpawnerComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	PrimaryComponentTick.bCanEverTick = true;
-	PrimaryComponentTick.bStartWithTickEnabled = false;
+	// Ticked manually by UNActorPoolSubsystem (see TickSpawner); this component never uses the engine's component-tick framework.
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// Only the server will have this
 	SetIsReplicatedByDefault(false);
@@ -56,20 +55,20 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 			continue;
 		}
 
-		// We want to register some settings, we dont create the pool here so that APS can be ahead of this.
+		// We want to register some settings, we don't create the pool here so that APS can be ahead of this.
 		if (!Subsystem->AddDefaultSettings(Templates[i].Template, Templates[i].Settings))
 		{
-			UE_LOG(LogNexusActorPools, Verbose, TEXT("Default settings for Actor(%p|%s) are already added to the subsystem, skipping."), Templates[i].Template.Get(), *Templates[i].Template->GetName());
+			UE_LOG(LogNexusActorPools, Verbose, TEXT("Default settings for Actor(%s) are already added to the subsystem, skipping."), *Templates[i].Template->GetName());
 		}
 
 		// Add to the weighted list
 		WeightedIndices.Add(i, Templates[i].Weight);
 	}
 
-	
+
 	if (TemplateCount > 0 && bRandomizeSeed)
 	{
-		Seed = FNRandom::GetNonDeterministic().RandHelper(42);
+		Seed = FNRandom::GetNonDeterministic().RandHelper(MAX_int32);
 	}
 
 	if (Distribution == ENActorPoolSpawnerDistribution::Spline)
@@ -88,10 +87,11 @@ void UNActorPoolSpawnerComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 	}
 }
 
-void UNActorPoolSpawnerComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UNActorPoolSpawnerComponent::TickSpawner(float DeltaTime)
 {
 	TimeSinceSpawned += DeltaTime;
 	if (TimeSinceSpawned < SpawnRate) return;
+	TimeSinceSpawned = 0.f; // Consume the interval whether or not Spawn() actually spawns.
 	Spawn();
 }
 
@@ -100,7 +100,7 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 	if ((!bSpawningEnabled && !bIgnoreSpawningFlag) || !WeightedIndices.HasData()) return;
 
 	if (!Subsystem.IsValid()) { return; }
-	
+
 
 	TArray<FVector> OutLocations;
 	switch (Distribution)
@@ -166,11 +166,11 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 			OutLocations.Add(this->GetComponentLocation() + Offset);
 		}
 		break;
-	default: 
+	default:
 		UE_LOG(LogNexusActorPools, Error, TEXT("Unable to spawn actors as the distribution type is not valid."));
 		return;
 	}
-	
+
 	const FRotator SpawnRotator = this->GetComponentRotation();
 	const int32 OutCount = OutLocations.Num();
 	for (int32 i = 0; i < OutCount; i++)
@@ -182,7 +182,6 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 		}
 		Subsystem->SpawnActor<AActor>(Templates[RandomIndex].Template, OutLocations[i], SpawnRotator);
 	}
-	TimeSinceSpawned = 0;
 }
 
 void UNActorPoolSpawnerComponent::CacheSplineComponent()
@@ -215,7 +214,7 @@ void UNActorPoolSpawnerComponent::CacheSplineComponent()
 			}
 		}
 	}
-	
+
 	if (CachedSplineComponent == nullptr)
 	{
 		Distribution = ENActorPoolSpawnerDistribution::Point;

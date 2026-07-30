@@ -14,6 +14,7 @@
  * Snapshot() walks the global object array to produce an FNObjectSnapshot, Diff() compares two
  * snapshots into an FNObjectSnapshotDiff, and the on-disk helpers provide a coarse way to persist
  * a baseline snapshot across editor sessions or commandlet runs.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/object-snapshot-utils/">FNObjectSnapshotUtils</a>
  */
 class NEXUSCORE_API FNObjectSnapshotUtils
 {

@@ -19,6 +19,7 @@ enum class ENDirection : uint8
 
 /**
  * Lookup helpers that map ENDirection values to their canonical FVector.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/direction/">FNDirection</a>
  */
 class FNDirection
 {
@@ -30,7 +31,7 @@ public:
 	 */
 	static const FVector& GetVector(const ENDirection& Direction)
 	{
-		switch (Direction) 
+		switch (Direction)
 		{
 			using enum ENDirection;
 		case Up:
@@ -41,13 +42,13 @@ public:
 
 		case Forward:
 			return FVector::ForwardVector;
-		
+
 		case Backward:
 			return FVector::BackwardVector;
-		
+
 		case Right:
 			return FVector::RightVector;
-		
+
 		case Left:
 			return FVector::LeftVector;
 		}

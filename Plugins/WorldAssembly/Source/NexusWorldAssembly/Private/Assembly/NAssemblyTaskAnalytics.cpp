@@ -3,8 +3,6 @@
 
 #include "Assembly/NAssemblyTaskAnalytics.h"
 
-#include "Developer/NReportListBlock.h"
-
 void FNAssemblyTaskAnalytics::TaskGraphCreationStart()
 {
 	TaskGraphCreationTimer.Start();
@@ -63,6 +61,12 @@ void FNAssemblyTaskAnalytics::OrganGraphBuilder_SetFailure(int32 Index, int32 Fi
 	Analytic.bSucceeded = false;
 	Analytic.FinalCellNodeCount = FinalCellNodeCount;
 	Analytic.FailureReasonOverride = Reason;
+}
+
+void FNAssemblyTaskAnalytics::OrganGraphBuilder_SetDrawCount(int32 Index, uint64 DrawCount)
+{
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.DrawCount = DrawCount;
 }
 
 void FNAssemblyTaskAnalytics::OrganGraphBuilder_AddMessages(int32 Index, const TArray<FString>& Messages)
@@ -192,8 +196,8 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	const int32 AnalyticsContentTicket = Report->CreateContentBlock();
 	FNReportContentBlock* AnalyticsContentBlock = Report->GetContentBlock(AnalyticsContentTicket);
 	AnalyticsContentBlock->SetHeading("Analytics");
-	
-	double DurationTotal = TaskGraphCreationTimer.Duration + CreateVirtualWorldContextTimer.Duration + 
+
+	double DurationTotal = TaskGraphCreationTimer.Duration + CreateVirtualWorldContextTimer.Duration +
 		ProcessVirtualWorldContextTimer.Duration + CreateSpawnCellsContextTimer.Duration;
 
 
@@ -209,26 +213,26 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	OverviewTable->AddRow({"Game", "TaskGraph Creation", FString::SanitizeFloat(TaskGraphCreationTimer.Duration)});
 	OverviewTable->AddRow({"Game", "Create VirtualWorldContext", FString::SanitizeFloat(CreateVirtualWorldContextTimer.Duration)});
 	OverviewTable->AddRow({"Task", "Process VirtualWorldContext", FString::SanitizeFloat(ProcessVirtualWorldContextTimer.Duration)});
-	
+
 	// Organ Builders Individual Times
 	double LoopTotal = 0;
 	int32 SucceededOrganCount = 0;
 	const int32 OrganBuilderTableTicket = Report->CreateTableBlock(TimespanContentTicket);
 	FNReportTableBlock* OrganBuilderTable = Report->GetTableBlock(OrganBuilderTableTicket);
 	OrganBuilderTable->SetHeading("FNOrganGraphBuildTasks");
-	OrganBuilderTable->Initialize({ "Thread", "Organ", "Iterations", "Status", "ms" });
+	OrganBuilderTable->Initialize({ "Thread", "Organ", "Iterations", "Draws", "Status", "ms" });
 	for (const auto Analytic : OrganGraphBuilderAnalytics)
 	{
-		OrganBuilderTable->AddRow({"Task", *Analytic.Name, FString::FromInt(Analytic.Iterations), Analytic.GetStatusString(), FString::SanitizeFloat(Analytic.Timer.Duration)});
+		OrganBuilderTable->AddRow({"Task", *Analytic.Name, FString::FromInt(Analytic.Iterations), FString::Printf(TEXT("%llu"), Analytic.DrawCount), Analytic.GetStatusString(), FString::SanitizeFloat(Analytic.Timer.Duration)});
 		DurationTotal += Analytic.Timer.Duration;
 		LoopTotal += Analytic.Timer.Duration;
 		if (Analytic.bSucceeded) { SucceededOrganCount++; }
 	}
-	
+
 	// Need to re-get as it may have moved
 	OverviewTable = Report->GetTableBlock(OverviewTableTicket);
 	OverviewTable->AddRow({"Task", "OrganGraph Builders", FString::SanitizeFloat(LoopTotal)});
-	
+
 	// Collection timings
 	LoopTotal = 0;
 	const int32 ProcessPassTableTicket = Report->CreateTableBlock(TimespanContentTicket);
@@ -241,7 +245,7 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 		DurationTotal += Analytic.Timer.Duration;
 		LoopTotal += Analytic.Timer.Duration;
 	}
-	
+
 	// Need to re-get as it may have moved
 	OverviewTable = Report->GetTableBlock(OverviewTableTicket);
 	OverviewTable->AddRow({"Task", "Process Pass", FString::SanitizeFloat(LoopTotal)});
@@ -258,10 +262,10 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 		DurationTotal += Analytic.Timer.Duration;
 		LoopTotal += Analytic.Timer.Duration;
 	}
-	
+
 	OverviewTable = Report->GetTableBlock(OverviewTableTicket);
 	OverviewTable->AddRow({"Game", "Spawn Cells (Sliced)", FString::SanitizeFloat(LoopTotal)});
-	
+
 	Report->AddReplaceToken("{{RUNTIME}}",  FString::SanitizeFloat(DurationTotal));
 
 	// Headline the overall verdict: on the Analytics block header, in the operation overview's {{STATUS}} cell,
@@ -295,7 +299,7 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 		return FString::Printf(TEXT("%s (%i, %i%%)"), *DominantReason, RejectCount, Percent);
 	};
 
-	
+
 	int32 InsightsTicket = Report->FindCollapsableBlockTicket("Insights");
 	if (FailedOrganCount > 0)
 	{
@@ -354,9 +358,9 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 
 float FNAssemblyTaskAnalytics::GetTotalDuration()
 {
-	double DurationTotal = TaskGraphCreationTimer.Duration + CreateVirtualWorldContextTimer.Duration + 
+	double DurationTotal = TaskGraphCreationTimer.Duration + CreateVirtualWorldContextTimer.Duration +
 		ProcessVirtualWorldContextTimer.Duration + CreateSpawnCellsContextTimer.Duration;
-	
+
 	for (const auto Analytic : OrganGraphBuilderAnalytics)
 	{
 		DurationTotal += Analytic.Timer.Duration;

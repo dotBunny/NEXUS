@@ -9,6 +9,7 @@
 
 /**
  * Source channel used by the NEXUS framework update-check task.
+ * @note Gap in values is reserved for future use.
  */
 UENUM(BlueprintType)
 enum class ENUpdatesChannel : uint8
@@ -26,6 +27,7 @@ enum class ENUpdatesChannel : uint8
  *
  * Fires an HTTP request to read the canonical NCoreMinimal.h from the chosen channel, compares
  * the embedded version number to the current build, and, when newer, surfaces a notification.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/delayed-editor-tasks/update-check-delayed-editor-task/">UNUpdateCheckDelayedEditorTask</a>
  */
 UCLASS()
 class NEXUSCOREEDITOR_API UNUpdateCheckDelayedEditorTask : public UNDelayedEditorTask
@@ -38,8 +40,10 @@ public:
 
 private:
 
+	/** HTTP completion handler: parses the fetched header's version and notifies when a newer release exists. */
 	static void OnUpdateQueryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bProcessedSuccessfully);
 
+	/** Delay-completion callback: issues the version-query HTTP request for the configured channel. */
 	UFUNCTION()
 	void Execute();
 

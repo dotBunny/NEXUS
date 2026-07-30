@@ -11,23 +11,40 @@
 #include "DelayedEditorTasks/NUpdateCheckDelayedEditorTask.h"
 #include "Modules/ModuleManager.h"
 
+N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE_IMPLEMENTATION(FNCoreEditorModule)
+
 void FNCoreEditorModule::StartupModule()
 {
 	if (IsRunningGame()) return;
-	
+
 	if (!FNEditorUtils::IsUserControlled())
 	{
 		UE_LOG(LogNexusCoreEditor, Log, TEXT("Framework initializing in an automated environment; some functionality will be ignored."));
 	}
-	
+
 	N_MODULE_POST_ENGINE_INIT_STATIC(FNCoreEditorModule::OnPostEngineInit);
 }
 
 void FNCoreEditorModule::ShutdownModule()
 {
 	N_MODULE_REMOVE_POST_ENGINE_INIT_DELEGATE()
+	// No-op in practice: the startup callback(s) are bound via CreateStatic (no `this` owner
+	// for RemoveAll to match) and RegisterStartupCallback usually runs them immediately. Kept
+	// for symmetry with Epic's module template; the real menu teardown is below.
 	UToolMenus::UnRegisterStartupCallback(this);
 	FNEditorCommands::RemoveMenuEntries();
+
+	// Mirror the Register() in OnPostEngineInit. IsRegistered() skips the headless cook/commandlet path, where
+	// Register() never ran (gated on IsUserControlled() + Slate init).
+	if (FNEditorCommands::IsRegistered())
+	{
+		FNEditorCommands::Unregister();
+	}
+
+	// Mirror the FNPropertySections::Register() in OnPostEngineInit. Safe to call unconditionally: when Register()
+	// never ran (headless cook/commandlet path), the cached pointers are null and the queues empty, so this is a no-op.
+	FNPropertySections::Unregister();
+
 	FNEditorStyle::Shutdown();
 	IModuleInterface::ShutdownModule();
 }
@@ -39,18 +56,18 @@ void FNCoreEditorModule::OnPostEngineInit()
 	// Setup staging rules for configs
 	FNEditorUtils::DisallowConfigFileFromStaging("DefaultNexusEditor");
 	FNEditorUtils::AllowConfigFileForStaging("DefaultNexusGame");
-	
+
 	FNEditorStyle::Initialize();
 
 	// Nothing works without the application being initialized
 	if (!FSlateApplication::IsInitialized()) return;
-	
+
 	FNEditorCommands::Register();
 	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNEditorCommands::AddMenuEntries));
-	
+
 	// Initialize our simplified property section manager
 	FNPropertySections::Register();
-	
+
 	// Start update check
 	UNUpdateCheckDelayedEditorTask::Create();
 }

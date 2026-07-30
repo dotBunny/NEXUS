@@ -12,6 +12,7 @@
  *
  * Stores machine-local state (such as the last time the update-check ran) so it does not leak
  * into source control via the shared NexusEditor ini.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/editor-user-settings/">UNEditorUserSettings</a>
  */
 UCLASS(config = NexusUserSettings)
 class NEXUSCOREEDITOR_API UNEditorUserSettings : public UDeveloperSettings

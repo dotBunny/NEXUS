@@ -15,6 +15,8 @@ namespace UnrealBuildTool.Rules
 					"Core",
 					"Engine",
 					"GameplayTags",
+					"Slate",
+					"SlateCore",
 					"UMG"
 				]
 			);
@@ -28,7 +30,6 @@ namespace UnrealBuildTool.Rules
 			
 			// NEXUS
 			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusUI"]);
-			PrivateDependencyModuleNames.AddRange(["NexusCore"]);
 
 			ShortName = "NexusDynamicRefs";						
 		}

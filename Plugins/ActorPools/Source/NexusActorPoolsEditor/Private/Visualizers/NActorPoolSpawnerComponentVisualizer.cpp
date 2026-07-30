@@ -18,7 +18,7 @@ void FNActorPoolSpawnerComponentVisualizer::DrawVisualization(const UActorCompon
 	const FVector Origin = SpawnerComponent->GetComponentLocation() + SpawnerComponent->GetOffset();
 	const FRotator Rotator = SpawnerComponent->GetComponentRotation();
 	const UNToolingEditorUserSettings* Settings = UNToolingEditorUserSettings::Get();
-	
+
 	switch (SpawnerComponent->GetDistribution())
 	{
 		using enum ENActorPoolSpawnerDistribution;
@@ -50,7 +50,7 @@ void FNActorPoolSpawnerComponentVisualizer::DrawVisualization(const UActorCompon
 		}
 		case Box:
 		{
-			const FVector BoxRange = SpawnerComponent->GetDistributionRange();
+			const FVector BoxRange = SpawnerComponent->GetDistributionRange() * 0.5f;
 			const FBox ABox = FBox(Origin - BoxRange, Origin + BoxRange);
 			DrawWireBox(PDI, ABox, Settings->VisualizationDistributionOuterColor, SDPG_Foreground, Settings->VisualizationLineThickness);
 			break;

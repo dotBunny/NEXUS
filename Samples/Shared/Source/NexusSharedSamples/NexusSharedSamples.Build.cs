@@ -22,7 +22,6 @@ namespace UnrealBuildTool.Rules
 
 			PrivateDependencyModuleNames.AddRange(
 				[
-					"CoreUObject",
 					"InputCore",
 					"Projects",
 					"UMG"
@@ -31,7 +30,6 @@ namespace UnrealBuildTool.Rules
 			
 			// NEXUS
 			PublicDependencyModuleNames.AddRange(["NexusCore"]);
-			PrivateDependencyModuleNames.AddRange(["NexusCore"]);
 			
 			ShortName = "NexusSharedSamples";						
 		}

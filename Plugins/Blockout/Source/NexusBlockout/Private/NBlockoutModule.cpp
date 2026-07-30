@@ -7,9 +7,10 @@
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 
+N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE_IMPLEMENTATION(FNBlockoutModule)
+
 void FNBlockoutModule::StartupModule()
 {
-	
 	N_UPDATE_UPLUGIN("NexusBlockout")
 	N_MODULE_POST_ENGINE_INIT_STATIC(FNBlockoutModule::OnPostEngineInit);
 }

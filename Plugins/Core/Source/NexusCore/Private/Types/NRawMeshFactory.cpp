@@ -7,6 +7,7 @@
 #include "Chaos/TriangleMeshImplicitObject.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Developer/NDeveloperUtils.h"
+#include "Engine/StaticMesh.h"
 #include "Math/NBoundsUtils.h"
 #include "PhysicsEngine/BodySetup.h"
 
@@ -24,7 +25,7 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 	for (AActor* Actor : Actors)
 	{
 		if (!IsValid(Actor)) continue;
-		
+
 		// Actor-bounds overlap filter: include when the actor's bounds intersect at least one supplied bounds.
 		if (!ContainingBounds.IsEmpty())
 		{
@@ -59,10 +60,13 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 			// Instanced variants share one BodySetup across N instances — emit per instance.
 			if (const UInstancedStaticMeshComponent* InstanceStaticMesh = Cast<UInstancedStaticMeshComponent>(ActorPrimitive))
 			{
-				// Ensure ConvexElems on the body have their Chaos::FConvex populated before
-				// AppendChaosAggregateGeometry reads them, otherwise FromChaosConvexHull falls back to the
-				// triangulated IndexData path and CheckConvex loses the polygonal face description.
-				if (!bUseComplexAsSimple && !Body->bCreatedPhysicsMeshes)
+				const UStaticMesh* SourceMesh = InstanceStaticMesh->GetStaticMesh();
+				const bool bUseRenderData = bUseComplexAsSimple && IsStaticMeshCPUReadable(SourceMesh);
+
+				// The render-data route needs no physics meshes. Every other route does: the simple path so
+				// AppendChaosAggregateGeometry reads polygonal ConvexElem face data instead of falling back to the
+				// triangulated IndexData, and the complex-as-simple route-2 fallback so TriMeshGeometries is populated.
+				if (!bUseRenderData && !Body->bCreatedPhysicsMeshes)
 				{
 					Body->CreatePhysicsMeshes();
 				}
@@ -73,10 +77,14 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 					FTransform InstanceWorld;
 					InstanceStaticMesh->GetInstanceTransform(i, InstanceWorld,true);
 
-					if (bUseComplexAsSimple)
+					if (!bUseComplexAsSimple)
+					{
+						AppendChaosAggregateGeometry(Body->AggGeom, InstanceWorld,OutMeshes, OutTransforms);
+					}
+					else if (bUseRenderData)
 					{
 						FNRawMesh InstanceMesh;
-						if (FromStaticMesh(InstanceStaticMesh->GetStaticMesh(), InstanceMesh))
+						if (FromStaticMesh(SourceMesh, InstanceMesh))
 						{
 							OutMeshes.Add(MoveTemp(InstanceMesh));
 							OutTransforms.Add(MoveTemp(InstanceWorld));
@@ -84,7 +92,9 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 					}
 					else
 					{
-						AppendChaosAggregateGeometry(Body->AggGeom, InstanceWorld,OutMeshes, OutTransforms);
+						// Render data isn't CPU-readable (cooked build without CPU access) — fall back to the
+						// cooked Chaos tri mesh, placed at this instance's world transform.
+						FromChaosBodySetup(Body, InstanceWorld, OutMeshes, OutTransforms);
 					}
 				}
 				continue;
@@ -94,25 +104,30 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 
 			if (bUseComplexAsSimple)
 			{
-				// Route 1 — StaticMeshComponent: read source triangles from render data.
+				// Route 1 — StaticMeshComponent: read source triangles from render data. Editor / CPU-accessible
+				// meshes only; cooked builds free the CPU buffer copies, so guard before reading them.
 				if (const UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(ActorPrimitive))
 				{
-					FNRawMesh InstanceMesh;
-					if (FromStaticMesh(StaticMeshComponent->GetStaticMesh(), InstanceMesh))
+					const UStaticMesh* SourceMesh = StaticMeshComponent->GetStaticMesh();
+					if (IsStaticMeshCPUReadable(SourceMesh))
 					{
-						OutMeshes.Add(MoveTemp(InstanceMesh));
-						OutTransforms.Add(CompToWorld);
-						continue;
+						FNRawMesh InstanceMesh;
+						if (FromStaticMesh(SourceMesh, InstanceMesh))
+						{
+							OutMeshes.Add(MoveTemp(InstanceMesh));
+							OutTransforms.Add(CompToWorld);
+							continue;
+						}
 					}
 				}
 
-				// Route 2 — everything else (procedural meshes, destructibles, etc):
-				// ensure physics meshes are built and read the Chaos tri mesh directly.
+				// Route 2 — everything else (procedural meshes, destructibles, etc), and the runtime-safe fallback
+				// when render data isn't CPU-readable: ensure physics meshes are built and read the Chaos tri mesh directly.
 				if (!Body->bCreatedPhysicsMeshes)
 				{
 					Body->CreatePhysicsMeshes();
 				}
-				
+
 				FromChaosBodySetup(Body, CompToWorld, OutMeshes, OutTransforms);
 				continue;
 			}
@@ -166,7 +181,7 @@ bool FNRawMeshFactory::FromChaosBox(const FKBoxElem& Box, const FTransform& Comp
 
 	Mesh.CalculateCenterAndBounds();
 	Mesh.Validate();
-	
+
 
 	const FTransform ElemLocal(Box.Rotation, Box.Center);
 	OutMesh = MoveTemp(Mesh);
@@ -331,7 +346,7 @@ bool FNRawMeshFactory::FromChaosSphyl(const FKSphylElem& Sphyl, const FTransform
 
 	Mesh.CalculateCenterAndBounds();
 	Mesh.Validate();
-	
+
 	const FTransform ElemLocal(Sphyl.Rotation, Sphyl.Center);
 	OutMesh = MoveTemp(Mesh);
 	OutTransform = ElemLocal * CompToWorld;
@@ -341,7 +356,7 @@ bool FNRawMeshFactory::FromChaosSphyl(const FKSphylElem& Sphyl, const FTransform
 bool FNRawMeshFactory::FromChaosTriMeshes(const Chaos::FTriangleMeshImplicitObjectPtr& TriMesh, FNRawMesh& OutMesh)
 {
 	if (!TriMesh.IsValid()) return false;
-	
+
 	const auto& Particles = TriMesh->Particles();
 	const Chaos::FTrimeshIndexBuffer& IdxBuffer = TriMesh->Elements();
 
@@ -504,7 +519,7 @@ bool FNRawMeshFactory::FromStaticMesh(const UStaticMesh* StaticMesh, FNRawMesh& 
 
 void FNRawMeshFactory::AppendChaosAggregateGeometry(const FKAggregateGeom& Agg, const FTransform& BaseToWorld, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms)
 {
-	
+
 	for (const FKConvexElem& ConvexHull : Agg.ConvexElems)
 	{
 		FNRawMesh WorkingMesh;
@@ -550,4 +565,24 @@ bool FNRawMeshFactory::IsLandscapePrimitive(const UPrimitiveComponent* Prim)
 {
 	// Avoids taking a hard dependency on the Landscape module.
 	return Prim->GetClass()->GetName().StartsWith(TEXT("Landscape"));
+}
+
+bool FNRawMeshFactory::IsStaticMeshCPUReadable(const UStaticMesh* StaticMesh)
+{
+	if (StaticMesh == nullptr || StaticMesh->GetRenderData() == nullptr
+		|| StaticMesh->GetRenderData()->LODResources.IsEmpty())
+	{
+		return false;
+	}
+#if WITH_EDITOR
+	// The editor retains CPU-side render data regardless of the asset's CPU-access flag.
+	return true;
+#else
+	// Cooked builds free the CPU copies of the vertex/index buffers unless the mesh opted into CPU access,
+	// so reading them without this guard dereferences null buffer data. Both buffers FromStaticMesh touches
+	// (positions + indices) must be readable.
+	const FStaticMeshLODResources& LOD = StaticMesh->GetRenderData()->LODResources[0];
+	return LOD.IndexBuffer.GetAllowCPUAccess()
+		&& LOD.VertexBuffers.PositionVertexBuffer.GetAllowCPUAccess();
+#endif // WITH_EDITOR
 }

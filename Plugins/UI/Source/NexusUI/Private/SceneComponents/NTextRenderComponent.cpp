@@ -3,7 +3,9 @@
 
 #include "SceneComponents/NTextRenderComponent.h"
 
+#include "NMultiplayerUtils.h"
 #include "NUIMinimal.h"
+#include "Iris/ReplicationSystem/Prioritization/SphereWithOwnerBoostNetObjectPrioritizer.h"
 #include "Net/UnrealNetwork.h"
 #include "Net/Core/PushModel/PushModel.h"
 
@@ -23,11 +25,20 @@ void UNTextRenderComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Ensure an owner is replicating
-	if (!GetOwner()->GetIsReplicated())
+	// Replicated text only propagates if the owning actor itself replicates. Either force replication
+	// on for the owner, or warn rather than silently failing to propagate.
+	AActor* Owner = GetOwner();
+	if (bShouldCheckReplication && Owner != nullptr && FNMultiplayerUtils::HasWorldAuthority(GetWorld()) && !Owner->GetIsReplicated())
 	{
-		UE_LOG(LogNexusUI, Warning, TEXT("NTextRenderComponent(%s) turned on replication for its Owner(%s); was this a mistake?"), *GetName(), *GetOwner()->GetActorNameOrLabel());
-		GetOwner()->SetReplicates(true);
+		if (bForceOwnerReplication)
+		{
+			Owner->SetReplicates(true);
+			UE_LOG(LogNexusUI, Log, TEXT("NTextRenderComponent(%s)'s Owner(%s) was not replicated; replication has been forced on so replicated text can propagate. Disable bForceOwnerReplication to opt out of this behavior."), *GetName(), *Owner->GetActorNameOrLabel());
+		}
+		else
+		{
+			UE_LOG(LogNexusUI, Warning, TEXT("NTextRenderComponent(%s)'s Owner(%s) is not replicated, so replicated text will not propagate. Enable replication on the owning actor, or disable bShouldCheckReplication on this component."), *GetName(), *Owner->GetActorNameOrLabel());
+		}
 	}
 
 	if (!IsRunningDedicatedServer())
@@ -47,15 +58,15 @@ void UNTextRenderComponent::OnRep_TextValue()
 
 void UNTextRenderComponent::SetFromName(const FName& NewValue)
 {
-	if (GetOwner()->HasAuthority())
+	if (FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
 	{
 		FString NewString = NewValue.ToString();
-		
+
 		if (CachedValue.Equals(NewString))
 		{
 			return;
 		}
-		
+
 		CachedValue = NewString;
 		MARK_PROPERTY_DIRTY_FROM_NAME(UNTextRenderComponent, CachedValue, this);
 
@@ -69,7 +80,7 @@ void UNTextRenderComponent::SetFromName(const FName& NewValue)
 
 void UNTextRenderComponent::SetFromString(const FString& NewValue)
 {
-	if (GetOwner()->HasAuthority())
+	if (FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
 	{
 		if (CachedValue.Equals(NewValue))
 		{
@@ -89,7 +100,7 @@ void UNTextRenderComponent::SetFromString(const FString& NewValue)
 
 void UNTextRenderComponent::SetFromText(const FText& NewValue)
 {
-	if (GetOwner()->HasAuthority())
+	if (FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
 	{
 		if (NewValue.EqualTo(FText::FromString(CachedValue)))
 		{

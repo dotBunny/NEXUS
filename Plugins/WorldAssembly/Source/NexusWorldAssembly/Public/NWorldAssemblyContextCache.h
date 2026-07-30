@@ -11,6 +11,8 @@
  * @note Every public method takes OperationContextLock for its full duration, so each query or mutation is atomic
  * with respect to AddOperationContext/RemoveOperationContext. No references into the backing maps ever escape the
  * lock, so callers cannot observe a dangling entry.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#operation-context-cache">Operation Context Cache</a>
  */
 class NEXUSWORLDASSEMBLY_API FNWorldAssemblyContextCache
 {
@@ -36,6 +38,9 @@ public:
 	 * @note Thread-safe: the whole batch is removed under a single lock acquisition.
 	 */
 	static void ClearContext(const TArray<int32>& OperationTickets);
+
+
+	static void ClearAllContext();
 
 	/**
 	 * Read the tag-counter value for a tag without exposing the cached counter.

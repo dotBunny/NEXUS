@@ -18,6 +18,8 @@ namespace UnrealBuildTool.Rules
 					"GameplayTags",
 					"GeometryCore",
 					"PCG",
+					"Slate",
+					"SlateCore",
 					"UMG"
 				]
 			);
@@ -25,9 +27,7 @@ namespace UnrealBuildTool.Rules
 			PrivateDependencyModuleNames.AddRange(
 		[
 					"Chaos",
-					"CoreUObject",
 					"DeveloperSettings",
-					"Engine",
 					"GeometryFramework",
 					"Projects",
 		]
@@ -35,7 +35,7 @@ namespace UnrealBuildTool.Rules
 			
 			// NEXUS
 			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusUI"]);
-			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusPicker", "NexusUI"]);
+			PrivateDependencyModuleNames.AddRange(["NexusPicker"]);
 
 			if (Target.bBuildEditor)
 			{

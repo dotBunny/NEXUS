@@ -16,13 +16,36 @@ class FNAssemblyOperationContext;
 class UNAssemblyOperation;
 struct FPropertyChangedEvent;
 
+/**
+ * Controls how much of the World Assembly edit-mode visualization is drawn, used to produce clean captures.
+ *
+ * Toggled by the screenshot commands so debug overlays and on-screen messages can be suppressed for a tidy image.
+ */
 enum class ENWorldAssemblyEdModeRenderMode
 {
+	/** Full authoring view: debug overlays (bounds/hull/voxel) and HUD warning messages are drawn. */
 	All,
+	/** Cell-thumbnail capture: cell overlays are still drawn, but HUD messages are hidden. */
 	CellScreenshot,
+	/** Level capture: both debug overlays and HUD messages are hidden for a clean level screenshot. */
 	LevelScreenshot,
+	/** Draw nothing: neither overlays nor HUD messages are rendered. */
 	None,
 };
+
+// still not used #00FFFF
+namespace NEXUS::WorldAssembly::DefaultColors
+{
+	static constexpr FLinearColor BoneValid = FLinearColor(0.061246f,1.f,1.f, 1.f); // #46FFFFFF
+	static constexpr FLinearColor BoneInvalid = FLinearColor(0.254152f,0.012983f,1.f, 1.f); // #8A1EFFFF
+
+	static constexpr FLinearColor JunctionValid = FLinearColor(0.010330f,1.f,0.391573f, 1.f); // #1AFFA8FF
+	static constexpr FLinearColor JunctionInvalid = FLinearColor(1.f,0.097587f,1.f, 1.f); // #FF58FFFF
+	static constexpr FLinearColor JunctionUnfilled = FLinearColor(1.f,1.f,1.f, 1.f); // #FFFFFFFF
+
+	static constexpr FLinearColor CellHull = FLinearColor(0.f,0.630757f,1.f, 1.f); // #00D0FFFF
+	static constexpr FLinearColor CellBounds = FLinearColor(0.434154f,0.006995f,0.001821f, 1.f); // #B01406FF
+}
 
 /**
  * Custom editor mode for World Assembly cell/organ authoring.
@@ -34,6 +57,7 @@ enum class ENWorldAssemblyEdModeRenderMode
 class FNWorldAssemblyEdMode final : public FEdMode
 {
 public:
+
 	/**
 	 * Which side-car slot the cell-editor view is currently focused on.
 	 */
@@ -58,20 +82,30 @@ public:
 	static FBox GetCachedBounds() { return CachedBounds; }
 
 	/** @return Cached bounds overlay color. */
-	static const FLinearColor& GetCachedBoundsColor() { return CachedBoundsColor; }
+	static const FLinearColor& GetCachedCellBoundsColor() { return CachedCellBoundsColor; }
+
+	/** @return Cached hull overlay color. */
+	static const FLinearColor& GetCachedCellHullColor() { return CachedCellHullColor; }
+
+	static const FLinearColor& GetCachedJunctionInvalidColor() { return CachedJunctionInvalidColor; }
+
+	static const FLinearColor& GetCachedJunctionValidColor() { return CachedJunctionValidColor; }
+
+	static const FLinearColor& GetCachedJunctionUnfilledColor() { return CachedJunctionUnfilledColor; }
+
+	static const FLinearColor& GetCachedBoneValidColor() { return CachedBoneValidColor; }
+
+	static const FLinearColor& GetCachedBoneInvalidColor() { return CachedBoneInvalidColor; }
 
 	/** @return Cached bounds overlay vertex positions. */
 	static const TArray<FVector>& GetCachedBoundsVertices() { return CachedBoundsVertices; }
-
-	/** @return Cached hull overlay color. */
-	static const FLinearColor& GetCachedHullColor() { return CachedHullColor; }
 
 	/** @return Cached voxel overlay data. */
 	static const FNCellVoxelData& GetCachedVoxelData() { return CachedVoxelData; }
 
 	/** @return Cached hull overlay vertex positions. */
 	static const TArray<FVector>& GetCachedHullVertices() { return CachedHullVertices; }
-	
+
 	/** @return Cached hull overlay vertex positions. */
 	static const TArray<FIntVector2>& GetCachedHullEdges() { return CachedHullEdges; }
 
@@ -106,21 +140,21 @@ public:
 	static void SetCellEdMode(const ENCellEdMode InCellEdMode)
 	{
 		if (CellEdMode == InCellEdMode) return;
-		
+
 		FNWorldAssemblyEditorModule& Module = FNWorldAssemblyEditorModule::Get();
 		Module.RootComponentVisualizer->ClearSelection();
-		
+
 		CellEdMode = InCellEdMode;
 	}
 
 	/** @return true when a world-collision visualizer actor is currently alive for the focused world. */
 	static bool HasCollisionVisualizer() { return CollisionVisualizer != nullptr; }
-	
+
 	static void OnActorDeleted(AActor* Actor);
-	
+
 	/** Set the active render mode used to draw World Assembly debug geometry in the edit mode. */
 	static void SetRenderMode(const ENWorldAssemblyEdModeRenderMode Mode) { RenderMode = Mode; }
-	
+
 	/**
 	 * Builds — or refreshes in place — the world-collision visualizer: a single merged ANDebugActor whose mesh is the
 	 * union of the simple-collision geometry of every world actor that passes the World Assembly world-actor filter
@@ -140,7 +174,7 @@ public:
 	 * from CreateCollisionVisualizer (refresh) and during Exit() so the visualizer doesn't outlive the editor mode.
 	 */
 	static void DestroyCollisionVisualizer();
-	
+
 	/** Unique identifier registered with the editor-mode manager. */
 	const static FEditorModeID Identifier;
 
@@ -168,6 +202,8 @@ public:
 	virtual void Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI) override;
 	virtual void DrawHUD(FEditorViewportClient* ViewportClient, FViewport* Viewport, const FSceneView* View, FCanvas* Canvas) override;
 	//End FEdMode
+
+	static void CacheUserSettings();
 
 private:
 	/** Subscribe to the editor world-change delegates that drive live visualizer refreshes. Called when one is spawned. */
@@ -201,15 +237,24 @@ private:
 	/** Delegate: an undo/redo transaction completed — geometry can't be cheaply diffed, so always flag a refresh. */
 	static void OnUndoRedo();
 
+
+
 	/** Pixel spacing between stacked HUD messages. */
 	const int32 MessageSpacing = 20;
 
 	static TArray<FVector> CachedHullVertices;
 	static TArray<FIntVector2> CachedHullEdges;
-	static FLinearColor CachedHullColor;
+
+	static FLinearColor CachedCellHullColor;
+	static FLinearColor CachedCellBoundsColor;
+	static FLinearColor CachedJunctionUnfilledColor;
+	static FLinearColor CachedJunctionInvalidColor;
+	static FLinearColor CachedJunctionValidColor;
+	static FLinearColor CachedBoneValidColor;
+	static FLinearColor CachedBoneInvalidColor;
+
 	static FBox CachedBounds;
 	static FNCellVoxelData CachedVoxelData;
-	static FLinearColor CachedBoundsColor;
 	static TArray<FVector> CachedBoundsVertices;
 	static TWeakObjectPtr<ANCellActor> CellActor;
 	static ENCellEdMode CellEdMode;
@@ -242,7 +287,8 @@ private:
 
 	/** User-disabled auto-hull regeneration; surfaces a HUD warning. */
 	bool bAutoHullDisabled = false;
-	
+
+	/** When true, the focused cell is allowed to keep a non-convex hull rather than forcing convexity. */
 	bool bAllowNonConvexHull = false;
 
 	/** User-disabled auto-voxel regeneration; surfaces a HUD warning. */
@@ -250,8 +296,8 @@ private:
 
 	/** Hash of the previously-selected organ set, used to detect selection changes per tick. */
 	uint32 PreviousSelectedOrganHash = 0;
-	
+
 	FDelegateHandle OnLevelActorDeletedHandle;
-	
+
 	FNMultiLineTextBoxCanvasItem CanvasMessageBox = FNMultiLineTextBoxCanvasItem();
 };

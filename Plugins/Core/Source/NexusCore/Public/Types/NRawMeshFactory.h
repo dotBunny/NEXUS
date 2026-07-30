@@ -16,11 +16,12 @@
  * transform so the caller can place every emitted mesh back in the correct frame. The class is stateless;
  * every method is static. Two distinct routes are exposed for complex-as-simple bodies — FromStaticMesh
  * (route 1, render-data) and FromChaosBodySetup (route 2, cooked Chaos tri meshes).
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/raw-mesh-factory/">FNRawMeshFactory</a>
  */
 class NEXUSCORE_API FNRawMeshFactory
 {
 public:
-	
+
 	/**
 	 * Walks each supplied actor's registered UPrimitiveComponents and extracts their simple-collision
 	 * representation as FNRawMesh entries, along with parallel world-space transforms.
@@ -39,7 +40,7 @@ public:
 	 */
 	static void FromActorsInBounds(const TArray<AActor*>& Actors, const TArray<FBoxSphereBounds>& ContainingBounds,
 		TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms);
-	
+
 	/**
 	 * Emits an FKBoxElem as an 8-vertex / 12-triangle FNRawMesh. The element's Center and Rotation are
 	 * folded into the emitted transform; the mesh itself is box-half-extent-local.
@@ -113,7 +114,7 @@ public:
 	 * @return true when a mesh was appended; false when StaticMesh has no usable render data.
 	 */
 	static bool FromStaticMesh(const UStaticMesh* StaticMesh, FNRawMesh& OutMesh);
-	
+
 private:
 	/**
 	 * Dispatches an FKAggregateGeom's convex/box/sphere/capsule elements through the per-element appenders.
@@ -124,11 +125,21 @@ private:
 	 */
 	static void AppendChaosAggregateGeometry(const FKAggregateGeom& Agg, const FTransform& BaseToWorld,
 		TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms);
-	
+
 	/**
 	 * Class-name heuristic to skip landscape primitives without taking a hard Landscape-module dependency.
 	 * @param Prim Primitive component to inspect.
 	 * @return true when the component's class name begins with "Landscape".
 	 */
 	static bool IsLandscapePrimitive(const UPrimitiveComponent* Prim);
+
+	/**
+	 * @param StaticMesh Mesh whose LOD0 render buffers are inspected.
+	 * @return true when StaticMesh's LOD0 render buffers can be read on the CPU. Always true in editor (CPU copies
+	 *         are retained regardless of the asset flag); in cooked builds, true only when the mesh opted into CPU
+	 *         access — otherwise the vertex/index CPU data is freed after GPU upload and FromStaticMesh would
+	 *         dereference null buffer data.
+	 * @note Guards every render-data read in FromActorsInBounds; route 2 (cooked Chaos tri mesh) is the fallback.
+	 */
+	static bool IsStaticMeshCPUReadable(const UStaticMesh* StaticMesh);
 };

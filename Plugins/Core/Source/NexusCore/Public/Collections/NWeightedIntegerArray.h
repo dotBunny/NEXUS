@@ -4,6 +4,7 @@
 #pragma once
 
 #include "NRandom.h"
+#include "Math/NMersenneTwister.h"
 #include "NWeightedIntegerArray.generated.h"
 
 /**
@@ -12,12 +13,13 @@
  * Rather than storing explicit weight tables, each value is inserted Weight times. Picking an
  * entry then becomes a uniform random index lookup while still honoring the relative weights.
  * This keeps selection fast at the cost of a larger memory footprint for heavily weighted entries.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/collections/weighted-integer-array/">FNWeightedIntegerArray</a>
  */
 USTRUCT(BlueprintType)
 struct FNWeightedIntegerArray
 {
 	GENERATED_BODY()
-	
+
 	/**
 	 * Add a value to the array, duplicated according to its weight.
 	 * @param Value The integer value to add.
@@ -25,7 +27,7 @@ struct FNWeightedIntegerArray
 	 */
 	void Add(const int32 Value, const int32 Weight = 1)
 	{
-		if (Weight == 0) return;
+		if (Weight <= 0) return;
 		Data.Reserve(Data.Num() + Weight);
 		for (int32 i = 0; i < Weight; i++)
 		{
@@ -35,12 +37,13 @@ struct FNWeightedIntegerArray
 	}
 
 	/** Clears all entries from the array. */
-	void Empty()	
+	void Empty()
 	{
 		Data.Empty();
 		CachedMaxIndex = -1;
 	};
-	
+
+	/** Clears all entries from the array while retaining the allocated slack, unlike Empty which releases it. */
 	void Reset()
 	{
 		Data.Reset();
@@ -82,28 +85,6 @@ struct FNWeightedIntegerArray
 			if (Limit == 0) break;
 		}
 		CachedMaxIndex = Data.Num() - 1;
-	}
-
-	/**
-	 * Get the next deterministic value from the array.
-	 * @return Uses FNRandom::GetDeterministic()
-	 */
-	int32 NextValue() const
-	{
-		if (!HasData()) return INDEX_NONE;
-		return Data[FNRandom::GetDeterministic().IntegerRange(0, CachedMaxIndex)];
-	}
-
-	/**
-	 * Get the next deterministic value from the array, then remove every copy of it.
-	 * @return The picked value, which will no longer appear in the array on subsequent calls. Uses FNRandom::GetDeterministic().
-	 */
-	int32 NextValueAndRemove()
-	{
-		if (!HasData()) return INDEX_NONE;
-		const int32 ReturnValue = Data[FNRandom::GetDeterministic().IntegerRange(0, CachedMaxIndex)];;
-		Remove(ReturnValue);
-		return ReturnValue;
 	}
 
 	/**
@@ -217,7 +198,7 @@ struct FNWeightedIntegerArray
 	{
 		return CachedMaxIndex >= 0;
 	}
-	
+
 	/**
 	 * Does the array currently contain at least one copy of the supplied value?
 	 * @param Value The value to test for.
@@ -233,14 +214,14 @@ struct FNWeightedIntegerArray
 	 *
 	 * @return A new array containing each unique value present in the weighted array.
 	 */
-	TArray<int32> GetUniqueValues()
+	TArray<int32> GetUniqueValues() const
 	{
 		TArray<int32> Values;
 		for (int32 i = 0; i < Data.Num(); i++)
 		{
 			Values.AddUnique(Data[i]);
 		}
-		return MoveTemp(Values);
+		return Values;
 	}
 
 	/**
@@ -250,8 +231,10 @@ struct FNWeightedIntegerArray
 	int32 WeightedCount() const { return Data.Num(); }
 
 private:
+	/** Backing storage: each value appears once per unit of its weight, so a weighted pick is a uniform index draw. */
 	UPROPERTY(VisibleAnywhere)
 	TArray<int32> Data;
+	/** Cached highest valid index into Data (Data.Num() - 1); -1 when the array is empty. */
 	UPROPERTY(VisibleAnywhere)
 	int32 CachedMaxIndex = -1;
 };

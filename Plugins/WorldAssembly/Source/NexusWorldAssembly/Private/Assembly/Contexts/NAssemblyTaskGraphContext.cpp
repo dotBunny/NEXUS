@@ -8,7 +8,7 @@ FNAssemblyTaskGraphContext::FNAssemblyTaskGraphContext(UWorld* OutputWorld, cons
 	this->OperationTicket = OperationTicket;
 	TargetWorld = OutputWorld;
 	OperationSettings = Settings;
-	
+
 	ContextTags = Settings.ContextTags;
 	TagCounter = Settings.TagCounters;
 }

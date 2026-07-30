@@ -4,17 +4,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ContentBrowserModule.h"
-#include "IContentBrowserSingleton.h"
-#include "LevelEditorSubsystem.h"
-#include "Selection.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
 
+class FConfigFile;
 class UAsyncEditorDelay;
 
 /**
  * A utility methods collection for the Unreal Editor.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/editor-utils/">FNEditorUtils</a>
  */
 class NEXUSCOREEDITOR_API FNEditorUtils
 {
@@ -37,7 +35,17 @@ public:
 		if (GEditor->GetSelectedActorCount() == 0) return false;
 		return true;
 	}
-	
+
+	/**
+	 * Is a single actor selected?
+	 * @return true/false if a single actor is selected.
+	 */
+	FORCEINLINE static bool HasActorSelected()
+	{
+		if (GEditor->GetSelectedActorCount() == 1) return true;
+		return false;
+	}
+
 	/** Get the current editor map name. */
 	FORCEINLINE static FString GetCurrentMapName()
 	{
@@ -67,9 +75,10 @@ public:
 	/** Is in PIE and not paused. */
 	FORCEINLINE static bool IsPlayInEditorRunning()
 	{
-		return IsPlayInEditor() && !GUnrealEd->PlayWorld->bDebugPauseExecution;
+		const UWorld* PlayWorld = GEditor->PlayWorld;
+		return PlayWorld != nullptr && !PlayWorld->bDebugPauseExecution;
 	}
-	
+
 	/**
 	 * Is the editor controlled by a user?
 	 * @note Attempts to represent if it is safe to do things that need a fully initialized editor.
@@ -105,7 +114,7 @@ public:
 	 * @return A pointer to the newly created Blueprint asset.
 	 */
 	static UBlueprint* CreateBlueprint(const FString& InPath, const TSubclassOf<UObject>& InParentClass);
-	
+
 	/**
 	 * Returns the active editor viewport's client.
 	 * @return The viewport client cast to FEditorViewportClient.
@@ -124,34 +133,13 @@ public:
 	 * Returns the current editor level.
 	 * @return The ULevel the user is editing, or nullptr while PIE is active.
 	 */
-	FORCEINLINE static ULevel* GetCurrentLevel()
-	{
-		if (IsPlayInEditor())
-		{
-			return nullptr;
-		}
-		
-		ULevelEditorSubsystem* LevelEditorSubsystem = GEditor->GetEditorSubsystem<ULevelEditorSubsystem>();
-		if (LevelEditorSubsystem != nullptr)
-		{
-			return LevelEditorSubsystem->GetCurrentLevel();
-		}
-		return nullptr;
-	}
-	
+	static ULevel* GetCurrentLevel();
+
 	/**
 	 * Returns the world that owns the current editor level.
 	 * @return The owning UWorld, or nullptr while PIE is active or no level is loaded.
 	 */
-	FORCEINLINE static UWorld* GetCurrentWorld()
-	{
-		ULevel* CurrentLevel = GetCurrentLevel();
-		if (CurrentLevel != nullptr)
-		{
-			return CurrentLevel->OwningWorld;
-		}
-		return nullptr;
-	}
+	static UWorld* GetCurrentWorld();
 
 	/**
 	 * Tests whether World has never been saved (new map or in-memory only).
@@ -170,40 +158,31 @@ public:
 	 * Replaces the current actor selection with Actor.
 	 * @param Actor The actor to select.
 	 */
-	FORCEINLINE static void SelectActor(AActor* Actor)
-	{
-		USelection* ActorSelection = GEditor->GetSelectedActors();
-		ActorSelection->Modify();
-		ActorSelection->DeselectAll();
-
-		GEditor->SelectActor(Actor, true, true, true, true);
-	}
+	static void SelectActor(AActor* Actor);
 
 	/**
 	 * Returns the union of folders selected in the Content Browser's main view and path view.
 	 * @return A de-duplicated list of asset path roots.
 	 */
-	static TArray<FString> GetSelectedContentBrowserPaths()
-	{
-		TArray<FString> SelectedPaths;
+	static TArray<FString> GetSelectedContentBrowserPaths();
 
-		IContentBrowserSingleton& ContentBrowser = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser").Get();
-		ContentBrowser.GetSelectedFolders(SelectedPaths);
-
-		TArray<FString> AdditionalPaths;
-		ContentBrowser.GetSelectedPathViewFolders(AdditionalPaths);
-		for (FString AdditionalPath : AdditionalPaths)
-		{
-			SelectedPaths.AddUnique(AdditionalPath);
-		}
-		return MoveTemp(SelectedPaths);
-	}
-	
-	/** Marks Config so it will not be bundled with staged/packaged builds. */
+	/** Marks Config so it will not be bundled with staged/packaged builds (undoes AllowConfigFileForStaging). */
 	static void DisallowConfigFileFromStaging(const FString& Config);
 
 	/** Marks Config so it will be bundled with staged/packaged builds (undoes DisallowConfigFileFromStaging). */
 	static void AllowConfigFileForStaging(const FString& Config);
+
+	/**
+	 * Adds RelativeConfig to AddArrayKey and prunes it from RemoveArrayKey within ConfigFile's [Staging]
+	 * section, so a config never lingers in both lists. Operates purely on ConfigFile — no disk I/O.
+	 * @param ConfigFile The config to mutate in place.
+	 * @param RelativeConfig The project-relative ini path to add (e.g. "NEXUS/Config/Foo.ini").
+	 * @param AddArrayKey The Staging array to add RelativeConfig to.
+	 * @param RemoveArrayKey The opposing Staging array to prune RelativeConfig from.
+	 * @return true if ConfigFile was modified.
+	 */
+	static bool ApplyStagingConfigEntry(FConfigFile& ConfigFile, const FString& RelativeConfig,
+		const TCHAR* AddArrayKey, const TCHAR* RemoveArrayKey);
 
 
 	/** Returns the absolute path to Engine/Binaries. */
@@ -232,4 +211,12 @@ public:
 
 	/** Deletes the contents of the project's Saved/Logs folder. */
 	static void CleanLogsFolder();
+
+	/**
+	 * Resolves the absolute path to the package file backing Asset on disk.
+	 * @param Asset Asset whose owning package to locate; may be null.
+	 * @return The full, absolute path to the package file, or an empty string if Asset is null or no file exists.
+	 */
+	static FString GetAssetPathOnDisk(const UObject* Asset);
+
 };

@@ -8,7 +8,7 @@ void FNReportContentBlock::Render(FNReport& Report, TArray<FString>& Output, con
 {
 	RenderHeading(Output, OutputFormat);
 	RenderHeader(Output, OutputFormat);
-	
+
 	if (OutputFormat == ENReportOutputFormat::Markdown)
 	{
 		for (int32 i = 0; i < Content.Num(); i++)
@@ -23,17 +23,17 @@ void FNReportContentBlock::Render(FNReport& Report, TArray<FString>& Output, con
 			Output.Add(Content[i]);
 		}
 	}
-	
+
 	TArray<int32> ChildrenTickets;
 	Report.GetOrderedBlocks(GetTicket(), ChildrenTickets, false);
-	
+
 	// Children
 	for (int32 i = 0; i < ChildrenTickets.Num(); i++)
 	{
 		Report.RenderBlock(ChildrenTickets[i], Output, OutputFormat);
 	}
-	
-	
-	
+
+
+
 	RenderFooter(Output, OutputFormat);
 }

@@ -11,11 +11,11 @@ namespace NEXUS::WorldAssembly
 	namespace ActorTags
 	{
 		inline const FName CellIgnore = FName("NCell_Ignore");
-		
+
 		inline const FName CellBoundsIgnore = FName("NCell_BoundsIgnore");
 		inline const FName CellHullIgnore = FName("NCell_HullIgnore");
 		inline const FName CellVoxelIgnore = FName("NCell_VoxelIgnore");
-		
+
 		inline const FName WorldCollisionIgnore = FName("NWorldCollision_Ignore");
 	}
 	/**
@@ -25,6 +25,7 @@ namespace NEXUS::WorldAssembly
 	{
 		/** Line thickness (cm) used when drawing World Assembly debug visualization. */
 		constexpr float LineThickness = 1.5f;
+		constexpr float LineExtraThickness = 3.f;
 	}
 
 	/**

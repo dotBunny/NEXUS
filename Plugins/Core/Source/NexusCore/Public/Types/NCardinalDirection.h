@@ -64,6 +64,7 @@ enum class ENCardinalDirection : uint8
 
 /**
  * Conversion helpers between decimal-degree angles and ENCardinalDirection values.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/cardinal-direction/">FNCardinalDirectionUtils</a>
  */
 class FNCardinalDirectionUtils
 {
@@ -103,7 +104,7 @@ public:
 			GetClosestCardinalAngle(Rotator.Yaw),
 			GetClosestCardinalAngle(Rotator.Roll));
 	}
-	
+
 	/**
 	 * Returns true when Angle lies within Tolerance of Direction's cardinal heading.
 	 *
@@ -270,7 +271,7 @@ public:
 		return North;
 
 	}
-	
+
 	/**
 	 * Returns the [0, 360) decimal-degree bearing of CardinalDirection.
 	 * @param CardinalDirection Enum value to convert.

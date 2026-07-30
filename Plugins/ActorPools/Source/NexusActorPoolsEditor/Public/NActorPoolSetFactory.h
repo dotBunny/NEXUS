@@ -11,6 +11,7 @@
 
 /**
  * Asset factory that creates new UNActorPoolSet assets from the Content Browser's "Create Asset" menu.
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/editor-types/actor-pool-set-factory/">UNActorPoolSetFactory</a>
  */
 UCLASS(MinimalAPI, HideCategories = Object)
 class UNActorPoolSetFactory : public UFactory

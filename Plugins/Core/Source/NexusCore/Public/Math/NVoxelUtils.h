@@ -9,6 +9,7 @@
  * Integer voxel coordinate triplet.
  *
  * Identifies a cell within a 3D voxel grid. Values are unsigned, so the origin voxel sits at (0,0,0).
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/voxel-coordinate/">FNVoxelCoordinate</a>
  */
 USTRUCT(BlueprintType)
 struct FNVoxelCoordinate

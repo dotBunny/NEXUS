@@ -20,7 +20,7 @@ FNPositionRotation UNOrganComponent::GetDebugLabelPositionRotation() const
 {
 	FNPositionRotation PositionRotation;
 	const AActor* Owner = GetOwner();
-	
+
 	const AVolume* Volume = IsVolumeBased() ? Cast<AVolume>(Owner) : nullptr;
 	if (Volume != nullptr)
 	{
@@ -32,8 +32,8 @@ FNPositionRotation UNOrganComponent::GetDebugLabelPositionRotation() const
 		PositionRotation.Position = Owner->GetActorLocation();
 		PositionRotation.Rotation = Owner->GetActorRotation();
 	}
-	
-	return MoveTemp(PositionRotation);
+
+	return PositionRotation;
 }
 
 void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
@@ -47,12 +47,12 @@ void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 		FTransform BoxTransform = Owner->GetLevelTransform();
 		const auto Box =  Volume->GetBounds().GetBox();
 		BoxTransform.SetLocation( Owner->GetActorLocation() );
-		
+
 		UModel* Model = Volume->GetBrushComponent()->Brush;
-		
+
 		FNVolumeGeometryData Data;
 		FNVolumeUtils::FillGeometryData(Model, Data);
-		
+
 		FDynamicMeshBuilder MeshBuilder(PDI->View->GetFeatureLevel());
 		MeshBuilder.AddVertices(Data.Vertices);
 		for (int32 i = 0; i < Data.Indices.Num(); i += 3)
@@ -63,17 +63,17 @@ void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 				Data.Indices[i+2]
 			);
 		}
-		if (bUnbounded)
+		if (bUnbound)
 		{
-			MeshBuilder.Draw(PDI, Volume->GetBrushComponent()->GetRenderMatrix(), 
+			MeshBuilder.Draw(PDI, Volume->GetBrushComponent()->GetRenderMatrix(),
 			GEngine->ConstraintLimitMaterial->GetRenderProxy(), SDPG_World);
 		}
 		else
 		{
-			MeshBuilder.Draw(PDI, Volume->GetBrushComponent()->GetRenderMatrix(), 
+			MeshBuilder.Draw(PDI, Volume->GetBrushComponent()->GetRenderMatrix(),
 			GEngine->ConstraintLimitMaterialPrismatic->GetRenderProxy(), SDPG_World);
 		}
-		
+
 	}
 }
 
@@ -98,6 +98,19 @@ void UNOrganComponent::OnUnregister()
 	Super::OnUnregister();
 }
 
+#if WITH_EDITOR
+void UNOrganComponent::PostEditImport()
+{
+	Super::PostEditImport();
+
+	// Editor duplication (alt-drag) and copy/paste both go through text import, which carries the serialized
+	// Identifier across to the copy. Regenerate it so duplicated organs don't share the GUID used for
+	// deterministic ordering and as the OrganResults / OrganCellCount map key. This hook does not fire on load,
+	// so the source organ keeps its identifier across saves.
+	Identifier = FGuid::NewGuid();
+}
+#endif // WITH_EDITOR
+
 void UNOrganComponent::GetTissueMap(TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutMap, FNTissueTagGroups& OutTagGroups) const
 {
 	TArray<UNTissue*> ReferencedTissues;
@@ -107,5 +120,4 @@ void UNOrganComponent::GetTissueMap(TMap<TObjectPtr<UNCell>, FNTissueEntry>& Out
 		if (LoadedTissue == nullptr) continue;
 		UNTissue::BuildTissueMap(LoadedTissue, OutMap, OutTagGroups, ReferencedTissues);
 	}
-	
 }

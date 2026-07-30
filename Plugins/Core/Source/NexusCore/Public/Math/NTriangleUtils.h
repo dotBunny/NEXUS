@@ -7,6 +7,7 @@
  * Geometric helpers for working with individual triangles in 3D space.
  *
  * All routines are header-only and allocation-free.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/triangle-utils/">FNTriangleUtils</a>
  */
 class NEXUSCORE_API FNTriangleUtils
 {
@@ -31,16 +32,25 @@ public:
 		const float dot11 = FVector::DotProduct(v1, v1);
 		const float dot12 = FVector::DotProduct(v1, v2);
 
+		// denom is a Gram determinant (dot00 * dot11 - dot01^2) and is therefore always >= 0. When it collapses
+		// to (near) zero the triangle is degenerate/collinear and has no valid barycentric basis, so the point
+		// cannot be inside. Testing denom directly also catches tiny negative values from floating-point error.
 		const float denom = dot00 * dot11 - dot01 * dot01;
-		if (FMath::Abs(denom) < SMALL_NUMBER) return false;
-		const float invDenom = 1.0f / denom;
-		
-		const float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-		const float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+		if (denom < SMALL_NUMBER)
+		{
+			return false;
+		}
 
-		return (u >= 0.0f) && (v >= 0.0f) && (u + v <= 1.0f);
+		// Compare the barycentric numerators against denom rather than dividing. Because denom > 0 here this is
+		// algebraically identical to (u >= 0 && v >= 0 && u + v <= 1) but performs no division — which avoids
+		// the false-positive C4723 (potential divide by 0) that MSVC raises when this header is inlined into a
+		// unit test with degenerate constant vertices and constant-folds denom to 0.
+		const float uNum = dot11 * dot02 - dot01 * dot12;
+		const float vNum = dot00 * dot12 - dot01 * dot02;
+
+		return (uNum >= 0.0f) && (vNum >= 0.0f) && (uNum + vNum <= denom);
 	}
-	
+
 	/**
 	 * Triangle-triangle intersection test using the full Möller 1997 algorithm.
 	 *

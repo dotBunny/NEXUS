@@ -5,6 +5,7 @@
 
 /**
  * A collection of non-cryptographic hashing utilities.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/hash-utils/">FNHashUtils</a>
  */
 class NEXUSCORE_API FNHashUtils
 {
@@ -13,6 +14,8 @@ public:
 	 * Produces a 64-bit hash of the supplied string using Dan Bernstein's djb2 algorithm.
 	 * @param InString The string to hash.
 	 * @return The 64-bit djb2 hash of InString.
+	 * @note The hash is computed over the string's UTF-8 encoding, so the result is
+	 *       platform-independent and pure-ASCII input matches the canonical byte-wise djb2.
 	 * @note Not cryptographically secure; suitable for hash tables and non-security-sensitive identity checks.
 	 */
 	static uint64 djb2(const FString& InString);

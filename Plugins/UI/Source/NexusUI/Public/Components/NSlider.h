@@ -21,7 +21,7 @@ public:
 #if WITH_EDITOR
 	virtual const FText GetPaletteCategory() override {  return NEXUS::UIEditor::PaletteCategory; }
 #endif // WITH_EDITOR
-	
+
 	/**
 	 * Set the value of the USlider without triggering exposed event bindings.
 	 * @param NewValue The new value.

@@ -10,35 +10,34 @@
 #include "NGameplayTagCounter.generated.h"
 
 /**
- * Tracks a running integer count per FGameplayTag that can never go below zero.
+ * Tracks a running signed integer count per FGameplayTag.
+ *
+ * Tags absent from the map read as a count of zero. The mutation API (Add/Subtract/Increment/Decrement) is not
+ * floored, so counts may go negative; this keeps ApplyOperation/ReverseOperation exact inverses and stays
+ * consistent with the signed values GetDifference and Combine already produce.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/collections/gameplay-tag-counter/">FNGameplayTagCounter</a>
  */
 USTRUCT(BlueprintType)
 struct FNGameplayTagCounter
 {
 	GENERATED_BODY()
 
-	/** The per-tag counts, with yes tags absent from the map are treated as a count of zero. */
+	/** The per-tag counts; tags absent from the map are treated as a count of zero. */
 	UPROPERTY(EditAnywhere)
 	TMap<FGameplayTag, int32> GameplayTags;
 
 	/** Constructs an empty counter. */
-	FNGameplayTagCounter()
-	{
-	}
+	FNGameplayTagCounter() = default;
 
 	/**
 	 * Constructs a counter seeded with an existing set of tag counts.
 	 * @param ExistingCounters The tag/count pairs to copy in.
 	 */
 	explicit FNGameplayTagCounter(const TMap<FGameplayTag, int32>& ExistingCounters)
+		: GameplayTags(ExistingCounters)
 	{
-		GameplayTags.Reserve(GameplayTags.Num() + ExistingCounters.Num());
-		for (auto& Pair : ExistingCounters)
-		{
-			GameplayTags.Add(Pair.Key, FMath::Max(Pair.Value, 0));
-		}
 	}
-	
+
 	/**
 	 * Constructs a counter seeded from a flat array of tag/count pairs.
 	 * @param Counts The tag/count entries to copy in; duplicate tags are summed.
@@ -50,12 +49,6 @@ struct FNGameplayTagCounter
 		{
 			GameplayTags.FindOrAdd(Entry.Tag) += Entry.Count;
 		}
-	}
-
-	/** Copy-constructs a counter from another, duplicating its counts. */
-	FNGameplayTagCounter(const FNGameplayTagCounter& Other)
-	{
-		*this = Other;
 	}
 
 	/**
@@ -87,7 +80,7 @@ struct FNGameplayTagCounter
 	{
 		Add(Tag, 1);
 	}
-	
+
 	/**
 	 * Decreases the count for a tag by one, adding the tag (then decrementing to -1) if it is not already tracked.
 	 * @param Tag The tag whose count should be decremented.
@@ -96,7 +89,7 @@ struct FNGameplayTagCounter
 	{
 		Subtract(Tag, 1);
 	}
-	
+
 	/**
 	 * Adds a value to the count for a tag, adding the tag (starting from zero) if it is not already tracked.
 	 * @param Tag The tag whose count should be increased.
@@ -104,13 +97,7 @@ struct FNGameplayTagCounter
 	 */
 	void Add(const FGameplayTag& Tag, const int32 Value)
 	{
-		if (!GameplayTags.Contains(Tag))
-		{
-			GameplayTags.Add(Tag);
-		}
-		
-		// Ensure we never go below zero
-		GameplayTags[Tag] = FMath::Max(GameplayTags[Tag] + Value, 0);
+		GameplayTags.FindOrAdd(Tag) += Value;
 	}
 
 	/**
@@ -120,15 +107,9 @@ struct FNGameplayTagCounter
 	 */
 	void Subtract(const FGameplayTag& Tag, const int32 Value)
 	{
-		if (!GameplayTags.Contains(Tag))
-		{
-			GameplayTags.Add(Tag);
-		}
-		
-		// Ensure we never go below zero
-		GameplayTags[Tag] = FMath::Max(GameplayTags[Tag] - Value, 0);
+		GameplayTags.FindOrAdd(Tag) -= Value;
 	}
-	
+
 	/**
 	 * Applies a declarative operation to the count for its target tag.
 	 * @param Operation The tag, arithmetic operation, and value to apply.
@@ -145,7 +126,7 @@ struct FNGameplayTagCounter
 			break;
 		}
 	}
-	
+
 	/**
 	 * Applies the inverse of a declarative operation to the count for its target tag, undoing a prior
 	 * ApplyOperation call (an Add is subtracted and a Subtract is added).
@@ -169,28 +150,29 @@ struct FNGameplayTagCounter
 	 * @param Tag The tag to query.
 	 * @return The tracked count, or zero if the tag is not present.
 	 */
-	int32 GetValue(const FGameplayTag& Tag)
+	int32 GetValue(const FGameplayTag& Tag) const
 	{
-		if (GameplayTags.Contains(Tag))
+		if (const int32* Found = GameplayTags.Find(Tag))
 		{
-			return GameplayTags[Tag];
+			return *Found;
 		}
 		return 0;
 	}
-	
+
 	/**
 	 * Attempts to read the current value for a tag without treating an absent tag as zero.
 	 * @param Tag The tag to query.
 	 * @param OutValue Receives the tracked count when the tag is present; left unchanged otherwise.
 	 * @return true if the tag is tracked and OutValue was written; false if the tag is absent.
 	 */
-	bool TryGetValue(const FGameplayTag& Tag, int32& OutValue)
+	bool TryGetValue(const FGameplayTag& Tag, int32& OutValue) const
 	{
-		if (!GameplayTags.Contains(Tag))
+		const int32* Found = GameplayTags.Find(Tag);
+		if (Found == nullptr)
 		{
 			return false;
 		}
-		OutValue = GameplayTags[Tag];
+		OutValue = *Found;
 		return true;
 	}
 
@@ -203,7 +185,7 @@ struct FNGameplayTagCounter
 	{
 		return GameplayTags.Contains(Tag);
 	}
-	
+
 	/**
 	 * Builds a flat array of tag/count pairs from the tracked counts.
 	 * @return An array containing one entry per tracked tag, in unspecified order.
@@ -220,7 +202,7 @@ struct FNGameplayTagCounter
 		}
 		return ReturnArray;
 	}
-	
+
 	/**
 	 * Builds a counter holding the signed difference of this counter minus another.
 	 *

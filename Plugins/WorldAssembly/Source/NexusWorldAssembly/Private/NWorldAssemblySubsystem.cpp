@@ -11,10 +11,13 @@
 #include "Assembly/NAssemblyOperation.h"
 #include "NWorldAssemblyRegistry.h"
 #include "NWorldAssemblyRelay.h"
+#include "Cell/NCellJunctionComponent.h"
 #include "Cell/NCellProxy.h"
+#include "Developer/NMethodScopeTimer.h"
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/PlayerController.h"
+#include "Organ/NOrganComponent.h"
 
 #if WITH_EDITOR
 #include "Editor.h"
@@ -34,12 +37,12 @@ namespace NEXUS::WorldAssembly::ConsoleCommands
 					UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to regenerate the world, as the world was NULL."));
 					return;
 				}
-				
+
 				if (FNMultiplayerUtils::HasWorldAuthority(World))
 				{
 					UNWorldAssemblySubsystem* System = UNWorldAssemblySubsystem::Get(World);
 					System->Clear();
-					
+
 					FNAssemblyOperationSettings Settings = FNAssemblyOperationSettings::GetDefaultSettings();
 					System->Generate(Settings);
 				}
@@ -61,7 +64,7 @@ namespace NEXUS::WorldAssembly::ConsoleCommands
 					UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to clear the world, as the world was NULL."));
 					return;
 				}
-				
+
 				if (FNMultiplayerUtils::HasWorldAuthority(World))
 				{
 					UNWorldAssemblySubsystem* System = UNWorldAssemblySubsystem::Get(World);
@@ -86,7 +89,7 @@ void UNWorldAssemblySubsystem::Generate(FNAssemblyOperationSettings& Settings)
 void UNWorldAssemblySubsystem::Clear()
 {
 	UWorld* World = GetWorld();
-	
+
 	for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
 	{
 		if (KnownOperations[i]->IsRunning())
@@ -113,81 +116,185 @@ void UNWorldAssemblySubsystem::Clear()
 		Proxy->DestroyLevelInstance(true, true);
 		Proxy->Destroy();
 	}
-	
-	// Handle our track for cleanup
-	for (TWeakObjectPtr Actor : TrackedActorsForCleanup)
+
+	// Handle our track for cleanup — destroy every operation's tracked actors, then drop all buckets.
+	for (const TPair<int32, TArray<TWeakObjectPtr<AActor>>>& Pair : TrackedOperationActors)
+	{
+		DestroyTrackedActors(Pair.Value);
+	}
+	TrackedOperationActors.Empty();
+
+	// Allow folks to subscribe for this event
+	OnCleared.Broadcast();
+}
+
+bool UNWorldAssemblySubsystem::IsReady(const bool bWaitOnStreaming)
+{
+	const UWorld* World = GetWorld();
+	if (bWaitOnStreaming && FNWorldUtils::IsStreaming(World))
+	{
+		return false;
+	}
+
+	// Server always has stuff replicated
+	if (FNMultiplayerUtils::HasWorldAuthority(World))
+	{
+		return KnownOperations.IsEmpty();
+	}
+
+	// Client hasn't spawned the goodness yet
+	if (LocalRelay == nullptr) return false;
+
+	// Client properly checking
+	return LocalRelay->IsReady();
+}
+
+FIntVector2 UNWorldAssemblySubsystem::GetRemainingStatus()
+{
+	if (LocalRelay == nullptr)
+	{
+		return FIntVector2::ZeroValue;
+	}
+
+	return LocalRelay->GetRemainingStatus();
+}
+
+void UNWorldAssemblySubsystem::DestroyTrackedActors(const TArray<TWeakObjectPtr<AActor>>& Actors)
+{
+	for (const TWeakObjectPtr<AActor>& Actor : Actors)
 	{
 		if (Actor.IsValid())
 		{
 			Actor.Get()->Destroy(true, false);
 		}
 	}
-	TrackedActorsForCleanup.Empty();
-	
-	// Allow folks to subscribe for this event
-	OnCleared.Broadcast();
 }
 
-bool UNWorldAssemblySubsystem::IsReady()
+void UNWorldAssemblySubsystem::RegisterOperationActor(AActor* Actor, const int32 OperationTicket)
 {
-	// Server always has stuff replicated
-	if (FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
+	if (Actor == nullptr) return;
+	TrackedOperationActors.FindOrAdd(OperationTicket).AddUnique(Actor);
+}
+
+void UNWorldAssemblySubsystem::UnregisterOperationActor(AActor* Actor)
+{
+	// The actor lives under exactly one ticket, but the caller does not pass it; scan every bucket and prune any
+	// that empties so stale ticket keys do not accumulate.
+	for (auto It = TrackedOperationActors.CreateIterator(); It; ++It)
 	{
-		return KnownOperations.IsEmpty();
+		It->Value.Remove(Actor);
+		if (It->Value.IsEmpty())
+		{
+			It.RemoveCurrent();
+		}
 	}
-	
-	// Client hasn't spawned the goodness yet
-	if (LocalRelay == nullptr) return false;
-	
-	// Client properly checking
-	return LocalRelay->IsReady();
 }
 
-void UNWorldAssemblySubsystem::RegisterActorForCleanup(AActor* Actor)
+void UNWorldAssemblySubsystem::UnregisterOperationActorByTicket(AActor* Actor, const int32 OperationTicket)
 {
-	TrackedActorsForCleanup.AddUnique(Actor);
+	// Direct bucket lookup (unlike UnregisterActorForCleanup, which scans every ticket); prune the bucket when the
+	// removal empties it so stale ticket keys do not accumulate.
+	if (TArray<TWeakObjectPtr<AActor>>* Bucket = TrackedOperationActors.Find(OperationTicket))
+	{
+		Bucket->Remove(Actor);
+		if (Bucket->IsEmpty())
+		{
+			TrackedOperationActors.Remove(OperationTicket);
+		}
+	}
 }
 
-void UNWorldAssemblySubsystem::UnregisterActorForCleanup(AActor* Actor)
+
+void UNWorldAssemblySubsystem::DestroyOperationActors(const int32 OperationTicket)
 {
-	TrackedActorsForCleanup.Remove(Actor);
+	TArray<TWeakObjectPtr<AActor>> Bucket;
+	if (TrackedOperationActors.RemoveAndCopyValue(OperationTicket, Bucket))
+	{
+		DestroyTrackedActors(Bucket);
+	}
 }
 
 void UNWorldAssemblySubsystem::Tick(float DeltaTime)
 {
-	for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
+	// Seamless-traveled players arrive asynchronously through HandleSeamlessTravelPlayer (no delegate to bind), so
+	// when seamless travel is supported we poll for unserved controllers. Throttled to roughly once per half-second: a
+	// frame-accurate response buys nothing and SpawnRelay is idempotent, so missed frames cost only a little latency.
+	if (bCachedSeamlessTravelMonitor)
 	{
-		KnownOperations[i]->Tick();
+		SeamlessTravelMonitorAccumulator += DeltaTime;
+		if (SeamlessTravelMonitorAccumulator >= SeamlessTravelMonitorInterval)
+		{
+			SeamlessTravelMonitorAccumulator = 0.f;
+			EnsurePlayerControllerRelays(GetWorld());
+		}
 	}
-	
+
+	if (KnownOperations.Num() > 0)
+	{
+		for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
+		{
+			KnownOperations[i]->Tick();
+		}
+	}
+
 	// If we have anything queued for generation, lets get it going
 	if (QueuedOrgansForAssembly.Num() > 0)
 	{
-		FNAssemblyOperationSettings Settings = FNAssemblyOperationSettings::GetDefaultSettings();
-		Settings.DisplayName = FText::FromString("QueuedOrganAssembly");
-		UNAssemblyOperation* InstanceOperation = UNAssemblyOperation::CreateInstance(QueuedOrgansForAssembly, Settings);
+		if (!FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
+		{
+			QueuedOrgansForAssembly.Empty();
+		}
+		else
+		{
+			FNAssemblyOperationSettings Settings = FNAssemblyOperationSettings::GetDefaultSettings();
+			Settings.DisplayName = FText::FromString("QueuedOrganAssembly");
+			UNAssemblyOperation* InstanceOperation = UNAssemblyOperation::CreateInstance(QueuedOrgansForAssembly, Settings);
 
-		StartOperation(InstanceOperation);
-		
-		// We issue the generation and then clear the queue.
-		QueuedOrgansForAssembly.Empty();
+			StartOperation(InstanceOperation);
+
+			// We issue the generation and then clear the queue.
+			QueuedOrgansForAssembly.Empty();
+		}
+	}
+
+	// Handle spawning / filling junctions, time-sliced so a large backlog
+	// drains across multiple ticks instead of stalling one frame.
+	if (QueuedCellJunctionsToFill.Num() > 0)
+	{
+		// Setting is authored in milliseconds; convert to seconds for the timer.
+		const double SliceSeconds = CachedCellJunctionTimeSlice;
+		const double StartTime = FPlatformTime::Seconds();
+		for (int32 i = QueuedCellJunctionsToFill.Num() - 1; i >= 0; i--)
+		{
+			if (UNCellJunctionComponent* Junction = QueuedCellJunctionsToFill[i])
+			{
+				Junction->Fill();
+			}
+			QueuedCellJunctionsToFill.RemoveAt(i);
+
+			// Always fill at least one per tick; stop once the slice is spent.
+			if (FPlatformTime::Seconds() - StartTime > SliceSeconds)
+			{
+				break;
+			}
+		}
 	}
 }
 
 bool UNWorldAssemblySubsystem::IsTickable() const
 {
-	if (KnownOperations.Num() > 0 || QueuedOrgansForAssembly.Num() > 0) return true;
+	if (KnownOperations.Num() > 0 || QueuedOrgansForAssembly.Num() > 0  || QueuedCellJunctionsToFill.Num() > 0 || bCachedSeamlessTravelMonitor) return true;
 	return false;
 }
 
 void UNWorldAssemblySubsystem::StartOperation(UNAssemblyOperation* Operation)
 {
 	if (Operation == nullptr) return;
-	
+
 	KnownOperations.AddUnique(Operation);
 	OnOperationStarted.Broadcast();
 	CachedOperationTickets.Add(Operation->GetTicket());
-	
+
 	Operation->StartBuild(this, this);
 
 	// Snapshot to guard against reentrant mutation of RelayMap during the broadcast.
@@ -257,52 +364,45 @@ void UNWorldAssemblySubsystem::UnregisterLocalRelay(const ANWorldAssemblyRelay* 
 
 void UNWorldAssemblySubsystem::RegisterOrganForAssembly(TObjectPtr<UNOrganComponent> Organ)
 {
+
+	if (!FNMultiplayerUtils::HasWorldAuthority(GetWorld())) return;
 	QueuedOrgansForAssembly.AddUnique(Organ);
+}
+
+void UNWorldAssemblySubsystem::RegisterCellJunctionToFill(TObjectPtr<UNCellJunctionComponent> CellJunction)
+{
+	// TODO: Do we want to make cell filling server authoritative? This will need some changes down the line, nothing major.
+	QueuedCellJunctionsToFill.AddUnique(CellJunction);
 }
 
 void UNWorldAssemblySubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	// Only do this on the server
+	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
+	bCachedSeamlessTravelMonitor = Settings->bSupportSeamlessTravel;
+	CachedCellJunctionTimeSlice = Settings->AssemblySpawningDelayedJunctionSpawningTimeSlice * 0.001f;
+
 	if (FNMultiplayerUtils::HasWorldAuthority(InWorld))
 	{
+		// Login/logout cover fresh connections and late joins in every mode; they never fire for players carried
+		// across by seamless travel, so binding them unconditionally is safe and never double-spawns a relay.
 		OnLoginHandle = FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &UNWorldAssemblySubsystem::OnPostLogin);
 		OnLogoutHandle = FGameModeEvents::GameModeLogoutEvent.AddUObject(this, &UNWorldAssemblySubsystem::OnLogout);
-		for (FConstPlayerControllerIterator It = InWorld.GetPlayerControllerIterator(); It; ++It)
-		{
-			if (APlayerController* PC = It->Get())
-			{
-				SpawnRelay(PC);
-			}
-		}
-	}
 
+		// One-shot back-fill for controllers already present when this world begins play — notably the listen-server
+		// local PC, which the engine hands to HandleSeamlessTravelPlayer before BeginPlay. Remote clients that finish
+		// loading later are picked up by the throttled monitor in Tick when seamless travel is enabled.
+		EnsurePlayerControllerRelays(InWorld.GetWorld());
+	}
 	Super::OnWorldBeginPlay(InWorld);
 }
 
-void UNWorldAssemblySubsystem::Deinitialize()
+void UNWorldAssemblySubsystem::OnWorldEndPlay(UWorld& InWorld)
 {
-	// Clear cached persistent operation data
-	if (CachedOperationTickets.Num() > 0)
-	{
-		FNWorldAssemblyContextCache::ClearContext(CachedOperationTickets);
-		CachedOperationTickets.Empty();
-	}
-	
-	if (OnLoginHandle.IsValid())
-	{
-		FGameModeEvents::GameModePostLoginEvent.Remove(OnLoginHandle);
-		OnLoginHandle.Reset();
-	}
-	if (OnLogoutHandle.IsValid())
-	{
-		FGameModeEvents::GameModeLogoutEvent.Remove(OnLogoutHandle);
-		OnLogoutHandle.Reset();
-	}
 	RelayMap.Reset();
-	TrackedActorsForCleanup.Empty();
-	
+	TrackedOperationActors.Empty();
 	LocalRelay = nullptr;
-	
+
 	// Stop all known operations
 	for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
 	{
@@ -317,7 +417,25 @@ void UNWorldAssemblySubsystem::Deinitialize()
 		}
 	}
 
-	Super::Deinitialize();
+	// Clear cached persistent operation data
+	if (CachedOperationTickets.Num() > 0)
+	{
+		FNWorldAssemblyContextCache::ClearContext(CachedOperationTickets);
+		CachedOperationTickets.Empty();
+	}
+
+	if (OnLoginHandle.IsValid())
+	{
+		FGameModeEvents::GameModePostLoginEvent.Remove(OnLoginHandle);
+		OnLoginHandle.Reset();
+	}
+	if (OnLogoutHandle.IsValid())
+	{
+		FGameModeEvents::GameModeLogoutEvent.Remove(OnLogoutHandle);
+		OnLogoutHandle.Reset();
+	}
+
+	Super::OnWorldEndPlay(InWorld);
 }
 
 void UNWorldAssemblySubsystem::OnPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer)
@@ -363,5 +481,16 @@ void UNWorldAssemblySubsystem::DestroyRelay(APlayerController* PlayerController)
 	if (RelayMap.RemoveAndCopyValue(PlayerController, Existing) && Existing != nullptr)
 	{
 		Existing->Destroy();
+	}
+}
+
+void UNWorldAssemblySubsystem::EnsurePlayerControllerRelays(const UWorld* World)
+{
+	for (FConstPlayerControllerIterator It = World->GetPlayerControllerIterator(); It; ++It)
+	{
+		if (APlayerController* PC = It->Get())
+		{
+			SpawnRelay(PC);
+		}
 	}
 }

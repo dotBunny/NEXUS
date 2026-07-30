@@ -9,6 +9,7 @@
  * Report block that holds tabular data. Must be initialized with either a fixed column count
  * or a header row before rows are added. Plain-text rendering left-aligns each cell to the
  * widest entry in its column; Markdown rendering emits a standard pipe-separated table.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/report-table-block/">FNReportTableBlock</a>
  */
 struct NEXUSCORE_API FNReportTableBlock : FNReportBlock
 {
@@ -43,7 +44,7 @@ struct NEXUSCORE_API FNReportTableBlock : FNReportBlock
 	 * @param OutputFormat Whether to emit plain text (column-aligned) or Markdown (pipe-separated).
 	 */
 	virtual void Render(FNReport& Report, TArray<FString>& Output, const ENReportOutputFormat OutputFormat = ENReportOutputFormat::PlainText) override;
-	
+
 private:
 	/** Header row cells; empty when the table was initialized with a column count rather than a header row. */
 	TArray<FString> HeaderCells;
@@ -54,7 +55,7 @@ private:
 
 	/** Number of columns the table was initialized with; -1 indicates the table has not been initialized yet. */
 	int32 ColumnCount = -1;
-	
+
 	/**
 	 * Render the header row, separator row, and body cells as a pipe-separated Markdown table.
 	 * @param Report The owning report (unused for content emission, retained for signature parity with the plain-text variant).

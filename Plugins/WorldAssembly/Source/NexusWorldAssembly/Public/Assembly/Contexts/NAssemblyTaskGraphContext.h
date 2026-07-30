@@ -6,6 +6,7 @@
 #include "Assembly/NAssemblyOperationSettings.h"
 #include "Cell/NCellProxy.h"
 #include "Assembly/Graph/NAssemblyGraph.h"
+#include "Math/NMersenneTwister.h"
 
 /**
  * A drained snapshot of a single status channel, handed to the game thread by ConsumeChannelUpdates.
@@ -58,13 +59,37 @@ public:
 	/** Append additional context tags to this context's accumulated set. */
 	void AddContextTags(const FGameplayTagContainer& NewContextTags)
 	{
+		FScopeLock Lock(&ContextTagMutex);
 		ContextTags.AppendTags(NewContextTags);
 	}
-	
+
 	void AddTagCounter(const FNGameplayTagCounter& NewTagCounter)
 	{
+		FScopeLock Lock(&TagCounterMutex);
 		TagCounter.Combine(NewTagCounter);
 	}
+
+	void SetOrganCellCount(const FGuid& OrganIdentifier, const int32 NewCount)
+	{
+		FScopeLock Lock(&OrganCellMutex);
+		OrganCellCount.Add(OrganIdentifier, NewCount);
+	}
+
+	/** Record the random-stream snapshot a successful organ build finished from, keyed by the organ's identifier. */
+	void SetOrganRandomState(const FGuid& OrganIdentifier, const FNMersenneTwisterState& State)
+	{
+		FScopeLock Lock(&OrganRandomStateMutex);
+		OrganRandomState.Add(OrganIdentifier, State);
+	}
+
+	/**
+	 * Request cooperative cancellation of the graph's remaining work. Safe to call from any thread.
+	 * Tasks poll IsCancelled at their loop boundaries and bail out early; completed work is unaffected.
+	 */
+	void RequestCancel() { bCancelled.Store(true); }
+
+	/** @return true once RequestCancel has been called. Safe to call from any task thread. */
+	bool IsCancelled() const { return bCancelled.Load(); }
 
 	/**
 	 * Record a progress/status message for display. Safe to call from any task thread.
@@ -205,26 +230,38 @@ public:
 
 	/** Context tags accumulated across the graphs built into this context. */
 	FGameplayTagContainer ContextTags;
-	
+
 	FNGameplayTagCounter TagCounter;
+
+	TMap<FGuid, int> OrganCellCount;
+
+	/** Random-stream snapshot each successful organ build finished from, keyed by the organ's identifier; drained back onto the source component on the game thread. */
+	TMap<FGuid, FNMersenneTwisterState> OrganRandomState;
 
 	/**
 	 * @param OutputWorld World to target when spawning proxies.
 	 * @param OperationTicket Identifier of the operation that owns this context.
 	 * @param Settings Operation-wide settings forwarded to dependent tasks.
 	 */
-	explicit FNAssemblyTaskGraphContext(UWorld* OutputWorld, const int32& OperationTicket, const FNAssemblyOperationSettings& Settings);
+	NEXUSWORLDASSEMBLY_API explicit FNAssemblyTaskGraphContext(UWorld* OutputWorld, const int32& OperationTicket, const FNAssemblyOperationSettings& Settings);
 
-	
+
 	/** Path the operation's report is written to, when report output is enabled. */
 	FString ReportFilePath;
 
 private:
+	/** Set once a cancel is requested; polled by tasks at loop boundaries for cooperative early-out. */
+	TAtomic<bool> bCancelled{false};
+
+	FCriticalSection ContextTagMutex;
+	FCriticalSection TagCounterMutex;
 	FCriticalSection TakeGraphMutex;
+	FCriticalSection OrganCellMutex;
+	FCriticalSection OrganRandomStateMutex;
 
 	/** Guards PendingDisplayMessage against concurrent writes from task threads. */
 	FCriticalSection DisplayMessageMutex;
-	
+
 	/** Most recent display message written by a task; coalesced (latest wins). */
 	FString PendingDisplayMessage;
 	/** Bumped on every SetDisplayMessage so the game-thread reader can cheaply detect changes without locking. */

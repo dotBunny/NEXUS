@@ -11,6 +11,7 @@
  * Lightweight name/bool/float key-value bag used to snapshot and restore UMG widget state
  * across navigation, layer changes, or save/load. Keys are stored in parallel arrays per type
  * so the struct stays USTRUCT-friendly without requiring a container-of-variants.
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/widget-state/">FNWidgetState</a>
  */
 USTRUCT(BlueprintType)
 struct FNWidgetState
@@ -103,8 +104,8 @@ struct FNWidgetState
 				}
 			}
 		}
-		
-		
+
+
 		BooleanKeys.Add(Key);
 		BooleanValues.Add(bValue);
 		return BooleanValues.Num() - 1;
@@ -159,8 +160,8 @@ struct FNWidgetState
 				}
 			}
 		}
-		
-		
+
+
 		FloatKeys.Add(Key);
 		FloatValues.Add(Value);
 		return FloatValues.Num() - 1;

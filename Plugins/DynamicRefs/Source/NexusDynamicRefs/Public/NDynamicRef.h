@@ -8,7 +8,8 @@
 /**
  * Compact, fixed-identifier enum used as the key for a dynamic reference.
  *
- * Each value identifies a slot that can be claimed by at most one UNDynamicRefComponent per world.
+ * Each value identifies a slot that any number of UObjects can claim per world; the subsystem stores
+ * them in an FNDynamicRefCollection in registration order, so a slot is a bucket rather than a single seat.
  * Slots are grouped by conceptual role (Location, Objective, Target, Secret, Spawn, Enemy, Pickup, Item)
  * to make manually assigning them in the editor ergonomic.
  * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref/">ENDynamicRef</a>
@@ -23,7 +24,7 @@ enum ENDynamicRef : int32
 	NDR_Player							= 1 UMETA(DisplayName = "Player"),
 	NDR_Enemy							= 2 UMETA(DisplayName = "Enemy"),
 	NDR_NonPlayableCharacter			= 3 UMETA(DisplayName = "NPC"),
-	
+
 	// Locations
 	NDR_Location_A 						= 32 UMETA(DisplayName = "Location A"),
 	NDR_Location_B 						= 33 UMETA(DisplayName = "Location B"),
@@ -249,6 +250,6 @@ enum ENDynamicRef : int32
 	NDR_Item_Z 							= 239 UMETA(DisplayName = "Item Z"),
 
 	NDR_Max								= 240 UMETA(Hidden)
-	
+
 	// ReSharper restore CppUE4CodingStandardNamingViolationWarning
 };

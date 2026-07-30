@@ -10,6 +10,7 @@
  * component visualizer.
  *
  * The Index value lets the owning FComponentVisualizer route picks back to a specific element.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/component-vis-proxies/index-component-vis-proxy/">HNIndexComponentVisProxy</a>
  */
 struct NEXUSCOREEDITOR_API HNIndexComponentVisProxy final : public HComponentVisProxy
 {

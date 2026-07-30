@@ -13,9 +13,9 @@ class ALevelInstance;
 
 /**
  * A handful of methods meant to support the building logic that works in multiplayer scenarios.
- * @see <a href="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/">UNMultiplayerLibrary</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/multiplayer-library/">UNMultiplayerLibrary</a>
  */
-class FNMultiplayerUtils
+class NEXUSCORE_API FNMultiplayerUtils
 {
 public:
 	/**
@@ -42,7 +42,7 @@ public:
 	 */
 	FORCEINLINE static bool HasWorldAuthority(const UWorld* World)
 	{
-		return World->GetAuthGameMode() != nullptr;
+		return World != nullptr && World->GetAuthGameMode() != nullptr;
 	}
 
 	/**
@@ -85,15 +85,20 @@ public:
 	/**
 	 * Get a player's unique identifier from the APlayerController.
 	 * @param PlayerController The target APlayerController to use when querying for the player identification number.
-	 * @return The player's identifier.
+	 * @param bShouldLogWarning Should a warning be logged when the player's APlayerState is unavailable? Pass false for expected-failure polling (e.g. while a player is still connecting).
+	 * @return The player's identifier, or -1 when the APlayerState is unavailable.
+	 * @note A return of 0 is a valid identifier state — it means the APlayerState exists but the session has not assigned an identifier yet; only -1 indicates the state was missing entirely.
 	 */
-	FORCEINLINE static int32 GetPlayerIdentifier(const APlayerController* PlayerController)
+	FORCEINLINE static int32 GetPlayerIdentifier(const APlayerController* PlayerController, const bool bShouldLogWarning = true)
 	{
 		APlayerState* PlayerState = PlayerController->GetPlayerState<APlayerState>();
 		if (PlayerState == nullptr)
 		{
-			UE_LOG(LogNexusCore, Warning, TEXT("GetPlayerIdentifier: Player state is nullptr, returning 0."));
-			return 0;
+			if (bShouldLogWarning)
+			{
+				UE_LOG(LogNexusCore, Warning, TEXT("GetPlayerIdentifier: Player state is nullptr, returning -1."));
+			}
+			return -1;
 		}
 		return PlayerState->GetPlayerId();
 	}
@@ -106,7 +111,7 @@ public:
 	FORCEINLINE static int32 GetFirstPlayerIdentifier(const UWorld* World)
 	{
 		if (const AGameStateBase* GameState = World->GetGameState();
-			GameState->PlayerArray.Num() > 0)
+			GameState != nullptr && GameState->PlayerArray.Num() > 0)
 		{
 			return GameState->PlayerArray[0]->GetPlayerId();
 		}
@@ -121,8 +126,9 @@ public:
 	 */
 	FORCEINLINE static APawn* GetPawnFromPlayerIdentifier(const UWorld* World, const int32 PlayerIdentifier)
 	{
-		for (const AGameStateBase* GameState = World->GetGameState();
-			const auto PlayerState : GameState->PlayerArray)
+		const AGameStateBase* GameState = World->GetGameState();
+		if (GameState == nullptr) return nullptr;
+		for (const auto PlayerState : GameState->PlayerArray)
 		{
 			if (PlayerState->GetPlayerId() == PlayerIdentifier)
 			{
@@ -140,8 +146,9 @@ public:
 	 */
 	FORCEINLINE static AActor* GetPlayerControllerFromPlayerIdentifier(const UWorld* World, const int32 PlayerIdentifier)
 	{
-		for (const AGameStateBase* GameState = World->GetGameState();
-			const auto PlayerState : GameState->PlayerArray)
+		const AGameStateBase* GameState = World->GetGameState();
+		if (GameState == nullptr) return nullptr;
+		for (const auto PlayerState : GameState->PlayerArray)
 		{
 			if (PlayerState->GetPlayerId() == PlayerIdentifier)
 			{
@@ -159,7 +166,9 @@ public:
 	 */
 	FORCEINLINE static APlayerState* GetPlayerStateFromPlayerIdentifier(const UWorld* World, const int32 PlayerIdentifier)
 	{
-		for (const auto PlayerState : World->GetGameState()->PlayerArray)
+		const AGameStateBase* GameState = World->GetGameState();
+		if (GameState == nullptr) return nullptr;
+		for (const auto PlayerState : GameState->PlayerArray)
 		{
 			if (PlayerState->GetPlayerId() == PlayerIdentifier)
 			{
@@ -201,11 +210,11 @@ public:
 		// All conditions checked should have a real ping to provide.
 		return PlayerController->PlayerState->ExactPing;
 	}
-	
+
 	/**
 	 * Is the current session created from the MultiplayerTest editor command?
 	 * @return true/false if it is.
-	 */	
+	 */
 	FORCEINLINE static bool IsMultiplayerTest()
 	{
 		return FParse::Param(FCommandLine::Get(), TEXT("NMultiplayerTest"));

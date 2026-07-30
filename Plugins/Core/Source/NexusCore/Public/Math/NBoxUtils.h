@@ -7,6 +7,7 @@
 
 /**
  * A collection of utility methods for working with FBoxes.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/box-utils/">FNBoxUtils</a>
  */
 class NEXUSCORE_API FNBoxUtils
 {

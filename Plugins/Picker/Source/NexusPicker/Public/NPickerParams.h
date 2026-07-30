@@ -18,19 +18,20 @@ enum class ENPickerProjectionMode : uint8
 
 /**
  * Structure representing the parameters used for the generation of points.
+ * @see <a href="https://nexus-framework.com/docs/plugins/picker/types/picker-params/">FNPickerParams</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSPICKER_API FNPickerParams
 {
 	GENERATED_BODY()
-	
+
 	/** The number of points to generate in a single pass. */
 	UPROPERTY(Category = "Base", BlueprintReadWrite, meta=(ClampMin=1))
 	int32 Count = 1;
-	
+
 	/** The world for line tracing and drawing. */
 	UPROPERTY(Category = "Base", BlueprintReadOnly, VisibleInstanceOnly)
-	TObjectPtr<UWorld> CachedWorld = nullptr;
+	TWeakObjectPtr<UWorld> CachedWorld = nullptr;
 
 	/** Should the point be projected somewhere? */
 	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay)

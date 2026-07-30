@@ -11,6 +11,7 @@
  * Parallel-arrays snapshot of per-widget state used by UNEditorUtilityWidgetSubsystem. Maps widget
  * identifiers to FNWidgetState key-value bags via two index-aligned arrays; the unusual shape is
  * chosen so UPROPERTY(config) serialization remains straightforward and stable across sessions.
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/widget-state-snapshot/">FNWidgetStateSnapshot</a>
  */
 USTRUCT(BlueprintType)
 struct FNWidgetStateSnapshot
@@ -151,7 +152,7 @@ struct FNWidgetStateSnapshot
 	FNWidgetState& GetWidgetState(const FName& Identifier)
 	{
 		const int32 WorkingIndex = GetIdentifierIndex(Identifier);
-		
+
 		// Handle bad index / state / runtime
 		if (WorkingIndex == INDEX_NONE)
 		{

@@ -31,7 +31,7 @@ TArray<UNCellJunctionComponent*> FNWorldAssemblyRegistry::GetCellJunctionsCompon
 	TArray<UNCellJunctionComponent*> JunctionComponents;
 	if (Level == nullptr)
 	{
-		return MoveTemp(JunctionComponents);
+		return JunctionComponents;
 	}
 
 	for (UNCellJunctionComponent* Junction : GetCellJunctionComponents())
@@ -49,8 +49,8 @@ TArray<UNCellJunctionComponent*> FNWorldAssemblyRegistry::GetCellJunctionsCompon
 			return A.Details.InstanceIdentifier < B.Details.InstanceIdentifier;
 		});
 	}
-	
-	return MoveTemp(JunctionComponents);
+
+	return JunctionComponents;
 }
 
 TArray<UNOrganComponent*> FNWorldAssemblyRegistry::GetOrganComponentsFromLevel(const ULevel* Level, const bool bSorted)
@@ -58,7 +58,7 @@ TArray<UNOrganComponent*> FNWorldAssemblyRegistry::GetOrganComponentsFromLevel(c
 	TArray<UNOrganComponent*> OrganComponents;
 	if (Level == nullptr)
 	{
-		return MoveTemp(OrganComponents);
+		return OrganComponents;
 	}
 
 	for (UNOrganComponent* Organ : GetOrganComponents())
@@ -68,16 +68,16 @@ TArray<UNOrganComponent*> FNWorldAssemblyRegistry::GetOrganComponentsFromLevel(c
 			OrganComponents.Add(Organ);
 		}
 	}
-	
+
 	if (bSorted)
 	{
 		OrganComponents.Sort([](const UNOrganComponent& A, const UNOrganComponent& B) {
 			return A.Identifier < B.Identifier;
 		});
 	}
-	
 
-	return MoveTemp(OrganComponents);
+
+	return OrganComponents;
 }
 
 TArray<UNBoneComponent*> FNWorldAssemblyRegistry::GetBoneComponentsFromLevel(const ULevel* Level, const bool bSorted)
@@ -85,7 +85,7 @@ TArray<UNBoneComponent*> FNWorldAssemblyRegistry::GetBoneComponentsFromLevel(con
 	TArray<UNBoneComponent*> BoneComponents;
 	if (Level == nullptr)
 	{
-		return MoveTemp(BoneComponents);
+		return BoneComponents;
 	}
 
 	for (UNBoneComponent* Bone : GetBoneComponents())
@@ -95,7 +95,7 @@ TArray<UNBoneComponent*> FNWorldAssemblyRegistry::GetBoneComponentsFromLevel(con
 			BoneComponents.Add(Bone);
 		}
 	}
-	
+
 	if (bSorted)
 	{
 		BoneComponents.Sort([](const UNBoneComponent& A, const UNBoneComponent& B) {
@@ -103,7 +103,7 @@ TArray<UNBoneComponent*> FNWorldAssemblyRegistry::GetBoneComponentsFromLevel(con
 		});
 	}
 
-	return MoveTemp(BoneComponents);
+	return BoneComponents;
 }
 
 UNCellRootComponent* FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(const ULevel* Level)
@@ -147,9 +147,9 @@ bool FNWorldAssemblyRegistry::HasOrganComponentsInWorld(const UWorld* World)
 	return false;
 }
 
-bool FNWorldAssemblyRegistry::HasOperations(bool bIgnoreEditorModeOperation)
+bool FNWorldAssemblyRegistry::HasOperations()
 {
-#if WITH_EDITOR	
+#if WITH_EDITOR
 	if (Operations.Num() == 1 && Operations[0]->GetName() == NEXUS::WorldAssembly::Operations::EditorMode)
 	{
 		return false;
@@ -160,14 +160,28 @@ bool FNWorldAssemblyRegistry::HasOperations(bool bIgnoreEditorModeOperation)
 
 bool FNWorldAssemblyRegistry::HasCellLevelInstances(const int32 OperationTicket, const bool bIsLevelLoaded)
 {
-	if (OperationTicket == 0)
+	// An entry only qualifies if it is non-null and, when bIsLevelLoaded is set, its underlying level has finished loading.
+	auto HasQualifying = [bIsLevelLoaded](const TArray<ANCellLevelInstance*>& Instances)
 	{
-		return !CellLevelInstances.IsEmpty();
+		for (ANCellLevelInstance* Instance : Instances)
+		{
+			if (Instance == nullptr) continue;
+			if (bIsLevelLoaded && !Instance->IsLoaded()) continue;
+			return true;
+		}
+		return false;
+	};
+
+	if (OperationTicket != 0)
+	{
+		const TArray<ANCellLevelInstance*>* LevelInstances = CellLevelInstances.Find(OperationTicket);
+		return LevelInstances != nullptr && HasQualifying(*LevelInstances);
 	}
-	
-	if (CellLevelInstances.Contains(OperationTicket))
+
+	// Search across all operations.
+	for (const auto& Pair : CellLevelInstances)
 	{
-		return !CellLevelInstances[OperationTicket].IsEmpty();
+		if (HasQualifying(Pair.Value)) return true;
 	}
 	return false;
 }
@@ -175,8 +189,8 @@ bool FNWorldAssemblyRegistry::HasCellLevelInstances(const int32 OperationTicket,
 TArray<ANCellLevelInstance*> FNWorldAssemblyRegistry::GetCellLevelInstancesInRange(const FVector& Location, const double Range, const bool bIsLevelLoaded, const int32 OperationTicket)
 {
 	TArray<ANCellLevelInstance*> Results;
-	if (CellLevelInstances.IsEmpty()) return MoveTemp(Results);
-	
+	if (CellLevelInstances.IsEmpty()) return Results;
+
 	const double RangeSquared = Range * Range;
 
 	// Distance check method
@@ -211,7 +225,7 @@ TArray<ANCellLevelInstance*> FNWorldAssemblyRegistry::GetCellLevelInstancesInRan
 		}
 	}
 
-	return MoveTemp(Results);
+	return Results;
 }
 
 bool FNWorldAssemblyRegistry::HasCellLevelInstance(const int32 OperationTicket, const FGuid LevelInstanceSpawnGuid, const bool bIsLevelLoaded)
@@ -221,11 +235,10 @@ bool FNWorldAssemblyRegistry::HasCellLevelInstance(const int32 OperationTicket, 
 	{
 		for (ANCellLevelInstance* LevelInstance : *LevelInstances)
 		{
-			if (LevelInstance->GetLevelInstanceSpawnGuid() == LevelInstanceSpawnGuid)
-			{
-				if (bIsLevelLoaded && !LevelInstance->IsLoaded()) continue;
-				return true;
-			}
+			if (LevelInstance == nullptr) continue;
+			if (LevelInstance->GetLevelInstanceSpawnGuid() != LevelInstanceSpawnGuid) continue;
+			if (bIsLevelLoaded && !LevelInstance->IsLoaded()) continue;
+			return true;
 		}
 	}
 	return false;
@@ -241,6 +254,19 @@ bool FNWorldAssemblyRegistry::HasCellLevelInstances(const TArray<FNCellLevelInst
 		}
 	}
 	return true;
+}
+
+TArray<FNCellLevelInstanceLocator> FNWorldAssemblyRegistry::GetRemainingCellLevelInstancesToSync(const TArray<FNCellLevelInstanceLocator>& LevelInstances, bool bIsLevelLoaded)
+{
+	TArray<FNCellLevelInstanceLocator> WaitingOnInstances;
+	for (const auto Locator : LevelInstances)
+	{
+		if (!HasCellLevelInstance(Locator.OperationTicket, Locator.LevelInstanceSpawnGuid, bIsLevelLoaded))
+		{
+			WaitingOnInstances.Add(Locator);
+		}
+	}
+	return WaitingOnInstances;
 }
 
 bool FNWorldAssemblyRegistry::RegisterBoneComponent(UNBoneComponent* Component)
@@ -295,12 +321,12 @@ bool FNWorldAssemblyRegistry::RegisterOperation(UNAssemblyOperation* Operation)
 {
 	if (Operations.Contains(Operation))
 	{
-		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Failed to register UNWorldAssemblyOperation(%s) as it is already registered"), *Operation->GetName());
+		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Failed to register UNAssemblyOperation(%s) as it is already registered"), *Operation->GetName());
 		return false;
 	}
 
 	Operations.Add(Operation);
-	
+
 	NotifyOfStateChange(Operation, ENWorldAssemblyOperationState::Registered);
 	return true;
 }
@@ -380,7 +406,7 @@ bool FNWorldAssemblyRegistry::UnregisterOperation(UNAssemblyOperation* Operation
 {
 	if (!Operations.Contains(Operation))
 	{
-		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Failed to find UNWorldAssemblyOperation(%s) when attempting to unregister it."), *Operation->GetName());
+		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Failed to find UNAssemblyOperation(%s) when attempting to unregister it."), *Operation->GetName());
 		return false;
 	}
 
@@ -399,7 +425,7 @@ bool FNWorldAssemblyRegistry::UnregisterCellLevelInstance(ANCellLevelInstance* C
 		{
 			LevelInstances->RemoveSwap(CellLevelInstance);
 			CellLevelInstance->bRegistered = false;
-	
+
 			if (LevelInstances->IsEmpty())
 			{
 				CellLevelInstances.Remove(OperationTicket);
@@ -423,7 +449,7 @@ void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnd
 {
 	// We're not going to handle Operations here, it will be handled elsewhere.
 	if (IsEngineExitRequested()) return;
-	
+
 	// Scrub Bones
 	for (int i = Bones.Num() - 1; i >= 0; --i)
 	{
@@ -433,21 +459,21 @@ void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnd
 			Bones.RemoveAt(i);
 		}
 	}
-	
+
 	// Scrub Cell Junctions
 	for (int i = CellJunctions.Num() - 1; i >= 0; --i)
 	{
 		if (CellJunctions[i]->GetWorld() == World)
 		{
-#if WITH_EDITOR			
+#if WITH_EDITOR
 			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Found uncleaned CellJunctions(%s), scrubbing."), *CellJunctions[i]->GetJunctionName());
 #else
 			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Found uncleaned CellJunctions(%s), scrubbing."), *CellJunctions[i]->GetFName().ToString());
-#endif // WITH_EDITOR			
+#endif // WITH_EDITOR
 			CellJunctions.RemoveAt(i);
 		}
 	}
-	
+
 	// Scrub Cell Roots
 	for (int i = CellRoots.Num() - 1; i >= 0; --i)
 	{
@@ -457,7 +483,7 @@ void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnd
 			CellRoots.RemoveAt(i);
 		}
 	}
-	
+
 	// Scrub Organs
 	for (int i = Organs.Num() - 1; i >= 0; --i)
 	{
@@ -467,11 +493,11 @@ void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnd
 			Organs.RemoveAt(i);
 		}
 	}
-	
+
 	// Scrub CellLevelInstances
 	TArray<int32> OperationTickets;
 	CellLevelInstances.GetKeys(OperationTickets);
-	
+
 	for (int i = OperationTickets.Num() - 1; i >= 0; --i)
 	{
 		const int32 Ticket = OperationTickets[i];
@@ -484,7 +510,7 @@ void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnd
 				CellLevelInstances[Ticket].RemoveAt(j);
 			}
 		}
-		
+
 		// Remove empty containers
 		if (CellLevelInstances[Ticket].IsEmpty())
 		{

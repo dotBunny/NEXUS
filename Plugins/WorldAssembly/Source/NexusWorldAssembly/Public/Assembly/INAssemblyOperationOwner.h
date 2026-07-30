@@ -13,6 +13,7 @@ class UNAssemblyOperation;
  * editor mode). The operation routes its lifecycle callbacks back to the owner so runtime vs editor
  * driven flows can specialize their behavior.
  * @remark Native-only interface; not exposed to Blueprints.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/assembly-operation-owner/">INAssemblyOperationOwner</a>
  */
 class INAssemblyOperationOwner
 {

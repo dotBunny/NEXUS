@@ -65,10 +65,16 @@ void UNToolingEditorUserSettings::ApplyAlwaysShowFrameRateAndMemory() const
 
 void UNToolingEditorUserSettings::ApplySpaceToPan() const
 {
-	if (FNEditorUtils::IsUserControlled())
+	if (!FNEditorUtils::IsUserControlled())
 	{
-		const FNToolingEditorModule& ToolingModule = FModuleManager::GetModuleChecked<FNToolingEditorModule>("NexusToolingEditor");
-		FNEditorInputProcessor* InputProcessor = ToolingModule.GetInputProcessor();
+		return;
+	}
+
+	// The processor is created in StartupModule under the same !IsRunningCommandlet() gate as IsUserControlled,
+	// so it is normally valid here. Guard anyway so this use site does not depend on that invariant holding.
+	const FNToolingEditorModule& ToolingModule = FModuleManager::GetModuleChecked<FNToolingEditorModule>("NexusToolingEditor");
+	if (FNEditorInputProcessor* InputProcessor = ToolingModule.GetInputProcessor())
+	{
 		InputProcessor->bCachedGraphNavigationSpaceToPan = bGraphNavigationSpaceToPan;
 		InputProcessor->CachedGraphNavigationPanSpeedMultiplier = GraphNavigationPanSpeedMultiplier;
 	}
@@ -77,13 +83,13 @@ void UNToolingEditorUserSettings::ApplySpaceToPan() const
 FString UNToolingEditorUserSettings::GetMultiplayerTestClientArguments() const
 {
 	FString ClientArguments = TEXT("-") + NEXUS::Tooling::MultiplayerTest::Argument;
-		
+
 	if (bClientGenerateNetworkProfile)
 	{
 		// ReSharper disable once StringLiteralTypo
 		ClientArguments.Append(" networkprofiler=true");
 	}
-		
+
 	if (bClientDisableSound)
 	{
 		// ReSharper disable once StringLiteralTypo
@@ -97,66 +103,66 @@ FString UNToolingEditorUserSettings::GetMultiplayerTestClientArguments() const
 	{
 		ClientArguments.Append(" -PktLagMin=0");
 	}
-		
+
 	if (ClientSimulateLagMaximum > 0)
 	{
 		ClientArguments.Append(FString::Printf(TEXT(" -PktLagMax=%i"), FMath::FloorToInt(ClientSimulateLagMaximum * 0.5f)));
 	}
-		
+
 	if (ClientSimulatePacketLoss > 0)
 	{
 		ClientArguments.Append(FString::Printf(TEXT(" -PktLoss=%i"), ClientSimulatePacketLoss));
 	}
-		
+
 	if (ClientSimulatePacketDuplication > 0)
 	{
 		ClientArguments.Append(FString::Printf(TEXT(" -PktDup=%i"), ClientSimulatePacketDuplication));
 	}
-	
+
 	if (ClientSimulatePacketJitter > 0)
 	{
 		ClientArguments.Append(FString::Printf(TEXT(" -PktJitter=%i"), ClientSimulatePacketJitter));
 	}
-		
+
 	if (bClientSimulateReceiveOutOfOrderPackets)
 	{
 		ClientArguments.Append(" -PktOrder=1");
 	}
-		
+
 	ClientArguments.Append(FString::Printf(TEXT(" %s"), *ClientParameters.TrimStartAndEnd()));
-		
-	return MoveTemp(ClientArguments);
+
+	return ClientArguments;
 }
 
 FString UNToolingEditorUserSettings::GetMultiplayerTestServerArguments() const
 {
 	FString ServerAdditionalArguments = TEXT("");
-		
+
 	if (bServerGenerateNetworkProfile)
 	{
 		// ReSharper disable once StringLiteralTypo
 		ServerAdditionalArguments.Append(" networkprofiler=true");
 	}
-		
+
 	ServerAdditionalArguments.Append(FString::Printf(TEXT(" %s"), *ServerParameters.TrimStartAndEnd()));
-		
-	return MoveTemp(ServerAdditionalArguments);
+
+	return ServerAdditionalArguments;
 }
 
 void UNToolingEditorUserSettings::ApplySettings(FRequestPlaySessionParams& Params) const
 {
 	// Set window sized
 	Params.EditorPlaySettings->SetClientWindowSize(ClientWindowSize);
-		
+
 	// Build out SERVER parameters
 	Params.EditorPlaySettings->AdditionalServerLaunchParameters = GetMultiplayerTestServerArguments();
-		
+
 	// Build out CLIENT parameters
 	Params.EditorPlaySettings->AdditionalLaunchParameters = GetMultiplayerTestClientArguments();
-		
+
 	// Set the number of clients
 	Params.EditorPlaySettings->SetPlayNumberOfClients(ClientCount);
-		
+
 	// Setup server mode
 	if (bUseDedicatedServer || ServerParameters.Len() > 0)
 	{

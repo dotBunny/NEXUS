@@ -9,36 +9,38 @@
 #include "NWorldAssemblySettings.h"
 #include "Organ/NOrganVolume.h"
 #include "Chaos/Convex.h"
+#include "Components/PrimitiveComponent.h"
 #include "Organ/NOrganComponent.h"
 #include "Misc/ScopedSlowTask.h"
+#include "Types/NRawMeshFactory.h"
 
 FBox FNWorldAssemblyUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCellBoundsGenerationSettings& Settings)
 {
 	FBox LevelBounds(ForceInit);
-	
+
 	// Go home early
 	if (InLevel == nullptr)
 	{
-		return MoveTemp(LevelBounds);
+		return LevelBounds;
 	}
-	
+
 	TArray<const AActor*> IgnoredActors;
-	
+
 	// Prefill Ignored Actors to effect downstream
 	ANCellActor* CellActor = nullptr;
 	UNCellRootComponent* CellRoot = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(InLevel);
 	if (CellRoot != nullptr)
 	{
-		CellActor = CellRoot->GetNCellActor();	
+		CellActor = CellRoot->GetNCellActor();
 	}
 	if (CellActor != nullptr)
 	{
 		CellActor->AppendAuthorTimeActors(IgnoredActors);
 	}
-	
+
 	FNLevelUtils::DetermineLevelBounds(InLevel, LevelBounds, IgnoredActors, Settings.ActorIgnoreTags, Settings.bIncludeEditorOnly, Settings.bIncludeNonColliding);
-	
-	return MoveTemp(LevelBounds);
+
+	return LevelBounds;
 }
 
 
@@ -46,65 +48,104 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 {
 	FNRawMesh Mesh;
 	TArray<Chaos::FConvex::FVec3Type> Vertices;
-	
+
 	if (InLevel == nullptr)
 	{
-		return MoveTemp(Mesh);
+		return Mesh;
 	}
-	
+
 	// Check for Cell Actor
 	ANCellActor* CellActor = nullptr;
 	UNCellRootComponent* CellRoot = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(InLevel);
 	if (CellRoot != nullptr)
 	{
-		CellActor = CellRoot->GetNCellActor();	
+		CellActor = CellRoot->GetNCellActor();
 	}
-	
-	FVector BoxVertices[8];
+
 	const int32 NumActors = InLevel->Actors.Num();
-	
+
+	// STEP 1 - Filter the level's actors down to those that should contribute to the hull.
 	FScopedSlowTask ActorTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusWorldAssembly", "Task_CalculateConvexHull_Actor", "Calculate Convex Hull - Actors"));
 	ActorTask.MakeDialog(false);
-	
-	Vertices.Reserve(NumActors * 8);
-	for (int32 ActorIndex = 0; ActorIndex < InLevel->Actors.Num() ; ++ActorIndex)
+
+	TArray<AActor*> HullActors;
+	HullActors.Reserve(NumActors);
+	for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
 	{
 		ActorTask.EnterProgressFrame(1);
-		const AActor* Actor = InLevel->Actors[ActorIndex];
-		if (Actor && Actor->IsLevelBoundsRelevant())
+		AActor* Actor = InLevel->Actors[ActorIndex];
+		if (Actor == nullptr || !Actor->IsLevelBoundsRelevant()) continue;
+
+		// Check Editor Only
+		if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly) continue;
+
+		// Don't bother with transient actors
+		if (Actor->HasAnyFlags(RF_Transient)) continue;
+
+		// Ignore Tags
+		if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
+
+		// Author Time Only
+		if (CellActor != nullptr && CellActor->IsAuthorTimeActor(Actor)) continue;
+
+		HullActors.Add(Actor);
+	}
+
+	// STEP 2 - Pull each qualifying actor's collision geometry (convex/box/sphere/capsule, or the
+	// complex-as-simple tri-mesh) and flatten every vertex into world space for the hull builder.
+	TArray<FNRawMesh> CollisionMeshes;
+	TArray<FTransform> CollisionTransforms;
+	FNRawMeshFactory::FromActorsInBounds(HullActors, {}, CollisionMeshes, CollisionTransforms);
+
+	int32 CollisionVertexCount = 0;
+	for (const FNRawMesh& CollisionMesh : CollisionMeshes)
+	{
+		CollisionVertexCount += CollisionMesh.Vertices.Num();
+	}
+
+	Vertices.Reserve(CollisionVertexCount + (Settings.bIncludeNonColliding ? HullActors.Num() * 8 : 0));
+	for (int32 MeshIndex = 0; MeshIndex < CollisionMeshes.Num(); ++MeshIndex)
+	{
+		const FTransform& ToWorld = CollisionTransforms[MeshIndex];
+		for (const FVector& Vertex : CollisionMeshes[MeshIndex].Vertices)
 		{
-			// Check Editor Only
-			if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly) continue;
-			
-			// Don't bother with transient actors
-			if (Actor->HasAnyFlags(RF_Transient)) continue;
-			
-			// Ignore Tags
-			if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
-			
-			// Author Time Only
-			if (CellActor != nullptr && CellActor->IsAuthorTimeActor(Actor)) continue;
-			
-			if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
-			
-			FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
-			if (ActorBox.IsValid && 
+			Vertices.Add(Chaos::FConvex::FVec3Type(ToWorld.TransformPosition(Vertex)));
+		}
+	}
+
+	// STEP 3 - Non-colliding actors yield no collision geometry, so (when requested) fall back to their
+	// bounding-box corners. A registered primitive with a BodySetup is the same gate FNRawMeshFactory uses
+	// to emit geometry, so its absence means the factory produced nothing for this actor.
+	if (Settings.bIncludeNonColliding)
+	{
+		FVector BoxVertices[8];
+		for (AActor* Actor : HullActors)
+		{
+			bool bHasCollisionGeometry = false;
+			TInlineComponentArray<UPrimitiveComponent*> ActorPrimitives(Actor);
+			for (UPrimitiveComponent* ActorPrimitive : ActorPrimitives)
+			{
+				if (ActorPrimitive != nullptr && ActorPrimitive->IsRegistered() && ActorPrimitive->GetBodySetup() != nullptr)
+				{
+					bHasCollisionGeometry = true;
+					break;
+				}
+			}
+			if (bHasCollisionGeometry) continue;
+
+			FBox ActorBox = Actor->GetComponentsBoundingBox(true);
+			if (ActorBox.IsValid &&
 				(ActorBox.GetExtent().X > 0 && ActorBox.GetExtent().Y > 0 && ActorBox.GetExtent().Z > 0))
 			{
 				ActorBox.GetVertices(BoxVertices);
-
-				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[0]));
-				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[1]));
-				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[2]));
-				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[3]));
-				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[4]));
-				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[5]));
-				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[6]));
-				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[7]));
+				for (const FVector& BoxVertex : BoxVertices)
+				{
+					Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertex));
+				}
 			}
 		}
 	}
-	
+
 	TArray<Chaos::FConvex::FPlaneType> OutPlanes;
 	TArray<TArray<int32>> OutFaceIndices;
 	TArray<Chaos::FConvex::FVec3Type> OutVertices;
@@ -115,14 +156,14 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 	ChaosTask.EnterProgressFrame(1);
 	Chaos::FConvexBuilder::FConvexBuilder::Build(Vertices, OutPlanes, OutFaceIndices, OutVertices, OutLocalBounds, Settings.GetChaosBuildMethod());
 	ChaosTask.EnterProgressFrame(1);
-	
+
 	// Construct FVector Vertices
 	const int32 VerticesCount = OutVertices.Num();
 	const int32 IndicesCount = OutFaceIndices.Num();
-	
+
 	FScopedSlowTask BuildTask = FScopedSlowTask(VerticesCount + IndicesCount, NSLOCTEXT("NexusWorldAssembly", "Task_CalculateConvexHull_Build", "Calculate Convex Hull - Build Mesh"));
 	BuildTask.MakeDialog(false);
-	
+
 	Mesh.Vertices.Reserve(VerticesCount);
 	FVector CenterCalc;
 	FBox BoundingBox(ForceInit);
@@ -130,7 +171,7 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 	{
 		BuildTask.EnterProgressFrame(1);
 		Mesh.Vertices.Add(FVector(OutVertices[i][0], OutVertices[i][1], OutVertices[i][2]));
-		
+
 		FVector& CreatedPoint = Mesh.Vertices.Last();
 		CenterCalc += CreatedPoint;
 		BoundingBox += CreatedPoint;
@@ -167,54 +208,54 @@ FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const 
 {
 	// TODO: We probably could use the voxel data to actually generate the overall bounds to avoid the double parse of the actors in the level
 	FNCellVoxelData ReturnData;
-	
+
 	// Go home early
 	if (InLevel == nullptr)
 	{
-		return MoveTemp(ReturnData);
+		return ReturnData;
 	}
-	
+
 	// Prefill Ignored Actors to effect downstream
 	TArray<const AActor*> IgnoredActors;
 	ANCellActor* CellActor = nullptr;
 	UNCellRootComponent* CellRoot = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(InLevel);
 	if (CellRoot != nullptr)
 	{
-		CellActor = CellRoot->GetNCellActor();	
+		CellActor = CellRoot->GetNCellActor();
 	}
 	if (CellActor != nullptr)
 	{
 		CellActor->AppendAuthorTimeActors(IgnoredActors);
 	}
-	
+
 	// Settings
 	const UWorld* World = InLevel->GetWorld();
 	const FVector UnitSize = UNWorldAssemblySettings::Get()->VoxelSize;
 	const ECollisionChannel CollisionChannel = Settings.CollisionChannel;
 	const FVector HalfUnitSize = UnitSize * 0.5f;
-	
+
 	// STEP 1 - Specific Bounds / Ignore Actors
 	FBox Bounds(ForceInit);
 	FNLevelUtils::DetermineLevelBounds(InLevel, Bounds, IgnoredActors, Settings.ActorIgnoreTags, Settings.bIncludeEditorOnly, Settings.bIncludeNonColliding);
-	
+
 	ReturnData.Origin = Bounds.Min;
-	
+
 	const FBox UnitBounds = FBox(
 				FNVectorUtils::GetFurthestGridIntersection(Bounds.Min, UnitSize),
 				FNVectorUtils::GetFurthestGridIntersection(Bounds.Max, UnitSize));
-	
+
 	const FVector BoundsSize = UnitBounds.GetSize();
 	const uint32 SizeX = FMath::RoundToInt(BoundsSize.X);
 	const uint32 SizeY = FMath::RoundToInt(BoundsSize.Y);
 	const uint32 SizeZ = FMath::RoundToInt(BoundsSize.Z);
-	
+
 	// Setup array
 	ReturnData.Resize(SizeX, SizeY, SizeZ);
 	const size_t Count = ReturnData.GetCount();
-	
+
 	FCollisionQueryParams Params = FCollisionQueryParams(TEXT("CalculateVoxelData"), true);
 	Params.AddIgnoredActors(IgnoredActors);
-	
+
 	// STEP 2 - Broad Trace
 	FScopedSlowTask BroadTraceTask = FScopedSlowTask(Count, NSLOCTEXT("NexusWorldAssembly", "Task_CalculateVoxelData_BroadTrace", "Broad Trace"));
 	BroadTraceTask.MakeDialog(false);
@@ -223,11 +264,11 @@ FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const 
 	TArray<FVector> RayEndPoints;
 	FHitResult SingleHit;
 	TArray<FHitResult> ObjectHits;
-	
+
 	// Our initial box shape is slightly larger than the actual voxel unit size as to always detect collisions right on the extents.
 	FCollisionShape BoxShape = FCollisionShape::MakeBox(HalfUnitSize + FVector(0.001f, 0.001f, 0.001f));
 	TArray<uint32> SurroundingIndices;
-	
+
 	// #SONARQUBE-DISABLE Need to loop depth to handle dimensions
 	for (uint32 x = 0; x < SizeX; x++)
 	{
@@ -238,7 +279,7 @@ FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const 
 				const size_t VoxelIndex = ReturnData.GetIndex(x,y,z);
 				BroadTraceTask.EnterProgressFrame(1);
 				FVector VoxelCenter = ReturnData.Origin + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
-				
+
 				// Standard Overlap Check
 				bool const bHit = World ? World->SweepSingleByChannel(SingleHit, VoxelCenter, VoxelCenter, FQuat::Identity, CollisionChannel, BoxShape, Params) : false;
 				if (bHit)
@@ -249,8 +290,8 @@ FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const 
 		}
 	}
 	// #SONARQUBE-ENABLE
-	
-	return MoveTemp(ReturnData);
+
+	return ReturnData;
 }
 
 int32 FNWorldAssemblyUtils::GetCellActorCountFromLevel(const ULevel* Level)
@@ -317,7 +358,7 @@ TArray<UNOrganComponent*> FNWorldAssemblyUtils::GetOrganComponentsFromLevel(cons
 {
 	TArray<UNOrganComponent*> Result;
 	if (InLevel == nullptr) return Result;
-    
+
 	for (auto ActorIt = InLevel->Actors.CreateConstIterator(); ActorIt; ++ActorIt)
 	{
 		if (const AActor* Actor = ActorIt->Get())
@@ -327,15 +368,15 @@ TArray<UNOrganComponent*> FNWorldAssemblyUtils::GetOrganComponentsFromLevel(cons
 			Result.Append(Components);
 		}
 	}
-	
+
 	if (bSorted)
 	{
 		Result.Sort([](const UNOrganComponent& A, const UNOrganComponent& B) {
 			return A.Identifier < B.Identifier;
 		});
 	}
-    
-	return MoveTemp(Result);
+
+	return Result;
 
 }
 
@@ -357,7 +398,7 @@ TArray<ANOrganVolume*> FNWorldAssemblyUtils::GetOrganVolumesFromWorld(const UWor
 {
 	TArray<ANOrganVolume*> Result;
 	if (World == nullptr ) return Result;
-	
+
 	for (const ULevel* Level : World->GetLevels())
 	{
 		if (bIgnoreInstancedLevels && Level->IsInstancedLevel()) continue;
@@ -388,7 +429,7 @@ TArray<FVector2D> FNWorldAssemblyUtils::GetSocketPoints2D(const FIntVector2& Uni
 			Points.Add(FVector2D(WidthStart + (i * UnitSize.X), HeightStart + (y * UnitSize.Y)));
 		}
 	}
-	return MoveTemp(Points);
+	return Points;
 }
 
 TArray<FVector> FNWorldAssemblyUtils::GetCenteredWorldCornerPoints2D(
@@ -405,7 +446,7 @@ TArray<FVector> FNWorldAssemblyUtils::GetCenteredWorldCornerPoints2D(
 	ReturnPositions.Add(FVector(-HalfWidth,0,-HalfHeight)); // BL
 	ReturnPositions.Add(FVector(HalfWidth,0,-HalfHeight)); // BR
 	ReturnPositions.Add(FVector(HalfWidth,0,HalfHeight)); // TR
-	
+
 	if (Axis == ENAxis::X)
 	{
 		ReturnPositions[0] = FVector(HalfHeight, 0, -HalfWidth);
@@ -421,7 +462,7 @@ TArray<FVector> FNWorldAssemblyUtils::GetCenteredWorldCornerPoints2D(
 		ReturnPositions[3] = FVector(-HalfWidth,HalfHeight, 0);
 	}
 
-	return MoveTemp(ReturnPositions);
+	return ReturnPositions;
 }
 
 void FNWorldAssemblyUtils::GetVoxelQueryPoints(const FVector& WorldCenter, const FVector& VoxelSize, TArray<FVector>& OutPositions)
@@ -434,7 +475,7 @@ void FNWorldAssemblyUtils::GetVoxelQueryPoints(const FVector& WorldCenter, const
 	 |       |		|		    |		|		    |
 	 5 - 6 - 7		14 - 15 -  16		22 -  23 -  24
 	 */
-	
+
 	OutPositions.Add(WorldCenter + FVector(VoxelSize.X,-VoxelSize.Y, VoxelSize.Z)); // TOP_0
 	OutPositions.Add(WorldCenter + FVector(VoxelSize.X,0, VoxelSize.Z)); // TOP_1
 	OutPositions.Add(WorldCenter + FVector(VoxelSize.X, VoxelSize.Y, VoxelSize.Z)); // TOP_2
@@ -444,7 +485,7 @@ void FNWorldAssemblyUtils::GetVoxelQueryPoints(const FVector& WorldCenter, const
 	OutPositions.Add(WorldCenter + FVector(-VoxelSize.X,-VoxelSize.Y, VoxelSize.Z)); // TOP_5
 	OutPositions.Add(WorldCenter + FVector(-VoxelSize.X,0, VoxelSize.Z)); // TOP_6
 	OutPositions.Add(WorldCenter + FVector(-VoxelSize.X, VoxelSize.Y, VoxelSize.Z)); // TOP_7
-	
+
 	OutPositions.Add(WorldCenter + FVector(VoxelSize.X,-VoxelSize.Y, 0)); // MIDDLE_9
 	OutPositions.Add(WorldCenter + FVector(VoxelSize.X,0, 0)); // MIDDLE_10
 	OutPositions.Add(WorldCenter + FVector(VoxelSize.X,VoxelSize.Y, 0)); // MIDDLE_11
@@ -453,7 +494,7 @@ void FNWorldAssemblyUtils::GetVoxelQueryPoints(const FVector& WorldCenter, const
 	OutPositions.Add(WorldCenter + FVector(-VoxelSize.X,-VoxelSize.Y, 0)); // MIDDLE_14
 	OutPositions.Add(WorldCenter + FVector(-VoxelSize.X,0, 0)); // MIDDLE_15
 	OutPositions.Add(WorldCenter + FVector(-VoxelSize.X,VoxelSize.Y, 0)); // MIDDLE_16
-	
+
 	OutPositions.Add(WorldCenter + FVector(VoxelSize.X,-VoxelSize.Y, -VoxelSize.Z)); // BOTTOM_17
 	OutPositions.Add(WorldCenter + FVector(VoxelSize.X,0, -VoxelSize.Z)); // BOTTOM_18
 	OutPositions.Add(WorldCenter + FVector(VoxelSize.X,VoxelSize.Y, -VoxelSize.Z)); // BOTTOM_19
@@ -485,5 +526,5 @@ void FNWorldAssemblyUtils::GetVoxelQueryLevelBoundsEndPoints(const FVector& Worl
 			OutPositions[i] = WorldCenter;
 		}
 	}
-	
+
 }

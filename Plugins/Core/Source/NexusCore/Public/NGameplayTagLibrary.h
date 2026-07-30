@@ -13,37 +13,38 @@
  *
  * Each helper wraps a standard container query and uses ExpandBoolAsExecs so the boolean result drives
  * true/false execution pins directly, removing the need for a separate Branch node in Blueprint graphs.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/gameplay-tag-library/">UNGameplayTagLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | GameplayTag Library")
 class UNGameplayTagLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
-	/** Branch on whether TagContainer holds Tag using an exact match (ignores tag hierarchy). 
-	 * @param TagContainer The container to query. 
-	 * @param Tag The tag to look for. 
+	/** Branch on whether TagContainer holds Tag using an exact match (ignores tag hierarchy).
+	 * @param TagContainer The container to query.
+	 * @param Tag The tag to look for.
 	 * @return true if the container holds exactly Tag. */
-	UFUNCTION(BlueprintCallable, DisplayName="Has Exact Tag ?", Category = "NEXUS|GameplayTags", meta=(ExpandBoolAsExecs="ReturnValue"))
+	UFUNCTION(BlueprintCallable, DisplayName="Has Exact Tag ?", Category = "NEXUS|GameplayTags", meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/gameplay-tag-library/#has-exact-tag-", ExpandBoolAsExecs="ReturnValue"))
 	static bool HasExactTagExec(const FGameplayTagContainer& TagContainer, const FGameplayTag Tag)
 	{
 		return TagContainer.HasTagExact(Tag);
 	};
 
-	/** Branch on whether TagContainer holds Tag, honoring tag hierarchy (a container tag that is a child of Tag also matches). 
-	 * @param TagContainer The container to query. 
-	 * @param Tag The tag to look for. 
+	/** Branch on whether TagContainer holds Tag, honoring tag hierarchy (a container tag that is a child of Tag also matches).
+	 * @param TagContainer The container to query.
+	 * @param Tag The tag to look for.
 	 * @return true if the container holds Tag or a descendant of it. */
-	UFUNCTION(BlueprintCallable, DisplayName="Has Tag ?", Category = "NEXUS|GameplayTags", meta=(ExpandBoolAsExecs="ReturnValue"))
+	UFUNCTION(BlueprintCallable, DisplayName="Has Tag ?", Category = "NEXUS|GameplayTags", meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/gameplay-tag-library/#has-tag-", ExpandBoolAsExecs="ReturnValue"))
 	static bool HasTagExec(const FGameplayTagContainer& TagContainer, const FGameplayTag Tag)
 	{
 		return TagContainer.HasTag(Tag);
 	};
-	
+
 	/** Branch on whether TagContainer holds any of Tags using an exact match (ignores tag hierarchy).
 	 * @param TagContainer The container to query.
 	 * @param Tags The tags to look for.
 	 * @return true if the container holds at least one tag in Tags exactly. */
-	UFUNCTION(BlueprintCallable, DisplayName="Has Any Exact Tags ?", Category = "NEXUS|GameplayTags", meta=(ExpandBoolAsExecs="ReturnValue"))
+	UFUNCTION(BlueprintCallable, DisplayName="Has Any Exact Tags ?", Category = "NEXUS|GameplayTags", meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/gameplay-tag-library/#has-any-exact-tags-", ExpandBoolAsExecs="ReturnValue"))
 	static bool HasAnyTagExactExec(const FGameplayTagContainer& TagContainer, const FGameplayTagContainer Tags)
 	{
 		return TagContainer.HasAnyExact(Tags);
@@ -53,7 +54,7 @@ class UNGameplayTagLibrary : public UBlueprintFunctionLibrary
 	 * @param TagContainer The container to query.
 	 * @param Tags The tags to look for.
 	 * @return true if the container holds at least one tag in Tags or a descendant of it. */
-	UFUNCTION(BlueprintCallable, DisplayName="Has Any Tags ?", Category = "NEXUS|GameplayTags", meta=(ExpandBoolAsExecs="ReturnValue"))
+	UFUNCTION(BlueprintCallable, DisplayName="Has Any Tags ?", Category = "NEXUS|GameplayTags", meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/gameplay-tag-library/#has-any-tags-", ExpandBoolAsExecs="ReturnValue"))
 	static bool HasAnyTagExec(const FGameplayTagContainer& TagContainer, const FGameplayTagContainer Tags)
 	{
 		return TagContainer.HasAny(Tags);

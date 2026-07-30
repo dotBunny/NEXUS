@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "UObject/ConstructorHelpers.h"
+
 // #SONARQUBE-DISABLE This file is ignored from duplication checks the duplication is intended
 
 /**

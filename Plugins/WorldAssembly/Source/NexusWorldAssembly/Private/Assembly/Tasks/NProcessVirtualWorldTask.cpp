@@ -5,14 +5,15 @@
 
 #include "NWorldAssemblyMinimal.h"
 #include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
+#include "Math/NBoundsBVH.h"
 #include "Types/NRawMeshUtils.h"
 
 void FNProcessVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
 	N_ASSEMBLY_ANALYTICS(ProcessVirtualWorldContextStart)
-	
+
 	const int32 MeshCount = VirtualWorldContextPtr->WorldCollisionMeshes.Num();
-		
+
 	// We are going to massage the data a bit at this point:
 	// - Apply each mesh's Transform scale against the vertices
 	// - Cache the location and the rotation
@@ -20,7 +21,7 @@ void FNProcessVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const 
 	{
 		// Unwind Transform
 		VirtualWorldContextPtr->WorldCollisionMeshes[i].ApplyTransform(VirtualWorldContextPtr->WorldCollisionTransforms[i]);
-		
+
 		// If the mesh is not convex were going to do it right here
 		if (!VirtualWorldContextPtr->WorldCollisionMeshes[i].IsConvex())
 		{
@@ -32,7 +33,28 @@ void FNProcessVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const 
 		// its first intersection query.
 		VirtualWorldContextPtr->WorldCollisionMeshes[i].EnsureCachedFacePlanes();
 	}
-	
+
+	// Build the broadphase now that every mesh is baked into world space, so its bounds are final. Built once here
+	// and never mutated again, which is what lets every organ builder in every pass query it concurrently.
+	{
+		TArray<FBox> MeshBounds;
+		MeshBounds.Reserve(MeshCount);
+		for (int32 i = 0; i < MeshCount; i++)
+		{
+			const FNRawMesh& Mesh = VirtualWorldContextPtr->WorldCollisionMeshes[i];
+			const bool bHasBounds = Mesh.HasBounds();
+			MeshBounds.Add(bHasBounds ? Mesh.Bounds : FBox(ForceInit));
+
+			// A mesh without bounds gets no AABB rejection inside GetIntersectDepth, so it cannot be excluded by a
+			// broadphase without changing the answer. Record it to be tested unconditionally instead.
+			if (!bHasBounds)
+			{
+				VirtualWorldContextPtr->UnboundedWorldCollisionIndices.Add(i);
+			}
+		}
+		VirtualWorldContextPtr->WorldCollisionBVH = FNBoundsBVH(MeshBounds);
+	}
+
 	// No point keeping this around
 	VirtualWorldContextPtr->WorldCollisionTransforms.Empty();
 

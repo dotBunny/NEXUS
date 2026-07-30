@@ -9,9 +9,15 @@
 DECLARE_MULTICAST_DELEGATE(FNSimpleMulticastDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FNSimpleDynamicMulticastDelegate);
 
+/**
+ * Discriminator selecting which of the two parameterless delegate flavors declared above a caller refers to.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/simple-delegates/">ENSimpleDelegateType</a>
+ */
 UENUM()
 enum class ENSimpleDelegateType : uint8
 {
+	/** Native, non-dynamic multicast delegate (FNSimpleMulticastDelegate). */
 	Multicast = 0,
+	/** Blueprint-assignable dynamic multicast delegate (FNSimpleDynamicMulticastDelegate). */
 	DynamicMulticast = 1,
 };

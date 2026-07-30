@@ -9,6 +9,7 @@
 
 /**
  * Intersection and containment helpers for FNRawMesh geometry.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/raw-mesh-utils/">FNRawMeshUtils</a>
  */
 class NEXUSCORE_API FNRawMeshUtils
 {
@@ -51,9 +52,9 @@ public:
 	static bool DoesIntersect(
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
-	
+
 	static bool DoesIntersect(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
-	
+
 	static bool DoesIntersect(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh);
 
 	/**
@@ -96,18 +97,15 @@ public:
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation,
 		float EarlyExitDepth = MAX_flt);
-	
+
 	static float GetIntersectDepth(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation, float EarlyExitDepth = MAX_flt);
-	
+
 	static float GetIntersectDepth(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, float EarlyExitDepth = MAX_flt);
-	
-	
-	static float GetIntersectDepth(
-		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
-		const FVector& WorldPosition, 
-		float EarlyExitDepth = MAX_flt);
-	
-	static float GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& WorldPosition, float EarlyExitDepth = MAX_flt);
+
+
+	static float GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation, const FVector& WorldPosition);
+
+	static float GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& WorldPosition);
 
 
 	/**

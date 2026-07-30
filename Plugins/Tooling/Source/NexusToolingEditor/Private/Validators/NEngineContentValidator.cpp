@@ -26,7 +26,7 @@ EDataValidationResult UNEngineContentValidator::ValidateLoadedAsset_Implementati
 		FNToolingEditorUtils::AddDataValidationResponse(Context, Settings->ValidatorEngineContentChange,
 			FText::FromString(TEXT("Engine content changes should be heavily scrutinized before commiting. They can be easily overwritten during upgrades or other verification processes.\nFor more information visit https://nexus-framework.com/docs/plugins/tooling/validators/engine-content-validator/#engine-content-changed")));
 
-		
+
 		Result = FNToolingEditorUtils::GetDataValidationResult(Settings->ValidatorEngineContentChange);
 	}
 	return Result;

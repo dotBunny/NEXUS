@@ -3,7 +3,6 @@
 
 #pragma once
 
-
 #include "CommonTextBlock.h"
 #include "INListViewEntry.h"
 #include "NDynamicRefsMinimal.h"
@@ -13,25 +12,24 @@
 #include "NDynamicRefListViewEntry.generated.h"
 
 class UNDynamicRefObject;
-class UCommonTextBlock;
 
 /**
  * UMG list view entry widget for a single dynamic-reference row (reference label + nested actor list).
+ * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-list-view-entry/">UNDynamicRefListViewEntry</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | DynamicRef ListView Entry", BlueprintType, Blueprintable)
 class NEXUSDYNAMICREFS_API UNDynamicRefListViewEntry : public UUserWidget, public INListViewEntry
 {
 	GENERATED_BODY()
 
-
 public:
-	
+
 	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
 	{
 		OwnerListView = Owner;
 		Execute_OnSetOwnerListView(Widget, Owner);
 	}
-	
+
 	/**
 	 * Button handler used by nested list rows to focus/select the referenced object.
 	 * @param TargetObject The object clicked.
@@ -56,14 +54,14 @@ protected:
 	/** Nested list view of objects currently claiming the reference. */
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr<UNListView> References;
-	
+
 	virtual void NativeConstruct() override
 	{
 		Super::NativeConstruct();
-		
+
 		// Will validate it here only to throw a message in log for someone to realize they haven't hooked up the widget correctly.
-		N_VALIDATE(LogNexusDynamicRefs, Reference)
-		N_VALIDATE(LogNexusDynamicRefs, References)
+		N_VALIDATE(LogNexusDynamicRefs, Reference);
+		N_VALIDATE(LogNexusDynamicRefs, References);
 	}
 	virtual void NativeDestruct() override;
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;

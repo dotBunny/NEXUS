@@ -12,6 +12,7 @@
  *
  * Useful for analytics that need to attribute counts to a retry pass, generation step,
  * or other discrete phase rather than a single cumulative total.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/iteration-counter/">FNIterationCounter</a>
  */
 struct FNIterationCounter
 {
@@ -26,7 +27,7 @@ struct FNIterationCounter
 	{
 		Counter[Iteration] = Counter[Iteration] + 1;
 	}
-	
+
 	/** Add the given amount to the current iteration's tally. */
 	void Add(int32 Value)
 	{
@@ -45,7 +46,7 @@ struct FNIterationCounter
 		Counter.Add(0);
 		Iteration++;
 	}
-	
+
 	/** Sum every iteration's tally and return the cumulative total across all buckets. */
 	int32 GetTotal()
 	{

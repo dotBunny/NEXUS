@@ -7,20 +7,14 @@
 
 /**
  * Registry and generator for the "Fixers" dropdown menu. Plugins contribute entries via
- * AddMenuEntry during startup; the Register/Unregister pair wires the dropdown into the
- * global tool-menu system.
+ * AddMenuEntry during startup; the dropdown itself is wired into the tool-menu system by
+ * FNToolingEditorCommands::AddMenuEntries, which binds GenerateMenu as its content delegate.
  */
 class FNFixersMenu
 {
 public:
 
-	/** Attach the Fixers dropdown to the tool-menu system. */
-	static void Register();
-
-	/** Detach the Fixers dropdown and release any tool-menu extensions it owned. */
-	static void Unregister();
-
-	/** Register a new entry in the Fixers menu; safe to call after Register(). */
+	/** Register a new entry in the Fixers menu. */
 	NEXUSTOOLINGEDITOR_API static void AddMenuEntry(const FNMenuEntry& Item);
 
 	/** Remove a previously-registered Fixers entry by identifier. */
@@ -33,7 +27,4 @@ private:
 
 	/** All registered menu entries keyed by their stable identifier. */
 	static TMap<FName, FNMenuEntry> Entries;
-
-	/** Display names for each section identifier referenced by Entries. */
-	static TMap<FName, FText> Sections;
 };

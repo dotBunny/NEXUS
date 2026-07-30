@@ -12,27 +12,36 @@
 
 void UNGuardianSubsystem::SetBaseline()
 {
-	BaselineTimerHandle.Invalidate();
-	
+	// A manual baseline supersedes any pending auto-baseline; cancel (not just forget) the timer. ClearTimer also
+	// invalidates the handle, so the OnWorldEndPlay path stays consistent. Safe when SetBaseline is itself the timer
+	// callback — FTimerManager supports clearing the currently-executing one-shot from inside its own delegate.
+	if (BaselineTimerHandle.IsValid())
+	{
+		if (const UWorld* World = GetWorld())
+		{
+			World->GetTimerManager().ClearTimer(BaselineTimerHandle);
+		}
+	}
+
 	const UNGuardianSettings* Settings = UNGuardianSettings::Get();
 	if (Settings == nullptr)
 	{
 		UE_LOG(LogNexusGuardian, Error, TEXT("Guardian settings was null; unable to set baseline."));
 		return;
 	}
-	
-	if (Settings->ObjectCountWarningThreshold >= Settings->ObjectCountSnapshotThreshold || 
+
+	if (Settings->ObjectCountWarningThreshold >= Settings->ObjectCountSnapshotThreshold ||
 		Settings->ObjectCountSnapshotThreshold >= Settings->ObjectCountCompareThreshold)
 	{
 		UE_LOG(LogNexusGuardian, Error, TEXT("Guardian settings values must increase between thresholds (warning < snapshot < compare); unable to set baseline."));
 		return;
 	}
-	
+
 	bPassedObjectCountWarningThreshold = false;
 	bPassedObjectCountSnapshotThreshold = false;
 	bPassedObjectCountCompareThreshold = false;
-	CaptureSnapshot.Reset();
-	
+	CapturedSnapshot.Reset();
+
 	BaseObjectCount = FNDeveloperUtils::GetCurrentObjectCount();
 
 	// Prevent Overflow
@@ -42,7 +51,7 @@ void UNGuardianSubsystem::SetBaseline()
 	ObjectCountWarningThreshold  = static_cast<int32>(FMath::Clamp<int64>(ResolvedWarning,  1, MAX_int32));
 	ObjectCountSnapshotThreshold = static_cast<int32>(FMath::Clamp<int64>(ResolvedSnapshot, 2, MAX_int32 - 1));
 	ObjectCountCompareThreshold  = static_cast<int32>(FMath::Clamp<int64>(ResolvedCompare,  3, MAX_int32 - 2));
-	
+
 	bShouldOutputSnapshot = Settings->bObjectCountCaptureOutput;
 
 	UE_LOG(LogNexusGuardian, Log, TEXT("Watching UObjects(%i). Warning @ %i (+%i) / Capture @ %i (+%i) / Compare @ %i (+%i)."),
@@ -62,41 +71,52 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 		return;
 	}
 	TickTimer = TickRate;
-	
+
 	LastObjectCount = FNDeveloperUtils::GetCurrentObjectCount();
-	
+
+	// The threshold ladder below evaluates one rung per tick: each rung latches its flag and returns so the next
+	// rung is only considered on a later tick. This is deliberate — it spreads the two synchronous Snapshot()
+	// calls (capture and compare) across separate frames to minimize game-thread hitching.
+	//
+	// As a consequence, the compare diff only attributes growth that occurs *between* the snapshot threshold and
+	// the compare threshold being crossed, i.e. gradual growth. A burst that climbs from below the warning
+	// threshold to above the compare threshold within a single sample (TickRate) has already completed before
+	// either snapshot is taken, so both snapshots are post-burst and the resulting diff is near-empty. In that
+	// case rely on the warning/error logs (which still fire) and, when bObjectCountCaptureOutput is set, the full
+	// snapshot dump written at the snapshot threshold, which records the post-burst world as absolute counts.
+
 	if (LastObjectCount < ObjectCountWarningThreshold && bPassedObjectCountWarningThreshold)
 	{
 		UE_LOG(LogNexusGuardian, Log, TEXT("The last UObject count has dropped below the warning threshold, resetting threshold triggers and releasing any captured snapshot."));
 		bPassedObjectCountWarningThreshold = false;
 		bPassedObjectCountSnapshotThreshold = false;
 		bPassedObjectCountCompareThreshold = false;
-		CaptureSnapshot.Reset();
+		CapturedSnapshot.Reset();
 		return;
 	}
-	
+
 	if (LastObjectCount >= ObjectCountWarningThreshold && !bPassedObjectCountWarningThreshold)
 	{
 		UE_LOG(LogNexusGuardian, Warning, TEXT("The UObject count warning threshold has been met with %d/%d objects."), LastObjectCount, ObjectCountWarningThreshold);
 		bPassedObjectCountWarningThreshold = true;
-		
+
 		// We want to wait till next tick/frame at this point before we evaluate the next threshold.
 		return;
 	}
-	
+
 	if (LastObjectCount >= ObjectCountSnapshotThreshold && !bPassedObjectCountSnapshotThreshold)
 	{
 		UE_LOG(LogNexusGuardian, Error, TEXT("The UObject count snapshot threshold has been met with %d/%d objects."), LastObjectCount, ObjectCountSnapshotThreshold);
-		CaptureSnapshot = FNObjectSnapshotUtils::Snapshot();
+		CapturedSnapshot = FNObjectSnapshotUtils::Snapshot();
 		if (bShouldOutputSnapshot)
 		{
 			FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
-				FString::Printf(TEXT("%s_%s.txt"), *SnapshotPrefix, *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
-			
+				FString::Printf(TEXT("%s_%s.txt"), SnapshotPrefix, *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+
 			// The thought process here is that the ToReport is actually more expensive than you would think given it is doing more string manipulation/etc.
 			// Maybe it's faster to generate it on the main thread and pass the report in, but the idea was to minimize hitch on GameThread.
 			Async(EAsyncExecution::TaskGraph,
-				[Snapshot = CaptureSnapshot, DumpFilePath = MoveTemp(DumpFilePath)]()
+				[Snapshot = CapturedSnapshot, DumpFilePath = MoveTemp(DumpFilePath)]()
 				{
 					const TArray<FString> Output = Snapshot.ToReport().GetReportLines(ENReportOutputFormat::PlainText);
 					FFileHelper::SaveStringArrayToFile(Output, *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
@@ -104,22 +124,22 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 				});
 		}
 		bPassedObjectCountSnapshotThreshold = true;
-		
+
 		// We want to wait till next tick/frame at this point before we evaluate the next threshold.
 		return;
 	}
-	
+
 	if (LastObjectCount >= ObjectCountCompareThreshold && !bPassedObjectCountCompareThreshold)
 	{
 		// Notice ahead of the actual capture to give user feedback
 		UE_LOG(LogNexusGuardian, Error, TEXT("The UObject count compare threshold has been met with %d/%d objects."), LastObjectCount, ObjectCountCompareThreshold);
-		
+
 		const FNObjectSnapshot CompareSnapshot = FNObjectSnapshotUtils::Snapshot();
-		FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(CaptureSnapshot, CompareSnapshot, false);
-		CaptureSnapshot.Reset();
-		
+		FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(CapturedSnapshot, CompareSnapshot, false);
+		CapturedSnapshot.Reset();
+
 		FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
-			FString::Printf(TEXT("%s_%s.txt"), *ComparePrefix, *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+			FString::Printf(TEXT("%s_%s.txt"), ComparePrefix, *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 		Async(EAsyncExecution::TaskGraph,
 			[Diff = MoveTemp(Diff), DumpFilePath = MoveTemp(DumpFilePath)]()
 			{
@@ -127,7 +147,7 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 				UE_LOG(LogNexusGuardian, Error, TEXT("A UObject comparison written to %s."), *DumpFilePath);
 			});
 		bPassedObjectCountCompareThreshold = true;
-		
+
 		// We are at the end of the block so we don't need to return, but again this concept is to move the next threshold eval to the next tick/frame.
 	}
 }
@@ -135,7 +155,7 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 void UNGuardianSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
-	
+
 	const UNGuardianSettings* Settings = UNGuardianSettings::Get();
 	if (Settings == nullptr)
 	{
@@ -144,11 +164,11 @@ void UNGuardianSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	}
 	TickRate = Settings->TickRate;
 	TickTimer = TickRate;
-	
+
 	// Spin up doing a baseline after the delay
 	if (Settings->bAutoBaseline)
 	{
-		InWorld.GetTimerManager().SetTimer(BaselineTimerHandle,                                                                                                          
+		InWorld.GetTimerManager().SetTimer(BaselineTimerHandle,
 			FTimerDelegate::CreateUObject(this, &UNGuardianSubsystem::SetBaseline),
 			Settings->AutoBaselineDelay,
 			false);

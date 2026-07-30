@@ -132,7 +132,7 @@ public: \
 	}
 
 /**
- * 3D analogue of N_FLAT_2D_ARRAY — generates the wrapping accessors around a flat TArray
+ * 3D analogue of N_FLAT_2D_ARRAY_BASE — generates the wrapping accessors around a flat TArray
  * exposed as a logical 3D grid.
  *
  * Expects the host class to declare TArray<DataType> DataArray plus IndexType-typed SizeX, SizeY,

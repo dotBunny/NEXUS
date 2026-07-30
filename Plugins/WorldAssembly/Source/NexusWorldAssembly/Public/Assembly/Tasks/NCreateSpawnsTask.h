@@ -16,7 +16,7 @@ class UNAssemblyOperation;
  *
  * Runs on any worker thread (see GetDesiredThread), and multiple operations may run their own instance
  * concurrently, so any shared state it touches must be thread-safe — e.g. it writes the per-operation
- * context through FNWorldAssemblyCache, whose accessors are guarded by a critical section.
+ * context through FNWorldAssemblyContextCache, whose accessors are guarded by a critical section.
  * Acts as the bridge between the world/pass collection stages and the actual proxy-spawning stage.
  */
 struct FNCreateSpawnsTask

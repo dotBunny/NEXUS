@@ -21,28 +21,31 @@ ILevelInstanceInterface* FNLevelUtils::GetActorLevelInstance(const AActor* Actor
 
 TArray<FString> FNLevelUtils::GetAllMapNames(TArray<FString> SearchPaths)
 {
-	TArray<FString> ReturnArray = TArray<FString>();
+	TArray<FString> ReturnArray;
 	TArray<FAssetData> AssetDataArray;
 
 	// Create our search library
 	UObjectLibrary* ObjectLibrary = UObjectLibrary::CreateLibrary(UWorld::StaticClass(), false, true);
-	
-	for (FString& PathRoot : SearchPaths)
+
+	// Load every search path into the library first. UObjectLibrary accumulates across LoadAssetDataFromPath calls.
+	for (const FString& PathRoot : SearchPaths)
 	{
 		ObjectLibrary->LoadAssetDataFromPath(PathRoot);
-		ObjectLibrary->GetAssetDataList(AssetDataArray); // Copies its internal array to AssetDataArray
+	}
 
-		const int32 Count = AssetDataArray.Num();
-		for (int32 i = 0; i < Count; ++i)
-		{
-			ReturnArray.Add(AssetDataArray[i].AssetName.ToString());
-		}
+	// Harvest once. GetAssetDataList snapshots the whole accumulated library, so collecting inside the load loop
+	// above would re-add every earlier path's maps on each subsequent iteration (one duplicate per extra path).
+	ObjectLibrary->GetAssetDataList(AssetDataArray);
+	ReturnArray.Reserve(AssetDataArray.Num());
+	for (const FAssetData& Data : AssetDataArray)
+	{
+		ReturnArray.Add(Data.AssetName.ToString());
 	}
 
 	// Flag object to be destroyed
 	ObjectLibrary->MarkAsGarbage();
 
-	return MoveTemp(ReturnArray);
+	return ReturnArray;
 }
 
 void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray<const AActor*>& OutIgnoredActors,
@@ -50,24 +53,24 @@ void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray
 {
 	// Ensure we have a valid level
 	if (!IsValid(InLevel)) return;
-	
+
 	const int32 NumActors = InLevel->Actors.Num();
-	
-#if WITH_EDITOR			
+
+#if WITH_EDITOR
 	FScopedSlowTask BoundsTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusCore", "Task_DetermineLevelBounds", "Determine Level Bounds"));
 	BoundsTask.MakeDialog(false);
-#endif // WITH_EDITOR	
-	
+#endif // WITH_EDITOR
+
 	// Initialize our empty box
 	OutBounds = FBox(ForceInit);
-	
+
 	for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
 	{
 		const AActor* Actor = InLevel->Actors[ActorIndex];
-#if WITH_EDITOR			
+#if WITH_EDITOR
 		BoundsTask.EnterProgressFrame(1);
 #endif // WITH_EDITOR
-		
+
 		// We do not want to have any bad actors at play
 		if (!IsValid(Actor))
 		{
@@ -79,31 +82,31 @@ void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray
 		{
 			continue;
 		}
-		
+
 		if (Actor && Actor->IsLevelBoundsRelevant())
 		{
-			
+
 			// Ignore Tags
 			if (FNArrayUtils::ContainsAny(Actor->Tags, ActorIgnoreTags))
 			{
 				OutIgnoredActors.Add(Actor);
 				continue;
 			}
-			
+
 			// Don't include transient actors
 			if (!bIncludeTransientActors && Actor->HasAnyFlags(RF_Transient))
 			{
 				OutIgnoredActors.Add(Actor);
 				continue;
 			}
-			
+
 			// Check Editor Only
 			if (Actor->IsEditorOnly() && !bIncludeEditorOnly)
 			{
 				OutIgnoredActors.Add(Actor);
 				continue;
 			}
-				
+
 			const FBox ActorBox = Actor->GetComponentsBoundingBox(bIncludeNonColliding);
 			if (ActorBox.IsValid)
 			{

@@ -21,7 +21,7 @@ class FNAssemblyTaskGraphContext;
  */
 struct FNOrganGraphBuilderTask
 {
-	explicit FNOrganGraphBuilderTask(const TSharedPtr<FNVirtualOrganContext>& OrganContextPtr,
+	NEXUSWORLDASSEMBLY_API explicit FNOrganGraphBuilderTask(const TSharedPtr<FNVirtualOrganContext>& OrganContextPtr,
 		const TSharedPtr<FNPassContext>& PassContextPtr, const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr,
 		const TSharedPtr<FNAssemblyTaskGraphContext>& TaskGraphContextPtr
 		N_ASSEMBLY_ANALYTICS_CONSTRUCTOR);
@@ -34,13 +34,42 @@ struct FNOrganGraphBuilderTask
 	/** Executed by the task graph: performs the full organ build. */
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
+	/**
+	 * Force-place finisher-eligible cells that still fall short of their MinimumCount onto the graph's remaining
+	 * open junctions, before the opportunistic CapBranchesWithFinishers pass can consume those slots.
+	 *
+	 * FinisherOnly cells are gated out of normal expansion and can only ever land at cap time, so without this a
+	 * cell with MinimumCount > 0 has no guaranteed placement and CheckGraph legitimately fails its minimum. This
+	 * is a no-op (no RNG draws, no graph changes) when no finisher-eligible cell has an unmet, enforceable minimum,
+	 * keeping generation byte-identical for tissues that do not use the feature.
+	 * @param Random Deterministic stream shared with the rest of the build.
+	 */
+	NEXUSWORLDASSEMBLY_API void EnsureFinisherMinimums(FNMersenneTwister& Random) const;
+
+	/**
+	 * @return true when CellNode's hull intersects any of the shared world-collision meshes (immutable after
+	 *         FNProcessVirtualWorldTask) and exceeds the penetration threshold.
+	 * @note Public so the perf tests can measure the real scan rather than a hand-rolled copy of its loop.
+	 *       Scans every world-collision mesh, so its cost is O(world meshes) for every candidate placement.
+	 */
+	NEXUSWORLDASSEMBLY_API bool DoesWorldCollide(const FNAssemblyGraphCellNode* CellNode) const;
+
+	/**
+	 * @return Every existing cell whose world bounds intersect NewNode's.
+	 * @note Public for the same reason as DoesWorldCollide. Walks every node in the organ graph (not just the
+	 *       cells), so its cost grows with the organ as it is built.
+	 */
+	NEXUSWORLDASSEMBLY_API TArray<FNAssemblyGraphCellNode*> CheckNodeBounds(const FNAssemblyGraphCellNode* NewNode) const;
+
+	/**
+	 * @return true when CellNode's hull intersects any placed-cell hull visible to this organ and exceeds the
+	 *         penetration threshold.
+	 * @note Public for the same reason as DoesWorldCollide. Reads its extent and broadphase from the organ context
+	 *       (NodeCollisionSnapshotCount / NodeCollisionBVH), so a caller that populates those can drive it directly.
+	 */
+	NEXUSWORLDASSEMBLY_API bool DoesExistingNodeWorldCollide(const FNAssemblyGraphCellNode* CellNode) const;
+
 private:
-	/** Cached world-collision simple-mesh hulls intersecting this organ's bounds. */
-	TArray<FNRawMesh> WorldCollisionMeshes;
-
-	/** Cached hulls of cells already placed by earlier organs that overlap this organ's bounds. */
-	TArray<FNRawMesh> ExistingNodeCollisionMeshes;
-
 	/** Per-organ input data and output graph reference. */
 	TSharedRef<FNVirtualOrganContext> OrganContextPtr;
 
@@ -55,18 +84,9 @@ private:
 
 	/** Top-level task-graph context; used here to publish progress/status messages for UI. */
 	TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContextPtr;
-	
+
 	/** Seed the graph with the organ's bones and the root node. */
 	void StartGraph(FNMersenneTwister& Random);
-
-	/** @return true when CellNode's hull intersects any of the cached world-collision meshes (parallel mesh/location/rotation arrays) and exceeds the penetration threshold. */
-	bool DoesWorldCollide(const FNAssemblyGraphCellNode* CellNode) const;
-	
-	/** @return true when CellNode's hull intersects any of the cached node-collision meshes (parallel mesh/location/rotation arrays) and exceeds the penetration threshold. */
-	bool DoesExistingNodeWorldCollide(const FNAssemblyGraphCellNode* CellNode) const;
-
-	/** @return Every existing cell whose world bounds intersect NewNode's. */
-	TArray<FNAssemblyGraphCellNode*> CheckNodeBounds(const FNAssemblyGraphCellNode* NewNode) const;
 
 	/** @return Every existing cell whose hull intersects NewNode's hull. */
 	TArray<FNAssemblyGraphCellNode*> CheckNodeHull(FNAssemblyGraphCellNode* NewNode) const;
@@ -76,6 +96,23 @@ private:
 
 	/** Cell-node specialization of ProcessNode: picks candidates for each open junction. */
 	TArray<FNAssemblyGraphNode*> ProcessCellNode(FNMersenneTwister& Random, FNAssemblyGraphCellNode* SourceCellNode, bool bIsEndNode = false) const;
+
+	/**
+	 * Resolve geometry for the chosen candidate, run the bounds/world/hull collision checks, and on success register
+	 * and link it under SourceJunctionKey. Shared by ProcessCellNode (weighted random pick) and the finisher-minimum
+	 * guarantee pass (forced pick) so both apply identical placement rules.
+	 * @return The newly placed node, or nullptr when the candidate was rejected (out of bounds / colliding).
+	 */
+	FNAssemblyGraphCellNode* TryAttachCellToJunction(FNMersenneTwister& Random, FNAssemblyGraphCellNode* SourceCellNode,
+		int32 SourceJunctionKey, const FNCellJunctionDetails* SourceJunctionValue, const FQuat& SourceJunctionWorldQuat,
+		FNVirtualCellData* CellInputData, const TArray<int32>& ValidJunctionIndices) const;
+
+	/**
+	 * Attempt a single placement of the CellInputData[TargetCellIndex] candidate onto any compatible open junction
+	 * in the current graph, in end-node (finisher) filter mode.
+	 * @return true once the candidate was placed; false when no open junction can currently accept it.
+	 */
+	bool TryPlaceTargetCellOnce(FNMersenneTwister& Random, int32 TargetCellIndex) const;
 
 	/** Cap open branch tips with Finisher/FinisherOnly cells when the tissue provides them. */
 	void CapBranchesWithFinishers(FNMersenneTwister& Random) const;

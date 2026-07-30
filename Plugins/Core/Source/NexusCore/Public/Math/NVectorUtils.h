@@ -19,6 +19,7 @@ enum class ENAxis : uint8
 
 /**
  * A collection of utility methods for working with FVectors.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/vector-utils/">FNVectorUtils</a>
  */
 class NEXUSCORE_API FNVectorUtils
 {

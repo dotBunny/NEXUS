@@ -14,6 +14,25 @@
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
 
+namespace
+{
+	// Unbound organs are deliberately scheduled into their own trailing passes (see LockAndPreprocess), so a
+	// container must never wait on an unbound organ it merely encloses — doing so would leave the container
+	// permanently unschedulable and dropped as a false "circular cycle". Returns true only when Data has at
+	// least one *bound* contained organ that genuinely gates its ordering.
+	bool HasBoundContainedOrgan(const FNWorldOrganData& Data)
+	{
+		for (const TObjectPtr<UNOrganComponent>& Contained : Data.ContainedComponents)
+		{
+			if (Contained != nullptr && !Contained->bUnbound)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
 FNAssemblyOperationContext::FNAssemblyOperationContext(const int32 NewOperationTicket)
 {
 	OperationTicket = NewOperationTicket;
@@ -28,20 +47,20 @@ void FNAssemblyOperationContext::ResetContext()
 	GenerationOrder.Empty();
 	InputComponents.Empty();
 	TargetWorld = nullptr;
-	
+
 	bIsLocked = false;
 }
 
 void FNAssemblyOperationContext::SetOperationSettings(const FNAssemblyOperationSettings& InSettings)
 {
-	
+
 	if (IsLocked())
 	{
 		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to copy settings on FNOrganGenerationContext when it has already been locked."));
 	}
 	else
 	{
-		OperationSettings = InSettings; 
+		OperationSettings = InSettings;
 	}
 }
 
@@ -52,13 +71,13 @@ bool FNAssemblyOperationContext::AddOrganComponent(UNOrganComponent* Component)
 		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Attempted to add additional context from a UNOrganComponent when the FNOrganGenerationContext has already been locked."));
 		return false;
 	}
-	
+
 	// We've already added this component
 	if (OrganData.Contains(Component))
 	{
 		return true;
 	}
-	
+
 	InputComponents.Add(Component);
 	OrganData.Add(Component, FNWorldOrganData());
 	FNWorldOrganData* WorkingOrganData = OrganData.Find(Component);
@@ -69,7 +88,7 @@ bool FNAssemblyOperationContext::AddOrganComponent(UNOrganComponent* Component)
 	TArray<UNOrganComponent*> LevelComponents = FNWorldAssemblyUtils::GetOrganComponentsFromLevel(Component->GetComponentLevel());
 
 	// We've got ourselves a volume and it has dimensions
-	if (Component->IsVolumeBased() && !Component->bUnbounded)
+	if (Component->IsVolumeBased() && !Component->bUnbound)
 	{
 		// Assign Bounds
 		const AVolume* ComponentVolume = Cast<AVolume>(Component->GetOwner());
@@ -88,7 +107,15 @@ bool FNAssemblyOperationContext::AddOrganComponent(UNOrganComponent* Component)
 				continue;
 			}
 
+			// Organs are not guaranteed to live on a volume (a non-volume organ is treated as unbounded elsewhere),
+			// so an owner that is not an AVolume has no bounds to test against — skip it rather than dereferencing a
+			// null cast.
 			const AVolume* OtherComponentVolume = Cast<AVolume>(OtherComponent->GetOwner());
+			if (OtherComponentVolume == nullptr)
+			{
+				continue;
+			}
+
 			FBoxSphereBounds OtherVolumeBounds = OtherComponentVolume->GetBounds();
 
 			// Check for intersection of any type
@@ -114,7 +141,7 @@ bool FNAssemblyOperationContext::AddOrganComponent(UNOrganComponent* Component)
 	else
 	{
 		// An unbounded component intersects with everything, no good way about this, they will generate first
-		WorkingOrganData->Bounds = FBox(FVector(MIN_dbl, MIN_dbl, MIN_dbl), FVector(MAX_dbl, MAX_dbl, MAX_dbl));
+		WorkingOrganData->Bounds = FBox(FVector(-MIN_dbl, -MIN_dbl, -MIN_dbl), FVector(MAX_dbl, MAX_dbl, MAX_dbl));
 		for (UNOrganComponent* OtherComponent : LevelComponents)
 		{
 			if (OtherComponent == Component) continue;
@@ -128,10 +155,10 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 {
 	bIsLocked = true;
 	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
-	
+
 	// This is the world where generation ultimately takes place
 	TargetWorld = World;
-	
+
 	// Gather our bone components so we can add them to a specific organs context later
 	TArray<UNBoneComponent*> BoneComponents = FNWorldAssemblyRegistry::GetBoneComponentsFromLevel(TargetWorld->GetCurrentLevel());
 	BoneData.Empty();
@@ -143,7 +170,7 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 		WorkingContext->SourceComponent = BoneComponent;
 		WorkingContext->CornerPoints = BoneComponent->GetCornerPoints(Settings->SocketSize);
 	}
-	
+
 	// Create a separate list of components that we will operate on and clear out.
 	int32 GenerationOrderIndex = 0;
 	GenerationOrder.Empty();
@@ -159,15 +186,15 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 		Pair.Value.WorldHullPenetration = Settings->AssemblyJunctionMatchingWorldPenetration;
 		Pair.Value.AssemblyDirectionTolerance = Settings->AssemblyDirectionTolerance;
 		Pair.Value.VoxelSize = Settings->VoxelSize;
-		
-		if (Pair.Key->bUnbounded)
+
+		if (Pair.Key->bUnbound)
 		{
 			// These will get generated last
 			UnboundComponents.AddUnique(Pair.Key);
 		}
 		else
 		{
-			PossibleComponents.AddUnique(Pair.Key);	
+			PossibleComponents.AddUnique(Pair.Key);
 		}
 	}
 
@@ -175,52 +202,58 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 	for (auto& Pair : OrganData)
 	{
 		// Again dont look at Unbounded here
-		if (Pair.Key->bUnbounded) continue;
-		
-		// Handle "easy" work parallelization classification
-		if (FNWorldOrganData& ComponentContext = Pair.Value; 
-			ComponentContext.ContainedComponents.IsEmpty())
+		if (Pair.Key->bUnbound) continue;
+
+		// Handle "easy" work parallelization classification. Only *bound* contained organs gate ordering;
+		// unbound ones are scheduled last in their own passes, so an organ that contains only unbound organs
+		// still qualifies for the first parallel phase.
+		if (FNWorldOrganData& ComponentContext = Pair.Value;
+			!HasBoundContainedOrgan(ComponentContext))
 		{
 			PossibleComponents.Remove(Pair.Key);
 			ProcessedComponents.Add(Pair.Key);
 			GenerationOrder[0].Add(Pair.Key);
 		}
 	}
-	
+
 	// Evaluate if we should bump the generation order
 	if (GenerationOrder[0].Num() > 0 && PossibleComponents.Num() > 0)
 	{
 		GenerationOrder.Add(TArray<TObjectPtr<UNOrganComponent>>());
 		GenerationOrderIndex = 1;
 	}
-	
+
 	// Theres a possibility that someone creates a circular dependence with the organs, so we are going to protect against that, just incase.
 	bool bMadeProgress = false;
 	while (PossibleComponents.Num() > 0)
 	{
 		// Reset flag
 		bMadeProgress = false;
-		
+
 		// We need to track the processed components per generation iteration, so if we process this loop, it needs
 		// to ensure that anything that required it bumps to the next iteration.
 		TArray<TObjectPtr<UNOrganComponent>> PhaseProcessed;
-		
+
 		for (int32 i = PossibleComponents.Num() - 1; i >= 0; i--)
 		{
 			UNOrganComponent* Component = PossibleComponents[i];
 			FNWorldOrganData* TargetOrganData = OrganData.Find(Component);
-			
-			// Ensure all contained organs are processed / not this iteration
+
+			// Ensure all contained organs are processed / not this iteration. Unbound contained organs are
+			// scheduled last in their own pass and never gate their container, so skip them here — otherwise a
+			// container enclosing an unbound organ could never be ordered and would be dropped.
 			bool bAllContainsProcessed = true;
 			for (auto ContainedComponent : TargetOrganData->ContainedComponents)
 			{
-				if (!ProcessedComponents.Contains(ContainedComponent) || 
+				if (ContainedComponent == nullptr || ContainedComponent->bUnbound) continue;
+
+				if (!ProcessedComponents.Contains(ContainedComponent) ||
 					PhaseProcessed.Contains(ContainedComponent))
 				{
 					bAllContainsProcessed = false;
 				}
 			}
-			
+
 			if (bAllContainsProcessed)
 			{
 				PhaseProcessed.Add(Component);
@@ -230,14 +263,14 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 				bMadeProgress = true;
 			}
 		}
-		
+
 		// Evaluate if we should bump the generation order
 		if (GenerationOrder[GenerationOrderIndex].Num() > 0 && PossibleComponents.Num() > 0)
 		{
 			GenerationOrder.Add(TArray<TObjectPtr<UNOrganComponent>>());
 			GenerationOrderIndex++;
 		}
-		
+
 		if (!bMadeProgress)
 		{
 			UE_LOG(LogNexusWorldAssembly, Error,
@@ -245,7 +278,7 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 			break;
 		}
 	}
-	
+
 	// Handle specific-case where your generating just an unbounded organ, it will just remove the empty pass to save us later.
 	if (GenerationOrder[0].IsEmpty())
 	{
@@ -258,13 +291,13 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 	{
 		for (int32 i = 0; i < UnboundComponents.Num(); i++)
 		{
-			// Add to our generation order last the unbound	
+			// Add to our generation order last the unbound
 			GenerationOrder.Add(TArray<TObjectPtr<UNOrganComponent>>());
 			TArray<TObjectPtr<UNOrganComponent>>& NextPhase = GenerationOrder.Last();
 			NextPhase.Add(UnboundComponents[i]);
 		}
 	}
-	
+
 	// Now that we have the generation order, we now are going to assign bones to the 'first' impacted organ.
 	// This step is going to remove things from BoneComponents as they are used so DO NOT use it after this point.
 	int32 BoneCount = BoneComponents.Num();
@@ -273,20 +306,20 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 		for (auto& Component : Phase)
 		{
 			FNWorldOrganData* TargetOrganData = OrganData.Find(Component);
-			
+
 			if (!Component->IsVolumeBased())
 			{
 				UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Component %s is not volume based, unable to determine if UNBoneComponents are contained."), *Component->GetName());
 				continue;
 			}
-			
+
 			const AVolume* Volume = Component->GetVolume();
 			Bounds.Add(Volume->GetBounds());
-			
+
 			for (int32 i = BoneCount - 1; i >= 0; i--)
 			{
 				 FNWorldBoneData* Context = BoneData.Find(BoneComponents[i]);
-				if (Volume->EncompassesPoint(Context->CornerPoints[0]) || 
+				if (Volume->EncompassesPoint(Context->CornerPoints[0]) ||
 					Volume->EncompassesPoint(Context->CornerPoints[1]) ||
 					Volume->EncompassesPoint(Context->CornerPoints[2]) ||
 					Volume->EncompassesPoint(Context->CornerPoints[3]))
@@ -298,7 +331,7 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 			}
 		}
 	}
-	
+
 	// If we have an unbounded volume, we need touch the entire world, unfortunately.
 	if (bHaveUnboundedBounds)
 	{
@@ -319,7 +352,7 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 	{
 		OperationContextContentBlock->SetHeading("Unnamed Operation");
 	}
-	
+
 	const int32 OverviewTableTicket = Report->CreateTableBlock(OperationContextContentTicket);
 	FNReportTableBlock* OverviewTable = Report->GetTableBlock(OverviewTableTicket);
 	OverviewTable->Initialize({ "Ticket", "Lock Status", "Result", "Runtime"});
@@ -327,24 +360,24 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 
 	Report->AddReplaceToken("{{RUNTIME}}", ""); // We'll fill this out later
 	Report->AddReplaceToken("{{STATUS}}", ""); // Filled in by FNAssemblyTaskAnalytics::AddToReports
-	
+
 	const int32 LatentSummaryTicket  = Report->CreateCollapsableBlock(OperationContextContentTicket);
 	FNReportCollapsableBlock* LatentSummaryContentBlock = Report->GetCollapsableBlock(LatentSummaryTicket);
 	LatentSummaryContentBlock->SetHeading(TEXT("Insights"));
-	
+
 	// # INPUTS
 	const int32 InputsTicket = Report->CreateContentBlock();
 	FNReportContentBlock* InputsBlock = Report->GetContentBlock(InputsTicket);
 	InputsBlock->SetHeading("Inputs");
-	
+
 	// ## Components
 	const int32 ComponentTableTicket = Report->CreateTableBlock(InputsTicket);
 	FNReportTableBlock* ComponentTableBlock = Report->GetTableBlock(ComponentTableTicket);
 	ComponentTableBlock->SetHeading(FString::Printf(TEXT("Components (%i)"), OrganData.Num()));
 	ComponentTableBlock->Initialize({ "Component", "Intersections", "Contains", "Bones", "Tissues" });
-	
-	FStringBuilderBase Builder;
-	
+
+	TStringBuilder<256> Builder;
+
 	for (auto Data : OrganData)
 	{
 		// Intersections
@@ -359,7 +392,7 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 			Builder.RemoveSuffix(2);
 		}
 		FString Intersections = Builder.ToString();
-		
+
 		// Fully Contains
 		Builder.Reset();
 		for (const auto ContainedComponent : Data.Value.ContainedComponents)
@@ -372,7 +405,7 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 			Builder.RemoveSuffix(2);
 		}
 		FString Contains = Builder.ToString();
-		
+
 		// Bones
 		Builder.Reset();
 		for (const auto ContainedBone : Data.Value.ContainedBones)
@@ -385,7 +418,7 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 			Builder.RemoveSuffix(2);
 		}
 		FString Bones = Builder.ToString();
-		
+
 		// Optionally list tissue buildout
 		FString TissueList = TEXT("");
 		if (bBuildTissues)
@@ -393,7 +426,7 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 			TMap<TObjectPtr<UNCell>, FNTissueEntry> BuildTissue;
 			FNTissueTagGroups TagGroups; // TODO: Add to report?
 			Data.Value.SourceComponent->GetTissueMap(BuildTissue, TagGroups);
-			
+
 			Builder.Reset();
 			for (const auto& TissuePair : BuildTissue)
 			{
@@ -405,10 +438,10 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 			}
 			TissueList = Builder.ToString();
 		}
-		
+
 		ComponentTableBlock->AddRow({ *Data.Value.SourceComponent->GetDebugLabel(), *Intersections, *Contains, *Bones, *TissueList });
 	}
-	
+
 	// ## Generation Order
 	const int32 GenerationOrderContentTicket = Report->CreateTableBlock(InputsTicket);
 	FNReportTableBlock* GenerationOrderTableBlock = Report->GetTableBlock(GenerationOrderContentTicket);

@@ -66,14 +66,15 @@ bool FNSeedGenerator::IsValidHexSeed(const FString& InHexSeed)
 	// Sanitize
 	const FString ParsedSeed = SanitizeHexSeed(InHexSeed);
 	const int32 SeedLength = ParsedSeed.Len();
-	
+
 	if (SeedLength == 0)
 	{
 		return false;
 	}
 
-	// Check that we have an equal number of sets
-	if (SeedLength != 1 && SeedLength % 2 != 0)
+	// Check that we have an equal number of sets; SanitizeHexSeed pads a single
+	// digit to a pair, so the length here is always 0 or 2-16.
+	if (SeedLength % 2 != 0)
 	{
 		return false;
 	}
@@ -90,7 +91,7 @@ uint64 FNSeedGenerator::RandomSeed()
 FString FNSeedGenerator::RandomFriendlySeed()
 {
 	FString ReturnSeed;
-	
+
 	TArray<uint8> Digits;
 	Digits.Reserve(23); // Max possible
 	uint64 TempSeed = RandomSeed();;
@@ -99,13 +100,13 @@ FString FNSeedGenerator::RandomFriendlySeed()
 		Digits.Insert(TempSeed % 10, 0);  // Insert at front to maintain order
 		TempSeed /= 10;
 	} while (TempSeed > 0);
-	
+
 	// Front pad digits
 	while (Digits.Num() < 20)
 	{
-		Digits.Insert(0, 0); 
+		Digits.Insert(0, 0);
 	}
-	
+
 	for (uint32 i = 0; i < 20; i++)
 	{
 		ReturnSeed.AppendChar(97 + Digits[i]);
@@ -114,7 +115,7 @@ FString FNSeedGenerator::RandomFriendlySeed()
 			ReturnSeed.AppendChar('-');
 		}
 	}
-	return MoveTemp(ReturnSeed);
+	return ReturnSeed;
 }
 
 FString FNSeedGenerator::SanitizeHexSeed(const FString& InHexSeed)
@@ -134,7 +135,7 @@ FString FNSeedGenerator::SanitizeHexSeed(const FString& InHexSeed)
 	{
 		Builder = Builder.Mid(0, 16);
 	}
-	
+
 	if (Builder.Len() == 1)
 	{
 		Builder.InsertAt(0, "0");
@@ -152,30 +153,28 @@ uint64 FNSeedGenerator::SeedFromString(const FString& InSeed)
 uint64 FNSeedGenerator::SeedFromFriendlySeed(const FString& InSeed)
 {
 	uint64 Seed = 0;
-	
-	// We're going to go in reverse as we use it as a multiplier
-	uint8 Multiplier = 0;
-	for (int32 i = InSeed.Len() - 1; i >= 0; i--)
+
+	// We're going to go in reverse so the last letter is the least significant digit.
+	// Only a-j map to digits (0-9), matching RandomFriendlySeed; everything else is
+	// ignored, and only the last 20 digits are read as that is all a uint64 can hold.
+	// Hand-typed seeds above the uint64 maximum intentionally wrap mod 2^64.
+	uint64 PlaceValue = 1;
+	int32 DigitCount = 0;
+	for (int32 i = InSeed.Len() - 1; i >= 0 && DigitCount < 20; i--)
 	{
-		uint8 CharacterValue = InSeed[i];
-		
+		TCHAR CharacterValue = InSeed[i];
+
 		// Move uppercase to lowercase region
-		if (CharacterValue >= 65 && CharacterValue <= 90)
+		if (CharacterValue >= 'A' && CharacterValue <= 'Z')
 		{
 			CharacterValue += 32;
 		}
-		// Ensure we are only dealing with lowercase digits
-		if (CharacterValue < 97|| CharacterValue > 122) continue;
+		// Ensure we are only dealing with digit letters
+		if (CharacterValue < 'a' || CharacterValue > 'j') continue;
 
-		const uint8 ParsedValue = static_cast<uint8>(CharacterValue - 97);
-		
-		uint64 FactorialMultiplier = 1;
-		for (int32 f = 0; f < Multiplier; f++)
-		{
-			FactorialMultiplier *= 10;
-		}
-		Multiplier++;
-		Seed += (ParsedValue * FactorialMultiplier);
+		Seed += static_cast<uint64>(CharacterValue - 'a') * PlaceValue;
+		PlaceValue *= 10;
+		DigitCount++;
 	}
 	return Seed;
 }
@@ -186,7 +185,8 @@ uint64 FNSeedGenerator::SeedFromHex(const FString& InHexSeed)
 	FString ParsedSeed = SanitizeHexSeed(InHexSeed);
 	const int32 SeedLength = ParsedSeed.Len();
 
-	if (SeedLength == 0 || SeedLength == 1)
+	// SanitizeHexSeed pads a single digit to a pair, so only empty is invalid here
+	if (SeedLength == 0)
 	{
 		UE_LOG(LogNexusCore, Warning, TEXT("The parsed(%s) seed(%s) length(%i) was below any possible valid value; returning 0."), *ParsedSeed, *InHexSeed, SeedLength);
 		return 0;
@@ -202,15 +202,12 @@ uint64 FNSeedGenerator::SeedFromHex(const FString& InHexSeed)
 	uint64 NewSeed = 0;
 	for (int32 i = 0; i < ParsedSeed.Len(); i += 2)
 	{
-		// Get our two hexadecimal characters in the series
+		// Get our two hexadecimal characters in the series; SanitizeHexSeed
+		// guarantees both are hex digits.
 		const TCHAR CachedLeftCharacter = ParsedSeed[i];
 		const TCHAR CachedRightCharacter = ParsedSeed[i + 1];
 
-		// Double-check them (why?)
-		if (TChar<TCHAR>::IsHexDigit(CachedLeftCharacter) && TChar<TCHAR>::IsHexDigit(CachedRightCharacter))
-		{
-			NewSeed = (NewSeed * 256) + (HexToInteger(CachedRightCharacter) + (HexToInteger(CachedLeftCharacter) * 16));
-		}
+		NewSeed = (NewSeed * 256) + (HexToInteger(CachedRightCharacter) + (HexToInteger(CachedLeftCharacter) * 16));
 	}
 
 	return NewSeed;
@@ -247,7 +244,7 @@ FString FNSeedGenerator::HexFromSeed(const uint64 Seed)
 			FancySeed.AppendChar(':');
 		}
 	}
-	
+
 	if (FancySeed.Len() == 0)
 	{
 		return TEXT("0");

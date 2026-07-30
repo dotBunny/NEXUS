@@ -15,23 +15,16 @@
 class NEXUSPICKER_API FNBoxPicker
 {
 public:
-	
-	/**
-	 * Generate deterministic points in relation to an axis-aligned FBox.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param OutLocations An array to store the generated points.
-	 * @param Params The parameters for the point generation.
-	 */
-	static void Next(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params);
 
 	/**
 	 * Generate random points in relation to an axis-aligned FBox.
 	 * Uses the non-deterministic random generator for true randomness.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Params The parameters for the point generation.
+	 * @note Not thread-safe; all pickers share a single non-deterministic FRandomStream (FNRandom::GetNonDeterministic()). Only call from the Game-thread.
 	 */
 	static void Random(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params);
-	
+
 	/**
 	 * Generate random points in relation to an axis-aligned FBox.
 	 * Useful for one-time random point generation with reproducible results.
@@ -44,7 +37,7 @@ public:
 		int32 DuplicateSeed = Seed;
 	 	Tracked(OutLocations, DuplicateSeed, Params);
 	}
-	
+
 	/**
 	 * Generate random points in relation to an axis-aligned FBox.
 	 * Updates the seed value to enable sequential random point generation.
@@ -55,44 +48,70 @@ public:
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBoxPickerParams& Params);
 
 	/**
-	 * Generate random points in relation to an axis-aligned FBox using a provided Mersenne Twister.	 
+	 * Generate random points in relation to an axis-aligned FBox using a provided Mersenne Twister.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Random The Mersenne Twister to query for random.
 	 * @param Params The parameters for the point generation.
 	 */
-	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNBoxPickerParams& Params);
-	
+	static void Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNBoxPickerParams& Params);
+
 	/**
 	 * Checks if a point is inside or on the surface of the axis-aligned FBox.
-	 * @param Origin The center point of the FBox.
-	 * @param Box The FBox to check if the point against.
+	 * @param Origin The world-space origin the FBox is offset from.
+	 * @param Box The FBox to check the point against.
 	 * @param Point The point to check.
 	 * @return True if the point is inside or on the surface of the FBox, false otherwise.
+	 * @note Inclusive: a point exactly on the surface returns true.
 	 */
 	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const FBox& Box, const FVector& Point)
 	{
-		return Box.MoveTo(Origin).IsInsideOrOn(Point);
+		return Box.ShiftBy(Origin).IsInsideOrOn(Point);
 	}
 
 	/**
-	 * Checks if multiple points are inside or on the surface of the axis-aligned FBox.
-	 * @param Points The array of points to check.
-	 * @param Origin The center point of the FBox.
+	 * Checks if a point is strictly inside the axis-aligned FBox, excluding its surface.
+	 * @param Origin The world-space origin the FBox is offset from.
+	 * @param Box The FBox to check the point against.
+	 * @param Point The point to check.
+	 * @return True if the point is strictly inside the FBox, false if on the surface or outside.
+	 */
+	FORCEINLINE static bool IsPointInside(const FVector& Origin, const FBox& Box, const FVector& Point)
+	{
+		return Box.ShiftBy(Origin).IsInside(Point);
+	}
+
+	/**
+	 * Checks if a point is inside or on the shell between two concentric axis-aligned boxes.
+	 * @param Origin The world-space origin the boxes are offset from.
 	 * @param MinimumBox The minimum FBox.
 	 * @param MaximumBox The maximum FBox.
-	 * @return An array of boolean values indicating if each point is inside or on the surface of the FBox.
+	 * @param Point The point to check.
+	 * @return True if the point is inside or on the box shell, false otherwise.
+	 * @note Closed shell: points on the inner OR outer surface are included; only points strictly inside MinimumBox (the hole) are excluded. When MinimumBox is empty there is no hole, so the center is included.
+	 */
+	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const FBox& MinimumBox, const FBox& MaximumBox, const FVector& Point)
+	{
+		return IsPointInsideOrOn(Origin, MaximumBox, Point) && !IsPointInside(Origin, MinimumBox, Point);
+	}
+
+	/**
+	 * Checks if multiple points are inside or on the shell between two concentric axis-aligned boxes.
+	 * @param Points The array of points to check.
+	 * @param Origin The world-space origin the boxes are offset from.
+	 * @param MinimumBox The minimum FBox.
+	 * @param MaximumBox The maximum FBox.
+	 * @return An array of boolean values indicating if each point is inside or on the box shell.
+	 * @note Closed shell: points on the inner OR outer surface are included; only points strictly inside MinimumBox (the hole) are excluded. When MinimumBox is empty there is no hole, so every point inside or on MaximumBox (including the center) is included.
 	 */
 	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const FBox& MinimumBox, const FBox& MaximumBox)
 	{
 		TArray<bool> OutResults;
 		OutResults.Reserve(Points.Num());
-		
+
 		for (const FVector& Point : Points)
 		{
-			const bool bValid = IsPointInsideOrOn(Origin, MaximumBox, Point)
-							 && !IsPointInsideOrOn(Origin, MinimumBox, Point);
-			OutResults.Add(bValid);
+			OutResults.Add(IsPointInsideOrOn(Origin, MinimumBox, MaximumBox, Point));
 		}
-		return MoveTemp(OutResults);
+		return OutResults;
 	}
 };

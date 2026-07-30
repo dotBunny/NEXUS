@@ -19,7 +19,6 @@ namespace UnrealBuildTool.Rules
 
 			PrivateDependencyModuleNames.AddRange(
 				[
-					"CoreUObject",
 					"Projects"
 				]
 			);
@@ -27,7 +26,7 @@ namespace UnrealBuildTool.Rules
 			// NEXUS
 			PrivateDependencyModuleNames.AddRange(["NexusCore"]);
 
-			ShortName = "NexusBlockout";						
+			ShortName = "NexusBlockout";
 		}
 	}
 }

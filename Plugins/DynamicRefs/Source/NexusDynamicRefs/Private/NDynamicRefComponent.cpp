@@ -6,6 +6,11 @@
 #include "NDynamicRefsMinimal.h"
 #include "NDynamicRefSubsystem.h"
 
+FString UNDynamicRefComponent::ToStringSlow(const ENDynamicRef& DynamicReference)
+{
+	return StaticEnum<ENDynamicRef>()->GetDisplayNameTextByValue(DynamicReference).ToString();
+}
+
 UNDynamicRefComponent::UNDynamicRefComponent()
 {
 	// InitializeComponent() is gated by bWantsInitializeComponent, which the engine reads during its
@@ -59,15 +64,16 @@ void UNDynamicRefComponent::Register()
 	const int32 TagReferenceCount = TagReferences.Num();
 	if (FastReferenceCount > 0 || NamedReferenceCount > 0 || TagReferenceCount > 0)
 	{
-		UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(GetWorld());
+		UWorld* World = GetWorld();
 		AActor* Owner = GetOwner();
-		
+		UNDynamicRefSubsystem* Subsystem = World ? UNDynamicRefSubsystem::Get(World) : nullptr;
+
 		if (Subsystem == nullptr)
 		{
-			UE_LOG(LogNexusDynamicRefs, Error, TEXT("Failed to register NDynamicRefComponent(%s) as no UNDynamicRefSubsystem was found."), *Owner->GetName());
+			UE_LOG(LogNexusDynamicRefs, Error, TEXT("Failed to register NDynamicRefComponent(%s) as no UNDynamicRefSubsystem was found."), *GetNameSafe(Owner));
 			return;
 		}
-		
+
 		for (int32 i = 0; i < FastReferenceCount; i++)
 		{
 			if (FastReferences[i] == NDR_None) continue;
@@ -78,7 +84,7 @@ void UNDynamicRefComponent::Register()
 			if (NamedReferences[i] == NAME_None) continue;
 			Subsystem->AddObjectByName(NamedReferences[i], Owner);
 		}
-		
+
 		// Store gameplay tags as if they are named
 		TArray<FGameplayTag> GameplayTags;
 		TagReferences.GetGameplayTagArray(GameplayTags);
@@ -91,22 +97,23 @@ void UNDynamicRefComponent::Register()
 }
 
 void UNDynamicRefComponent::Unregister()
-{	
+{
 	const int32 FastReferenceCount = FastReferences.Num();
 	const int32 NamedReferenceCount = NamedReferences.Num();
 	const int32 TagReferenceCount = TagReferences.Num();
-	
+
 	if (FastReferenceCount > 0 || NamedReferenceCount > 0 || TagReferenceCount > 0)
 	{
-		UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(GetWorld());
+		UWorld* World = GetWorld();
 		AActor* Owner = GetOwner();
-		
+		UNDynamicRefSubsystem* Subsystem = World ? UNDynamicRefSubsystem::Get(World) : nullptr;
+
 		if (Subsystem == nullptr)
 		{
-			UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Failed to unregister NDynamicRefComponent(%s) as no UNDynamicRefSubsystem was found."), *Owner->GetName());
+			UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Failed to unregister NDynamicRefComponent(%s) as no UNDynamicRefSubsystem was found."), *GetNameSafe(Owner));
 			return;
 		}
-		
+
 		for (int32 i = 0; i < FastReferenceCount; i++)
 		{
 			if (FastReferences[i] == NDR_None) continue;
@@ -117,7 +124,7 @@ void UNDynamicRefComponent::Unregister()
 			if (NamedReferences[i] == NAME_None) continue;
 			Subsystem->RemoveObjectByName(NamedReferences[i], Owner);
 		}
-		
+
 		// Store gameplay tags as if they are named
 		TArray<FGameplayTag> GameplayTags;
 		TagReferences.GetGameplayTagArray(GameplayTags);

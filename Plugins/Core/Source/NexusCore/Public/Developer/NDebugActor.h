@@ -13,6 +13,7 @@
  *
  * ANDebugActor is intentionally hidden from the editor's Place Actors panel; It has no gameplay behavior and should
  * not be shipped in release content.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/debug-actor/">ANDebugActor</a>
  */
 UCLASS(NotPlaceable, HideDropdown, Hidden, ClassGroup = "NEXUS", DisplayName = "NEXUS | Debug Actor", HideCategories=(Tags, Activation, Cooking,
 	AssetUserData, Navigation, Actor, Input, LevelInstance, WorldPartition, DataLayers, Rendering, LOD, HLOD, Physics,
@@ -22,18 +23,18 @@ class NEXUSCORE_API ANDebugActor : public AActor
 	GENERATED_BODY()
 
 public:
-	
+
 	ANDebugActor();
 
 	/** Human-readable message stored with actor instance. */
 	UPROPERTY(EditAnywhere)
 	FString Message;
-	
+
 	/** Fired when this actor is destroyed (broadcast from the AActor::Destroyed override). */
 	FSimpleDelegate OnDestroyed;
 	/** Fired when this actor ends play (broadcast from the AActor::EndPlay override). */
 	FSimpleDelegate OnEndPlay;
-	
+
 	/**
 	 * Spawns a debug actor in the supplied world at the given transform, labeled for quick identification.
 	 * @param World The world to spawn into.
@@ -73,7 +74,7 @@ public:
 		bListedInSceneOutliner = true;
 #endif // WITH_EDITORONLY_DATA
 	}
-	
+
 	/**
 	 * Replaces the sphere marker with arbitrary dynamic-mesh geometry, hiding the sphere in the process.
 	 * Calls Modify() on the dynamic-mesh component so the change is captured by the editor's transaction system.

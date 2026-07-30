@@ -7,7 +7,7 @@
 
 #include "Developer/NTestScopeTimer.h"
 
-// We're going to include our 
+// We're going to include our
 #include "Developer/TestLatentCommands/NTestLatentCommand.h"
 #include "Developer/TestLatentCommands/NTestLatentCommand_CleanupWorld.h"
 #include "Developer/TestLatentCommands/NTestLatentCommand_CreateWorld.h"
@@ -171,6 +171,28 @@ namespace NEXUS::Testing::LatentCommands
 
 #define N_TESTS_PERF_FINISH_LATENT_TEST_WORLD \
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_CleanupWorld) \
-	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_PostPerformanceTest) 
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_PostPerformanceTest)
+
+
+/**
+ * Declares a world subsystem pointer and fails the current test if it cannot be retrieved.
+ *
+ * Expands to the subsystem declaration plus the standard null guard shared by every world-based
+ * unit test: on failure it raises ADD_ERROR naming the subsystem type and returns from the
+ * enclosing callable. Only valid where a test context (ADD_ERROR) and a void-returning scope are
+ * in scope — i.e. the lambda body passed to FNTestUtils::WorldTest / WorldTestChecked.
+ *
+ * @param VarName Identifier to declare for the retrieved subsystem pointer.
+ * @param SubsystemType Subsystem class exposing a static Get(UWorld*) accessor.
+ * @param World UWorld pointer to resolve the subsystem from.
+ * @note Unit tests only; perf-test guards intentionally omit the ADD_ERROR and use a bare return.
+ */
+#define N_TEST_GET_SUBSYSTEM_CHECKED(VarName, SubsystemType, World)\
+	SubsystemType* VarName = SubsystemType::Get(World);\
+	if (!VarName)\
+	{\
+		ADD_ERROR("Could not retrieve " #SubsystemType " from PIE world.");\
+		return;\
+	}
 
 

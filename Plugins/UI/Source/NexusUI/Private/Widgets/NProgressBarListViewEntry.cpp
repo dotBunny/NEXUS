@@ -94,19 +94,41 @@ void UNProgressBarListViewEntry::OnDataChanged()
 
 void UNProgressBarListViewEntry::UpdateFromData() const
 {
-	if (IsValid(Data))
+	// BindWidget pointers are required bindings (non-null in a compiling Blueprint); guard anyway so a
+	// malformed cooked subclass missing a widget fails soft rather than crashing on the deref.
+	if (!IsValid(Data) || !LeftText || !CenterText || !RightText || !ProgressBar)
 	{
-		LeftText->SetText(FText::FromString(Data->GetLabel()));
-		CenterText->SetText(FText::FromString(Data->GetMessage()));
-		RightText->SetText(FText::FromString(FString::Printf(TEXT("%d%%"), FMath::RoundToInt(Data->GetPercent() * 100.f))));
-		ProgressBar->SetPercent(Data->GetPercent());
+		return;
 	}
+
+	LeftText->SetText(FText::FromString(Data->GetLabel()));
+	CenterText->SetText(FText::FromString(Data->GetMessage()));
+
+	// OnChanged is a single coarse broadcast (label/message/percent share it), so this runs on label-only
+	// changes too. Skip the percent SetText — and the Slate relayout it forces — unless the rounded value moved.
+	const int32 Percent = FMath::RoundToInt(Data->GetPercent() * 100.f);
+	if (Percent != LastShownPercent)
+	{
+		LastShownPercent = Percent;
+		RightText->SetText(FText::FromString(FString::Printf(TEXT("%d%%"), Percent)));
+	}
+
+	ProgressBar->SetPercent(Data->GetPercent());
 }
 
 void UNProgressBarListViewEntry::Reset() const
 {
+	if (!LeftText || !CenterText || !RightText || !ProgressBar)
+	{
+		return;
+	}
+
 	LeftText->SetText(FText::GetEmpty());
 	CenterText->SetText(FText::GetEmpty());
 	RightText->SetText(FText::GetEmpty());
 	ProgressBar->SetPercent(0.f);
+
+	// Clearing RightText above invalidates the cache; reseed so a recycled entry repaints even if its
+	// new data happens to sit at the same rounded percent.
+	LastShownPercent = MIN_int32;
 }

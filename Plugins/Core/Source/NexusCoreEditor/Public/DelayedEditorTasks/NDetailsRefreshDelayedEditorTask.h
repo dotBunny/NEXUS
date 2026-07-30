@@ -12,6 +12,7 @@
  *
  * Useful after registering or unregistering a detail customization at runtime — the panel
  * needs a refresh tick to pick up the change.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/delayed-editor-tasks/details-refresh-delayed-editor-task/">UNDetailsRefreshDelayedEditorTask</a>
  */
 UCLASS()
 class NEXUSCOREEDITOR_API UNDetailsRefreshDelayedEditorTask : public UNDelayedEditorTask
@@ -26,12 +27,13 @@ public:
 		UAsyncEditorDelay* DelayedMechanism = CreateDelayMechanism();
 		UNDetailsRefreshDelayedEditorTask* PropertyObject = NewObject<UNDetailsRefreshDelayedEditorTask>(DelayedMechanism);
 		PropertyObject->Lock(DelayedMechanism);
-		
+
 		DelayedMechanism->Complete.AddDynamic(PropertyObject, &UNDetailsRefreshDelayedEditorTask::Execute);
 		DelayedMechanism->Start(0.5f, 5);
 	}
-	
-private:	
+
+private:
+	/** Delay-completion callback: notifies the property editor of the customization change, then releases the task. */
 	UFUNCTION()
 	void Execute()
 	{

@@ -19,30 +19,30 @@ TSharedPtr<SDockTab> FNEditorSlateUtils::FindDockTab(const TSharedPtr<SWidget>& 
 TSharedPtr<SDockTab> FNEditorSlateUtils::FindDockTabByIdentifier(const FName TabIdentifier)
 {
 	const FName ActiveTabIdentifier = FName(FString::Printf(TEXT("%s_ActiveTab"), *TabIdentifier.ToString()));
-	
+
 	// Try the global tabs (nomad/etc)
 	{
 		const TSharedRef<FGlobalTabmanager>& GlobalTabManager = FGlobalTabmanager::Get();
-	
+
 		const TSharedPtr<SDockTab> GlobalTab = GlobalTabManager->FindExistingLiveTab(TabIdentifier);
 		if (GlobalTab.IsValid())
 		{
 			return GlobalTab;
 		}
-	
+
 		const TSharedPtr<SDockTab> GlobalActiveTab = GlobalTabManager->FindExistingLiveTab(ActiveTabIdentifier);
 		if (GlobalActiveTab.IsValid())
 		{
 			return GlobalActiveTab;
 		}
 	}
-	
+
 	// Try the level editor
 	{
 		if (const FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
 		{
 			const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
-		
+
 			const TSharedPtr<SDockTab> LevelEditorTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier);
 			if (LevelEditorTab.IsValid())
 			{
@@ -55,6 +55,6 @@ TSharedPtr<SDockTab> FNEditorSlateUtils::FindDockTabByIdentifier(const FName Tab
 			}
 		}
 	}
-	
+
 	return nullptr;
 }

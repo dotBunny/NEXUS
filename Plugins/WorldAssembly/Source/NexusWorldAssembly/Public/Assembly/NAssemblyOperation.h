@@ -47,10 +47,20 @@ struct FNAssemblyOperationResult
 	/** Detailed result message for display. */
 	FText Message;
 
-	/** Total wall-clock time the operation took, in seconds. */
+	/** Total wall-clock time the operation took, in milliseconds. */
 	float Duration = 0.0f;
 	/** Number of cells created during the operation. */
-	int CreatedCells;
+	int32 CreatedCells = 0;
+
+	void Reset()
+	{
+		bSuccess = false;
+		bWarning = false;
+		Title = FText::GetEmpty();
+		Message = FText::GetEmpty();
+		Duration = 0.f;
+		CreatedCells = 0;
+	}
 };
 
 /** Broadcast when the display message shown in UI changes. */
@@ -66,6 +76,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNWorldAssemblyOperationPercentage
  * Owns the generation context (participating organs, cells, tissue), the task graph that actually
  * executes the pass, and the per-operation settings (seed, level-instance behavior). Clients register
  * as the operation's owner via INAssemblyOperationOwner to receive lifecycle callbacks.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/assembly-operation/">UNAssemblyOperation</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Assembly Operation")
 class NEXUSWORLDASSEMBLY_API UNAssemblyOperation : public UObject
@@ -93,7 +104,7 @@ public:
 		FString OutputFile = FPaths::Combine(FPaths::ProjectLogDir(),
 					FString::Printf(TEXT("NEXUS_WorldAssembly_%s.md"), *Timestamp));
 		TArray<FString> Output = Report.GetReportLines(ENReportOutputFormat::Markdown);
-		
+
 		Async(EAsyncExecution::TaskGraph,
 			[Output = MoveTemp(Output), OutputFile]()
 			{
@@ -116,7 +127,7 @@ public:
 	FNReport* GetReport() { return &Report; }
 
 #endif // !UE_BUILD_SHIPPING
-	
+
 	/**
 	 * Convert an operation state enum into the stable string used by logs and the developer overlay.
 	 * @param State The state to convert.
@@ -139,11 +150,11 @@ public:
 			return NEXUS::WorldAssembly::States::Unregistered;
 		default:
 			return NEXUS::WorldAssembly::States::None;
-		}		
+		}
 	}
-	
+
 	/**
-	 * Build an operation from an explicit set of organ components.	 
+	 * Build an operation from an explicit set of organ components.
 	 * @param Components Components participating in the generation context. It is important that these have been presorted by Identifier to ensure determinism.
 	 * @param OperationSettings Per-operation settings to apply (seed, level-instance behavior).
 	 * @return The configured operation ready to be registered with a World Assembly subsystem.
@@ -185,6 +196,14 @@ public:
 	 */
 	bool AddToContext(UNOrganComponent* Component) const;
 
+	/**
+	 * Query whether an organ component participates in this operation's generation context.
+	 * @param Component Organ component to look for.
+	 * @return true if the component is part of the operation's context.
+	 * @note Returns false once the operation has been torn down and its context released.
+	 */
+	bool ContainsComponent(const UNOrganComponent* Component) const;
+
 	/** @return true if the context has been locked and the dependency order resolved. */
 	bool IsLocked() const { return Context->IsLocked(); }
 	/** @return true if a build is currently running for this operation. */
@@ -214,17 +233,30 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnAssemblyOperationTasksChanged OnTasksChanged;
 
+	/**
+	 * Broadcast whenever the combined progress changes (0..1). Combines completed-task count with the
+	 * fractional progress of currently-open status channels, so the value keeps moving during long-running
+	 * tasks that report sub-progress instead of freezing between task-completion milestones.
+	 */
+	UPROPERTY(BlueprintAssignable)
+	FOnNWorldAssemblyOperationPercentageChanged OnPercentageChanged;
+
+	/** @return The most recently computed combined task + channel progress in the 0..1 range. */
+	float GetCombinedProgress() const { return CachedCombinedProgress; }
+
 	/** @return Cached (completed, total) task counts captured since the last OnTasksChanged broadcast. */
 	FIntVector2 GetCachedTaskStatusCounts() const { return FIntVector2(CachedCompletedTasks, CachedTotalTasks); }
 	/** @return The unique 32-bit identifier assigned to this operation at creation time. */
 	int32 GetTicket() const { return Ticket; }
-	
-	/** @return A snapshot of the operation's outcome (success/warning flags, title, message, duration, and created-cell count). */
-	FNAssemblyOperationResult GetResult() const;
+
+	void UpdateCachedResult();
 
 	/** Requests cancellation of the in-flight build. */
 	void Cancel();
-	
+
+	/** @return A snapshot of the operation's outcome (success/warning flags, title, message, duration, and created-cell count). */
+	const FNAssemblyOperationResult& GetResult() const { return Result; }
+
 protected:
 	void Tick();
 	void FinishBuild(TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContext);
@@ -233,6 +265,9 @@ protected:
 
 	/** Drain pending status-channel updates from the task graph and forward them to the registry. Game thread only. */
 	void DrainStatusChannels();
+
+	/** Recompute combined task + open-channel progress and broadcast OnPercentageChanged when it changes. Game thread only. */
+	void BroadcastCombinedProgress();
 
 private:
 	/** Monotonically increasing ticket source used to assign a unique identifier to each operation. */
@@ -254,12 +289,10 @@ private:
 
 	/** true while StartBuild has been called and the task graph has not yet finished. */
 	bool bIsRunning;
-	
-	/** Mirrors Context->IsLocked(); cached here to avoid reaching through the TUniquePtr from const callers. */
-	bool bIsContextLocked;
+
 	/** Human-friendly label for UI. */
 	FText DisplayName;
-	
+
 	/** Current progress message for UI. */
 	FString StatusMessage;
 
@@ -268,10 +301,17 @@ private:
 	/** Most recent completed-task count broadcast to OnTasksChanged. */
 	int32 CachedCompletedTasks = 0;
 
+	/** Latest percent (0..1) reported by each currently-open status channel, keyed by ChannelId. Closed channels are removed. */
+	TMap<int32, float> OpenChannelPercents;
+	/** Most recent combined progress broadcast via OnPercentageChanged; held monotonic so channel churn never moves the bar backwards. */
+	float CachedCombinedProgress = 0.0f;
+
 	/** Unique identifier for this operation, allocated from NextTicket. */
 	int32 Ticket;
 
 #if !UE_BUILD_SHIPPING
 	FNReport Report;
 #endif // !UE_BUILD_SHIPPING
+
+	FNAssemblyOperationResult Result;
 };

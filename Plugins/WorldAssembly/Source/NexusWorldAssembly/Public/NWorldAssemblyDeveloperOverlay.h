@@ -16,6 +16,7 @@ struct FNStatusChannelUpdate;
  *
  * Subscribes to the registry's state-change broadcast so the list refreshes as operations
  * start, progress, and complete. Intended for diagnostics; not shipped to end users.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/developer-overlay/">UNWorldAssemblyDeveloperOverlay</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | World Assembly Developer Overlay", BlueprintType, Abstract)
 class NEXUSWORLDASSEMBLY_API UNWorldAssemblyDeveloperOverlay : public UNDeveloperOverlay

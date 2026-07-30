@@ -3,11 +3,15 @@
 
 #include "Visualizers/NBoneComponentVisualizer.h"
 
+#include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblySettings.h"
 #include "NWorldCollisionCache.h"
+#include "Math/NMeshBVH.h"
 #include "Organ/NBoneComponent.h"
 #include "Types/NRawMesh.h"
 #include "Types/NRawMeshUtils.h"
+
+TMap<TWeakObjectPtr<const UNBoneComponent>, FNBoneComponentVisualizer::FCachedPenetration> FNBoneComponentVisualizer::PenetrationCache;
 
 void FNBoneComponentVisualizer::DrawVisualization(const UActorComponent* Component, const FSceneView* View,
 	FPrimitiveDrawInterface* PDI)
@@ -21,23 +25,97 @@ void FNBoneComponentVisualizer::DrawVisualization(const UActorComponent* Compone
 
 	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
 
-	// Measure how deep the socket corners sit inside world collision, sampling the shared (and invalidation-tracked)
-	// world-collision mesh rather than re-gathering it here. Mirrors the junction's hull test, just against the world.
+	// Penetration is a pure function of (world-collision mesh, bone transform, socket size) — none of which change
+	// frame to frame in the common idle case — so it is memoized rather than re-swept on every viewport redraw.
 	float WorldPenetration = 0.f;
 	if (Settings != nullptr)
 	{
-		const FNRawMesh& WorldCollisionMesh = FNWorldCollisionCache::Get(BoneComponent->GetWorld());
-		if (WorldCollisionMesh.Loops.Num() > 0)
+		WorldPenetration = GetCachedWorldPenetration(BoneComponent, Settings);
+	}
+
+	// We are always going to draw this
+	BoneComponent->DrawDebugPDI(PDI, FNWorldAssemblyEdMode::GetCachedBoneValidColor(),  FNWorldAssemblyEdMode::GetCachedBoneInvalidColor(),
+		true,  true, Settings, WorldPenetration);
+}
+
+float FNBoneComponentVisualizer::GetCachedWorldPenetration(const UNBoneComponent* BoneComponent, const UNWorldAssemblySettings* Settings)
+{
+	const UWorld* World = BoneComponent->GetWorld();
+
+	// Kick a background rebuild if this world's collision changed. This never blocks: the gather + merge + BVH build
+	// happen off the draw (see FNWorldCollisionCache async path), so a viewport redraw is always cheap even right after
+	// an edit. Each world is tracked independently, so this never disturbs another viewport's published data.
+	FNWorldCollisionCache::RequestAsyncRefresh(World);
+
+	// The memo entry stays valid until NEW results publish for this bone's world (ResultsGeneration bumps only on a
+	// publish, not on invalidation) — so during a rebuild we keep drawing the last-known value, and a rebuild in one
+	// world never invalidates bones drawn for another.
+	const uint32 Generation = FNWorldCollisionCache::GetResultsGeneration(World);
+
+	// Per-bone inputs that change the result independently of world geometry.
+	const FTransform CurrentTransform = BoneComponent->GetComponentTransform();
+	const FIntVector2 CurrentSocketSize = BoneComponent->SocketSize;
+	const FVector2D CurrentSettingSocketSize = Settings->SocketSize;
+
+	const TWeakObjectPtr<const UNBoneComponent> Key(BoneComponent);
+	if (const FCachedPenetration* Existing = PenetrationCache.Find(Key))
+	{
+		if (Existing->KeyResultsGeneration == Generation
+			&& Existing->KeySocketSize == CurrentSocketSize
+			&& Existing->KeySettingSocketSize == CurrentSettingSocketSize
+			&& Existing->KeyTransform.Equals(CurrentTransform))
 		{
-			const TArray<FVector> CornerPoints = BoneComponent->GetWorldCornerPoints(Settings->SocketSize);
+			return Existing->Penetration;
+		}
+	}
+
+	// Miss — we are about to recompute this entry. Misses are rare (a real input or generation change), so use the
+	// opportunity to drop entries whose bone has been destroyed; without a whole-map reset this is what keeps the memo
+	// from growing across selection changes and across the multiple worlds it serves.
+	for (TMap<TWeakObjectPtr<const UNBoneComponent>, FCachedPenetration>::TIterator It(PenetrationCache); It; ++It)
+	{
+		if (!It.Key().IsValid())
+		{
+			It.RemoveCurrent();
+		}
+	}
+
+	// Sample the socket corners against this world's most recently published world-collision mesh + BVH. When nothing
+	// has been published yet (first build still running) both are null and we report 0 until results land and bump the
+	// generation above.
+	float WorldPenetration = 0.f;
+	const TSharedPtr<const FNMeshBVH> WorldCollisionBVH = FNWorldCollisionCache::GetPublishedBVH(World);
+	const TSharedPtr<const FNRawMesh> WorldCollisionMesh = FNWorldCollisionCache::GetPublishedMesh(World);
+	if (WorldCollisionBVH.IsValid() && WorldCollisionMesh.IsValid() && WorldCollisionMesh->Loops.Num() > 0)
+	{
+		const TArray<FVector> CornerPoints = BoneComponent->GetWorldCornerPoints(Settings->SocketSize);
+
+		// The merged world-collision mesh is non-convex in any real level; sample it through the BVH, which reproduces
+		// FNRawMeshUtils::ComputePointDepthInsideNonConvex exactly but visits only the geometry near each corner. The
+		// convex / non-triangle degenerate cases (trivial single-body test levels) keep the original exact path, whose
+		// convex face-plane metric the BVH does not replicate.
+		if (!FNWorldCollisionCache::IsPublishedMeshConvex(World) && !FNWorldCollisionCache::PublishedMeshHasNonTris(World))
+		{
 			for (const FVector& Corner : CornerPoints)
 			{
-				const float Depth = FNRawMeshUtils::GetIntersectDepth(WorldCollisionMesh, FVector::ZeroVector, FRotator::ZeroRotator, Corner);
+				WorldPenetration = FMath::Max(WorldPenetration, WorldCollisionBVH->GetPointDepth(Corner));
+			}
+		}
+		else
+		{
+			for (const FVector& Corner : CornerPoints)
+			{
+				const float Depth = FNRawMeshUtils::GetIntersectDepth(*WorldCollisionMesh, FVector::ZeroVector, FRotator::ZeroRotator, Corner);
 				WorldPenetration = FMath::Max(WorldPenetration, Depth);
 			}
 		}
 	}
 
-	// We are always going to draw this
-	BoneComponent->DrawDebugPDI(PDI, true, Settings, WorldPenetration);
+	FCachedPenetration& Entry = PenetrationCache.FindOrAdd(Key);
+	Entry.KeyTransform = CurrentTransform;
+	Entry.KeySocketSize = CurrentSocketSize;
+	Entry.KeySettingSocketSize = CurrentSettingSocketSize;
+	Entry.KeyResultsGeneration = Generation;
+	Entry.Penetration = WorldPenetration;
+	return WorldPenetration;
 }

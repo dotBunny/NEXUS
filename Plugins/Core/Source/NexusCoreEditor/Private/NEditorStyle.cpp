@@ -14,11 +14,13 @@ TSharedRef<FSlateStyleSet> FNEditorStyle::Create()
 	N_EDITOR_STYLE_CREATE
 
 	Style.Set("NEXUS.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("NEXUS"), Icon16x16));
+	Style.Set("Lock", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Lock"), Icon16x16));
+	Style.Set("Lock.Desaturated", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Lock_Desaturated"), Icon16x16));
 	Style.Set("Command.OpenDiscordInviteLink", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_OpenDiscordInviteLink"), Icon16x16));
-	
+
 	// NDebugActor
 	Style.Set("ClassIcon.NDebugActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NDebugActor"), Icon16x16));
 	Style.Set("ClassThumbnail.NDebugActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NDebugActor"), Icon128x128));
-	
+
 	return StyleRef;
 }

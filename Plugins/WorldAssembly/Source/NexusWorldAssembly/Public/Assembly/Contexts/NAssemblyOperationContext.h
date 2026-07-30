@@ -43,7 +43,7 @@ public:
 
 	/** Spatial bounds of every input organ; forwarded to FNVirtualWorldContext to scope collision gathering. */
 	TArray<FBoxSphereBounds> Bounds;
-	
+
 	/**
 	 * Register an organ component as a generation input.
 	 * @return true if the component was accepted; false if the context is already locked or the component was rejected.
@@ -58,7 +58,7 @@ public:
 
 	/** Finalize the context: compute per-organ/per-bone state, build the generation ordering, create world collision structure, and mark locked. */
 	void LockAndPreprocess(UWorld* World);
-	
+
 #if !UE_BUILD_SHIPPING
 	/**
 	 * Appends a summary of this context's organs, bones, and generation order to the supplied report (non-shipping builds only).

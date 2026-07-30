@@ -30,14 +30,17 @@ public:
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 	/** @return The shared filter settings used to gather collision-source actors from the world. */
-	static FNWorldActorFilterSettings CreateWorldActorFilterSettings()
+	static FNWorldActorFilterSettings CreateWorldActorFilterSettings(const FNWorldAssemblyWorldCollisionSettings& Settings)
 	{
 		// Collect the world AActors that we need to care about
 		FNWorldActorFilterSettings ActorFilterSettings;
-		ActorFilterSettings.bExcludeNonCollisionEnabledActors = true;
-		ActorFilterSettings.bIncludePlayerStarts = true;
+
+		ActorFilterSettings.bExcludeNonCollisionEnabledActors = Settings.bExcludeNonCollisionEnabledActors;
+		ActorFilterSettings.bIncludePlayerStarts = Settings.bIncludePlayerStarts;
+		ActorFilterSettings.WorldCollisionActorIgnoreTags = Settings.ActorIgnoreTags;
+
 		ActorFilterSettings.ExclusionFunction = &IsWorldCollisionSource;
-		return MoveTemp(ActorFilterSettings);
+		return ActorFilterSettings;
 	}
 
 	/**
@@ -47,18 +50,15 @@ public:
 	 */
 	static bool IsWorldCollisionSource(const AActor* Actor)
 	{
-		// It's being destroyed so don't even bother with it
-		if (Actor->IsPendingKillPending()) return false;
-		
 		// Check global ignore tag
 		if (Actor->ActorHasTag(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore)) return false;
-		
+
 		// We are going to outright ignore volumes as collision data
 		if (Actor->IsA<AVolume>()) return false;
-		
+
 		// Nor should any of our debug actors
 		if (Actor->IsA<ANDebugActor>()) return false;
-		
+
 		return true;
 	}
 

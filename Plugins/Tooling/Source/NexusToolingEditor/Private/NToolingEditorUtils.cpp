@@ -13,7 +13,7 @@
 #ifdef UNICODE
 #define SEND_MESSAGE  SendMessageW
 #define LOAD_IMAGE LoadImageW
-#define LOAD_IMAGE_PATH 
+#define LOAD_IMAGE_PATH
 #else // !UNICODE
 #define SEND_MESSAGE  SendMessageA
 #define LOAD_IMAGE LoadImageA
@@ -27,7 +27,7 @@ bool FNToolingEditorUtils::TryGetForegroundBlueprintEditorSelectedNodes(FGraphPa
 {
 	IAssetEditorInstance* ForegroundAssetEditor = FNEditorUtils::GetForegroundAssetEditor();
 	if (ForegroundAssetEditor == nullptr) return false;
-	
+
 	if (IsBlueprintEditorAssetType(ForegroundAssetEditor->GetEditingAssetTypeName()))
 	{
 		const FBlueprintEditor* BlueprintEditor = static_cast<FBlueprintEditor*>(ForegroundAssetEditor);
@@ -50,6 +50,8 @@ void FNToolingEditorUtils::ReplaceAppIconSVG(FSlateVectorImageBrush* Icon)
 	FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get()));
 	if (MutableStyleSet != nullptr)
 	{
+		// Set() takes ownership of Icon (stored in BrushResources, deleted when the style set is torn down).
+		// It does not delete the brush previously registered under "AppIcon", so each swap orphans one brush.
 		MutableStyleSet->Set("AppIcon", Icon);
 	}
 	else
@@ -64,6 +66,8 @@ void FNToolingEditorUtils::ReplaceAppIcon(FSlateImageBrush* Icon)
 	FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get()));
 	if (MutableStyleSet != nullptr)
 	{
+		// Set() takes ownership of Icon (stored in BrushResources, deleted when the style set is torn down).
+		// It does not delete the brush previously registered under "AppIcon", so each swap orphans one brush.
 		MutableStyleSet->Set("AppIcon", Icon);
 	}
 	else
@@ -82,15 +86,15 @@ bool FNToolingEditorUtils::ReplaceWindowIcon(const FString& IconPath)
 		const Windows::HWND WindowHandle = FWindowsPlatformMisc::GetTopLevelWindowHandle(FWindowsPlatformProcess::GetCurrentProcessId());
 		Windows::HICON hIcon = (Windows::HICON)LOAD_IMAGE(NULL, LOAD_IMAGE_PATH(*FinalPath),IMAGE_ICON,
 		GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_LOADFROMFILE);
-		
+
 		if (hIcon)
 		{
 			// Set the large icon (Alt+Tab, taskbar)
 			SEND_MESSAGE(WindowHandle, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
-        
+
 			// Set the small icon (window title bar)
 			SEND_MESSAGE(WindowHandle, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-        
+
 			// Also set it for the window class
 			SetClassLongPtr(WindowHandle, GCLP_HICON, (LONG_PTR)hIcon);
 			SetClassLongPtr(WindowHandle, GCLP_HICONSM, (LONG_PTR)hIcon);

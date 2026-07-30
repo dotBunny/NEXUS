@@ -15,7 +15,7 @@ USTRUCT(BlueprintType)
 struct NEXUSPICKER_API FNArcPickerParams : public FNPickerParams
 {
 	GENERATED_BODY()
-	
+
 	/** The center point when attempting to generate new points. */
 	UPROPERTY(Category = "Arc", BlueprintReadWrite)
 	FVector Origin = FVector::ZeroVector;
@@ -27,7 +27,7 @@ struct NEXUSPICKER_API FNArcPickerParams : public FNPickerParams
 	/** The degrees of the arc. */
 	UPROPERTY(Category = "Arc", BlueprintReadWrite)
 	float Degrees = 90.f;
-	
+
 	/**
 	 * The minimum distance from Origin at which points may be generated.
 	 * @note Points are sampled uniformly over the annular sector's area; the radial component is sqrt-corrected, so an even spread is produced rather than a clustering near MinimumDistance. Must be >= 0.

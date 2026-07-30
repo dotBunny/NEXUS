@@ -15,9 +15,9 @@ UCLASS(DisplayName = "NEXUS | ComboBox (String)", ClassGroup = UI, meta = (Categ
 class NEXUSUI_API UNComboBoxString : public UComboBoxString
 {
 	GENERATED_BODY()
-	
+
 public:
-	
+
 #if WITH_EDITOR
 	virtual const FText GetPaletteCategory() override {  return NEXUS::UIEditor::PaletteCategory; }
 #endif // WITH_EDITOR
@@ -31,7 +31,7 @@ public:
 	void SetSelectedOption_NoBroadcast(FString Option);
 
 	/**
-	 * Sets the selected option by index of the UComboBoxString without triggering exposed event bindings.	 
+	 * Sets the selected option by index of the UComboBoxString without triggering exposed event bindings.
 	 * @param Index The new option's index.
 	 */
 	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set Selected Index (No Broadcast)",

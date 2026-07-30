@@ -34,10 +34,11 @@ void FNWorldAssemblyEditorUndo::CompareAgainstSidecar()
 	for (const auto Root : FNWorldAssemblyRegistry::GetCellRootComponents())
 	{
 		// Do not process undo on proxy-based actors
-		if (ANCellActor* CellActor = Root->GetNCellActor(); 
-			CellActor != nullptr && !CellActor->WasSpawnedFromProxy()) 
+		if (ANCellActor* CellActor = Root->GetNCellActor();
+			CellActor != nullptr && !CellActor->WasSpawnedFromProxy())
 		{
-			CellActor->Modify();
+			// bActorDirty is a transient, non-reflected flag recomputed on every undo/redo, so it
+			// is intentionally not journaled; Modify() here would capture nothing and must not run.
 			CellActor->SetActorDirty(CellActor->HasDifferencesFromSidecar());
 		}
 	}
@@ -59,11 +60,11 @@ bool FNWorldAssemblyEditorUndo::MatchesContext(const FTransactionContext& InCont
 		if (const UActorComponent* Component = Cast<UActorComponent>(Pair.Key);
 			Component != nullptr)
 		{
-			
+
 			if (FNWorldAssemblyEditorUtils::EffectsGeneratedData(Component)) return true;
 			if (FNWorldAssemblyEditorUtils::EffectsGeneratedData(Component->GetOwner())) return true;
 		}
 	}
-	
+
 	return false;
 }

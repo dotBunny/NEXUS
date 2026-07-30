@@ -18,6 +18,7 @@ class UNEditorUtilityWidget;
  * mappings across editor sessions via the NexusUserSettings config. Widgets register themselves in
  * NativeConstruct so the subsystem can push cached state back into them before they go live, and
  * unregister on destruct to avoid dangling references.
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/editor-utility-widget-subsystem/">UNEditorUtilityWidgetSubsystem</a>
  */
 UCLASS(config = NexusUserSettings)
 class NEXUSUIEDITOR_API UNEditorUtilityWidgetSubsystem : public UEditorSubsystem

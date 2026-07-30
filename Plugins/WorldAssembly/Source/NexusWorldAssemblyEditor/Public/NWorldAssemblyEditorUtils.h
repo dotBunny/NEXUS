@@ -62,20 +62,20 @@ public:
 
 		return false;
 	}
-	
+
 	/** @return true if the component is a cell-root or junction component. */
 	FORCEINLINE static bool EffectsGeneratedData(const UActorComponent* ContextActorComponent)
 	{
 		if (ContextActorComponent == nullptr) return false;
 		return ContextActorComponent->IsA<UNCellRootComponent>() || ContextActorComponent->IsA<UNCellJunctionComponent>();
 	}
-	
+
 	/** @return First ANCellActor found in the currently-edited world, or nullptr. */
 	static ANCellActor* GetCellActorFromCurrentWorld();
-	
+
 	/** @return Every ANCellActor in the current editor selection. */
 	static TArray<ANCellActor*> GetSelectedCellActors();
-	
+
 	/**
 	 * @param bSorted When true, results are returned in a stable sort order suitable for deterministic traversal.
 	 * @return Every UNOrganComponent from the current editor selection (volumes and standalone components).
@@ -96,7 +96,7 @@ public:
 
 	/** @return true if any selected actor corresponds to a generated cell proxy. */
 	static bool HasSelectedGeneratedCellProxies();
-	
+
 	/** @return true if the currently-edited world contains at least one ANCellActor. */
 	static bool IsCellActorPresentInCurrentWorld();
 
@@ -118,9 +118,29 @@ public:
 	 *
 	 * @param World World whose cell asset should be persisted. Used both to resolve the package and (when CellActor is null) to find the cell actor.
 	 * @param CellActor Specific cell actor to save, or nullptr to use the world's primary cell actor.
+	 * @param bForceSave Write the package even when the refresh produced no changes, rather than skipping an unchanged asset.
 	 * @note Editor-only. Triggers the same slow-task UI as UpdateCell (it's invoked internally) and performs synchronous disk I/O.
 	 */
 	static void SaveCell(UWorld* World, ANCellActor* CellActor = nullptr, bool bForceSave = false);
+
+	/**
+	 * Refreshes the cell side-car asset from CellActor (via UpdateCell) and marks the package dirty, but does NOT write
+	 * it to disk. This is the in-memory half of SaveCell, split out so callers that run inside the world-save flow can
+	 * sync the data here and defer the side-car's own SavePackage to PostSaveWorldWithContext (saving a package from
+	 * inside PreSaveWorldWithContext is a re-entrant save and is unsafe).
+	 *
+	 * Resolves or creates the UNCell package via UAssetDefinition_NCell::GetOrCreatePackage. When CellActor is null, the
+	 * world's primary ANCellActor is resolved via FNWorldAssemblyUtils::GetCellActorFromWorld; if no cell actor can be
+	 * found at all, a warning is logged and the call no-ops.
+	 *
+	 * @param World World whose cell asset should be synced.
+	 * @param CellActor Specific cell actor to sync, or nullptr to use the world's primary cell actor.
+	 * @param bForceSave When true, flags the side-car for a flush even if UpdateCell reported no changes.
+	 * @return The side-car UNCell that was dirtied and now needs a disk flush, or nullptr when nothing changed (or the
+	 *         cell actor / package could not be resolved).
+	 * @note Editor-only. Triggers the same slow-task UI as UpdateCell (it's invoked internally).
+	 */
+	static UNCell* SyncCell(UWorld* World, ANCellActor* CellActor = nullptr, bool bForceSave = false);
 
 	/**
 	 * Ensures the callback actors required by the cell exist and are initialized in the world.
@@ -140,4 +160,12 @@ public:
 
 	/** @return true if every organ in the current level can be generated. */
 	static bool CanGenerateAllOrgans();
+
+	/**
+	 * Gather the asset data for every UNCell (and subclass) known to the asset registry.
+	 * @param bWaitForFullScan when true, blocks until the entire asset registry has been scanned before gathering.
+	 * @return the asset data for all discovered cell data assets.
+	 * @note Pass true only from commandlets or other headless contexts; the synchronous scan will hard-stall an interactive editor on large projects.
+	 */
+	static TArray<FAssetData> GetAllCellDataAssetData(bool bWaitForFullScan);
 };

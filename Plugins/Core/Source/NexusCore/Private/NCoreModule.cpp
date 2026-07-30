@@ -17,11 +17,11 @@ void FNCoreModule::StartupModule()
 	N_UPDATE_UPLUGIN("NexusCore")
 
 	UE_LOG(LogNexusCore, Log, TEXT("NEXUS Version %i (%i.%i.%i)"), NEXUS::Version::Number, NEXUS::Version::Major, NEXUS::Version::Minor, NEXUS::Version::Patch);
-	
+
 	// Initialize our font glyphs
 	FNPrimitiveFont::Initialize();
 
-#if WITH_EDITOR	
+#if WITH_EDITOR
 	N_MODULE_POST_ENGINE_INIT(FNCoreModule, OnPostEngineInit);
 #endif // WITH_EDITOR
 }
@@ -34,27 +34,27 @@ void FNCoreModule::ShutdownModule()
 
 IMPLEMENT_MODULE(FNCoreModule, NexusCore)
 
-#if WITH_EDITOR	
+#if WITH_EDITOR
 void FNCoreModule::OnPostEngineInit()
 {
 	if (FNMultiplayerUtils::IsMultiplayerTest())
 	{
 		const FString FileName = FPaths::GetCleanFilename(FGenericPlatformOutputDevices::GetAbsoluteLogFilename());
-		
+
 		FString ConnectionAddress;
 		const TCHAR* CommandLine = FCommandLine::Get();
 		if (CommandLine && FCString::Strlen(CommandLine) > 0)
 		{
 			FString Token;
 			FParse::Token(CommandLine, Token, false);
-			
+
 			// Is the first token an address (the proper format) to connect to?
 			if (Token.Contains(TEXT(".")) || Token.Contains(TEXT(":")))
 			{
 				ConnectionAddress = Token;
 			}
 		}
-		
+
 		FString WindowTitle;
 		if (!ConnectionAddress.IsEmpty())
 		{
@@ -75,7 +75,7 @@ void FNCoreModule::OnPostEngineInit()
 				WindowTitle = FString::Printf(TEXT("%s ClientServer %s"), FApp::GetProjectName(), *FileName);
 			}
 		}
-		
+
 		UE_LOG(LogNexusCore, Log, TEXT("Multiplayer Test - %s"), *WindowTitle);
 		MultiplayerTestWindowTitle = FText::FromString(WindowTitle);
 		UKismetSystemLibrary::SetWindowTitle(MultiplayerTestWindowTitle);

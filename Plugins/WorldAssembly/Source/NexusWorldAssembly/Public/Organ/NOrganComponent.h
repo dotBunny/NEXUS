@@ -4,6 +4,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Collections/NGameplayTagCounterConstraint.h"
+#include "NWorldAssemblySettings.h"
+#include "Math/NMersenneTwister.h"
 #include "Types/NPositionRotation.h"
 #include "NOrganComponent.generated.h"
 
@@ -19,7 +22,18 @@ UENUM(BlueprintType)
 enum class ENOrganGenerationTrigger : uint8
 {
 	OnDemand = 0	UMETA(DisplayName="On Demand", ToolTip = "Generates only when requested (e.g. via Blueprint or Subsystem)."),
-	BeginPlay = 1	UMETA(DisplayName="Begin Play", ToolTip = "Generates when the compent receives it's BeginPlay call.")
+	BeginPlay = 1	UMETA(DisplayName="Begin Play", ToolTip = "Generates when the component receives it's BeginPlay call.")
+};
+
+/**
+ * Selects the reference point a cell's directional constraint measures candidate bearings from.
+ */
+UENUM(BlueprintType)
+enum class ENOrganDirectionConstraintMode : uint8
+{
+	StartBone = 0 UMETA(DisplayName = "Start Bone", ToolTip = "Measure candidate bearings from the organ's start bone (the generation anchor)."),
+	OrganCenter = 1 UMETA(DisplayName = "Organ Center", ToolTip = "Measure candidate bearings from the geometric center of the organ volume. Unbound organs fall back to the start bone."),
+	DynamicCentroid = 2 UMETA(DisplayName = "Dynamic Centroid", ToolTip = "Measure candidate bearings from the running centroid of already-placed cells, which shifts as the organ grows. Falls back to the start bone before any cell is placed.")
 };
 
 /**
@@ -28,6 +42,7 @@ enum class ENOrganGenerationTrigger : uint8
  * The organ defines a region of space plus the pool of tissues and cell-count constraints the
  * World Assembly pipeline will use to populate it. The owning actor's transform/bounds drive placement;
  * this component supplies the rules.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/organ-component/">UNOrganComponent</a>
  */
 UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Organ", HideCategories=(Tags, Activation, Cooking,
 	AssetUserData, Navigation, Actor, Input))
@@ -41,34 +56,51 @@ class NEXUSWORLDASSEMBLY_API UNOrganComponent : public UActorComponent
 
 public:
 	/** When false, the organ is skipped entirely by the World Assembly pipeline. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 100))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Inputs")
 	bool bActivated = true;
 
+	/** When false, the organ can produce no results and still be considered a successful assembly operation. */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Inputs")
+	bool bRequired = true;
+
 	/** When true, the organ is not clipped to its owning volume — cells may extend past the volume bounds. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component")
-	bool bUnbounded = false;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Inputs")
+	bool bUnbound = false;
 
-	/** Lower bound on the cell count placed in this organ; -1 means no minimum. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta=(ClampMin=-1))
-	int32 MinimumCellCount = -1;
+	/** Lower bound on the cell count placed in this organ; 0 means no minimum. */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Requirements", meta=(ClampMin=0))
+	int32 MinimumCellCount = 0;
 
-	/** Upper bound on the cell count placed in this organ; -1 means no maximum. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta=(ClampMin=-1))
-	int32 MaximumCellCount = -1;
+	/** Upper bound on the cell count placed in this organ; 0 means no maximum. */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Requirements", meta=(ClampMin=0))
+	int32 MaximumCellCount = 0;
 
-	/** Deterministic seed mixed into the organ's generation decisions. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 600))
-	int32 Seed = -1;
+	/** Context tags the finished organ must carry; enforced as RequiredContextTags during graph validation. */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Requirements")
+	FGameplayTagContainer ContextTags;
 
-	/** Controls when the organ is allowed to generate (on-demand, begin-play). */
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 200))
-	ENOrganGenerationTrigger GenerationTrigger = ENOrganGenerationTrigger::OnDemand;
+	/** Tag-counter constraints the finished organ must satisfy; enforced as RequiredTagCounters during graph validation. */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Requirements", meta=(TitleProperty="{Tag}"))
+	TArray<FNGameplayTagCounterConstraint> TagCounters;
 
 	/** Tissues (and transitively, cells) the organ may draw from during generation. */
 	UPROPERTY(EditAnywhere, Category = "Organ Component")
 	TArray<TSoftObjectPtr<UNTissue>> Tissues;
 
-	/** @return true if the owning actor is a volume-derived actor. */
+	/** Controls when the organ is allowed to generate (on-demand, begin-play). */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Organ Component|Operation", meta = (DisplayPriority = 200))
+	ENOrganGenerationTrigger GenerationTrigger = ENOrganGenerationTrigger::OnDemand;
+
+	/** Deterministic seed mixed into the organ's generation decisions. */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Operation")
+	int32 Seed = -1;
+
+	/** Reference point this organ's cell directional constraints measure candidate bearings from. */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Operation", DisplayName="Direction Mode",
+		meta=(ToolTip="How directional constraints are resolved for this organ: from the start bone, the organ volume's center, or the running centroid of placed cells."))
+	ENOrganDirectionConstraintMode DirectionMode = ENOrganDirectionConstraintMode::StartBone;
+
+	/** @return true when the owning actor is an AVolume, so the organ has authored bounds to place cells within. */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|World Assembly")
 	bool IsVolumeBased() const { return GetOwner()->IsA<AVolume>(); }
 
@@ -98,7 +130,7 @@ public:
 				Components.Add(Cast<UNOrganComponent>(Object));
 			}
 		}
-		return MoveTemp(Components);
+		return Components;
 	}
 
 	/** Render the organ's debug outline and labels via the provided primitive draw interface. */
@@ -106,6 +138,12 @@ public:
 
 	/** Stash the ticket of the most recent operation that targeted this organ. */
 	void SetLastOperationTicket(const int32& Ticket) { LastOperationTicket = Ticket; }
+
+	/** Record the random-stream snapshot the organ's most recent successful build finished from. */
+	void SetLastRandomState(const FNMersenneTwisterState& State) { LastRandomState = State; }
+
+	/** @return The random-stream snapshot of the organ's most recent successful build. */
+	const FNMersenneTwisterState& GetLastRandomState() const { return LastRandomState; }
 
 	/** @return The ticket of the most recent operation that targeted this organ. */
 	const int32& GetLastOperationTicket() const { return LastOperationTicket; }
@@ -119,12 +157,18 @@ public:
 	}
 
 	/** Stable unique identifier for this organ, used to keep generation deterministic across runs. */
-	UPROPERTY(VisibleAnywhere, Category = "Organ Component")
+	UPROPERTY(VisibleAnywhere, Category = "Organ Component|Operation")
 	FGuid Identifier = FGuid::NewGuid();
 
 	//~UActorComponent
 	virtual void BeginPlay() override;
 	//End UActorComponent
+
+#if WITH_EDITOR
+	//~UObject
+	virtual void PostEditImport() override;
+	//End UObject
+#endif // WITH_EDITOR
 protected:
 
 	//~UActorComponent
@@ -138,4 +182,5 @@ protected:
 private:
 	/** Ticket of the operation most recently scheduled against this organ; zeroed by GetAndResetLastOperationTicket. */
 	int32 LastOperationTicket = 0;
+	FNMersenneTwisterState LastRandomState;
 };
