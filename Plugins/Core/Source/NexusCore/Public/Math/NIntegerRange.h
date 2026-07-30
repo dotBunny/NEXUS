@@ -12,7 +12,7 @@
  * A 32-bit integer inclusive range [Minimum, Maximum].
  *
  * Defaults span the entire representable range of int32; override either bound at author time.
- * The member API (NextValue, RandomValue, PercentageValue, etc.) is supplied by N_RANGE.
+ * The member API (NextValue, RandomValue, PercentageValue, etc.) is supplied by N_RANGE_BASE.
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNIntegerRange

@@ -13,7 +13,7 @@ class ALevelInstance;
 
 /**
  * A handful of methods meant to support the building logic that works in multiplayer scenarios.
- * @see <a href="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/">UNMultiplayerLibrary</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/multiplayer-library/">UNMultiplayerLibrary</a>
  */
 class NEXUSCORE_API FNMultiplayerUtils
 {

@@ -9,7 +9,7 @@
 
 /**
  * A component that builds a network-synchronized UTextRenderComponent between clients.
- * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/text-render-component/">UNTextRenderComponent</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/scene-components/text-render-component/">UNTextRenderComponent</a>
  */
 UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Text Render", meta = (BlueprintSpawnableComponent))
 class NEXUSUI_API UNTextRenderComponent final : public UTextRenderComponent
@@ -47,7 +47,7 @@ public:
 	 * @param NewValue The desired text value.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Set From Name", Category = "NEXUS|User Interface",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/text-render-component/#set-from-name"))
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/scene-components/text-render-component/#set-from-name"))
 	void SetFromName(const FName& NewValue);
 
 	/**
@@ -55,7 +55,7 @@ public:
 	 * @param NewValue The desired text value.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Set From String", Category = "NEXUS|User Interface",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/text-render-component/#set-from-string"))
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/scene-components/text-render-component/#set-from-string"))
 	void SetFromString(const FString& NewValue);
 
 	/**
@@ -63,7 +63,7 @@ public:
 	 * @param NewValue The desired text value.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Set From Text",  Category = "NEXUS|User Interface",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/text-render-component/#set-from-text"))
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/scene-components/text-render-component/#set-from-text"))
 	void SetFromText(const FText& NewValue);
 
 	/** Delegate fired when the text is changed via any of the provided methods. */

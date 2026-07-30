@@ -12,7 +12,7 @@
  * Blueprint-exposed wrappers around FNFloatRange's sampling API.
  *
  * Thin passthroughs so that Blueprint authors can reach the same NextValue / RandomValue /
- * PercentageValue helpers that native code uses via N_RANGE.
+ * PercentageValue helpers that native code uses via N_RANGE_BASE.
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Float Range Library")
 class NEXUSCORE_API UNFloatRangeLibrary : public UBlueprintFunctionLibrary

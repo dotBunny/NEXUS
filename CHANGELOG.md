@@ -82,6 +82,9 @@
 +PropertyRedirects=(OldName="/Script/NexusWorldAssembly.NCellJunctionComponent.OnBeginPlayCallback",NewName="/Script/NexusWorldAssembly.NCellJunctionComponent.OnBeginPlayTargets")
 +PropertyRedirects=(OldName="/Script/NexusWorldAssembly.NCellActor.InitializeCallbackActors",NewName="/Script/NexusWorldAssembly.NCellActor.CellInitializedTargets")
 +ClassRedirects=(OldName="/Script/NexusActorPools.NPooledActor",NewName="/Script/NexusActorPools.NPooledActorBase")
++FunctionRedirects=(OldName="NIntegerRangeLibrary.RandomValueFromSeed",NewName="NIntegerRangeLibrary.RandomValue")
++FunctionRedirects=(OldName="NIntegerRangeLibrary.RandomValueInSubRangeFromSeed",NewName="NIntegerRangeLibrary.RandomValueInSubRange")
++FunctionRedirects=(OldName="NDoubleRangeLibrary.RandomValueFromSeed",NewName="NDoubleRangeLibrary.RandomValue")
 ```
 
 ## [0.3.1] - 2026-06-07

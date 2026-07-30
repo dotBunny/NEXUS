@@ -22,7 +22,7 @@ ENUM_CLASS_FLAGS(ENCellVoxel)
 /**
  * Flat 3D grid of ENCellVoxel flags describing occupancy inside a cell.
  *
- * Stored packed as a flat uint8 array keyed by (X, Y, Z); N_FLAT_3D_ARRAY provides the
+ * Stored packed as a flat uint8 array keyed by (X, Y, Z); N_FLAT_3D_ARRAY_BASE provides the
  * indexing helpers. Sized from the cell's unit-bounds / unit-size.
  */
 USTRUCT(BlueprintType)
@@ -35,7 +35,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	FNVoxelCoordinate Size;
 
-	/** Flat per-voxel storage for ENCellVoxel flag bitmasks, indexed via the generated N_FLAT_3D_ARRAY accessors. */
+	/** Flat per-voxel storage for ENCellVoxel flag bitmasks, indexed via the generated N_FLAT_3D_ARRAY_BASE accessors. */
 	UPROPERTY(VisibleAnywhere)
 	TArray<uint8> Data;
 

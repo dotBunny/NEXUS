@@ -41,7 +41,7 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnActorOperationalStateChangedDelegate, co
  *       FNActorPool dispatches via the fast path Cast<INActorPoolItem>(Actor) (see NActorPool.cpp), which only succeeds
  *       for native C++ implementers. A Blueprint that implemented this interface would make UClass::ImplementsInterface()
  *       return true (taking the fast path) while Cast<INActorPoolItem>() returned nullptr - an immediate null deref.
- *       Blueprint actors are supported through other routes instead: derive from ANPooledActor (native interface +
+ *       Blueprint actors are supported through other routes instead: derive from ANPooledActorBase (native interface +
  *       BlueprintAssignable events), or set the InvokeUFunctions pool flag and define matching named UFUNCTIONs.
  */
 UINTERFACE(meta=(CannotImplementInterfaceInBlueprint))

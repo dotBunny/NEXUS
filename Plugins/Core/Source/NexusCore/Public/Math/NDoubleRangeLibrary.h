@@ -12,7 +12,7 @@
  * Blueprint-exposed wrappers around FNDoubleRange's sampling API.
  *
  * Thin passthroughs so that Blueprint authors can reach the same NextValue / RandomValue /
- * PercentageValue helpers that native code uses via N_RANGE.
+ * PercentageValue helpers that native code uses via N_RANGE_BASE.
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Double Range Library")
 class NEXUSCORE_API UNDoubleRangeLibrary : public UBlueprintFunctionLibrary
@@ -42,7 +42,7 @@ class NEXUSCORE_API UNDoubleRangeLibrary : public UBlueprintFunctionLibrary
 
 	/** Non-deterministic sample from Range's full span. */
 	UFUNCTION(BlueprintCallable, DisplayName="Random Value (Double)",  Category = "NEXUS|Core|Range")
-	static double RandomValueFromSeed(const FNDoubleRange& Range)
+	static double RandomValue(const FNDoubleRange& Range)
 	{
 		return Range.RandomValue();
 	}
