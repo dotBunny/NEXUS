@@ -8,6 +8,7 @@
  *
  * Registers a UToolMenus section whose single entry starts/stops a multiplayer test session via the editor
  * subsystem, and keeps its icon/tooltip in sync with the running state through cached delegate bindings.
+ * @see <a href="https://nexus-framework.com/docs/plugins/tooling/editor-types/multiplayer-test/multiplayer-test-toolbar-section/">FNMultiplayerTestToolbarSection</a>
  */
 class FNMultiplayerTestToolbarSection
 {

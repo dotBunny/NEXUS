@@ -15,6 +15,8 @@
  *
  * Duplication is disabled because a cell side-car is tied to a specific world and a specific cell
  * actor; copying the asset without rebinding would produce a phantom reference.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-types/asset-definitions/asset-definition-cell/">UAssetDefinition_NCell</a>
  */
 UCLASS()
 class UAssetDefinition_NCell : public UAssetDefinitionDefault

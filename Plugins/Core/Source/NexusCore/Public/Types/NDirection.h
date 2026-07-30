@@ -19,6 +19,7 @@ enum class ENDirection : uint8
 
 /**
  * Lookup helpers that map ENDirection values to their canonical FVector.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/direction/">FNDirection</a>
  */
 class FNDirection
 {

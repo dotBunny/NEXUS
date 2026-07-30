@@ -32,6 +32,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Text Render Component")
 	bool bShouldCheckReplication = true;
 
+	/** When the replication check finds a non-replicated owner, enable replication on it rather than only warning. Disable to leave the owner untouched and take a warning instead. */
 	UPROPERTY(EditAnywhere, Category = "Text Render Component")
 	bool bForceOwnerReplication = true;
 

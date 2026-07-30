@@ -13,6 +13,7 @@
  * Launches additional local client/server processes using the project's play-in-editor
  * settings augmented by UNToolingEditorUserSettings, tracks their FProcHandles, and
  * shuts them down when the test ends or the editor exits.
+ * @see <a href="https://nexus-framework.com/docs/plugins/tooling/editor-types/multiplayer-test/multiplayer-test-subsystem/">UNMultiplayerTestSubsystem</a>
  */
 UCLASS()
 class NEXUSTOOLINGEDITOR_API UNMultiplayerTestSubsystem : public UEditorSubsystem, public FTickableGameObject
@@ -56,7 +57,7 @@ class NEXUSTOOLINGEDITOR_API UNMultiplayerTestSubsystem : public UEditorSubsyste
 	 * Track a locally launched process so the subsystem can monitor and shut it down.
 	 * @param ProcessIdentifier OS-level process id of the launched editor/client/server instance.
 	 */
-	UFUNCTION()
+	UFUNCTION(meta=(DocsURL="https://nexus-framework.com/docs/plugins/tooling/editor-types/multiplayer-test/multiplayer-test-subsystem/#add-local-process"))
 	void AddLocalProcess(const uint32 ProcessIdentifier);
 
 private:

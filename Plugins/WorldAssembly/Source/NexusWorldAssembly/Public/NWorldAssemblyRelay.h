@@ -15,6 +15,7 @@ class UNWorldAssemblySubsystem;
  * Lives invisibly on every client as the server's handle for that player — the server pushes
  * operation lifecycle events into it (Started/Finished/Destroyed) and answers "what level
  * instances are around this player right now?" via the nearby-cells RPC exchange.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-relay/">ANWorldAssemblyRelay</a>
  */
 UCLASS(NotPlaceable, HideDropdown, Hidden, Transient, ClassGroup = "NEXUS", DisplayName = "NEXUS | World Assembly Relay")
 class NEXUSWORLDASSEMBLY_API ANWorldAssemblyRelay : public AActor

@@ -12,6 +12,7 @@
  *
  * Runs once the timed region is finished so allocations made during the test do not leak into subsequent ones.
  * Paired with FNTestLatentCommand_PrePerformanceTest.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/test-latent-commands/test-latent-command-post-performance-test/">FNTestLatentCommand_PostPerformanceTest</a>
  */
 class FNTestLatentCommand_PostPerformanceTest : public IAutomationLatentCommand
 {

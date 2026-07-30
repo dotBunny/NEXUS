@@ -10,6 +10,7 @@
 /**
  * The data-only representation of a NCellActor and its details.
  * @note The UNCell is effectively a side-car file to NCellActor.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/cell/">UNCell</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Cell")
 class NEXUSWORLDASSEMBLY_API UNCell : public UDataAsset

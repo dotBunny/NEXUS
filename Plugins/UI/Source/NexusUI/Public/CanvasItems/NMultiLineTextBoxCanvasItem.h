@@ -13,6 +13,7 @@
  *
  * Accumulates lines with per-line color and font size, tracks a severity that drives the border color, and
  * lazily measures/lays out its content (via the private Process pass) when marked dirty.
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/canvas-items/multi-line-text-box-canvas-item/">FNMultiLineTextBoxCanvasItem</a>
  */
 struct FNMultiLineTextBoxCanvasItem
 {

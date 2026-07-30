@@ -12,6 +12,8 @@ class UNCellRootComponent;
  * Component visualizer for UNCellRootComponent that both renders the cell's bounds/hull/voxel
  * overlays in-viewport and accepts drag/click input to edit individual hull/bounds vertices or
  * toggle voxel points — depending on which cell-edit sub-mode is active.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-types/visualizers/cell-root-component-visualizer/">FNCellRootComponentVisualizer</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNCellRootComponentVisualizer final : public FComponentVisualizer
 {

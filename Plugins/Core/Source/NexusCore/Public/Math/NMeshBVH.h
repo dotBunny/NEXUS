@@ -20,6 +20,7 @@ struct FNRawMesh;
  * mesh), matching the "vertices are baked" convention used throughout FNRawMeshUtils. Non-triangle loops are
  * skipped at build time, so the accelerated queries are only equivalent to the brute-force sweep on a triangle
  * mesh (which is the domain those queries are defined on anyway).
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/mesh-bvh/">FNMeshBVH</a>
  */
 class NEXUSCORE_API FNMeshBVH
 {

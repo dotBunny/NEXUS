@@ -9,6 +9,7 @@
  * Hit-proxy that represents an edge — a pair of indexed endpoints — rendered by a component visualizer.
  *
  * The StartIndex / EndIndex pair lets the owning FComponentVisualizer identify which edge was picked.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/component-vis-proxies/edge-component-vis-proxy/">HNEdgeComponentVisProxy</a>
  */
 struct NEXUSCOREEDITOR_API HNEdgeComponentVisProxy final : public HComponentVisProxy
 {

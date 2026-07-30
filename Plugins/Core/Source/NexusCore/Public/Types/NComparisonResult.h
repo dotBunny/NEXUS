@@ -8,6 +8,7 @@
  *
  * Names which comparison to apply between a queried value and an operand; consumed by predicate checks such as
  * FNGameplayTagCounterConstraint::DoesPassComparison. It selects the operation to perform, not the outcome of one.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/comparison-result/">ENComparisonResult</a>
  */
 UENUM(BlueprintType)
 enum class ENComparisonResult : uint8

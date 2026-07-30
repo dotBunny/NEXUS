@@ -12,6 +12,7 @@
  *
  * Same deferral behavior as FNTestLatentCommand, but the test base is forwarded so the deferred method can call
  * the assertion macros (which expand to expressions referencing a `Test` symbol).
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/test-latent-commands/test-latent-command-with-base/">FNTestLatentCommand_WithBase</a>
  */
 class FNTestLatentCommand_WithBase : public IAutomationLatentCommand
 {

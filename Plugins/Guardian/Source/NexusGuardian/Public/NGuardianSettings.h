@@ -13,7 +13,7 @@
  *
  * Exposes which build configurations the subsystem is active in, plus the three thresholds that
  * drive the warn/snapshot/compare ladder as UObject counts grow.
- * @see <a href="https://nexus-framework.com/docs/plugins/guardian/project-settings//">UNGuardianSettings</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/guardian/project-settings/">UNGuardianSettings</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "Guardian Settings", Config=NexusGame, defaultconfig)
 class NEXUSGUARDIAN_API UNGuardianSettings : public UDeveloperSettings
@@ -30,7 +30,7 @@ public:
 	/** How often, in seconds, the subsystem polls the UObject count and responds. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Subsystem", DisplayName ="Tick Rate",
 		meta=(ToolTip="How often should the system poll the object count? and respond.",
-			EditCondition="BuildAvailability!=0", ClampMin="0.0", UIMin="0.0", ClampMax="300.0", UIMax="300.0", Units="cm"))
+			EditCondition="BuildAvailability!=0", ClampMin="0.0", UIMin="0.0", ClampMax="300.0", UIMax="300.0", Units="s"))
 	float TickRate = 1.0f;
 
 	/** When true, captured snapshots are also written to the project's logs folder (comparison works from memory regardless). */

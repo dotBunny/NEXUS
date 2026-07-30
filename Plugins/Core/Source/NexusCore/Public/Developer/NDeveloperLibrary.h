@@ -165,7 +165,7 @@ public:
 	 * @return The newly created, seeded twister object.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Create Mersenne Twister Object", Category = "NEXUS|Developer",
-		meta = (WorldContext = "WorldContextObject"))
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#create-mersenne-twister-object", WorldContext = "WorldContextObject"))
 	static UNMersenneTwisterObject* CreateMersenneTwisterObject(const UObject* WorldContextObject, const FString& Seed)
 	{
 		UWorld* InWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);

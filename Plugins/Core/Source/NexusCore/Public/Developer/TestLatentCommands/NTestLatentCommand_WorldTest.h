@@ -14,6 +14,7 @@
  * Used by the world-based test/perf harness once FNTestLatentCommand_CreateWorld has built the environment.
  * Optionally wraps the call in an FGCScopeGuard so garbage collection cannot run mid-test, the standard choice
  * for performance tests. Use the _WithBase variant when the method must also assert.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/test-latent-commands/test-latent-command-world-test/">FNTestLatentCommand_WorldTest</a>
  */
 class FNTestLatentCommand_WorldTest : public IAutomationLatentCommand
 {

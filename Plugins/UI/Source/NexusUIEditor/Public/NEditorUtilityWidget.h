@@ -30,21 +30,24 @@ public:
 	static UEditorUtilityWidget* SpawnTab(const FString& ObjectPath, FName Identifier = NAME_None);
 
 	/** @return True when the widget opts in to cross-session state persistence via the widget subsystem. */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/editor-types/editor-utility-widget/#is-persistent"))
 	bool IsPersistent() const
 	{
 		return bIsPersistent;
 	};
 
 	/** @return The widget's stable identifier used as the key when storing/restoring persistent state. */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/editor-types/editor-utility-widget/#get-unique-identifier"))
 	FName GetUniqueIdentifier() const
 	{
 		return UniqueIdentifier;
 	};
 
 	/** @return The tab identifier the widget was most recently hosted under, or NAME_None if not tabbed. */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/editor-types/editor-utility-widget/#get-tab-identifier"))
 	FName GetTabIdentifier() const
 	{
 		return CachedTabIdentifier;

@@ -18,6 +18,7 @@ class UCommonTextBlock;
 
 /**
  * UMG list view entry widget for displaying a single Actor Pool row (used by developer overlays).
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-list-view-entry/">UNActorPoolListViewEntry</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Pools ListView Entry", BlueprintType, Blueprintable)
 class NEXUSACTORPOOLS_API UNActorPoolListViewEntry : public UUserWidget, public INListViewEntry

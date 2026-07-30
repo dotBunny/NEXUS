@@ -18,6 +18,7 @@ enum class ENPickerProjectionMode : uint8
 
 /**
  * Structure representing the parameters used for the generation of points.
+ * @see <a href="https://nexus-framework.com/docs/plugins/picker/types/picker-params/">FNPickerParams</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSPICKER_API FNPickerParams

@@ -14,6 +14,7 @@
  * Creates a Game-type UWorld plus game instance, world context, and game mode, stores them on
  * FNTestUtils::Environment for the world-based latent commands to use, and calls BeginPlay. Paired with
  * FNTestLatentCommand_CleanupWorld, which tears the same environment back down.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/test-latent-commands/test-latent-command-create-world/">FNTestLatentCommand_CreateWorld</a>
  */
 class FNTestLatentCommand_CreateWorld : public IAutomationLatentCommand
 {

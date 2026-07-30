@@ -11,6 +11,7 @@
  * Place one of these on the stack at the top of a region you wish to time; its destructor will
  * emit a single LogNexusCore line in milliseconds. Call ManualStop() earlier to freeze the
  * timer before destruction if the region ends in a non-scope-aligned control flow.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/method-scope-timer/">FNMethodScopeTimer</a>
  */
 class FNMethodScopeTimer
 {

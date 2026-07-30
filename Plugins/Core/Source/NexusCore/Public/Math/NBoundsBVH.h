@@ -21,6 +21,7 @@
  *
  * Immutable after construction, so a built tree can be shared across threads without synchronisation. Rebuild it
  * when the underlying set changes; there is no incremental insert.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/bounds-bvh/">FNBoundsBVH</a>
  */
 class NEXUSCORE_API FNBoundsBVH
 {

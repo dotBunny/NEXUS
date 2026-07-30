@@ -10,6 +10,12 @@
 
 struct FNRawMesh;
 
+/**
+ * Parameters describing how a junction socket should be rendered by FNWorldAssemblyDebugDraw::DrawSocket.
+ *
+ * Carries both the authored unit size and the world size it resolves to, the junction type (which
+ * decides what supplementary geometry is drawn), the draw colour, and whether the socket is connected.
+ */
 struct NEXUSWORLDASSEMBLY_API FNDrawSocketSettings
 {
 	/** A unit representation of size (width(x) and height(y)). No concept of depth. */
@@ -39,6 +45,8 @@ struct NEXUSWORLDASSEMBLY_API FNDrawSocketSettings
 
 /**
  * Shared debug-draw helpers for cell/junction/voxel overlays used across editor-mode visualizers.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-debug-draw/">FNWorldAssemblyDebugDraw</a>
  */
 class NEXUSWORLDASSEMBLY_API FNWorldAssemblyDebugDraw
 {
@@ -54,14 +62,25 @@ public:
 
 	/**
 	 * Draw the edges of Mesh as dashed line segments, offset and rotated into world space.
+	 * @param PDI The draw interface to submit line segments to.
+	 * @param Mesh The mesh whose edges are drawn; its vertices are in local space.
+	 * @param Rotation Rotation applied to Mesh's vertices before drawing.
+	 * @param Offset World-space translation applied after Rotation.
+	 * @param Color Colour of the dashed segments.
 	 * @param DashSize Length of each dash, in world units.
+	 * @param Priority Scene depth priority group the segments are drawn in.
 	 */
 	static void DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const FRotator& Rotation, const FVector& Offset,
 		FLinearColor Color, float DashSize = 2, ESceneDepthPriorityGroup Priority = SDPG_World);
 
 	/**
 	 * Draw the edges of Mesh as dashed line segments using pre-transformed world vertices.
+	 * @param PDI The draw interface to submit line segments to.
+	 * @param Mesh The mesh supplying edge topology; its own vertices are ignored in favour of WorldVertices.
 	 * @param WorldVertices Vertex positions already in world space; must parallel Mesh's vertex array.
+	 * @param Color Colour of the dashed segments.
+	 * @param DashSize Length of each dash, in world units.
+	 * @param Priority Scene depth priority group the segments are drawn in.
 	 */
 	static void DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const TArray<FVector>& WorldVertices,
 		FLinearColor Color, float DashSize = 2, ESceneDepthPriorityGroup Priority = SDPG_World);
@@ -73,9 +92,24 @@ public:
 	static void DrawRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const TArray<FVector>& WorldVertices,
 		FLinearColor Color, ESceneDepthPriorityGroup Priority = SDPG_World);
 
-	/** Render the voxel grid as line segments between adjacent occupied voxels. */
+	/**
+	 * Render every occupied voxel as a wire box in SDPG_World.
+	 * @param PDI The draw interface to submit primitives to.
+	 * @param VoxelData Occupancy grid to render; voxel size is read from UNWorldAssemblySettings::VoxelSize.
+	 * @param Offset World-space translation added to the grid's own Origin.
+	 * @param Rotation Currently unused — see #ROTATE-VOXELS.
+	 * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-debug-draw/#drawing-voxels">Drawing Voxels</a>
+	 */
 	static void DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation);
 
-	/** Render the voxel grid as a point cloud centered on each occupied voxel. */
+	/**
+	 * Render every occupied voxel as a point in SDPG_Foreground, plus a yellow wire box marking voxel
+	 * (0,0,0) whether or not it is occupied.
+	 * @param PDI The draw interface to submit primitives to.
+	 * @param VoxelData Occupancy grid to render; voxel size is read from UNWorldAssemblySettings::VoxelSize.
+	 * @param Offset World-space translation added to the grid's own Origin.
+	 * @param Rotation Currently unused — see #ROTATE-VOXELS.
+	 * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-debug-draw/#drawing-voxels">Drawing Voxels</a>
+	 */
 	static void DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation);
 };

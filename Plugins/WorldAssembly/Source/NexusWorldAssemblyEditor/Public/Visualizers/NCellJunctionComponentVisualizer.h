@@ -8,6 +8,8 @@
 /**
  * Component visualizer for UNCellJunctionComponent — draws the junction socket footprint and
  * orientation gizmo in the level viewport so authors can see connection points without selecting.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-types/visualizers/cell-junction-component-visualizer/">FNCellJunctionComponentVisualizer</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNCellJunctionComponentVisualizer final : public FComponentVisualizer
 {

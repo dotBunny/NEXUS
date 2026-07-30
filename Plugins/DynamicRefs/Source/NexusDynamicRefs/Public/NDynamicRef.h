@@ -8,7 +8,8 @@
 /**
  * Compact, fixed-identifier enum used as the key for a dynamic reference.
  *
- * Each value identifies a slot that can be claimed by at most one UNDynamicRefComponent per world.
+ * Each value identifies a slot that any number of UObjects can claim per world; the subsystem stores
+ * them in an FNDynamicRefCollection in registration order, so a slot is a bucket rather than a single seat.
  * Slots are grouped by conceptual role (Location, Objective, Target, Secret, Spawn, Enemy, Pickup, Item)
  * to make manually assigning them in the editor ergonomic.
  * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref/">ENDynamicRef</a>

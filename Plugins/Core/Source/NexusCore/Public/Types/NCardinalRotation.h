@@ -12,6 +12,7 @@
  *
  * Useful for grid-aligned gameplay that only needs 16-wind orientations. Conversion helpers
  * produce either unsigned [0, 360) or normalized [-180, 180) degree representations.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/cardinal-rotation/">FNCardinalRotation</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNCardinalRotation

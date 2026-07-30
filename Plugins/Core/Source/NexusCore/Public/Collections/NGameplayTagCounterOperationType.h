@@ -5,6 +5,7 @@
 
 /**
  * The arithmetic operation an FNGameplayTagCounterOperation applies to a tag's count.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/collections/gameplay-tag-counter-operation-type/">ENGameplayTagCounterOperationType</a>
  */
 UENUM(BlueprintType)
 enum class ENGameplayTagCounterOperationType : uint8

@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "INCellInitialized.generated.h"
 
+/** Reflection marker for the INCellInitialized interface; INCellInitialized carries the contract implementors provide. */
 UINTERFACE()
 class NEXUSWORLDASSEMBLY_API UNCellInitialized : public UInterface
 {

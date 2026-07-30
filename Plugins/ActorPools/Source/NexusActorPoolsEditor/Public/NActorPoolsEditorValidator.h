@@ -8,6 +8,7 @@
 
 /**
  * Data validator that checks NexusActorPools assets (e.g. UNActorPoolSet) on save / commandlet validation.
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/editor-types/actor-pools-editor-validator/">UNActorPoolsEditorValidator</a>
  */
 UCLASS()
 class UNActorPoolsEditorValidator : public UEditorValidatorBase

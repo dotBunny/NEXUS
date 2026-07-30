@@ -9,6 +9,7 @@
  * Lightweight pairing of an FVector position and an FRotator rotation.
  *
  * Use when an FTransform is overkill — no scale, no matrix decomposition.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/position-rotation/">FNPositionRotation</a>
  */
 USTRUCT(BlueprintType)
 struct FNPositionRotation

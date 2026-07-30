@@ -16,6 +16,7 @@
  * transform so the caller can place every emitted mesh back in the correct frame. The class is stateless;
  * every method is static. Two distinct routes are exposed for complex-as-simple bodies — FromStaticMesh
  * (route 1, render-data) and FromChaosBodySetup (route 2, cooked Chaos tri meshes).
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/raw-mesh-factory/">FNRawMeshFactory</a>
  */
 class NEXUSCORE_API FNRawMeshFactory
 {

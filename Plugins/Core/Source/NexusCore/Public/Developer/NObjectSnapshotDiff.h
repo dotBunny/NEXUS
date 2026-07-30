@@ -12,6 +12,7 @@
  * between captures, which persisted across both captures, and which disappeared. It is the
  * primary data surface used by tests, the Guardian overlay, and developer tools to reason
  * about lifetime churn and suspected leaks.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/object-snapshot-diff/">FNObjectSnapshotDiff</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNObjectSnapshotDiff

@@ -18,6 +18,7 @@ struct FNVolumeGeometryData
 
 /**
  * Helpers for working with AVolume and its underlying UModel geometry.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/volume-utils/">FNVolumeUtils</a>
  */
 class NEXUSCORE_API FNVolumeUtils
 {

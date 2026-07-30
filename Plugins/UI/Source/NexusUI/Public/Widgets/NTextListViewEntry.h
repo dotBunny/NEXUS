@@ -40,7 +40,8 @@ public:
 	 * Sets the background color override and marks it as present so the entry widget applies it.
 	 * @param Color The ENColor value to use for the row's container background.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Text")
+	UFUNCTION(BlueprintCallable, Category = "Text",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/widgets/text-list-view-entry/#set-background-color"))
 	void SetBackgroundColor(const ENColor Color)
 	{
 		bHasBackgroundColor = true;
@@ -76,7 +77,8 @@ public:
 	 * Replaces the text displayed by any entry widget bound to this data object.
 	 * @param InText The text to display.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Text")
+	UFUNCTION(BlueprintCallable, Category = "Text",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/widgets/text-list-view-entry/#set-text"))
 	void SetText(const FText& InText) { Text = InText; }
 
 private:
@@ -92,6 +94,7 @@ private:
 /**
  * List-view entry widget that renders a UBorder + UCommonTextBlock driven by a bound
  * UNTextListEntry. Used as a lightweight label row in UNListView controls.
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/widgets/text-list-view-entry/">UNTextListViewEntry</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Text ListView Entry", BlueprintType, Blueprintable, HideDropdown)
 class NEXUSUI_API UNTextListViewEntry : public UUserWidget, public INListViewEntry
@@ -114,21 +117,24 @@ public:
 	 * Updates the text displayed by the bound UCommonTextBlock.
 	 * @param NewText The text to display in the row.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/widgets/text-list-view-entry/#set-text"))
 	void SetText(const FText NewText) const;
 
 	/**
 	 * Applies a palette color to the text block's color-and-opacity.
 	 * @param NewColor The ENColor palette entry used to resolve the FLinearColor applied to the text.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/widgets/text-list-view-entry/#set-text-color"))
 	void SetTextColor(ENColor NewColor) const;
 
 	/**
 	 * Applies a palette color to the container border's brush.
 	 * @param NewColor The ENColor palette entry used to resolve the FLinearColor applied to the border.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/widgets/text-list-view-entry/#set-background-color"))
 	void SetBackgroundColor(ENColor NewColor) const;
 
 protected:

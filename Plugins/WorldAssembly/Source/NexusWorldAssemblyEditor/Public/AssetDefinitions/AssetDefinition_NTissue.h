@@ -12,6 +12,8 @@
 /**
  * Asset definition for UNTissue — a reusable named collection of cell templates an organ can pull
  * from during generation. Provides content-browser display, color, category, and validation hooks.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-types/asset-definitions/asset-definition-tissue/">UAssetDefinition_NTissue</a>
  */
 UCLASS()
 class UAssetDefinition_NTissue : public UAssetDefinitionDefault

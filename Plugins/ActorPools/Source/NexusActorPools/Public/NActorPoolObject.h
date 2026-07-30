@@ -8,6 +8,7 @@
 
 /**
  * UObject wrapper around a native FNActorPool, exposing pool operations to Blueprints and UMG bindings.
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-object/">UNActorPoolObject</a>
  */
 UCLASS(BlueprintType, ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Pool Object")
 class NEXUSACTORPOOLS_API UNActorPoolObject : public UObject

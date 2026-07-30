@@ -44,6 +44,7 @@ struct NEXUSCORE_API FNMersenneTwisterState
  * Mersenne Twister based FRandomStream-like API with some extras!
  * Implements the std::mt19937_64 engine to produce high-quality uint64 random numbers.
  * Guaranteed behavior across platforms/compilers by avoiding using std::*_distribution.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/mersenne-twister/">FNMersenneTwister</a>
  */
 class NEXUSCORE_API FNMersenneTwister
 {
@@ -178,9 +179,9 @@ public:
 	* @param MaximumValue The highest possible value.
 	* @return a pseudo random integer.
 	*/
-	int32 IntegerRange(const int32 MinimumValue = -MIN_int32, const int32 MaximumValue = MAX_int32);
+	int32 IntegerRange(const int32 MinimumValue = MIN_int32, const int32 MaximumValue = MAX_int32);
 	/** Alias for IntegerRange, matching UE's FMath::RandRange naming. @return a pseudo random integer between MinimumValue and MaximumValue. */
-	FORCEINLINE int32 RandRange(const int32 MinimumValue = -MIN_int32, const int32 MaximumValue = MAX_int32)
+	FORCEINLINE int32 RandRange(const int32 MinimumValue = MIN_int32, const int32 MaximumValue = MAX_int32)
 	{
 		return IntegerRange(MinimumValue, MaximumValue);
 	}
@@ -194,7 +195,7 @@ public:
 	 * @param StartIndex The index to start writing at.
 	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
-	void IntegerRange(TArray<int32>& OutArray, const int32 Count, const int32 MinimumValue = -MIN_int32, const int32 MaximumValue = MAX_int32, const int32 StartIndex = 0);
+	void IntegerRange(TArray<int32>& OutArray, const int32 Count, const int32 MinimumValue = MIN_int32, const int32 MaximumValue = MAX_int32, const int32 StartIndex = 0);
 
 	/**
 	* Generate a pseudo random unsigned integer between minimum and maximum.

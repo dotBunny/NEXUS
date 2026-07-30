@@ -14,6 +14,7 @@ class ALevelInstance;
  *
  * These helpers are only accessible from C++ code and are not exposed to Blueprints.
  * For Blueprint-callable equivalents see UNLevelLibrary.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/level-utils/">FNLevelUtils</a>
  */
 class NEXUSCORE_API FNLevelUtils
 {

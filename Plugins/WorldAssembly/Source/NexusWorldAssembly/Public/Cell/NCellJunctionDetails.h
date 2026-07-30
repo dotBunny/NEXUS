@@ -19,6 +19,14 @@ enum class ENCellJunctionType : uint8
 };
 
 
+/**
+ * How deep a junction fill volume is, and which way it grows from the socket plane.
+ *
+ * The Default* modes take their depth from the project-wide Socket Depth; the Override* modes use the
+ * junction's own Override Fill Depth instead. Forward grows along the junction facing, Backward opposite
+ * it, and Centered straddles the plane. Fillers must honour this via
+ * UNWorldAssemblyLibrary::GetJunctionFillDepthOffset -- one that ignores it always fills Forward.
+ */
 UENUM()
 enum class ENCellJunctionFillDepthMode : uint8
 {

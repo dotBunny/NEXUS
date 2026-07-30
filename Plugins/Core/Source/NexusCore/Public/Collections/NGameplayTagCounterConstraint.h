@@ -13,6 +13,7 @@
  *
  * Authored in the editor to gate behavior on a tag's running total (e.g. "count >= 1") when the
  * constraint is evaluated.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/collections/gameplay-tag-counter-constraint/">FNGameplayTagCounterConstraint</a>
  */
 USTRUCT(BlueprintType)
 struct FNGameplayTagCounterConstraint

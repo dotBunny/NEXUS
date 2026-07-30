@@ -13,6 +13,7 @@
  *
  * Ends play, destroys the world and its game instance/context, and clears the FNTestUtils::Environment pointers
  * so the next test starts from a clean slate.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/test-latent-commands/test-latent-command-cleanup-world/">FNTestLatentCommand_CleanupWorld</a>
  */
 class FNTestLatentCommand_CleanupWorld : public IAutomationLatentCommand
 {

@@ -24,6 +24,8 @@ struct FNStatusChannelUpdate;
  * current message, and task progress.
  *
  * Binds to the operation's message/task delegates so the row stays in sync without manual polling.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/assembly-operation-list-view-entry/">UNAssemblyOperationListViewEntry</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Assembly Operation ListView Entry", BlueprintType, Blueprintable)
 class NEXUSWORLDASSEMBLY_API UNAssemblyOperationListViewEntry : public UUserWidget, public INListViewEntry

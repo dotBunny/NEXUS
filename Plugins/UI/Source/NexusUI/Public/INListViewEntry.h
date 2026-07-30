@@ -8,6 +8,7 @@
 
 class UNListView;
 
+/** Reflection marker for the INListViewEntry interface; INListViewEntry carries the contract implementors provide. */
 UINTERFACE(BlueprintType)
 class NEXUSUI_API UNListViewEntry : public UUserObjectListEntry
 {
@@ -18,6 +19,7 @@ class NEXUSUI_API UNListViewEntry : public UUserObjectListEntry
  * Extends UUserObjectListEntry so entries hosted in a UNListView are handed back a typed pointer
  * to their owning list at construction. Useful for entries that need to talk to sibling rows or
  * ask the list for selection state.
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/list-view-entry/">INListViewEntry</a>
  */
 class NEXUSUI_API INListViewEntry : public IUserObjectListEntry
 {

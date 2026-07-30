@@ -10,6 +10,7 @@
 
 /**
  * Asset definition for NActorPoolSet.
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/editor-types/asset-definitions/asset-definition-actor-pool-set/">UAssetDefinition_NActorPoolSet</a>
  */
 UCLASS()
 class UAssetDefinition_NActorPoolSet : public UAssetDefinitionDefault

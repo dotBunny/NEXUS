@@ -11,6 +11,7 @@ struct FNReportTableBlock;
  * Base type for all report blocks. Carries the rendering metadata (heading, header, footer,
  * indentation level, sort priority) shared by every block, and tracks an ordered list of
  * child block tickets owned by the parent FNReport.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/report-block/">FNReportBlock</a>
  */
 struct NEXUSCORE_API FNReportBlock
 {

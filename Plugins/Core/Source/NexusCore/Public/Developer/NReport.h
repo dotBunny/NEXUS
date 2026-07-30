@@ -13,6 +13,7 @@
  * Composable, hierarchical report structure that can be emitted as plain text or Markdown.
  * Reports own their child blocks (content and table) by value, keyed by an integer ticket
  * issued from a per-report counter; top-level blocks are parented to the implicit root ticket 0.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/report/">FNReport</a>
  */
 struct NEXUSCORE_API FNReport
 {

@@ -39,6 +39,7 @@ ENUM_CLASS_FLAGS(ENBuildConfigurationAvailability)
 
 /**
  * Runtime helper that compares an ENBuildConfigurationAvailability mask against the current build.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/build-configuration-availability/">FNBuildConfigurationAvailability</a>
  */
 class FNBuildConfigurationAvailability
 {

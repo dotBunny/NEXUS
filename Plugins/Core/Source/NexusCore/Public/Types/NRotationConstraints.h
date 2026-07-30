@@ -12,6 +12,7 @@
  *
  * The "matching" interval constrains a candidate rotation's own pose, while the "difference"
  * interval constrains the delta between two rotations. Either interval can be enabled independently.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/rotation-constraints/">FNRotationConstraints</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNRotationConstraints

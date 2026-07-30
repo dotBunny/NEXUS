@@ -28,6 +28,7 @@ class AGameModeBase;
  *
  * Game-only; also implements INAssemblyOperationOwner so it can host operations created via Generate().
  * Spawns one ANWorldAssemblyRelay per connected player controller to carry per-player generation state.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-subsystem/">UNWorldAssemblySubsystem</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | World Assembly Subsystem")
 class NEXUSWORLDASSEMBLY_API UNWorldAssemblySubsystem : public UTickableWorldSubsystem, public INAssemblyOperationOwner

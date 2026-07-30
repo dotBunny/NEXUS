@@ -13,6 +13,7 @@
  *
  * Combines FNTestLatentCommand_WorldTest's world access and optional GC suppression with the assertion support of
  * FNTestLatentCommand_WithBase, for world-based tests whose deferred method needs to raise assertions.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/test-latent-commands/test-latent-command-world-test-with-base/">FNTestLatentCommand_WorldTestWithBase</a>
  */
 class FNTestLatentCommand_WorldTestWithBase : public IAutomationLatentCommand
 {

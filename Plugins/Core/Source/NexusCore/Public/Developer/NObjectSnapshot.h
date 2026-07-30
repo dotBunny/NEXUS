@@ -14,6 +14,7 @@
  * Created by FNObjectSnapshotUtils::Snapshot(). Pairs of snapshots can be diffed with
  * FNObjectSnapshotUtils::Diff() to produce an FNObjectSnapshotDiff describing what appeared or
  * disappeared between captures — the core primitive used by the framework's leak-detection tooling.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/object-snapshot/">FNObjectSnapshot</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNObjectSnapshot

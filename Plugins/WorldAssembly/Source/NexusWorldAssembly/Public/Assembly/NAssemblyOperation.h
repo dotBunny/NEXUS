@@ -76,6 +76,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNWorldAssemblyOperationPercentage
  * Owns the generation context (participating organs, cells, tissue), the task graph that actually
  * executes the pass, and the per-operation settings (seed, level-instance behavior). Clients register
  * as the operation's owner via INAssemblyOperationOwner to receive lifecycle callbacks.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/assembly-operation/">UNAssemblyOperation</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Assembly Operation")
 class NEXUSWORLDASSEMBLY_API UNAssemblyOperation : public UObject

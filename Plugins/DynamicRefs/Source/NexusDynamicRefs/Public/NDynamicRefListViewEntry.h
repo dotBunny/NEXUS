@@ -15,6 +15,7 @@ class UNDynamicRefObject;
 
 /**
  * UMG list view entry widget for a single dynamic-reference row (reference label + nested actor list).
+ * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-list-view-entry/">UNDynamicRefListViewEntry</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | DynamicRef ListView Entry", BlueprintType, Blueprintable)
 class NEXUSDYNAMICREFS_API UNDynamicRefListViewEntry : public UUserWidget, public INListViewEntry

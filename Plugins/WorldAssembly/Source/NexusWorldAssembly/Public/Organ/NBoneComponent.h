@@ -29,6 +29,7 @@ enum class ENBoneMode : uint8
  * A bone marks a spot where the World Assembly pipeline should emit a cell-to-cell junction — its
  * transform, socket size, and type/requirements determine what fits there. In Automatic mode
  * the editor snaps the bone onto a safe location inside the owning organ.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/bone-component/">UNBoneComponent</a>
  */
 UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Bone", meta=(BlueprintSpawnableComponent,
 	DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/bone-component"),
@@ -100,6 +101,12 @@ public:
 
 	/**
 	 * Render the bone's debug outline and socket extents via the provided primitive draw interface.
+	 * @param PDI The draw interface to submit primitives to.
+	 * @param ValidColor Colour used while the bone's socket is within tolerance.
+	 * @param InvalidColor Colour used once WorldPenetration crosses the red threshold.
+	 * @param bShowDepth Draw the numeric penetration readout alongside the outline.
+	 * @param bShowSocket Draw the socket extents in addition to the bone outline.
+	 * @param Settings Settings supplying socket size and depth thresholds; defaults to the project settings.
 	 * @param WorldPenetration Deepest penetration of the socket corners into world collision (supplied by the
 	 *        visualizer from FNWorldCollisionCache); drives the red threshold and depth readout when bShowDepth.
 	 */

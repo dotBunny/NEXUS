@@ -9,6 +9,7 @@
  * Report block that holds tabular data. Must be initialized with either a fixed column count
  * or a header row before rows are added. Plain-text rendering left-aligns each cell to the
  * widest entry in its column; Markdown rendering emits a standard pipe-separated table.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/report-table-block/">FNReportTableBlock</a>
  */
 struct NEXUSCORE_API FNReportTableBlock : FNReportBlock
 {

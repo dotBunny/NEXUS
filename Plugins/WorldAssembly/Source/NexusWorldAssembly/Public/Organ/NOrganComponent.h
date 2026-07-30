@@ -42,6 +42,7 @@ enum class ENOrganDirectionConstraintMode : uint8
  * The organ defines a region of space plus the pool of tissues and cell-count constraints the
  * World Assembly pipeline will use to populate it. The owning actor's transform/bounds drive placement;
  * this component supplies the rules.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/organ-component/">UNOrganComponent</a>
  */
 UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Organ", HideCategories=(Tags, Activation, Cooking,
 	AssetUserData, Navigation, Actor, Input))
@@ -99,7 +100,7 @@ public:
 		meta=(ToolTip="How directional constraints are resolved for this organ: from the start bone, the organ volume's center, or the running centroid of placed cells."))
 	ENOrganDirectionConstraintMode DirectionMode = ENOrganDirectionConstraintMode::StartBone;
 
-	/** @return true if the owning actor is a volume-derived actor. */
+	/** @return true when the owning actor is an AVolume, so the organ has authored bounds to place cells within. */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|World Assembly")
 	bool IsVolumeBased() const { return GetOwner()->IsA<AVolume>(); }
 

@@ -6,6 +6,13 @@
 #include "Developer/NReportBlock.h"
 
 
+/**
+ * A report block that renders its entries as a bulleted list.
+ *
+ * Items are appended in order via AddItem and emitted as list markup appropriate to the chosen
+ * ENReportOutputFormat, so the same block reads correctly as plain text or Markdown.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/report-list-block/">FNReportListBlock</a>
+ */
 struct NEXUSCORE_API FNReportListBlock : FNReportBlock
 {
 	explicit FNReportListBlock(const int32 Ticket)

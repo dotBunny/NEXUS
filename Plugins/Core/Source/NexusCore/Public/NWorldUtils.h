@@ -8,6 +8,7 @@
 
 /**
  * A collection of native utility methods for working with worlds.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/world-utils/">FNWorldUtils</a>
  */
 class FNWorldUtils
 {
@@ -26,6 +27,12 @@ public:
 		return nullptr;
 	}
 
+	/**
+	 * Reports whether any of the world's streaming levels is still resolving — either loaded but not yet
+	 * visible while it wants to be, or with a load request still pending.
+	 * @param InWorld The world to inspect; a null world reports false.
+	 * @return true while streaming work is in flight.
+	 */
 	static bool IsStreaming(const UWorld* InWorld)
 	{
 		if (!InWorld) return false;

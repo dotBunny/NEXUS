@@ -20,6 +20,7 @@ enum class ENActorComponentLifecycle : uint8
 
 /**
  * Identifies which UActorComponent lifecycle hook a feature should initialize on.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/actor-component-lifecycle/">ENActorComponentLifecycleStart</a>
  */
 UENUM(BlueprintType)
 enum class ENActorComponentLifecycleStart : uint8

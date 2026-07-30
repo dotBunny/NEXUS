@@ -14,6 +14,7 @@
  * Project-level NEXUS editor settings (updates channel, update-check cadence).
  *
  * Saved to the NexusEditor config hierarchy and surfaced under Project Settings → NEXUS → Core.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/editor-settings/">UNEditorSettings</a>
  */
 UCLASS(config = NexusEditor, defaultconfig)
 class NEXUSCOREEDITOR_API UNEditorSettings : public UDeveloperSettings

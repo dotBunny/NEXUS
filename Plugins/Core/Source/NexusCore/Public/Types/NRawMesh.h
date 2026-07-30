@@ -15,6 +15,7 @@
  * Stores a shared vertex buffer plus one or more ordered loops that reference into it. Supports
  * convexity / non-tri validation, rigid-body rotation around a pivot, and conversion into
  * Unreal Engine's FDynamicMesh3 for richer geometry work.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/raw-mesh/">FNRawMesh</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNRawMesh

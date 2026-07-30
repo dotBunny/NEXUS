@@ -7,6 +7,7 @@
 
 /**
  * A utility methods collection for Slate
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/slate-utils/">FNSlateUtils</a>
  */
 class NEXUSUI_API FNSlateUtils
 {

@@ -13,6 +13,7 @@
  *
  * ANDebugActor is intentionally hidden from the editor's Place Actors panel; It has no gameplay behavior and should
  * not be shipped in release content.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/debug-actor/">ANDebugActor</a>
  */
 UCLASS(NotPlaceable, HideDropdown, Hidden, ClassGroup = "NEXUS", DisplayName = "NEXUS | Debug Actor", HideCategories=(Tags, Activation, Cooking,
 	AssetUserData, Navigation, Actor, Input, LevelInstance, WorldPartition, DataLayers, Rendering, LOD, HLOD, Physics,

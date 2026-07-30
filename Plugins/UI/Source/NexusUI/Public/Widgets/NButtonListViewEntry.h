@@ -75,6 +75,7 @@ private:
  * List-view entry widget that renders a UButton + UCommonTextBlock pair driven by a bound
  * UNButtonListEntry. Swaps background/foreground colors on hover/press/release
  * using the palette slots on the bound object.
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/widgets/button-list-view-entry/">UNButtonListViewEntry</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Button ListView Entry", BlueprintType, Blueprintable, HideDropdown)
 class NEXUSUI_API UNButtonListViewEntry : public UUserWidget, public INListViewEntry

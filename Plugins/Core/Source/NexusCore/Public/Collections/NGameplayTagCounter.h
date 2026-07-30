@@ -15,6 +15,7 @@
  * Tags absent from the map read as a count of zero. The mutation API (Add/Subtract/Increment/Decrement) is not
  * floored, so counts may go negative; this keeps ApplyOperation/ReverseOperation exact inverses and stays
  * consistent with the signed values GetDifference and Combine already produce.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/collections/gameplay-tag-counter/">FNGameplayTagCounter</a>
  */
 USTRUCT(BlueprintType)
 struct FNGameplayTagCounter

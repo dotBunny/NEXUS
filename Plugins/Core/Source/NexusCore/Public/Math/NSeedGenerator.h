@@ -8,6 +8,7 @@
  *
  * Supports three seed representations: raw 64-bit numeric, hexadecimal text, and human-friendly
  * word-style strings. The From/To helpers convert between forms while sanitizing user input.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/seed-generator/">FNSeedGenerator</a>
  */
 class NEXUSCORE_API FNSeedGenerator
 {

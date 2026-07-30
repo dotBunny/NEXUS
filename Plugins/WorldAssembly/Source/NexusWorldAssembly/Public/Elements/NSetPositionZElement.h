@@ -22,6 +22,8 @@ struct FNSetPositionZParams
 
 /**
  * PCG settings node that flattens input points onto a single world-Z plane.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/elements/set-position-z/">UNSetPositionZSettings</a>
  */
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
 class UNSetPositionZSettings : public UPCGSettings

@@ -12,6 +12,7 @@
  *
  * Returns false from Update until the requested frame count has elapsed, letting the engine tick in between —
  * useful when a test must wait for deferred engine work (spawning, streaming, physics) to settle.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/test-latent-commands/test-latent-command-frame-wait/">FNTestLatentCommand_FrameWait</a>
  */
 class FNTestLatentCommand_FrameWait : public IAutomationLatentCommand
 {

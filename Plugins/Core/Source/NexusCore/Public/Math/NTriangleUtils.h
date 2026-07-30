@@ -7,6 +7,7 @@
  * Geometric helpers for working with individual triangles in 3D space.
  *
  * All routines are header-only and allocation-free.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/triangle-utils/">FNTriangleUtils</a>
  */
 class NEXUSCORE_API FNTriangleUtils
 {

@@ -27,6 +27,7 @@ enum class ENUpdatesChannel : uint8
  *
  * Fires an HTTP request to read the canonical NCoreMinimal.h from the chosen channel, compares
  * the embedded version number to the current build, and, when newer, surfaces a notification.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/delayed-editor-tasks/update-check-delayed-editor-task/">UNUpdateCheckDelayedEditorTask</a>
  */
 UCLASS()
 class NEXUSCOREEDITOR_API UNUpdateCheckDelayedEditorTask : public UNDelayedEditorTask

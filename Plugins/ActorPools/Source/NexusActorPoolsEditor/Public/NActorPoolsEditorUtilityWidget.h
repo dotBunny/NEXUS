@@ -12,6 +12,7 @@
 /**
  * The Actor Pools editor utility widget: hosts the developer overlay and exposes editor-only actions
  * (e.g. creating a new UNActorPoolSet) in a dockable editor tab.
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/editor-types/actor-pools-editor-utility-widget/">UNActorPoolsEditorUtilityWidget</a>
  */
 UCLASS(MinimalAPI, HideCategories = Object)
 class UNActorPoolsEditorUtilityWidget : public UNEditorUtilityWidget
@@ -24,7 +25,7 @@ class UNActorPoolsEditorUtilityWidget : public UNEditorUtilityWidget
 protected:
 
 	/** Button handler that creates a new UNActorPoolSet asset in the current content browser path. */
-	UFUNCTION()
+	UFUNCTION(meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/editor-types/actor-pools-editor-utility-widget/#on-create-actor-pool-set"))
 	void OnCreateActorPoolSet();
 
 	/** Bound developer overlay widget displaying live pool state. */

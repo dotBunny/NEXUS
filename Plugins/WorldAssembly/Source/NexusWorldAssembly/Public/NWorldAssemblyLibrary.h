@@ -15,6 +15,7 @@
 
 /**
  * A utility class providing functionality to support World Assembly operations.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/">UNWorldAssemblyLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | World Assembly")
 class NEXUSWORLDASSEMBLY_API UNWorldAssemblyLibrary : public UBlueprintFunctionLibrary
@@ -29,7 +30,8 @@ public:
 	 * @param bWithDepth When true, fills Z with the configured SocketDepth; otherwise Z stays 1.
 	 * @return The junction's world-space size (X,Y scaled from the socket grid; Z = depth when requested).
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction World Size")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction World Size",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#get-junction-world-size"))
 	static FVector GetJunctionWorldSize(UNCellJunctionComponent* JunctionComponent, bool bWithDepth = false)
 	{
 		if (JunctionComponent == nullptr)
@@ -54,7 +56,7 @@ public:
 	 * @param Scale Uniform multiplier applied to all three components.
 	 * @return A vector packed as (SocketDepth, world X, world Y), each scaled by Scale.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction World Size (Shifted)", meta=(ToolTip="Depth, X, Y"))
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction World Size (Shifted)", meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#get-junction-world-size-shifted", ToolTip="Depth, X, Y"))
 	static FVector GetJunctionWorldSizeShifted(UNCellJunctionComponent* JunctionComponent, float Scale = 1.f)
 	{
 		if (JunctionComponent == nullptr)
@@ -76,7 +78,8 @@ public:
 	 * @param JunctionComponent The junction whose fill-depth anchor to read.
 	 * @return The anchor distance in world units; negative values shift the volume toward the junction's backward direction.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction Fill Depth Anchor")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction Fill Depth Anchor",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#get-junction-fill-depth-anchor"))
 	static float GetJunctionFillDepthAnchor(UNCellJunctionComponent* JunctionComponent)
 	{
 		if (JunctionComponent == nullptr)
@@ -94,7 +97,8 @@ public:
 	 * @param JunctionComponent The junction whose fill-depth anchor to read.
 	 * @return The world-space anchor offset (junction forward direction scaled by the signed anchor distance).
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction Fill Depth Offset")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction Fill Depth Offset",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#get-junction-fill-depth-offset"))
 	static FVector GetJunctionFillDepthOffset(UNCellJunctionComponent* JunctionComponent)
 	{
 		if (JunctionComponent == nullptr)
@@ -110,7 +114,8 @@ public:
 	 * @param SocketSize Socket size (in grid units) to project the corners for.
 	 * @return The junction's four corner points in world space for the given socket size.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction World Corner Points")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction World Corner Points",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#get-junction-world-corner-points"))
 	static TArray<FVector> GetJunctionWorldCornerPoints(UNCellJunctionComponent* JunctionComponent, const FVector2D& SocketSize)
 	{
 		if (JunctionComponent == nullptr)
@@ -123,7 +128,8 @@ public:
 
 
 	/** @return A freshly generated human-friendly seed string suitable for use as FNAssemblyOperationSettings::Seed. */
-	UFUNCTION(BlueprintPure, Category = "NEXUS|WorldAssembly", DisplayName="Get New Friendly Seed")
+	UFUNCTION(BlueprintPure, Category = "NEXUS|WorldAssembly", DisplayName="Get New Friendly Seed",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#get-new-friendly-seed"))
 	static FString GetNewFriendlySeed() { return FNSeedGenerator::RandomFriendlySeed(); }
 
 	/**
@@ -131,7 +137,8 @@ public:
 	 * @return The final context tags associated with the world assembly.
 	 * @note Returns a copy; edits made to it are not written back to the cell. Use Append/Remove Context Tags to persist changes.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Context Tags")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Context Tags",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#get-context-tags"))
 	static FGameplayTagContainer GetContextTags(ANCellLevelInstance* LevelInstance)
 	{
 		return IsValid(LevelInstance) ? LevelInstance->GetContextTags() : FGameplayTagContainer();
@@ -142,7 +149,8 @@ public:
 	 * @return The context tags this cell added to the overall state.
 	 * @note Returns a copy; edits made to it are not written back to the cell.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Context Tags Added")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Context Tags Added",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#reading-cell-state"))
 	static FGameplayTagContainer GetContextTagsAdded(ANCellLevelInstance* LevelInstance)
 	{
 		return IsValid(LevelInstance) ? LevelInstance->GetContextTagsAdded() : FGameplayTagContainer();
@@ -153,7 +161,8 @@ public:
 	 * @return The assembly tags used by the cell itself.
 	 * @note Returns a copy; edits made to it are not written back to the cell.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Assembly Tags")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Assembly Tags",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#get-assembly-tags"))
 	static FGameplayTagContainer GetAssemblyTags(ANCellLevelInstance* LevelInstance)
 	{
 		return IsValid(LevelInstance) ? LevelInstance->GetAssemblyTags() : FGameplayTagContainer();
@@ -163,7 +172,8 @@ public:
 	 * @param LevelInstance The cell level instance to query.
 	 * @return The cell's seed formatted as a human-readable hexadecimal string.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Hex Seed")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Hex Seed",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#get-hex-seed"))
 	static FString GetHexSeed(ANCellLevelInstance* LevelInstance)
 	{
 		return IsValid(LevelInstance) ? FNSeedGenerator::HexFromSeed(LevelInstance->GetSeed()) : FString();
@@ -173,7 +183,8 @@ public:
 	 * @param LevelInstance The cell level instance to query.
 	 * @return The identifier of the graph node this cell was assembled from.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Node Identifier")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Node Identifier",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#get-node-identifier"))
 	static int32 GetNodeIdentifier(ANCellLevelInstance* LevelInstance)
 	{
 		return IsValid(LevelInstance) ? LevelInstance->GetNodeIdentifier() : INDEX_NONE;
@@ -184,7 +195,8 @@ public:
 	 * @return The final TagCounter for the assembly operation.
 	 * @note Returns a copy; edits made to it are not written back to the cell. Use Add/Subtract Tag Counter to persist changes.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Tag Counter (Map)")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Tag Counter (Map)",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#reading-cell-state"))
 	static TMap<FGameplayTag, int32> GetTagCounter(ANCellLevelInstance* LevelInstance)
 	{
 		return IsValid(LevelInstance) ? LevelInstance->GetTagCounter() : TMap<FGameplayTag, int32>();
@@ -195,7 +207,8 @@ public:
 	 * @return The final TagCounter for the assembly operation as an array of tag/count pairs.
 	 * @note Returns a copy; edits made to it are not written back to the cell. Use Add/Subtract Tag Counter to persist changes.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Tag Counter (Array)")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Tag Counter (Array)",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#reading-cell-state"))
 	static TArray<FNGameplayTagCount> GetTagCounterArray(ANCellLevelInstance* LevelInstance)
 	{
 		return IsValid(LevelInstance) ? LevelInstance->GetTagCounterArray() : TArray<FNGameplayTagCount>();
@@ -205,7 +218,8 @@ public:
 	 * @param LevelInstance The cell level instance to query.
 	 * @return The ticket identifying the assembly operation this cell belongs to, used to key the context cache.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Operation Ticket")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Operation Ticket",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#reading-cell-state"))
 	static int32 GetOperationTicket(ANCellLevelInstance* LevelInstance)
 	{
 		return IsValid(LevelInstance) ? LevelInstance->GetOperationTicket() : INDEX_NONE;
@@ -225,7 +239,8 @@ public:
 	 * @param LevelInstance The cell level instance to query.
 	 * @return true if this cell lies on the assembly's hot path.
 	 */
-	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is HotPath")
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is HotPath",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#is-hotpath"))
 	static bool IsHotPath(ANCellLevelInstance* LevelInstance)
 	{
 		return IsValid(LevelInstance) && LevelInstance->IsHotPath();
@@ -237,7 +252,7 @@ public:
 	 * @return true if this cell lies on the assembly's hot path.
 	 */
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is HotPath ?",
-		meta = (ExpandBoolAsExecs="ReturnValue"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#exec-pin-variants", ExpandBoolAsExecs="ReturnValue"))
 	static bool IsHotPathExec(ANCellLevelInstance* LevelInstance)
 	{
 		return IsValid(LevelInstance) && LevelInstance->IsHotPath();
@@ -247,7 +262,8 @@ public:
 	 * @param LevelInstance The cell level instance to query.
 	 * @return true if this cell lies on the shortest-path hot path (spokes from the start cell).
 	 */
-	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is HotPath (Shortest)")
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is HotPath (Shortest)",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#is-hotpath-shortest"))
 	static bool IsHotPathShortest(ANCellLevelInstance* LevelInstance)
 	{
 		return IsValid(LevelInstance) && LevelInstance->IsHotPathShortest();
@@ -258,7 +274,7 @@ public:
 	 * @return true if this cell lies on the shortest-path hot path (spokes from the start cell).
 	 */
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is HotPath (Shortest) ?",
-		meta = (ExpandBoolAsExecs="ReturnValue"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#exec-pin-variants", ExpandBoolAsExecs="ReturnValue"))
 	static bool IsHotPathShortestExec(ANCellLevelInstance* LevelInstance)
 	{
 		return IsValid(LevelInstance) && LevelInstance->IsHotPathShortest();
@@ -268,7 +284,8 @@ public:
 	 * @param LevelInstance The cell level instance to query.
 	 * @return true if this cell lies on the sequential hot path (nearest-first visiting chain).
 	 */
-	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is HotPath (Sequential)")
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is HotPath (Sequential)",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#is-hotpath-sequential"))
 	static bool IsHotPathSequential(ANCellLevelInstance* LevelInstance)
 	{
 		return IsValid(LevelInstance) && LevelInstance->IsHotPathSequential();
@@ -279,7 +296,7 @@ public:
 	 * @return true if this cell lies on the sequential hot path (nearest-first visiting chain).
 	 */
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is HotPath (Sequential) ?",
-		meta = (ExpandBoolAsExecs="ReturnValue"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#exec-pin-variants", ExpandBoolAsExecs="ReturnValue"))
 	static bool IsHotPathSequentialExec(ANCellLevelInstance* LevelInstance)
 	{
 		return IsValid(LevelInstance) && LevelInstance->IsHotPathSequential();
@@ -290,7 +307,8 @@ public:
 	 * @param Tag Tag to look for.
 	 * @return true if the cell's final TagCounter contains an entry for Tag.
 	 */
-	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Has Tag Counter")
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Has Tag Counter",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#testing-cell-state"))
 	static bool HasTagCounter(ANCellLevelInstance* LevelInstance, const FGameplayTag Tag)
 	{
 		return IsValid(LevelInstance) && LevelInstance->GetTagCounter().Contains(Tag);
@@ -303,7 +321,7 @@ public:
 	 * @return true if the cell's final TagCounter contains an entry for Tag.
 	 */
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Has Tag Counter ?",
-		meta = (ExpandBoolAsExecs="ReturnValue"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#exec-pin-variants", ExpandBoolAsExecs="ReturnValue"))
 	static bool HasTagCounterExec(ANCellLevelInstance* LevelInstance, const FGameplayTag Tag)
 	{
 		return IsValid(LevelInstance) && LevelInstance->GetTagCounter().Contains(Tag);
@@ -314,7 +332,8 @@ public:
 	 * @param TagContainer Tags that must all be present.
 	 * @return true if the cell's final context tags contain every tag in TagContainer (exact match).
 	 */
-	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Has Context Tag(s)")
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Has Context Tag(s)",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#testing-cell-state"))
 	static bool HasContextTags(ANCellLevelInstance* LevelInstance, const FGameplayTagContainer TagContainer)
 	{
 		return IsValid(LevelInstance) && LevelInstance->GetContextTags().HasAllExact(TagContainer);
@@ -327,7 +346,7 @@ public:
 	 * @return true if the cell's final context tags contain every tag in TagContainer (exact match).
 	 */
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Has Context Tag(s) ?",
-		meta = (ExpandBoolAsExecs="ReturnValue"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#exec-pin-variants", ExpandBoolAsExecs="ReturnValue"))
 	static bool HasContextTagsExec(ANCellLevelInstance* LevelInstance, const FGameplayTagContainer TagContainer)
 	{
 		return IsValid(LevelInstance) && LevelInstance->GetContextTags().HasAllExact(TagContainer);
@@ -339,7 +358,8 @@ public:
 	 * @param LevelInstance The cell level instance to modify.
 	 * @param TagContainer Tags to add.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Append Context Tags")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Append Context Tags",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#mutating-cell-state"))
 	static void AppendContextTags(ANCellLevelInstance* LevelInstance, FGameplayTagContainer TagContainer)
 	{
 		if (IsValid(LevelInstance))
@@ -353,7 +373,8 @@ public:
 	 * @param LevelInstance The cell level instance to modify.
 	 * @param TagContainer Tags to remove.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Remove Context Tags")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Remove Context Tags",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#mutating-cell-state"))
 	static void RemoveContextTags(ANCellLevelInstance* LevelInstance, FGameplayTagContainer TagContainer)
 	{
 		if (IsValid(LevelInstance))
@@ -369,7 +390,8 @@ public:
 	 * @param Tag Tag whose counter to increase.
 	 * @param Value Amount to add (defaults to 1).
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Add Tag Counter")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Add Tag Counter",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#mutating-cell-state"))
 	static void AddTagCounter(ANCellLevelInstance* LevelInstance, FGameplayTag Tag, int32 Value = 1)
 	{
 		if (IsValid(LevelInstance))
@@ -384,7 +406,8 @@ public:
 	 * @param Tag Tag whose counter to decrease.
 	 * @param Value Amount to subtract (defaults to 1).
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Subtract Tag Counter")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Subtract Tag Counter",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#mutating-cell-state"))
 	static void SubtractTagCounter(ANCellLevelInstance* LevelInstance, FGameplayTag Tag, int32 Value = 1)
 	{
 		if (IsValid(LevelInstance))
@@ -400,7 +423,8 @@ public:
 	 * @param OperationTicket Ticket identifying the assembly operation.
 	 * @return true if cached context state exists for OperationTicket.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Has Operation Context Cache")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Has Operation Context Cache",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#operation-context-cache"))
 	static bool HasContextCache(int32 OperationTicket)
 	{
 		return FNWorldAssemblyContextCache::HasOperation(OperationTicket);
@@ -412,7 +436,7 @@ public:
 	 * @return true if cached context state exists for OperationTicket.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Has Operation Context Cache ?",
-		meta = (ExpandBoolAsExecs="ReturnValue"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#exec-pin-variants", ExpandBoolAsExecs="ReturnValue"))
 	static bool HasContextCacheExec(int32 OperationTicket)
 	{
 		return FNWorldAssemblyContextCache::HasOperation(OperationTicket);
@@ -424,7 +448,8 @@ public:
 	 * @param Tag Tag whose counter value to read.
 	 * @return The counter value, or -1 if the operation or tag is not present in the cache.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Operation Tag Counter")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Operation Tag Counter",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#operation-context-cache"))
 	static int32 GetOperationTagCounter(int32 OperationTicket, FGameplayTag Tag)
 	{
 		int32 Count = -1;
@@ -440,7 +465,8 @@ public:
 	 * @param OutValue Receives the counter value when found; left unchanged otherwise.
 	 * @return true if a counter entry exists for Tag on this operation.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="TryGet Operation Tag Counter")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="TryGet Operation Tag Counter",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#operation-context-cache"))
 	static bool TryGetOperationTagCounter(int32 OperationTicket, FGameplayTag Tag, int32& OutValue)
 	{
 		return FNWorldAssemblyContextCache::TryGetTagCount(OperationTicket, Tag, OutValue);
@@ -451,7 +477,8 @@ public:
 	 * @param Tag Tag to look for.
 	 * @return true if the cached operation has a counter entry for Tag.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Has Operation Tag Counter")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Has Operation Tag Counter",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#operation-context-cache"))
 	static bool HasOperationTagCounter(int32 OperationTicket, FGameplayTag Tag)
 	{
 		return FNWorldAssemblyContextCache::HasTagCount(OperationTicket, Tag);
@@ -463,7 +490,8 @@ public:
 	 * @param Tag Tag whose counter to increase.
 	 * @param Value Amount to add (defaults to 1).
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Add Operation Tag Counter")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Add Operation Tag Counter",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#operation-context-cache"))
 	static void AddOperationTagCounter(int32 OperationTicket, FGameplayTag Tag, int32 Value = 1)
 	{
 		FNWorldAssemblyContextCache::AddTagCount(OperationTicket, Tag, Value);
@@ -475,7 +503,8 @@ public:
 	 * @param Tag Tag whose counter to decrease.
 	 * @param Value Amount to subtract (defaults to 1).
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Subtract Operation Tag Counter")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Subtract Operation Tag Counter",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#operation-context-cache"))
 	static void SubtractOperationTagCounter(int32 OperationTicket, FGameplayTag Tag, int32 Value = 1)
 	{
 		FNWorldAssemblyContextCache::SubtractTagCount(OperationTicket, Tag, Value);
@@ -486,7 +515,8 @@ public:
 	 * @param TagContainer Tags that must all be present.
 	 * @return true if the cached operation's context tags contain every tag in TagContainer (exact match).
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Has Operation Context Tag(s)")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Has Operation Context Tag(s)",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#operation-context-cache"))
 	static bool HasOperationContextTags(int32 OperationTicket, FGameplayTagContainer TagContainer)
 	{
 		return FNWorldAssemblyContextCache::HasContextTags(OperationTicket, TagContainer);
@@ -499,7 +529,7 @@ public:
 	 * @return true if the cached operation's context tags contain every tag in TagContainer (exact match).
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Has Operation Context Tag(s) ?",
-		meta = (ExpandBoolAsExecs="ReturnValue"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#exec-pin-variants", ExpandBoolAsExecs="ReturnValue"))
 	static bool HasOperationContextTagsExec(int32 OperationTicket, FGameplayTagContainer TagContainer)
 	{
 		return FNWorldAssemblyContextCache::HasContextTags(OperationTicket, TagContainer);
@@ -510,7 +540,8 @@ public:
 	 * @param OperationTicket Ticket identifying the assembly operation.
 	 * @param TagContainer Tags to add.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Append Operation Context Tag(s)")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Append Operation Context Tag(s)",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#operation-context-cache"))
 	static void AppendOperationContextTags(int32 OperationTicket, FGameplayTagContainer TagContainer)
 	{
 		FNWorldAssemblyContextCache::AppendContextTags(OperationTicket, TagContainer);
@@ -521,7 +552,8 @@ public:
 	 * @param OperationTicket Ticket identifying the assembly operation.
 	 * @param TagContainer Tags to remove.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Remove Operation Context Tag(s)")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Remove Operation Context Tag(s)",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#operation-context-cache"))
 	static void RemoveOperationContextTags(int32 OperationTicket, FGameplayTagContainer TagContainer)
 	{
 		FNWorldAssemblyContextCache::RemoveContextTags(OperationTicket, TagContainer);

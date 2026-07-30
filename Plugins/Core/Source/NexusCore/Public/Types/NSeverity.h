@@ -7,6 +7,7 @@
  * Ordered diagnostic severity level, ascending from purely informational to unrecoverable.
  *
  * The numeric ordering is meaningful: callers may threshold on it (e.g. "Warning and above") to filter output.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/severity/">ENSeverity</a>
  */
 UENUM(BlueprintType)
 enum class ENSeverity : uint8

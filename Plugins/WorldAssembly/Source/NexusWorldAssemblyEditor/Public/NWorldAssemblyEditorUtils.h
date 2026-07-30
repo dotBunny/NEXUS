@@ -118,6 +118,7 @@ public:
 	 *
 	 * @param World World whose cell asset should be persisted. Used both to resolve the package and (when CellActor is null) to find the cell actor.
 	 * @param CellActor Specific cell actor to save, or nullptr to use the world's primary cell actor.
+	 * @param bForceSave Write the package even when the refresh produced no changes, rather than skipping an unchanged asset.
 	 * @note Editor-only. Triggers the same slow-task UI as UpdateCell (it's invoked internally) and performs synchronous disk I/O.
 	 */
 	static void SaveCell(UWorld* World, ANCellActor* CellActor = nullptr, bool bForceSave = false);

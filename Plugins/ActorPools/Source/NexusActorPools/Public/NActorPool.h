@@ -22,6 +22,7 @@ namespace NEXUS::ActorPools::InvokeMethods
 /**
  * A runtime-unique controlling object that maintains a pool of spawned actors.
  * @note Not thread-safe, must be used on the game thread due to creating actors.
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool/">FNActorPool</a>
  */
 class NEXUSACTORPOOLS_API FNActorPool
 {

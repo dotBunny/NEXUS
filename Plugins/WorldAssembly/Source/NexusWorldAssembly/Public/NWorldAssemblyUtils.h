@@ -13,6 +13,8 @@ struct FNRawMesh;
 /**
  * Grab-bag of World Assembly-specific utilities: cell-level side-car calculators, world/level accessors,
  * and small geometry helpers used by the cell and graph builder.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-utils/">FNWorldAssemblyUtils</a>
  */
 class NEXUSWORLDASSEMBLY_API FNWorldAssemblyUtils
 {
@@ -111,6 +113,7 @@ public:
 
 	/**
 	 * Emit the 26 neighbour-sample positions around WorldCenter.
+	 * @param WorldCenter World-space centre the neighbour samples are generated around.
 	 * @param VoxelSize Spacing (per-axis) between samples.
 	 * @param OutPositions [out] Populated with VoxelQueryPointCount world positions.
 	 */
@@ -118,6 +121,8 @@ public:
 
 	/**
 	 * Emit sample endpoints that extend from WorldCenter outward to the faces of LevelBounds.
+	 * @param WorldCenter World-space origin the endpoints radiate from.
+	 * @param LevelBounds Bounds whose faces the endpoints are projected onto.
 	 * @param OutPositions [out] Populated with the computed world positions.
 	 */
 	static void GetVoxelQueryLevelBoundsEndPoints(const FVector& WorldCenter, const FBox& LevelBounds, TArray<FVector>& OutPositions);

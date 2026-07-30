@@ -48,6 +48,7 @@ enum class ENColor : uint8
  * FNColor centralises the framework's palette so that debug drawing, editor tooling and runtime UI
  * can share a consistent look. Callers can either use the strongly-typed FLinearColor constants
  * below (preferred in C++) or resolve a color by ENColor value at runtime.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/color/">FNColor</a>
  */
 class NEXUSCORE_API FNColor
 {

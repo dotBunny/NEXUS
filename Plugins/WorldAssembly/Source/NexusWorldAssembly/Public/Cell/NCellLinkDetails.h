@@ -5,6 +5,14 @@
 
 #include "NCellLinkDetails.generated.h"
 
+/**
+ * The resolved connection state of a single junction once the cell graph has been linked.
+ *
+ * Identifies the junction (and the node owning it), whether it ended up connected, and if so which
+ * node and junction it reaches. The two hot-path flags describe the link rather than either cell:
+ * they are set only when the connection itself forms part of the shortest or sequential hot path.
+ * Handed to implementors of INCellJunctionBeginPlay so gameplay can react to how a junction was wired.
+ */
 USTRUCT(BlueprintType)
 struct NEXUSWORLDASSEMBLY_API FNCellLinkDetails
 {

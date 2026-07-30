@@ -17,6 +17,8 @@ namespace NEXUS::Tooling::MultiplayerTest
  * Per-user editor preferences for NexusTooling. Stored in NexusUserSettings.ini so each developer
  * keeps their own values (frame-rate cap, visualization colors, graph navigation ergonomics).
  * Property edits re-apply immediately via PostEditChangeProperty.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/tooling/user-settings/">User Settings</a>
  */
 UCLASS(config = NexusUserSettings, meta = (DisplayName = "Tooling (User)"))
 class NEXUSTOOLINGEDITOR_API UNToolingEditorUserSettings : public UDeveloperSettings
@@ -96,12 +98,18 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Clients", meta = (DisplayName = "Parameters", Tooltip = "Additional parameters to pass to the client being launched."))
 	FString ClientParameters = "";
 
-	/** Minimum simulated network lag (ms) added on top of the real round-trip time. */
-	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Clients|Network Simulation", meta = (DisplayName = "Lag (Minimum)", Tooltip = "The minimum amount of network lag (ms) be simulated ontop of the existing round trip time.", ClampMin="0", ClampMax="1000", UIMin="0", UIMax="1000", SliderExponent = 1))
+	/**
+	 * Minimum simulated network lag (ms) added on top of the real round-trip time.
+	 * @remark This is a round-trip figure; it is halved (floored) to produce the one-way -PktLagMin switch.
+	 */
+	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Clients|Network Simulation", meta = (DisplayName = "Lag (Minimum)", Tooltip = "The minimum amount of network lag (ms) be simulated ontop of the existing round trip time. Halved to produce the one-way -PktLagMin switch.", ClampMin="0", ClampMax="1000", UIMin="0", UIMax="1000", SliderExponent = 1))
 	int32 ClientSimulateLagMinimum = 20;
 
-	/** Maximum simulated network lag (ms) added on top of the real round-trip time. */
-	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Clients|Network Simulation", meta = (DisplayName = "Lag (Maximum)", Tooltip = "The maximum amount of network lag (ms) be simulated ontop of the existing round trip time.", ClampMin="0", ClampMax="1000", UIMin="0", UIMax="1000", SliderExponent = 1))
+	/**
+	 * Maximum simulated network lag (ms) added on top of the real round-trip time.
+	 * @remark This is a round-trip figure; it is halved (floored) to produce the one-way -PktLagMax switch.
+	 */
+	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Clients|Network Simulation", meta = (DisplayName = "Lag (Maximum)", Tooltip = "The maximum amount of network lag (ms) be simulated ontop of the existing round trip time. Halved to produce the one-way -PktLagMax switch.", ClampMin="0", ClampMax="1000", UIMin="0", UIMax="1000", SliderExponent = 1))
 	int32 ClientSimulateLagMaximum = 60;
 
 	/** Simulated packet loss (%). */
@@ -120,8 +128,13 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Clients|Network Simulation", meta = (DisplayName = "Receive Out Of Order", Tooltip = "Forces network packets to be recieved out of order."))
 	bool bClientSimulateReceiveOutOfOrderPackets = false;
 
-	/** Capture a server-side network profile (.nprof); ignored when the client profile option is enabled. */
-	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Server", meta = (EditCondition="!bClientGenerateNetworkProfile", EditConditionHides, DisplayName = "Generate Network Profile", Tooltip = "This setting has no effect if option is turned on for clients. Profiles will be stored in <PROJECT_DIRECTORY>/Saved/Profiling/<PROJECT_NAME>-<TIMESTAMP>.nprof"))
+	/**
+	 * Capture a server-side network profile (.nprof).
+	 * @remark EditConditionHides only hides this field while client profiling is on — the stored value is
+	 *         still honoured by GetMultiplayerTestServerArguments, so a previously-enabled server profile
+	 *         stays active while invisible.
+	 */
+	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Server", meta = (EditCondition="!bClientGenerateNetworkProfile", EditConditionHides, DisplayName = "Generate Network Profile", Tooltip = "Hidden while client profiling is enabled, but a stored value still applies to the server. Profiles will be stored in <PROJECT_DIRECTORY>/Saved/Profiling/<PROJECT_NAME>-<TIMESTAMP>.nprof"))
 	bool bServerGenerateNetworkProfile = false;
 
 	/** Spawn a dedicated server for the test clients. */
@@ -132,8 +145,8 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Server", meta = (DisplayName = "Spawn Separate Server", Tooltip = "This is a rarely used option that will launch a separate server (possibly hidden in-process depending on RunUnderOneProcess) even if the net mode does not require a server (such as Standalone). If the net mode requires a server (such as Client) a server will be launched for you (regardless of this setting)."))
 	bool bSpawnSeparateServer = false;
 
-	/** Extra command-line parameters passed to the launched server (in addition to client parameters). */
-	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Server", meta = (DisplayName = "Parameters", Tooltip = "Additional parameters to pass to the server being launched, on top of client parameters."))
+	/** Extra command-line parameters passed to the launched server; delivered separately from ClientParameters. */
+	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Server", meta = (DisplayName = "Parameters", Tooltip = "Additional parameters to pass to the server being launched. These are delivered as the server's own launch parameters, separately from the client parameters."))
 	FString ServerParameters = "";
 
 #endif // WITH_EDITORONLY_DATA

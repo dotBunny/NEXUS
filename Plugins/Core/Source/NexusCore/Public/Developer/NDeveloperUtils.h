@@ -13,6 +13,7 @@
  *
  * The members of this class are intentionally cheap and read-only so that they can be safely
  * invoked from tests, overlays, and developer UIs without perturbing the state they are inspecting.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/developer-utils/">FNDeveloperUtils</a>
  */
 class FNDeveloperUtils
 {

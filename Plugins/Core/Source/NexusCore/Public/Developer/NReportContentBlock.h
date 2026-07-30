@@ -8,6 +8,7 @@
 /**
  * Report block that holds a sequence of free-form text lines. Lines are emitted verbatim
  * for both plain text and Markdown output, separated by a blank line each.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/report-content-block/">FNReportContentBlock</a>
  */
 struct NEXUSCORE_API FNReportContentBlock : FNReportBlock
 {

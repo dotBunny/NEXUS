@@ -11,6 +11,7 @@
  *
  * Use it to wrap optional groupings whose heading should only appear once something is nested under
  * them — empty sections vanish from the output rather than leaving a dangling heading.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/report-collapsable-block/">FNReportCollapsableBlock</a>
  */
 struct NEXUSCORE_API FNReportCollapsableBlock : FNReportBlock
 {

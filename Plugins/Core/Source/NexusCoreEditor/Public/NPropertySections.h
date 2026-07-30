@@ -13,6 +13,7 @@ class FPropertySection;
  *
  * Categories added before Register() runs are queued and flushed during registration, so callers can request
  * sections during module startup without ordering concerns.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/property-sections/">FNPropertySections</a>
  */
 class NEXUSCOREEDITOR_API FNPropertySections
 {

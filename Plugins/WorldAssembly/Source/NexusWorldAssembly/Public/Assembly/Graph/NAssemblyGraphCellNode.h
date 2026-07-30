@@ -125,6 +125,7 @@ public:
 	}
 
 	/**
+	 * @param OtherMesh World-space mesh tested against this cell's hull.
 	 * @param EarlyExitDepth Caller's threshold for the typical `if (depth >= threshold)` rejection pattern.
 	 *        See FNRawMeshUtils::GetIntersectDepth for the semantics of the short-circuit shortcuts.
 	 * @return The deepest penetration distance between this cell's (world-space baked) hull and the supplied

@@ -9,6 +9,7 @@
  * A utility methods collection for editor-time Slate; primarily provides helpers to locate
  * SDockTab instances inside the editor's tab hierarchy so callers can reach tabs that were
  * spawned by other systems.
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/editor-slate-utils/">FNEditorSlateUtils</a>
  */
 class NEXUSUIEDITOR_API FNEditorSlateUtils
 {

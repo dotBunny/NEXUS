@@ -12,6 +12,8 @@ class UNWorldAssemblySettings;
 /**
  * Component visualizer for UNBoneComponent — renders the bone's socket, reach, and mode-specific
  * widgets in the level viewport so authors can reason about junction anchors without selection.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-types/visualizers/bone-component-visualizer/">FNBoneComponentVisualizer</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNBoneComponentVisualizer final : public FComponentVisualizer
 {

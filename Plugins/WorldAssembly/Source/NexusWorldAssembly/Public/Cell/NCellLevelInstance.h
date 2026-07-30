@@ -19,6 +19,7 @@ class UDynamicMesh;
  * Carries the replicated operation ticket so clients can attribute the cell back to its owning
  * UNAssemblyOperation, and stores a pointer to the cell's junction data for quick lookup.
  * Not author-placeable — instances are created exclusively by the World Assembly pipeline.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/cell-level-instance/">ANCellLevelInstance</a>
  */
 UCLASS(NotPlaceable, HideDropdown, Hidden, Transient, ClassGroup = "NEXUS", DisplayName = "NEXUS | Cell LevelInstance")
 class NEXUSWORLDASSEMBLY_API ANCellLevelInstance final : public ALevelInstance

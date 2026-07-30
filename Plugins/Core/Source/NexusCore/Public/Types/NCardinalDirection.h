@@ -64,6 +64,7 @@ enum class ENCardinalDirection : uint8
 
 /**
  * Conversion helpers between decimal-degree angles and ENCardinalDirection values.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/cardinal-direction/">FNCardinalDirectionUtils</a>
  */
 class FNCardinalDirectionUtils
 {

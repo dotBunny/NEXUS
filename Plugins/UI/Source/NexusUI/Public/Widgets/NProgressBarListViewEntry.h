@@ -19,6 +19,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnProgressBarListEntryChanged);
  * Data model for a single row in a UNListView of progress bars. Carries a label, a status message,
  * and a 0..1 completion percent. Mutating any field broadcasts OnChanged so the bound
  * UNProgressBarListViewEntry can update in place without the owning list rebuilding its rows.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/widgets/progress-bar-list-view-entry/#data-object--unprogressbarlistentry">UNProgressBarListEntry</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | ProgressBar List Entry", BlueprintType)
 class NEXUSUI_API UNProgressBarListEntry : public UObject
@@ -75,6 +77,8 @@ private:
  * List-view entry widget that renders a progress bar plus left/center/right text driven by a bound
  * UNProgressBarListEntry. Binds to the data object's OnChanged delegate so message/percent updates
  * refresh the row in place; the owning list only rebuilds when entries are added or removed.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/widgets/progress-bar-list-view-entry/">UNProgressBarListViewEntry</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | ProgressBar ListView Entry", BlueprintType, Blueprintable)
 class NEXUSUI_API UNProgressBarListViewEntry : public UUserWidget, public INListViewEntry

@@ -15,6 +15,7 @@
  * These utilities are only meaningful inside the Low-Level Test framework and therefore depend on
  * its macros (REQUIRE_MESSAGE, ADD_ERROR). All methods are designed to be safely re-entrant — every
  * world is disposed before the call returns.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/test-utils/">FNTestUtils</a>
  */
 class NEXUSCORE_API FNTestUtils
 {

@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "INCellJunctionFiller.generated.h"
 
+/** Reflection marker for the INCellJunctionFiller interface; INCellJunctionFiller carries the contract implementors provide. */
 UINTERFACE()
 class NEXUSWORLDASSEMBLY_API UNCellJunctionFiller : public UInterface
 {

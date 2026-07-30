@@ -12,6 +12,7 @@
  *
  * Useful for analytics that need to attribute counts to a retry pass, generation step,
  * or other discrete phase rather than a single cumulative total.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/iteration-counter/">FNIterationCounter</a>
  */
 struct FNIterationCounter
 {

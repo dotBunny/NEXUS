@@ -26,6 +26,7 @@ struct FNPrimitiveFontPoint
  * Provides line-based primitive rendering of ASCII strings for debug and developer visualisation,
  * without relying on UE's Slate or UMG text systems. Glyph data is built once during module
  * startup by FNCoreModule.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/primitive-font/">FNPrimitiveFont</a>
  */
 class NEXUSCORE_API FNPrimitiveFont
 {

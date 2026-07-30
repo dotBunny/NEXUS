@@ -9,6 +9,7 @@
 
 /**
  * Intersection and containment helpers for FNRawMesh geometry.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/raw-mesh-utils/">FNRawMeshUtils</a>
  */
 class NEXUSCORE_API FNRawMeshUtils
 {

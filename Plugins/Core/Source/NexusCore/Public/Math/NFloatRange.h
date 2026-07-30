@@ -11,8 +11,14 @@
 /**
  * A single-precision inclusive range [Minimum, Maximum].
  *
- * Defaults span the entire representable range of float; override either bound at author time.
+ * Defaults to [-MIN_flt, MAX_flt]; override both bounds at author time.
  * The member API (NextValue, RandomValue, PercentageValue, etc.) is supplied by N_RANGE_BASE.
+ * @note MIN_flt is the smallest positive normalized float rather than the most negative one, so the default
+ *       lower bound is effectively zero. Widening it to -MAX_flt is deliberately avoided: sampling evaluates
+ *       (Maximum - Minimum), which overflows across the full representable span.
+ * @note The Random* methods are half-open [Minimum, Maximum); the range itself is inclusive for the
+ *       clamping and percentage methods.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/float-range/">FNFloatRange</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNFloatRange

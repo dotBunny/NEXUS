@@ -8,6 +8,7 @@
 
 /**
  * A collection of default values to use within the Nexus Editor modules.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/editor-defaults/">FNEditorDefaults</a>
  */
 class NEXUSCOREEDITOR_API FNEditorDefaults
 {

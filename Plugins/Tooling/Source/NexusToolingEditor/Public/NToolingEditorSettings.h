@@ -33,6 +33,8 @@ enum class ENValidatorSeverity : uint8
  * Shipped in NexusEditor.ini so they travel with the project — per-user overrides live on
  * UNToolingEditorUserSettings instead. Groups icon overrides, level bookmarks, and per-validator
  * severities.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/tooling/editor-settings/">Editor Settings</a>
  */
 UCLASS(config = NexusEditor, defaultconfig)
 class UNToolingEditorSettings : public UDeveloperSettings

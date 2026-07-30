@@ -10,6 +10,7 @@
 /**
  * A BlueprintType UObject wrapper that owns an FNMersenneTwister, exposing a seedable
  * deterministic random stream to Blueprint with its lifecycle managed by the garbage collector.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/mersenne-twister-object/">UNMersenneTwisterObject</a>
  */
 UCLASS(BlueprintType, ClassGroup = "NEXUS", DisplayName = "NEXUS | Mersenne Twister Object")
 class NEXUSCORE_API UNMersenneTwisterObject : public UObject

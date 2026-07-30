@@ -15,6 +15,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGetActorAsyncOutputPin, AActor*, Sp
 
 /**
  * Async Blueprint action that soft-loads an AActor class and then gets an instance of it from the Actor Pool subsystem.
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/get-actor-async/">UNGetActorBlueprintAsyncAction</a>
  */
 UCLASS()
 class NEXUSACTORPOOLS_API UNGetActorBlueprintAsyncAction : public UBlueprintAsyncActionBase
@@ -38,7 +39,7 @@ public:
 	 * @return The async action instance that BP will attach its output pins to.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Actor Async", Category = "NEXUS|Actor Pools",
-		meta = (BlueprintInternalUseOnly = "true", WorldContext = "WorldContextObject"))
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/get-actor-async/#get-actor-async", BlueprintInternalUseOnly = "true", WorldContext = "WorldContextObject"))
 	static UNGetActorBlueprintAsyncAction* GetActorAsync(UObject* WorldContextObject, TSoftClassPtr<AActor> ActorClass);
 
 	/** Fires once the class has been loaded and the pooled actor has been spawned. SpawnedActor is null on failure. */

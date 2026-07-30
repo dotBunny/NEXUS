@@ -13,6 +13,7 @@
  *
  * Thin passthroughs so that Blueprint authors can reach the same NextValue / RandomValue /
  * PercentageValue helpers that native code uses via N_RANGE_BASE.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/integer-range-library/">UNIntegerRangeLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Integer Range Library")
 class NEXUSCORE_API UNIntegerRangeLibrary : public UBlueprintFunctionLibrary
@@ -55,14 +56,14 @@ class NEXUSCORE_API UNIntegerRangeLibrary : public UBlueprintFunctionLibrary
 	}
 
 	/** One-shot seeded sample from Range's full span; does not advance any persistent stream. */
-	UFUNCTION(BlueprintCallable, DisplayName="Random One Shot Value (Integer)",  Category = "NEXUS|Core|Range")
+	UFUNCTION(BlueprintCallable, DisplayName="Random One-Shot Value (Integer)",  Category = "NEXUS|Core|Range")
 	static int32 RandomOneShotValue(const FNIntegerRange& Range, const int32 Seed)
 	{
 		return Range.RandomOneShotValue(Seed);
 	}
 
 	/** One-shot seeded sample clamped to [MinimumValue, MaximumValue] within Range. */
-	UFUNCTION(BlueprintCallable, DisplayName="Random One Shot Value In Sub-Range (Integer)",  Category = "NEXUS|Core|Range")
+	UFUNCTION(BlueprintCallable, DisplayName="Random One-Shot Value In Sub-Range (Integer)",  Category = "NEXUS|Core|Range")
 	static int32 RandomOneShotValueInSubRange(const FNIntegerRange& Range, int32 Seed, int32 MinimumValue, int32 MaximumValue)
 	{
 		return Range.RandomOneShotValueInSubRange(Seed, MinimumValue, MaximumValue);

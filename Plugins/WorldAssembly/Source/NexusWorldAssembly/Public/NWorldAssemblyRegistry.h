@@ -23,6 +23,7 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnAssemblyOperationChannelsChanged, UNAsse
  * Components self-register via the Register/Unregister pair during their lifecycle, which lets
  * subsystems and tooling enumerate the active World Assembly graph without walking every actor/component.
  * @note All accessors expect to be called from the game thread.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-registry/">FNWorldAssemblyRegistry</a>
  */
 class NEXUSWORLDASSEMBLY_API FNWorldAssemblyRegistry
 {

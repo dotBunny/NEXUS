@@ -11,6 +11,7 @@ class UNGuardianSubsystem;
 
 /**
  * Developer overlay widget that displays the Guardian subsystem's baseline, current count, and next threshold.
+ * @see <a href="https://nexus-framework.com/docs/plugins/guardian/developer-overlay/">UNGuardianDeveloperOverlay</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Guardian Developer Overlay", BlueprintType, Abstract)
 class NEXUSGUARDIAN_API UNGuardianDeveloperOverlay : public UNDeveloperOverlay

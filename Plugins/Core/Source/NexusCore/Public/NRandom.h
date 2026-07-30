@@ -5,6 +5,7 @@
 
 /**
  * A collection of random number generators.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/random/">FNRandom</a>
  */
 class NEXUSCORE_API FNRandom
 {

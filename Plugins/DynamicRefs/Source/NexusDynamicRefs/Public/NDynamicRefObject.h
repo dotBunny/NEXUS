@@ -12,6 +12,7 @@ class UWorld;
  * Blueprint-friendly UObject wrapper around a single ENDynamicRef slot or FName bucket.
  *
  * Used primarily by the developer overlay to let UMG bind to a single reference's live object list.
+ * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-object/">UNDynamicRefObject</a>
  */
 UCLASS(BlueprintType, ClassGroup = "NEXUS", DisplayName = "NEXUS | DynamicRef Object")
 class NEXUSDYNAMICREFS_API UNDynamicRefObject : public UObject

@@ -12,6 +12,7 @@
 
 /**
  * Per-cell assembly metadata recorded on a generated cell, identifying the operation and graph node that produced it.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/cell-assembly-data/">FNCellAssemblyData</a>
  */
 USTRUCT(BlueprintType)
 struct FNCellAssemblyData
