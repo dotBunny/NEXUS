@@ -156,6 +156,11 @@ public:
 		meta=(MustImplement="/Script/NexusWorldAssembly.NCellJunctionFiller", ToolTip="The actor spawned to fill a junction when none of that junction's authored fillers are eligible. Must implement NCellJunctionFiller. Setting this Actor does not guarantee its inclusion in a build, you must take steps to include it manually."))
 	TSoftClassPtr<AActor> AssemblySpawningDefaultJunctionFiller;
 
+	/** Fallback filler spawned when none of a junction's authored fillers are eligible; must implement INCellJunctionFiller. */
+	UPROPERTY(Config, EditAnywhere, DisplayName="Junction Default Connector", Category="Assembly|Spawning",
+		meta=(MustImplement="/Script/NexusWorldAssembly.NCellJunctionConnector", ToolTip="The actor spawned to connect two junctions in close proximity. Must implement NCellJunctionConnector. Setting this Actor does not guarantee its inclusion in a build, you must take steps to include it manually."))
+	TSoftClassPtr<AActor> AssemblySpawningDefaultJunctionConnector;
+
 	/** When true, junction filling registers with the subsystem to be time-sliced via Junction Time Slice rather than spawning immediately. */
 	UPROPERTY(Config, EditAnywhere, DisplayName="Delayed Junction Spawning", Category="Assembly|Spawning",
 		meta=(ToolTip="Should junctions that are being filled register themselves with the UWorldAssemblySubsystem to be filled time-sliced via Junction Time Slice?"))
