@@ -135,6 +135,9 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 
 	// TODO: Validate task to ensure generation is completable?
 
+	// TODO: Match close proximity junctions that are not of the same cell, and are within the range
+
+
 	const FNAssemblyOperationSettings& OperatingSettings = Context->GetOperationSettings();
 
 	// Create our context of what we are going to need to spawn back on the game-thread

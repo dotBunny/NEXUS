@@ -6,6 +6,8 @@
 
 ### Changed
 
+- World Assembly sample blueprints have been consolidated to the `Extras` folder.
+
 ### Removed
 
 ## [0.3.2] - 2026-07-30
