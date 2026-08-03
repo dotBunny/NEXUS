@@ -146,6 +146,25 @@ public:
 		meta=(ToolTip="How close should the range of angle be to the target direction (within this many degrees +/-)?", Units="deg"))
 	float AssemblyDirectionTolerance = 15.f;
 
+
+	UPROPERTY(Config, EditAnywhere, DisplayName="Junction Default Connector", Category="Assembly|Spawning",
+		meta=(MustImplement="/Script/NexusWorldAssembly.NCellJunctionConnector", ToolTip="The actor spawned to connect two junctions in close proximity. Must implement NCellJunctionConnector. Setting this Actor does not guarantee its inclusion in a build, you must take steps to include it manually."))
+	TSoftClassPtr<AActor> AssemblyDefaultJunctionConnector;
+
+	UPROPERTY(Config, EditAnywhere, DisplayName="Maximum Junction Default Connection Range", Category="Assembly|Spawning",
+	meta=(ToolTip="The maximum distance a junction can be to be considered to match."))
+	float AssemblyJunctionConnectorMaximumRange = 5000.f;
+
+	UPROPERTY(Config, EditAnywhere, DisplayName="Maximum Junction Default Connection Spline Length", Category="Assembly|Spawning",
+meta=(ToolTip="The maximum spline length allowed to connect two unmatched Junctions. "))
+	float AssemblyJunctionConnectorMaximumSplineLength = 1000.f;
+
+
+	UPROPERTY(Config, EditAnywhere, DisplayName="Maximum Junction Default Connection Spline Radius", Category="Assembly|Spawning",
+meta=(ToolTip="The collision check distance around the spline"))
+	float AssemblyJunctionConnectorSplineRadius = 200.f;
+
+
 	/** Target per-frame time budget for spawning cells; the remainder is queued to a new task once exceeded. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Spawning", DisplayName="Cell Time Slice",
 	meta=(ToolTip="The target maximum allowed frame time to spawn cells before a new task is queued with the remainder."))
@@ -156,10 +175,7 @@ public:
 		meta=(MustImplement="/Script/NexusWorldAssembly.NCellJunctionFiller", ToolTip="The actor spawned to fill a junction when none of that junction's authored fillers are eligible. Must implement NCellJunctionFiller. Setting this Actor does not guarantee its inclusion in a build, you must take steps to include it manually."))
 	TSoftClassPtr<AActor> AssemblySpawningDefaultJunctionFiller;
 
-	/** Fallback filler spawned when none of a junction's authored fillers are eligible; must implement INCellJunctionFiller. */
-	UPROPERTY(Config, EditAnywhere, DisplayName="Junction Default Connector", Category="Assembly|Spawning",
-		meta=(MustImplement="/Script/NexusWorldAssembly.NCellJunctionConnector", ToolTip="The actor spawned to connect two junctions in close proximity. Must implement NCellJunctionConnector. Setting this Actor does not guarantee its inclusion in a build, you must take steps to include it manually."))
-	TSoftClassPtr<AActor> AssemblySpawningDefaultJunctionConnector;
+
 
 	/** When true, junction filling registers with the subsystem to be time-sliced via Junction Time Slice rather than spawning immediately. */
 	UPROPERTY(Config, EditAnywhere, DisplayName="Delayed Junction Spawning", Category="Assembly|Spawning",
