@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Collections/NGameplayTagCounterConstraint.h"
 #include "NWorldAssemblySettings.h"
+#include "Cell/NCellJunctionConnectorEntry.h"
 #include "Math/NMersenneTwister.h"
 #include "Types/NPositionRotation.h"
 #include "NOrganComponent.generated.h"
@@ -94,6 +95,16 @@ public:
 	/** Deterministic seed mixed into the organ's generation decisions. */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Operation")
 	int32 Seed = -1;
+
+	/**
+	 * Candidate connectors used when the connector pass pairs a junction on a cell this organ placed.
+	 *
+	 * The fallback for junctions that name no connector of their own, and in turn falls back to the project-wide
+	 * default. When a pairing spans two organs, the start end's organ list is consulted first; see
+	 * FNCellJunctionConnection for which end that is.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Organ Component|Connect", meta=(TitleProperty="{Actor}"))
+	TArray<FNCellJunctionConnectorEntry> Connectors;
 
 	/** Reference point this organ's cell directional constraints measure candidate bearings from. */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Operation", DisplayName="Direction Mode",

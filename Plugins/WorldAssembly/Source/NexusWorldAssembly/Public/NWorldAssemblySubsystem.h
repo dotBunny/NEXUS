@@ -6,11 +6,14 @@
 #include "Assembly/INAssemblyOperationOwner.h"
 #include "Macros/NSubsystemMacros.h"
 #include "Assembly/NAssemblyOperationSettings.h"
+#include "Cell/NCellJunctionConnection.h"
+#include "Cell/NCellJunctionConnectorEntry.h"
 #include "NWorldAssemblyRelay.h"
 #include "Types/NSimpleDelegates.h"
 #include "NWorldAssemblySubsystem.generated.h"
 
 class UNCellJunctionComponent;
+class ANCellLevelInstance;
 class UNOrganComponent;
 class ANWorldAssemblyRelay;
 class UNAssemblyOperation;
@@ -140,6 +143,36 @@ public:
 	bool HasQueuedCellJunctionsToFill() const { return !QueuedCellJunctionsToFill.IsEmpty(); }
 	void RegisterCellJunctionToFill(TObjectPtr<UNCellJunctionComponent> CellJunction);
 
+	/**
+	 * Record a junction pairing the connector pass accepted, to be built once both of its cells are live.
+	 *
+	 * The connecting actor cannot be spawned when the pairing is produced: cells stream in asynchronously, so
+	 * neither junction component exists yet. The pairing is held here and completed by the endpoints reporting in.
+	 * @param Connection The accepted pairing, including the route proved clear for it.
+	 */
+	void RegisterPendingJunctionConnector(const FNCellJunctionConnection& Connection);
+
+	/**
+	 * Report a junction that the connector pass paired as live and ready to be connected.
+	 *
+	 * Called by the junction on begin play. The second endpoint of a pairing to arrive moves it onto the spawn
+	 * queue; the first simply waits.
+	 * @param CellJunction The junction reporting in. Ignored unless its link details name a connector pairing.
+	 */
+	void RegisterJunctionConnectorEndpoint(UNCellJunctionComponent* CellJunction);
+
+	/**
+	 * Withdraw a junction from its connector pairing, destroying the connecting actor if one was built.
+	 *
+	 * Called when a junction goes away — most often its cell streaming out. The pairing itself is kept, so the
+	 * connector is rebuilt if the cell streams back in and the junction reports again.
+	 * @param CellJunction The junction being withdrawn.
+	 */
+	void UnregisterJunctionConnectorEndpoint(const UNCellJunctionComponent* CellJunction);
+
+	/** @return true if at least one connector pairing is waiting on its endpoints or on a spawn slice. */
+	bool HasPendingJunctionConnectors() const { return !PendingJunctionConnectors.IsEmpty(); }
+
 	/** Fired each time a new operation begins being tracked by the subsystem, immediately before its build is kicked off. */
 	UPROPERTY(BlueprintAssignable)
 	FNSimpleDynamicMulticastDelegate OnOperationStarted;
@@ -194,6 +227,66 @@ private:
 	/** Junctions registered for delayed, time-sliced filling; drained a slice at a time each tick (see Junction Time Slice). */
 	UPROPERTY()
 	TArray<TObjectPtr<UNCellJunctionComponent>> QueuedCellJunctionsToFill;
+
+	/** One accepted junction pairing, waiting on its two endpoints to stream in before it can be built. */
+	struct FPendingJunctionConnector
+	{
+		/** The pairing as the connector pass recorded it, including the cleared route. */
+		FNCellJunctionConnection Connection;
+
+		/** The start junction once it has reported in; null while its cell is not loaded. */
+		TWeakObjectPtr<UNCellJunctionComponent> StartJunction;
+
+		/** The end junction once it has reported in; null while its cell is not loaded. */
+		TWeakObjectPtr<UNCellJunctionComponent> EndJunction;
+
+		/** The connecting actor, once built. Destroyed and cleared if either endpoint goes away. */
+		TWeakObjectPtr<AActor> ConnectorActor;
+
+		/** Set while the pairing sits on the spawn queue, so a re-report cannot enqueue it twice. */
+		bool bQueued = false;
+	};
+
+	/**
+	 * Accepted pairings keyed by connector identifier, each waiting on its endpoints.
+	 *
+	 * Keyed by identifier rather than by junction because that is the only key both ends agree on: node identifiers
+	 * restart per assembly graph, and a pairing can span graphs.
+	 * @note Not a UPROPERTY: the members are weak pointers, which self-null, so reflection buys nothing here.
+	 */
+	TMap<int32, FPendingJunctionConnector> PendingJunctionConnectors;
+
+	/** Identifiers of pairings whose endpoints are both live, drained a slice at a time each tick. */
+	TArray<int32> QueuedJunctionConnectorsToSpawn;
+
+	/** Build the connecting actor for a pairing whose endpoints are both live. */
+	void SpawnJunctionConnector(FPendingJunctionConnector& Pending);
+
+	/**
+	 * Resolve which connector class to build for a pairing, and the offset to place it with.
+	 *
+	 * Walks the priority chain: the start junction's own list, then the end junction's, then the organ that placed
+	 * the start cell, then the organ that placed the end cell, and finally the project-wide default. Within a list,
+	 * entries are gated by their context-tag and tag-counter constraints against the owning cell's assembly state,
+	 * then one is picked weighted-at-random — the same selection fillers use.
+	 * @param Pending The pairing being built; both endpoints must be live.
+	 * @param OutOffset Receives the placement offset authored on the winning entry, or identity for the default.
+	 * @return The class to spawn, or nullptr when nothing is authored and the default is unset or unloaded.
+	 */
+	UClass* ResolveJunctionConnectorClass(const FPendingJunctionConnector& Pending, FTransform& OutOffset) const;
+
+	/**
+	 * Pick an eligible entry from one authored connector list.
+	 * @param Entries The list to select from.
+	 * @param CellLevelInstance The cell whose assembly state the constraints are evaluated against.
+	 * @param ConnectorIdentifier Mixed into the selection seed so two pairings on the same junction can differ.
+	 * @return The selected entry, or nullptr when the list is empty or every entry was gated out.
+	 */
+	static const FNCellJunctionConnectorEntry* SelectJunctionConnectorEntry(const TArray<FNCellJunctionConnectorEntry>& Entries,
+		ANCellLevelInstance* CellLevelInstance, int32 ConnectorIdentifier);
+
+	/** @return The registered organ component carrying Identifier, or nullptr when it is not (or no longer) present. */
+	static UNOrganComponent* FindOrganComponent(const FGuid& Identifier);
 
 	/**
 	 * Organs waiting to be folded into an assembly operation.

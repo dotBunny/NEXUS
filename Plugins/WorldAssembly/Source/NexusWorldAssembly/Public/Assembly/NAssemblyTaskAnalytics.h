@@ -2,6 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
+#include "Analytics/NConnectJunctionsAnalytics.h"
 #include "Analytics/NOrganGraphBuilderAnalytics.h"
 #include "Analytics/NProcessPassAnalytics.h"
 #include "Analytics/NWorldAssemblyTaskTimer.h"
@@ -188,6 +189,17 @@ public:
 	/** Mark the finish time of the collect-generation-passes record at Index. */
 	void CollectGenerationPassesFinish(int32 Index);
 
+	/** Start the timer for the junction-connector matching stage. */
+	void ConnectJunctionsStart();
+	/** Stop the timer for the junction-connector matching stage. */
+	void ConnectJunctionsFinish();
+
+	/**
+	 * Record the outcome of the junction-connector matching stage.
+	 * @param Analytics The populated counters; the stage's timer is preserved rather than overwritten.
+	 */
+	void ConnectJunctions_SetResult(const FNConnectJunctionsAnalytics& Analytics);
+
 	/** Start the timer for the create-spawn-cells-context stage. */
 	void CreateSpawnCellsContextStart();
 	/** Stop the timer for the create-spawn-cells-context stage. */
@@ -223,6 +235,9 @@ private:
 
 	/** Timer for the create-spawn-cells-context stage. */
 	FNWorldAssemblyTaskTimer CreateSpawnCellsContextTimer = FNWorldAssemblyTaskTimer();
+
+	/** Counters and timer for the junction-connector matching stage; a single record, since the stage runs once. */
+	FNConnectJunctionsAnalytics ConnectJunctionsAnalytics;
 
 	/** Per-organ-builder records allocated by OrganGraphBuilderCreate. */
 	TArray<FNOrganGraphBuilderAnalytics> OrganGraphBuilderAnalytics;

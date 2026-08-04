@@ -115,6 +115,14 @@ void UNCellJunctionComponent::BeginPlay()
 		}
 	}
 
+	// A connector-paired junction is connected but nothing occupies it yet: the actor that bridges it needs both
+	// cells live, so report in and let the subsystem build it once the far end arrives.
+	if (LinkDetails.bConnector)
+	{
+		UNWorldAssemblySubsystem::Get(GetWorld())->RegisterJunctionConnectorEndpoint(this);
+		return;
+	}
+
 	if (LinkDetails.bConnected)
 		return;
 
@@ -149,6 +157,14 @@ void UNCellJunctionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	if (EndPlayReason == EEndPlayReason::Type::Destroyed || EndPlayReason == EEndPlayReason::Type::RemovedFromWorld )
 	{
 		UWorld* World = GetWorld();
+
+		// A connector bridges two cells, so this one leaving strands it. Withdrawing tears it down and leaves the
+		// pairing intact, ready to rebuild if the cell streams back in.
+		if (LinkDetails.bConnector && World != nullptr)
+		{
+			UNWorldAssemblySubsystem::Get(World)->UnregisterJunctionConnectorEndpoint(this);
+		}
+
 		if (World != nullptr && FillerActor.Get() != nullptr)
 		{
 			AActor* Actor = FillerActor.Get();
@@ -480,15 +496,11 @@ void UNCellJunctionComponent::GetCachedHullPenetration(const FNRawMesh& Hull, co
 
 TArray<FVector> UNCellJunctionComponent::GetWorldCornerPoints(const FVector2D& SocketSize) const
 {
-	const FQuat DisplayQuat = FQuat(GetComponentRotation()) * FQuat(FRotator(0.0f, 90.0f, 0.0f));
-	const FRotator DisplayRotation = DisplayQuat.Rotator();
-
+	// Built from the live component transform rather than Details' baked one, which is why this cannot just take
+	// the FNCellJunctionDetails overload.
 	// TODO: Should this maybe be cached at spawning at runtime?
-	const FVector2D Size = FNWorldAssemblyUtils::GetWorldSize2D(Details.SocketSize, SocketSize);
-
-	const TArray<FVector> UnrotatedCornerPoints = FNWorldAssemblyUtils::GetCenteredWorldCornerPoints2D(Size.X,Size.Y, ENAxis::Z);
-	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, GetComponentLocation());
-	return RotatedCornerPoints;
+	return FNWorldAssemblyUtils::GetJunctionWorldCornerPoints(GetComponentLocation(), GetComponentRotation(),
+		Details.SocketSize, SocketSize);
 }
 
 

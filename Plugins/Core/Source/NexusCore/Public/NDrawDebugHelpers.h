@@ -3,6 +3,14 @@
 
 #pragma once
 
+// Self-contained rather than relying on the consumer: DrawSweep is inline and calls DrawDebugLine, the shape
+// overloads take FCollisionShape by value, and every signature defaults its depth priority to SDPG_World. None of
+// those come from CoreMinimal, so without these a new consumer that included this header early would not compile.
+#include "CoreMinimal.h"
+#include "DrawDebugHelpers.h"
+#include "SceneTypes.h"
+#include "Engine/EngineTypes.h"
+
 // #SONARQUBE-DISABLE-CPP_S107 Necessary verbosity of methods to fully convey the drawing methods
 
 /**
@@ -32,6 +40,25 @@ public:
 		const FRotator& Rotation, bool bPersistentLines = false, float LifeTime=-1.f, uint8 DepthPriority = SDPG_World,
 		FLinearColor ForegroundColor = FLinearColor::White, float Scale = 1, float LineHeight = 4.f,
 		float Thickness = 8.f, const bool bInvertLineFeed = false, const bool bDrawBelowPosition = true);
+
+	/**
+	 * Draws a connected run of debug lines through an ordered set of points.
+	 *
+	 * The polyline counterpart to DrawDebugLine, for the many places a path already exists as an array of points —
+	 * a spline sampled to a polyline, a traced route, a hull edge loop — and would otherwise need a loop at every
+	 * call site.
+	 * @param InWorld Which world to operate in.
+	 * @param Points Ordered world-space points to connect. Fewer than two draws nothing.
+	 * @param Color Color used for the drawn debug lines.
+	 * @param bClosedLoop Should a final segment connect the last point back to the first?
+	 * @param bPersistentLines Should the drawn lines be permanent?
+	 * @param LifeTime How long the lines should last if not permanent.
+	 * @param DepthPriority The scene depth priority group to draw into.
+	 * @param Thickness Line thickness in pixels.
+	 */
+	static void DrawPointLine(const UWorld* InWorld, const TArray<FVector>& Points, const FColor& Color,
+		bool bClosedLoop = false, bool bPersistentLines = false, float LifeTime = -1.f,
+		uint8 DepthPriority = SDPG_World, float Thickness = 2.f);
 
 	/**
 	 * Draws a swept FCollisionShape from a start to an end position, dispatching to the correct shape helper.

@@ -47,6 +47,85 @@ struct FNWorldAssemblyWorldCollisionSettings
 
 
 /**
+ * Tuning for the junction-connector pass, which pairs junctions the graph builders left unmatched and proves a
+ * collision-free swept path between each pair.
+ *
+ * Held both project-wide on UNWorldAssemblySettings and per-operation on FNAssemblyOperationSettings; the assembly
+ * task graph reads the operation's copy, since the pass runs on a worker thread and cannot touch the settings object.
+ */
+USTRUCT(BlueprintType)
+struct FNWorldAssemblyJunctionConnectorSettings
+{
+	GENERATED_BODY()
+
+	/** When false, the junction-connector pass is skipped entirely and unmatched junctions are filled as before. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Enabled",
+		meta=(ToolTip="Should unmatched junctions in close proximity be paired up and connected with geometry?"))
+	bool bEnabled = true;
+
+	/** Straight-line distance within which two unmatched junctions are considered as a candidate pair. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Maximum Range",
+		meta=(ToolTip="The maximum distance a junction can be to be considered to match.", ClampMin="0", Units="cm"))
+	float MaximumRange = 5000.f;
+
+	/** Upper bound on the arc length of the connecting spline; a pair whose path exceeds this is rejected. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Maximum Spline Length",
+		meta=(ToolTip="The maximum spline length allowed to connect two unmatched Junctions.", ClampMin="0", Units="cm"))
+	float MaximumSplineLength = 1000.f;
+
+	/** Radius of the coarse clearance sweep run along the center spline before the exact socket-corner test. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Spline Radius",
+		meta=(ToolTip="The collision check distance around the spline.", ClampMin="0", Units="cm"))
+	float SplineRadius = 200.f;
+
+	/** Spacing between samples when a spline is flattened to a polyline for length and collision testing; smaller is more accurate and slower. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Sample Step",
+		meta=(ToolTip="How far apart to sample a connector spline when measuring its length and sweeping it for collisions.", ClampMin="1", Units="cm"))
+	float SampleStep = 50.f;
+
+	/**
+	 * Spline tangent magnitude at each socket, as a fraction of the straight-line distance between the two junctions.
+	 * @note Larger values leave each socket more perpendicular before curving, at the cost of a longer path.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Tangent Scale",
+		meta=(ToolTip="How strongly the spline leaves each socket along its facing, as a fraction of the distance between the two junctions.", ClampMin="0", ClampMax="2"))
+	float TangentScale = 0.5f;
+
+	/** Number of detour variants tried when the natural path collides, before the pair is abandoned. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Maximum Avoidance Attempts",
+		meta=(ToolTip="How many alternate spline paths to try when the direct path is blocked.", ClampMin="0"))
+	int32 MaximumAvoidanceAttempts = 16;
+
+	/** Distance each successive detour variant pushes its midpoint away from the direct path. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Avoidance Offset Step",
+		meta=(ToolTip="How far each successive avoidance attempt pushes the spline off the direct path.", ClampMin="1", Units="cm"))
+	float AvoidanceOffsetStep = 200.f;
+
+	/**
+	 * Distance from each socket over which the owning cell's own hull is excluded from collision testing.
+	 * @note A socket sits on its cell's hull surface, so without this every path would collide at both endpoints.
+	 *       Beyond this distance the hull is tested again, which is what rejects a path that curls back into its
+	 *       own cell.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Endpoint Exclusion",
+		meta=(ToolTip="How far from each socket the connected cell's own geometry is ignored when checking for collisions.", ClampMin="0", Units="cm"))
+	float EndpointExclusion = 100.f;
+
+	/**
+	 * When false, two cells may hold at most one connection between them, and a candidate pair whose cells are
+	 * already linked is rejected.
+	 * @note "Already linked" covers both a doorway the graph builders mated and a connector this same pass accepted
+	 *       earlier, so several openings facing each other across two cells produce one connector rather than a
+	 *       bundle. Only a direct link between the two cells blocks — cells joined indirectly through others are
+	 *       still free to connect, which is usually the interesting case.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Allow Multiple Cell Connections",
+		meta=(ToolTip="Can two cells be connected more than once? When disabled, cells that are already joined - by a doorway or by an earlier connector - will not be connected again."))
+	bool bAllowMultipleCellConnections = false;
+};
+
+
+/**
  * Project-wide settings for the NexusWorldAssembly plugin.
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "World Assembly Settings", Config=NexusGame, defaultconfig)
@@ -147,23 +226,15 @@ public:
 	float AssemblyDirectionTolerance = 15.f;
 
 
-	UPROPERTY(Config, EditAnywhere, DisplayName="Junction Default Connector", Category="Assembly|Spawning",
+	/** Fallback connector spawned for a paired junction when neither junction nor organ names one; must implement INCellJunctionConnector. */
+	UPROPERTY(Config, EditAnywhere, DisplayName="Junction Default Connector", Category="Assembly|Junction Connecting",
 		meta=(MustImplement="/Script/NexusWorldAssembly.NCellJunctionConnector", ToolTip="The actor spawned to connect two junctions in close proximity. Must implement NCellJunctionConnector. Setting this Actor does not guarantee its inclusion in a build, you must take steps to include it manually."))
 	TSoftClassPtr<AActor> AssemblyDefaultJunctionConnector;
 
-	UPROPERTY(Config, EditAnywhere, DisplayName="Maximum Junction Default Connection Range", Category="Assembly|Spawning",
-	meta=(ToolTip="The maximum distance a junction can be to be considered to match."))
-	float AssemblyJunctionConnectorMaximumRange = 5000.f;
-
-	UPROPERTY(Config, EditAnywhere, DisplayName="Maximum Junction Default Connection Spline Length", Category="Assembly|Spawning",
-meta=(ToolTip="The maximum spline length allowed to connect two unmatched Junctions. "))
-	float AssemblyJunctionConnectorMaximumSplineLength = 1000.f;
-
-
-	UPROPERTY(Config, EditAnywhere, DisplayName="Maximum Junction Default Connection Spline Radius", Category="Assembly|Spawning",
-meta=(ToolTip="The collision check distance around the spline"))
-	float AssemblyJunctionConnectorSplineRadius = 200.f;
-
+	/** Tuning for the pass that pairs unmatched junctions and routes a connecting spline between them. */
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Connecting", DisplayName="Junction Connectors",
+		meta=(ToolTip="Settings used when matching up unmatched junctions and routing geometry between them."))
+	FNWorldAssemblyJunctionConnectorSettings JunctionConnectorSettings;
 
 	/** Target per-frame time budget for spawning cells; the remainder is queued to a new task once exceeded. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Spawning", DisplayName="Cell Time Slice",

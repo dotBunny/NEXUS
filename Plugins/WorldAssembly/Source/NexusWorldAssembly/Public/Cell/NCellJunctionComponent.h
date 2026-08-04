@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "NCellAssemblyData.h"
+#include "NCellJunctionConnectorEntry.h"
 #include "NCellJunctionDetails.h"
 #include "NCellJunctionFillerEntry.h"
 #include "NCellLinkDetails.h"
@@ -77,6 +78,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction|Fill", meta=(TitleProperty="{Actor}", EditCondition="!bDisableFill"))
 	TArray<FNCellJunctionFillerEntry> Fillers;
 
+	/**
+	 * Candidate connectors for this junction, used when the connector pass pairs it with another cell's junction.
+	 *
+	 * Takes priority over the owning organ's list and the project-wide default. When a pairing has a list at both
+	 * ends, the start end's wins; see FNCellJunctionConnection for which end that is.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction|Connect", meta=(TitleProperty="{Actor}"))
+	TArray<FNCellJunctionConnectorEntry> Connectors;
+
 	/** When true, bypass filler time-slicing and spawn this junction's filler immediately during BeginPlay. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Spawn Filler Immediately", Category = "Cell Junction|Fill",
 		meta=(ToolTip="Override timeslicing support and immediately spawn this filler in BeginPlay", EditCondition="!bDisableFill"))
@@ -98,6 +108,9 @@ public:
 	virtual void OnRegister() override;
 	virtual void OnUnregister() override;
 	//End USceneComponent
+
+	/** @return The cell level instance this junction was spawned as part of, or nullptr before it is streamed in. */
+	ALevelInstance* GetLevelInstance() const { return LevelInstance.Get(); }
 
 	/** @return The rotational offset authored on the junction's details. */
 	FRotator GetOffsetRotator() const;

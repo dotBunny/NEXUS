@@ -211,6 +211,15 @@ void FNAssemblyGraphCellNode::GenerateLinkDetails()
 		FNAssemblyGraphNode* LinkedNode = *LinkedNodePtr;
 		Details.ConnectedNodeIdentifier = LinkedNode->GetNodeIdentifier();
 
+		// A connector pairing links across open space, and can link across graphs — in which case
+		// ConnectedNodeIdentifier is ambiguous (identifiers restart per graph) and the identifier stamped here is
+		// what actually rejoins the two ends at runtime.
+		if (const int32* ConnectorIdentifierPtr = ConnectorLinks.Find(Junction.Key))
+		{
+			Details.bConnector = true;
+			Details.ConnectorIdentifier = *ConnectorIdentifierPtr;
+		}
+
 		if (LinkedNode->GetNodeType() == ENAssemblyGraphNodeType::Null) continue;
 
 		// Connected means its connected to a cell or a bone, not a null object and shouldnt be filled
@@ -247,6 +256,20 @@ void FNAssemblyGraphCellNode::LinkJunction(const int32 JunctionKey, FNAssemblyGr
 	Links.Add(JunctionKey, Node);
 }
 
+void FNAssemblyGraphCellNode::LinkJunctionConnector(const int32 JunctionKey, FNAssemblyGraphNode* Node, const int32 ConnectorIdentifier)
+{
+	LinkJunction(JunctionKey, Node);
+
+	// LinkJunction logs and bails when the key was not free, leaving it absent from Links. Mirror that here rather
+	// than recording a pairing for a junction that was never actually linked to Node.
+	if (Links.FindRef(JunctionKey) != Node)
+	{
+		return;
+	}
+
+	ConnectorLinks.Add(JunctionKey, ConnectorIdentifier);
+}
+
 int32 FNAssemblyGraphCellNode::FindJunctionKeyLinkedTo(const FNAssemblyGraphNode* Node) const
 {
 	for (const auto& Link : Links)
@@ -269,5 +292,6 @@ void FNAssemblyGraphCellNode::UnlinkJunction(const int32 JunctionKey)
 	}
 
 	Links.Remove(JunctionKey);
+	ConnectorLinks.Remove(JunctionKey);
 	FreeJunctionKeys.Add(JunctionKey);
 }

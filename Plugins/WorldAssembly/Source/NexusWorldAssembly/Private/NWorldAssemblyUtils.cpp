@@ -465,6 +465,24 @@ TArray<FVector> FNWorldAssemblyUtils::GetCenteredWorldCornerPoints2D(
 	return ReturnPositions;
 }
 
+TArray<FVector> FNWorldAssemblyUtils::GetJunctionWorldCornerPoints(const FVector& Location, const FRotator& Rotation,
+	const FIntVector2& Units, const FVector2D& UnitSize)
+{
+	// Compose: yaw-align the local XZ-plane corners into the YZ-plane (rect normal becomes +X), then apply the
+	// junction rotation. Rotator addition is component-wise and only matches composition for yaw-only inputs;
+	// quaternions compose correctly for pitch and roll too.
+	const FQuat DisplayQuat = FQuat(Rotation) * FQuat(FRotator(0.0f, 90.0f, 0.0f));
+
+	const FVector2D Size = GetWorldSize2D(Units, UnitSize);
+	const TArray<FVector> UnrotatedCornerPoints = GetCenteredWorldCornerPoints2D(Size.X, Size.Y, ENAxis::Z);
+	return FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayQuat.Rotator(), Location);
+}
+
+TArray<FVector> FNWorldAssemblyUtils::GetJunctionWorldCornerPoints(const FNCellJunctionDetails& Details, const FVector2D& UnitSize)
+{
+	return GetJunctionWorldCornerPoints(Details.WorldLocation, Details.WorldRotation, Details.SocketSize, UnitSize);
+}
+
 void FNWorldAssemblyUtils::GetVoxelQueryPoints(const FVector& WorldCenter, const FVector& VoxelSize, TArray<FVector>& OutPositions)
 {
 	/** Directional Vectors (26)

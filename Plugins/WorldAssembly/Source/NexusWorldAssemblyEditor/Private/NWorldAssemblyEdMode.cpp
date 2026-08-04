@@ -11,7 +11,9 @@
 #include "NWorldAssemblyRegistry.h"
 #include "Cell/NCellRootComponent.h"
 #include "NEditorUtils.h"
+#include "NWorldAssemblyDebugDraw.h"
 #include "NWorldAssemblyEditorSettings.h"
+#include "NWorldAssemblyEditorSubsystem.h"
 #include "NWorldAssemblyEditorUserSettings.h"
 #include "Developer/NPrimitiveFont.h"
 #include "NWorldAssemblyEditorUtils.h"
@@ -223,6 +225,7 @@ void FNWorldAssemblyEdMode::CacheUserSettings()
 	CachedJunctionUnfilledColor = Settings->ColorPaletteJunctionsUnfilled;
 	CachedJunctionValidColor = Settings->ColorPaletteJunctionsValid;
 	CachedJunctionInvalidColor = Settings->ColorPaletteJunctionsInvalid;
+	CachedJunctionConnectorCornersColor = Settings->ColorPaletteJunctionsConnectorCorners;
 }
 
 const FEditorModeID FNWorldAssemblyEdMode::Identifier = TEXT("NWorldAssemblyEdMode");
@@ -245,6 +248,7 @@ FLinearColor FNWorldAssemblyEdMode::CachedCellBoundsColor = NEXUS::WorldAssembly
 FLinearColor FNWorldAssemblyEdMode::CachedJunctionUnfilledColor = NEXUS::WorldAssembly::DefaultColors::JunctionUnfilled;
 FLinearColor FNWorldAssemblyEdMode::CachedJunctionInvalidColor = NEXUS::WorldAssembly::DefaultColors::JunctionInvalid;
 FLinearColor FNWorldAssemblyEdMode::CachedJunctionValidColor = NEXUS::WorldAssembly::DefaultColors::JunctionValid;
+FLinearColor FNWorldAssemblyEdMode::CachedJunctionConnectorCornersColor = NEXUS::WorldAssembly::DefaultColors::JunctionConnectorCorners;
 FLinearColor FNWorldAssemblyEdMode::CachedBoneValidColor = NEXUS::WorldAssembly::DefaultColors::BoneValid;
 FLinearColor FNWorldAssemblyEdMode::CachedBoneInvalidColor = NEXUS::WorldAssembly::DefaultColors::BoneInvalid;
 
@@ -456,6 +460,24 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 				continue;
 			}
 
+			// Runtime Connected, by a routed connector rather than by mating directly with another cell. Tested
+			// ahead of bConnected because a connector pairing sets both, and it is the more specific state — the
+			// socket is spanned by geometry that arrives separately, not closed off against a neighbouring cell.
+			if (LinkDetails.bConnector)
+			{
+				// Both ends draw, unlike the mated case below. A mated pair has its two sockets co-located, so that
+				// branch elects a single drawer to avoid rendering the same rectangle twice; a connector pair is
+				// specifically two sockets with open space between them, so electing one would leave the other end
+				// invisible. (The election would also be meaningless here: node identifiers restart per graph, and a
+				// connector pair can span graphs, so both ends can hold the same one.)
+				JunctionComponent->DrawDebugPDI(PDI,
+					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsValid,
+					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsValid,
+					false, true, true, true,
+					WorldAssemblySettings);
+				continue;
+			}
+
 			// Runtime Connected
 			if (LinkDetails.bConnected)
 			{
@@ -483,6 +505,29 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 		for (const auto BoneComponent : FNWorldAssemblyRegistry::GetBoneComponents())
 		{
 			BoneComponent->DrawDebugPDI(PDI, WorldAssemblyEditorUserSettings->ColorPaletteBonesValid, WorldAssemblyEditorUserSettings->ColorPaletteBonesInvalid, false, false);
+		}
+	}
+
+	// Draw the routes the connector pass proved clear. Deliberately outside the junction-component block above: the
+	// routes come from the editor subsystem's own cache rather than the registry, so they draw in the default
+	// proxy-only preview too — which is exactly the case with no junction components to hang them off.
+	if (UNWorldAssemblyEditorUserSettings::Get()->bDebugWorldDrawJunctionConnectors)
+	{
+		const UWorld* CurrentWorld = GetWorld();
+		for (const TPair<int32, UNWorldAssemblyEditorSubsystem::FNGeneratedConnections>& Entry :
+			UNWorldAssemblyEditorSubsystem::Get()->GetGeneratedConnections())
+		{
+			// Routes are world-space points with no object references, so unlike the proxies they would happily
+			// outlive their world; skipping on a mismatch is what keeps one world's routes out of another's viewport.
+			if (Entry.Value.World.Get() != CurrentWorld) continue;
+
+			for (const FNCellJunctionConnection& Connection : Entry.Value.Connections)
+			{
+				// Center and corners share the one connector color; the junction sockets at either end are drawn in
+				// the ordinary valid color by the loop above, so the route is what reads as distinct.
+				FNWorldAssemblyDebugDraw::DrawConnectorPath(PDI, Connection.Path,
+					GetCachedJunctionConnectorCornersColor(), GetCachedJunctionConnectorCornersColor());
+			}
 		}
 	}
 

@@ -16,8 +16,10 @@
 #include "Assembly/Contexts/NVirtualWorldContext.h"
 #include "Assembly/Tasks/NCreateVirtualWorldTask.h"
 #include "Assembly/Tasks/NProcessVirtualWorldTask.h"
+#include "Assembly/Tasks/NConnectJunctionsTask.h"
 #include "Assembly/Tasks/NCreateSpawnsTask.h"
 #include "Assembly/Tasks/NSpawnCellProxiesTask.h"
+#include "Assembly/Tasks/NSpawnJunctionConnectorsTask.h"
 
 #include "Math/NMersenneTwister.h"
 #include "Math/NSeedGenerator.h"
@@ -135,8 +137,21 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 
 	// TODO: Validate task to ensure generation is completable?
 
-	// TODO: Match close proximity junctions that are not of the same cell, and are within the range
+	// ----- STEP 3 - CONNECT UNMATCHED JUNCTIONS ---------------------------------------------------------------------------------------------------
 
+	// Gated on every pass's collection task: those are what move the built graphs into the task-graph context and
+	// every placed cell hull into the world context, so only once they have all finished does this see the complete
+	// generated output it needs to match against. It in turn gates FNCreateSpawnsTask, so a pairing it makes is
+	// already in place when link details are generated from it.
+	//
+	// SocketSize is snapshotted here, on the game thread, because the task runs on a worker and cannot reach the
+	// settings object itself.
+	FGraphEventRef ConnectJunctionsTask = TGraphTask<FNConnectJunctionsTask>::CreateTask(
+		&CollectionTasks, FNConnectJunctionsTask::GetDesiredThread())
+		.ConstructAndHold(VirtualWorldContextPtr, TaskGraphContextPtr,
+			UNWorldAssemblySettings::Get()->SocketSize N_ASSEMBLY_ANALYTICS_CLASS_REF);
+	ConnectJunctionsTasks.Add(ConnectJunctionsTask);
+	AllTasks.Add(ConnectJunctionsTask);
 
 	const FNAssemblyOperationSettings& OperatingSettings = Context->GetOperationSettings();
 
@@ -145,11 +160,20 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 		OperatingSettings.bPreLoadLevelInstances, OperatingSettings.bCreateLevelInstances,
 		(OperatingSettings.CellSpawnTimeSlice * 0.001f)); // Convert to expected timescale
 
-	FGraphEventRef CreateSpawnsTask = TGraphTask<FNCreateSpawnsTask>::CreateTask(&CollectionTasks, FNCreateSpawnsTask::GetDesiredThread())
+	FGraphEventRef CreateSpawnsTask = TGraphTask<FNCreateSpawnsTask>::CreateTask(&ConnectJunctionsTasks, FNCreateSpawnsTask::GetDesiredThread())
 		.ConstructAndHold(SpawnContextPtr, TaskGraphContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
 	FinalizerTasks.Add(CreateSpawnsTask);
 	SpawnContextTasks.Add(CreateSpawnsTask);
 	AllTasks.Add(CreateSpawnsTask);
+
+	// Hand the accepted junction pairings to the subsystem, which builds each one once both of its cells have
+	// streamed in. Sits alongside the cell spawning rather than after it: it does not spawn anything itself, and the
+	// junctions it is waiting on begin reporting as soon as the first cells load.
+	FGraphEventRef SpawnJunctionConnectorsTask = TGraphTask<FNSpawnJunctionConnectorsTask>::CreateTask(
+		&SpawnContextTasks, FNSpawnJunctionConnectorsTask::GetDesiredThread())
+		.ConstructAndHold(TaskGraphContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
+	FinalizerTasks.Add(SpawnJunctionConnectorsTask);
+	AllTasks.Add(SpawnJunctionConnectorsTask);
 
 	// Create our dispatcher task that will time-slice spawning
 	FGraphEventRef SpawnCellProxiesTaskCompleted = FGraphEvent::CreateGraphEvent();
@@ -229,6 +253,7 @@ void FNAssemblyTaskGraph::TearDownGraph()
 	ProcessInitialGameThreadTasks.Empty();
 	ProcessPassTasks.Empty();
 	CollectionTasks.Empty();
+	ConnectJunctionsTasks.Empty();
 	SpawnContextTasks.Empty();
 
 	FinalizerTasks.Empty();

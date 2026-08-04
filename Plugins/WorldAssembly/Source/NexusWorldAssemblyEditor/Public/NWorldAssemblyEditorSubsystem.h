@@ -7,6 +7,7 @@
 #include "Engine/TimerHandle.h"
 #include "NEditorUtils.h"
 #include "Assembly/NAssemblyOperation.h"
+#include "Cell/NCellJunctionConnection.h"
 #include "Macros/NEditorSubsystemMacros.h"
 #include "NWorldAssemblyEditorSubsystem.generated.h"
 
@@ -187,8 +188,42 @@ private:
 	UPROPERTY()
 	TArray<TObjectPtr<ANCellProxy>> KnownProxies;
 
+public:
+	/** One operation's accepted junction pairings, retained so the ed mode can draw the routes it proved clear. */
+	struct FNGeneratedConnections
+	{
+		/**
+		 * World the pairings were generated into.
+		 * @note Held because FNCellJunctionConnection is a plain struct of world-space points with no object
+		 *       references — unlike the proxy entries, whose weak pointers self-null when their world goes away,
+		 *       these would happily outlive their world and draw into an unrelated one.
+		 */
+		TWeakObjectPtr<UWorld> World;
+
+		/** The pairings, copied out of the task-graph context before it is torn down. */
+		TArray<FNCellJunctionConnection> Connections;
+	};
+
+	/**
+	 * @return Accepted junction pairings from every completed operation, keyed by operation ticket.
+	 * @note Editor-side only. The routes live on the task-graph context, which is destroyed with the operation, and
+	 *       the runtime subsystem never receives them for an editor preview — FNSpawnJunctionConnectorsTask skips
+	 *       registration when the operation creates no level instances, which is the editor default.
+	 */
+	const TMap<int32, FNGeneratedConnections>& GetGeneratedConnections() const { return ConnectionMap; }
+
+private:
+
 	/** Index from operation ticket to the proxies spawned by that operation, for fast per-operation cleanup. */
 	TMap<int32, TArray<TObjectPtr<ANCellProxy>>> ProxyMap;
+
+	/**
+	 * Index from operation ticket to that operation's accepted junction pairings; the visual counterpart to ProxyMap,
+	 * cleared on the same paths.
+	 * @note Not a UPROPERTY: FNCellJunctionConnection holds no object references, and the world it carries is a weak
+	 *       pointer, so there is nothing here for reflection to keep alive.
+	 */
+	TMap<int32, FNGeneratedConnections> ConnectionMap;
 
 	/** Frame number of the last Tick — guards against re-entrant ticking from multiple callers. */
 	uint32 LastFrameNumberWeTicked = INDEX_NONE;

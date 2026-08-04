@@ -42,6 +42,7 @@ namespace NEXUS::WorldAssembly::DefaultColors
 	static constexpr FLinearColor JunctionValid = FLinearColor(0.010330f,1.f,0.391573f, 1.f); // #1AFFA8FF
 	static constexpr FLinearColor JunctionInvalid = FLinearColor(1.f,0.097587f,1.f, 1.f); // #FF58FFFF
 	static constexpr FLinearColor JunctionUnfilled = FLinearColor(1.f,1.f,1.f, 1.f); // #FFFFFFFF
+	static constexpr FLinearColor JunctionConnectorCorners = FLinearColor(0.947307f,0.745404f,0.964686f, 1.f); // #A06600FF
 
 	static constexpr FLinearColor CellHull = FLinearColor(0.f,0.630757f,1.f, 1.f); // #00D0FFFF
 	static constexpr FLinearColor CellBounds = FLinearColor(0.434154f,0.006995f,0.001821f, 1.f); // #B01406FF
@@ -92,6 +93,9 @@ public:
 	static const FLinearColor& GetCachedJunctionValidColor() { return CachedJunctionValidColor; }
 
 	static const FLinearColor& GetCachedJunctionUnfilledColor() { return CachedJunctionUnfilledColor; }
+
+	/** @return Cached color for the curves of a junction connector's route. */
+	static const FLinearColor& GetCachedJunctionConnectorCornersColor() { return CachedJunctionConnectorCornersColor; }
 
 	static const FLinearColor& GetCachedBoneValidColor() { return CachedBoneValidColor; }
 
@@ -250,6 +254,7 @@ private:
 	static FLinearColor CachedJunctionUnfilledColor;
 	static FLinearColor CachedJunctionInvalidColor;
 	static FLinearColor CachedJunctionValidColor;
+	static FLinearColor CachedJunctionConnectorCornersColor;
 	static FLinearColor CachedBoneValidColor;
 	static FLinearColor CachedBoneInvalidColor;
 

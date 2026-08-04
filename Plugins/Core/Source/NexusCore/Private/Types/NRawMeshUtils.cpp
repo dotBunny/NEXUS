@@ -573,6 +573,69 @@ FNRawMesh FNRawMeshUtils::MakeBoxHull(const FBox& Box)
 	return Hull;
 }
 
+FNRawMesh FNRawMeshUtils::MakeConvexPrism(const TStaticArray<FVector, 4>& NearCorners, const TStaticArray<FVector, 4>& FarCorners)
+{
+	// The index layout below is MakeBoxHull's, which assumes the near cap (0-3) is wound so its right-hand normal
+	// points at the far cap (4-7). Callers order corners to suit their own geometry, not ours, so rather than
+	// demanding a winding we detect the flipped case and swap the two caps — which reverses the near cap's normal
+	// relative to the sweep without disturbing the i <-> i+4 pairing the side faces rely on.
+	FVector NearNormal = FVector::ZeroVector;
+	FVector NearCenter = FVector::ZeroVector;
+	FVector FarCenter = FVector::ZeroVector;
+	for (int32 i = 0; i < 4; i++)
+	{
+		// Newell's method: robust for the slightly non-planar caps a swept cross-section produces, where picking
+		// a single triangle's cross product would key the whole orientation off one arbitrary corner.
+		const FVector& Current = NearCorners[i];
+		const FVector& Next = NearCorners[(i + 1) % 4];
+		NearNormal.X += (Current.Y - Next.Y) * (Current.Z + Next.Z);
+		NearNormal.Y += (Current.Z - Next.Z) * (Current.X + Next.X);
+		NearNormal.Z += (Current.X - Next.X) * (Current.Y + Next.Y);
+
+		NearCenter += Current;
+		FarCenter += FarCorners[i];
+	}
+	// A degenerate cap leaves the normal at zero, making the dot product zero and the swap a no-op. That is the
+	// right outcome: there is no winding to preserve, and the hull is degenerate whichever order it is emitted in.
+	const bool bFlipped = FVector::DotProduct(NearNormal, FarCenter - NearCenter) < 0.0;
+
+	const TStaticArray<FVector, 4>& First = bFlipped ? FarCorners : NearCorners;
+	const TStaticArray<FVector, 4>& Second = bFlipped ? NearCorners : FarCorners;
+
+	FNRawMesh Prism;
+	Prism.Vertices = {
+		First[0], First[1], First[2], First[3],       // 0-3, cap the prism sweeps from
+		Second[0], Second[1], Second[2], Second[3],   // 4-7, cap the prism sweeps to
+	};
+
+	// Polygonal faces, each wound so its Newell normal points away from the prism interior: the near cap reversed,
+	// the far cap as-is, and one quad per near-cap edge bridging to its far-cap counterpart.
+	Prism.FaceLoops = {
+		FNRawMeshLoop(0, 3, 2, 1), // near cap
+		FNRawMeshLoop(4, 5, 6, 7), // far cap
+		FNRawMeshLoop(0, 1, 5, 4),
+		FNRawMeshLoop(1, 2, 6, 5),
+		FNRawMeshLoop(2, 3, 7, 6),
+		FNRawMeshLoop(3, 0, 4, 7),
+	};
+
+	// Matching fan triangulation (a,b,c,d -> a,b,c + a,c,d) preserving each face's outward winding.
+	Prism.Loops = {
+		FNRawMeshLoop(0, 3, 2), FNRawMeshLoop(0, 2, 1),
+		FNRawMeshLoop(4, 5, 6), FNRawMeshLoop(4, 6, 7),
+		FNRawMeshLoop(0, 1, 5), FNRawMeshLoop(0, 5, 4),
+		FNRawMeshLoop(1, 2, 6), FNRawMeshLoop(1, 6, 5),
+		FNRawMeshLoop(2, 3, 7), FNRawMeshLoop(2, 7, 6),
+		FNRawMeshLoop(3, 0, 4), FNRawMeshLoop(3, 4, 7),
+	};
+
+	Prism.CalculateCenterAndBounds();
+	// Same reason as MakeBoxHull: the buffers were assigned directly, bypassing the mutators that mark validation
+	// dirty, so without this the cached flags stay at their stale defaults.
+	Prism.Validate();
+	return Prism;
+}
+
 bool FNRawMeshUtils::IsRelativePointInside(const FNRawMesh& Mesh, const FVector& RelativePoint)
 {
 	if (Mesh.HasNonTris())

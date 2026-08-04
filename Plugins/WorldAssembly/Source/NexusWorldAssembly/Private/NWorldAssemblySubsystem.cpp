@@ -11,8 +11,12 @@
 #include "Assembly/NAssemblyOperation.h"
 #include "NWorldAssemblyRegistry.h"
 #include "NWorldAssemblyRelay.h"
+#include "Cell/INCellJunctionConnector.h"
 #include "Cell/NCellJunctionComponent.h"
+#include "Cell/NCellLevelInstance.h"
 #include "Cell/NCellProxy.h"
+#include "Collections/NWeightedIntegerArray.h"
+#include "Math/NMersenneTwister.h"
 #include "Developer/NMethodScopeTimer.h"
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
@@ -116,6 +120,12 @@ void UNWorldAssemblySubsystem::Clear()
 		Proxy->DestroyLevelInstance(true, true);
 		Proxy->Destroy();
 	}
+
+	// Drop every connector pairing. The connector actors themselves are tracked per operation and destroyed by the
+	// sweep below, so this only discards the bookkeeping — but it has to happen, or a pairing whose cells never
+	// streamed in would outlive the generation that produced it and rebuild against the next one.
+	PendingJunctionConnectors.Empty();
+	QueuedJunctionConnectorsToSpawn.Empty();
 
 	// Handle our track for cleanup — destroy every operation's tracked actors, then drop all buckets.
 	for (const TPair<int32, TArray<TWeakObjectPtr<AActor>>>& Pair : TrackedOperationActors)
@@ -279,11 +289,37 @@ void UNWorldAssemblySubsystem::Tick(float DeltaTime)
 			}
 		}
 	}
+
+	// Connector pairings whose two cells have both streamed in. Shares the junction slice budget: both are the same
+	// kind of work (spawning a piece of geometry into a junction) arriving on the same streaming-driven schedule.
+	if (QueuedJunctionConnectorsToSpawn.Num() > 0)
+	{
+		const double SliceSeconds = CachedCellJunctionTimeSlice;
+		const double StartTime = FPlatformTime::Seconds();
+		for (int32 i = QueuedJunctionConnectorsToSpawn.Num() - 1; i >= 0; i--)
+		{
+			const int32 ConnectorIdentifier = QueuedJunctionConnectorsToSpawn[i];
+			QueuedJunctionConnectorsToSpawn.RemoveAt(i);
+
+			if (FPendingJunctionConnector* Pending = PendingJunctionConnectors.Find(ConnectorIdentifier))
+			{
+				Pending->bQueued = false;
+				SpawnJunctionConnector(*Pending);
+			}
+
+			// Always spawn at least one per tick; stop once the slice is spent.
+			if (FPlatformTime::Seconds() - StartTime > SliceSeconds)
+			{
+				break;
+			}
+		}
+	}
 }
 
 bool UNWorldAssemblySubsystem::IsTickable() const
 {
-	if (KnownOperations.Num() > 0 || QueuedOrgansForAssembly.Num() > 0  || QueuedCellJunctionsToFill.Num() > 0 || bCachedSeamlessTravelMonitor) return true;
+	if (KnownOperations.Num() > 0 || QueuedOrgansForAssembly.Num() > 0  || QueuedCellJunctionsToFill.Num() > 0
+		|| QueuedJunctionConnectorsToSpawn.Num() > 0 || bCachedSeamlessTravelMonitor) return true;
 	return false;
 }
 
@@ -373,6 +409,256 @@ void UNWorldAssemblySubsystem::RegisterCellJunctionToFill(TObjectPtr<UNCellJunct
 {
 	// TODO: Do we want to make cell filling server authoritative? This will need some changes down the line, nothing major.
 	QueuedCellJunctionsToFill.AddUnique(CellJunction);
+}
+
+void UNWorldAssemblySubsystem::RegisterPendingJunctionConnector(const FNCellJunctionConnection& Connection)
+{
+	if (Connection.ConnectorIdentifier == INDEX_NONE) return;
+
+	FPendingJunctionConnector& Pending = PendingJunctionConnectors.FindOrAdd(Connection.ConnectorIdentifier);
+	Pending.Connection = Connection;
+}
+
+void UNWorldAssemblySubsystem::RegisterJunctionConnectorEndpoint(UNCellJunctionComponent* CellJunction)
+{
+	if (CellJunction == nullptr) return;
+
+	const FNCellLinkDetails& LinkDetails = CellJunction->LinkDetails;
+	if (!LinkDetails.bConnector) return;
+
+	FPendingJunctionConnector* Pending = PendingJunctionConnectors.Find(LinkDetails.ConnectorIdentifier);
+	if (Pending == nullptr)
+	{
+		// The endpoint arrived without a pairing to join. Expected on clients, where the junction's link details
+		// replicate with the cell but the pass that produced the pairing only ever ran on the server.
+		return;
+	}
+
+	// Match on the junction's own identifier rather than on arrival order: both cells could carry the same node
+	// identifier (they restart per graph), so the junction instance is what distinguishes the two ends.
+	if (LinkDetails.JunctionInstanceIdentifier == Pending->Connection.StartJunctionInstanceIdentifier
+		&& LinkDetails.NodeIdentifier == Pending->Connection.StartNodeIdentifier)
+	{
+		Pending->StartJunction = CellJunction;
+	}
+	else
+	{
+		Pending->EndJunction = CellJunction;
+	}
+
+	// Queue only once both ends are live and nothing has been built yet; a cell streaming back in re-reports, and
+	// the bQueued guard is what stops that enqueuing the same pairing twice.
+	if (Pending->bQueued || Pending->ConnectorActor.IsValid()) return;
+	if (!Pending->StartJunction.IsValid() || !Pending->EndJunction.IsValid()) return;
+
+	Pending->bQueued = true;
+	QueuedJunctionConnectorsToSpawn.AddUnique(LinkDetails.ConnectorIdentifier);
+}
+
+void UNWorldAssemblySubsystem::UnregisterJunctionConnectorEndpoint(const UNCellJunctionComponent* CellJunction)
+{
+	if (CellJunction == nullptr) return;
+
+	const FNCellLinkDetails& LinkDetails = CellJunction->LinkDetails;
+	if (!LinkDetails.bConnector) return;
+
+	FPendingJunctionConnector* Pending = PendingJunctionConnectors.Find(LinkDetails.ConnectorIdentifier);
+	if (Pending == nullptr) return;
+
+	if (Pending->StartJunction.Get() == CellJunction)
+	{
+		Pending->StartJunction.Reset();
+	}
+	else if (Pending->EndJunction.Get() == CellJunction)
+	{
+		Pending->EndJunction.Reset();
+	}
+	else
+	{
+		return;
+	}
+
+	// A connector spans two cells, so losing either end leaves it bridging to nothing. Tear it down and drop out of
+	// the queue; the pairing itself is kept, so streaming the cell back in rebuilds it.
+	if (AActor* ConnectorActor = Pending->ConnectorActor.Get())
+	{
+		UnregisterOperationActorByTicket(ConnectorActor, Pending->Connection.OperationTicket);
+		ConnectorActor->Destroy();
+	}
+	Pending->ConnectorActor.Reset();
+
+	if (Pending->bQueued)
+	{
+		Pending->bQueued = false;
+		QueuedJunctionConnectorsToSpawn.Remove(LinkDetails.ConnectorIdentifier);
+	}
+}
+
+const FNCellJunctionConnectorEntry* UNWorldAssemblySubsystem::SelectJunctionConnectorEntry(
+	const TArray<FNCellJunctionConnectorEntry>& Entries, ANCellLevelInstance* CellLevelInstance, const int32 ConnectorIdentifier)
+{
+	if (Entries.IsEmpty() || CellLevelInstance == nullptr) return nullptr;
+
+	const FNCellAssemblyData& AssemblyData = CellLevelInstance->GetAssemblyData();
+	const FNGameplayTagCounter TagCounter(AssemblyData.TagCounter);
+
+	// Gated exactly as fillers are (see UNCellJunctionComponent::GetJunctionFillEntries), so an author who knows one
+	// list knows the other.
+	FNWeightedIntegerArray WeightedIndices;
+	for (int32 i = 0; i < Entries.Num(); i++)
+	{
+		const FNCellJunctionConnectorEntry& Entry = Entries[i];
+		if (Entry.Actor == nullptr) continue;
+
+		// REQUIRED CONTEXT TAGS — the cell's resolved context must satisfy every tag the entry requires.
+		if (!Entry.RequiredContextTags.IsEmpty() && !AssemblyData.ContextTags.HasAllExact(Entry.RequiredContextTags))
+		{
+			continue;
+		}
+
+		// TAG COUNTER CONSTRAINTS — every constraint must pass; an untracked tag compares as a count of zero.
+		bool bGatedByTagCounter = false;
+		for (const FNGameplayTagCounterConstraint& Constraint : Entry.TagCounterConstraints)
+		{
+			if (!Constraint.DoesPassComparison(TagCounter))
+			{
+				bGatedByTagCounter = true;
+				break;
+			}
+		}
+		if (bGatedByTagCounter) continue;
+
+		WeightedIndices.Add(i, Entry.Weighting);
+	}
+
+	// Seeded from the cell's own seed plus the pairing, so the choice is stable across runs and a junction paired
+	// twice in different layouts does not always land on the same entry.
+	FNMersenneTwister RandomGenerator(AssemblyData.Seed ^ AssemblyData.NodeIdentifier ^ ConnectorIdentifier);
+	const int32 EntryIndex = WeightedIndices.TwistedValue(RandomGenerator);
+	return EntryIndex != INDEX_NONE ? &Entries[EntryIndex] : nullptr;
+}
+
+UNOrganComponent* UNWorldAssemblySubsystem::FindOrganComponent(const FGuid& Identifier)
+{
+	if (!Identifier.IsValid()) return nullptr;
+
+	for (UNOrganComponent* Organ : FNWorldAssemblyRegistry::GetOrganComponents())
+	{
+		if (IsValid(Organ) && Organ->Identifier == Identifier)
+		{
+			return Organ;
+		}
+	}
+	return nullptr;
+}
+
+UClass* UNWorldAssemblySubsystem::ResolveJunctionConnectorClass(const FPendingJunctionConnector& Pending, FTransform& OutOffset) const
+{
+	OutOffset = FTransform::Identity;
+
+	UNCellJunctionComponent* StartJunction = Pending.StartJunction.Get();
+	UNCellJunctionComponent* EndJunction = Pending.EndJunction.Get();
+	if (StartJunction == nullptr || EndJunction == nullptr) return nullptr;
+
+	ANCellLevelInstance* StartCell = Cast<ANCellLevelInstance>(StartJunction->GetLevelInstance());
+	ANCellLevelInstance* EndCell = Cast<ANCellLevelInstance>(EndJunction->GetLevelInstance());
+	const int32 ConnectorIdentifier = Pending.Connection.ConnectorIdentifier;
+
+	// Priority chain, most specific first. The start end wins over the end at each level, which is what makes the
+	// pass's deterministic start/end ordering the tiebreak between two junctions that both name a connector.
+	const FNCellJunctionConnectorEntry* Entry = SelectJunctionConnectorEntry(StartJunction->Connectors, StartCell, ConnectorIdentifier);
+	if (Entry == nullptr)
+	{
+		Entry = SelectJunctionConnectorEntry(EndJunction->Connectors, EndCell, ConnectorIdentifier);
+	}
+	if (Entry == nullptr)
+	{
+		if (const UNOrganComponent* Organ = FindOrganComponent(Pending.Connection.StartOrganIdentifier))
+		{
+			Entry = SelectJunctionConnectorEntry(Organ->Connectors, StartCell, ConnectorIdentifier);
+		}
+	}
+	if (Entry == nullptr)
+	{
+		if (const UNOrganComponent* Organ = FindOrganComponent(Pending.Connection.EndOrganIdentifier))
+		{
+			Entry = SelectJunctionConnectorEntry(Organ->Connectors, EndCell, ConnectorIdentifier);
+		}
+	}
+
+	if (Entry != nullptr)
+	{
+		// Authored entries hard-reference their class, so it is always resident and can spawn synchronously.
+		OutOffset = Entry->Offset;
+		return Entry->Actor;
+	}
+
+	// Nothing authored: fall back to the project-wide default. It is a soft reference, and the spawn task asked for
+	// it to be loaded when the pairings were registered — if that has not landed yet, Get() returns null and the
+	// pairing is dropped rather than stalling the queue. In practice cells take far longer to stream than the class.
+	const TSoftClassPtr<AActor>& DefaultConnector = UNWorldAssemblySettings::Get()->AssemblyDefaultJunctionConnector;
+	return DefaultConnector.IsNull() ? nullptr : DefaultConnector.Get();
+}
+
+void UNWorldAssemblySubsystem::SpawnJunctionConnector(FPendingJunctionConnector& Pending)
+{
+	UNCellJunctionComponent* StartJunction = Pending.StartJunction.Get();
+	UNCellJunctionComponent* EndJunction = Pending.EndJunction.Get();
+	if (StartJunction == nullptr || EndJunction == nullptr) return;
+
+	FTransform Offset;
+	UClass* ConnectorClass = ResolveJunctionConnectorClass(Pending, Offset);
+	if (ConnectorClass == nullptr)
+	{
+		UE_LOG(LogNexusWorldAssembly, Warning,
+			TEXT("Unable to connect junctions for connector %i as no connector was available; the junctions stay open."),
+			Pending.Connection.ConnectorIdentifier);
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = StartJunction->GetOwner();
+	SpawnParams.OverrideLevel = StartJunction->GetComponentLevel();
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.ObjectFlags |= RF_Transient;
+
+	// Anchored on the start junction so the connector's own frame lines up with the route it is handed, whose points
+	// are world-space. The authored offset is applied in that junction's frame, matching how fillers are placed.
+	const FQuat ConnectorRotation = StartJunction->GetComponentRotation().Quaternion();
+	AActor* SpawnedActor = World->SpawnActor<AActor>(ConnectorClass,
+		StartJunction->GetComponentLocation() + ConnectorRotation.RotateVector(Offset.GetLocation()),
+		(ConnectorRotation * FQuat(Offset.Rotator())).Rotator(),
+		SpawnParams);
+
+	if (SpawnedActor == nullptr)
+	{
+		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Failed to spawn connector %i."), Pending.Connection.ConnectorIdentifier);
+		return;
+	}
+
+	SpawnedActor->SetActorScale3D(SpawnedActor->GetActorScale3D() * Offset.GetScale3D());
+
+	RegisterOperationActor(SpawnedActor, Pending.Connection.OperationTicket);
+	Pending.ConnectorActor = SpawnedActor;
+
+	if (SpawnedActor->Implements<UNCellJunctionConnector>())
+	{
+		INCellJunctionConnector::Execute_OnConnectJunctions(SpawnedActor,
+			Cast<ANCellLevelInstance>(StartJunction->GetLevelInstance()), StartJunction,
+			Pending.Connection.StartJunctionInstanceIdentifier,
+			Cast<ANCellLevelInstance>(EndJunction->GetLevelInstance()), EndJunction,
+			Pending.Connection.EndJunctionInstanceIdentifier,
+			Pending.Connection.Path);
+	}
+	else
+	{
+		UE_LOG(LogNexusWorldAssembly, Warning,
+			TEXT("Unable to invoke OnConnectJunctions on %s as it does not implement the INCellJunctionConnector."),
+			*SpawnedActor->GetName())
+	}
 }
 
 void UNWorldAssemblySubsystem::OnWorldBeginPlay(UWorld& InWorld)

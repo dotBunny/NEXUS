@@ -159,6 +159,31 @@ public:
 	}
 
 	/**
+	 * Draw a connected run of debug lines through an ordered set of points.
+	 * @param WorldContextObject Object that provides the context of which world to operate in.
+	 * @param Points Ordered world-space points to connect. Fewer than two draws nothing.
+	 * @param Color The color to draw the lines with.
+	 * @param bClosedLoop Should a final segment connect the last point back to the first?
+	 * @param bPersistentLines Should the drawn lines be permanent?
+	 * @param LifeTime How long should the lines last if not permanent, -1 for a single frame.
+	 * @param DepthPriority What priority should they be drawn at?
+	 * @param Thickness The thickness of the drawn lines.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName = "Draw Point Line", Category = "NEXUS|Developer",
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#draw-point-line", WorldContext = "WorldContextObject"))
+	static void DrawPointLine(const UObject* WorldContextObject, const TArray<FVector>& Points,
+		const FLinearColor Color = FLinearColor::White, const bool bClosedLoop = false,
+		const bool bPersistentLines = false, const float LifeTime = -1.f, const uint8 DepthPriority = 0,
+		const float Thickness = 2.f)
+	{
+		const UWorld* InWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
+		if (InWorld == nullptr || Points.Num() == 0) return;
+
+		FNDrawDebugHelpers::DrawPointLine(InWorld, Points, Color.ToFColor(true), bClosedLoop, bPersistentLines,
+			LifeTime, DepthPriority, Thickness);
+	}
+
+	/**
 	 * Create a Mersenne Twister object seeded from a string, outered to the world resolved from the context.
 	 * @param WorldContextObject Object used to resolve the owning UWorld.
 	 * @param Seed String seed used to initialize the random stream.

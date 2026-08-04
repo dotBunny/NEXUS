@@ -50,9 +50,18 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Color Palette|Junctions", DisplayName="Invalid", meta=(Tooltip="Color of junction when it is embedded too far into geometry making it impossible to match."))
 	FLinearColor ColorPaletteJunctionsInvalid = NEXUS::WorldAssembly::DefaultColors::JunctionInvalid;
 
+	/** Color used to draw the four socket-corner curves bounding a junction connector's route. */
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Color Palette|Junctions", DisplayName="Connector Corners", meta=(Tooltip="Color of the corner curves that bound the volume a junction connector's geometry may occupy."))
+	FLinearColor ColorPaletteJunctionsConnectorCorners = NEXUS::WorldAssembly::DefaultColors::JunctionConnectorCorners;
+
 	/** Draw debug markers for unfilled (unconnected) junctions in the world preview. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Draw Unfilled Junctions")
 	bool bDebugWorldDrawUnfilledJunctions = true;
+
+	/** Draw the routes the connector pass proved clear between junctions it paired, in the world preview. */
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Draw Junction Connectors",
+		meta=(Tooltip="Draws the center and socket-corner curves of every route the connector pass accepted during the last operation."))
+	bool bDebugWorldDrawJunctionConnectors = true;
 
 	/** Show alerts and HUD messages in the viewport while editing cells. */
 	UPROPERTY(EditAnywhere, config,  Category="Notifications", DisplayName="Display Viewport Messages", meta=(Tooltip="Shows relevant alerts and messages in the viewport upper-left corner."))
@@ -92,7 +101,8 @@ public:
 			PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteCellHull) ||
 			PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteJunctionsUnfilled) ||
 			PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteJunctionsValid) ||
-			PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteJunctionsInvalid))
+			PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteJunctionsInvalid) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteJunctionsConnectorCorners))
 		{
 			FNWorldAssemblyEdMode::CacheUserSettings();
 		}

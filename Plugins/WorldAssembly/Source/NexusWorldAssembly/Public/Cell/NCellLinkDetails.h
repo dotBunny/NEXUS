@@ -45,17 +45,36 @@ struct NEXUSWORLDASSEMBLY_API FNCellLinkDetails
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bHotPathSequential = false;
 
+	/**
+	 * Was this junction paired by the connector pass rather than by two cells mating directly?
+	 * @note bConnected is also true for these, so the junction is not filled — but nothing occupies the opening
+	 *       until the connector actor spawns, which happens once both ends of the pairing have streamed in.
+	 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bConnector = false;
+
+	/**
+	 * Identifier of the connector pairing this junction belongs to, or INDEX_NONE when it is not connector-paired.
+	 * @note Both ends of a pairing carry the same value, and this — not ConnectedNodeIdentifier — is what rejoins
+	 *       them at runtime: node identifiers are only unique within a single assembly graph, and a connector
+	 *       pairing can span graphs.
+	 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int32 ConnectorIdentifier = INDEX_NONE;
+
 	FString ToString() const
 	{
 		return FString::Printf(
-			TEXT("[%d:%d] Connected: %s > [%d:%d] | HotShort: %s | HotSeq: %s"),
+			TEXT("[%d:%d] Connected: %s > [%d:%d] | HotShort: %s | HotSeq: %s | Connector: %s(%d)"),
 			NodeIdentifier,
 			JunctionInstanceIdentifier,
 			bConnected ? TEXT("True") : TEXT("False"),
 			ConnectedNodeIdentifier,
 			ConnectedJunctionInstanceIdentifier,
 			bHotPathShortest ? TEXT("True") : TEXT("False"),
-			bHotPathSequential ? TEXT("True") : TEXT("False")
+			bHotPathSequential ? TEXT("True") : TEXT("False"),
+			bConnector ? TEXT("True") : TEXT("False"),
+			ConnectorIdentifier
 		);
 	}
 };

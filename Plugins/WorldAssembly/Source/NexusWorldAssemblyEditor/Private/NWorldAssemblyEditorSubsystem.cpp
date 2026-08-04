@@ -140,6 +140,16 @@ void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Op
 
 	// Make our own map to the created proxies tied to the operation ticket
 	ProxyMap.Add(Operation->GetTicket(), TArray<TObjectPtr<ANCellProxy>>(TaskGraphContext->CreatedProxies));
+
+	// Same for the junction pairings, so the ed mode can draw the routes the connector pass proved clear. Copied by
+	// value because the context is torn down with the operation moments after this returns, taking them with it.
+	if (TaskGraphContext->JunctionConnections.Num() > 0)
+	{
+		FNGeneratedConnections& Generated = ConnectionMap.Add(Operation->GetTicket());
+		Generated.World = TaskGraphContext->TargetWorld;
+		Generated.Connections = TaskGraphContext->JunctionConnections;
+	}
+
 	KnownOperations.Remove(Operation);
 
 	// Toast - skip if disabled or autorun
@@ -209,6 +219,7 @@ void UNWorldAssemblyEditorSubsystem::ClearAllProxies()
 	}
 	ProxyMap.Empty();
 	KnownProxies.Empty();
+	ConnectionMap.Empty();
 }
 
 void UNWorldAssemblyEditorSubsystem::ClearGenerated(const int32& OperationTicket)
@@ -218,6 +229,11 @@ void UNWorldAssemblyEditorSubsystem::ClearGenerated(const int32& OperationTicket
 
 void UNWorldAssemblyEditorSubsystem::ClearGeneratedProxies(const int32& OperationTicket)
 {
+	// Dropped unconditionally rather than inside the proxy branch below: an operation can accept pairings and still
+	// have had its proxies cleared by another route, and a stale entry would keep drawing routes to cells that are
+	// no longer there.
+	ConnectionMap.Remove(OperationTicket);
+
 	if (ProxyMap.Num() > 0 && ProxyMap.Contains(OperationTicket))
 	{
 		// Per-ticket clears can also tear down streamed sublevel actors the user may have selected;
