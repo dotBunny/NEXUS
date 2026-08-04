@@ -155,6 +155,24 @@ void FNAssemblyTaskAnalytics::CollectGenerationPassesFinish(int32 Index)
 	Analytic.Timer.Stop();
 }
 
+void FNAssemblyTaskAnalytics::ConnectJunctionsStart()
+{
+	ConnectJunctionsAnalytics.Timer.Start();
+}
+
+void FNAssemblyTaskAnalytics::ConnectJunctionsFinish()
+{
+	ConnectJunctionsAnalytics.Timer.Stop();
+}
+
+void FNAssemblyTaskAnalytics::ConnectJunctions_SetResult(const FNConnectJunctionsAnalytics& Analytics)
+{
+	// Copy the counters but keep our own timer: the caller builds its record without one, and Start has already run.
+	const FNWorldAssemblyTaskTimer Timer = ConnectJunctionsAnalytics.Timer;
+	ConnectJunctionsAnalytics = Analytics;
+	ConnectJunctionsAnalytics.Timer = Timer;
+}
+
 void FNAssemblyTaskAnalytics::CreateSpawnCellsContextStart()
 {
 	CreateSpawnCellsContextTimer.Start();
@@ -198,7 +216,8 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	AnalyticsContentBlock->SetHeading("Analytics");
 
 	double DurationTotal = TaskGraphCreationTimer.Duration + CreateVirtualWorldContextTimer.Duration +
-		ProcessVirtualWorldContextTimer.Duration + CreateSpawnCellsContextTimer.Duration;
+		ProcessVirtualWorldContextTimer.Duration + CreateSpawnCellsContextTimer.Duration +
+		ConnectJunctionsAnalytics.Timer.Duration;
 
 
 	const int32 TimespanContentTicket = Report->CreateContentBlock(AnalyticsContentTicket);
@@ -249,7 +268,27 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	// Need to re-get as it may have moved
 	OverviewTable = Report->GetTableBlock(OverviewTableTicket);
 	OverviewTable->AddRow({"Task", "Process Pass", FString::SanitizeFloat(LoopTotal)});
+	OverviewTable->AddRow({"Task", "Connect Junctions", FString::SanitizeFloat(ConnectJunctionsAnalytics.Timer.Duration)});
 	OverviewTable->AddRow({"Task", "Create SpawnCellsContext", FString::SanitizeFloat(CreateSpawnCellsContextTimer.Duration)});
+
+	// Junction connector breakdown, laid out so the dominant rejection reason is the thing that stands out — that is
+	// what tells a designer whether a sparse result is the length budget or genuinely dense geometry.
+	if (ConnectJunctionsAnalytics.OpenJunctionCount > 0)
+	{
+		const int32 ConnectJunctionsTableTicket = Report->CreateTableBlock(TimespanContentTicket);
+		FNReportTableBlock* ConnectJunctionsTable = Report->GetTableBlock(ConnectJunctionsTableTicket);
+		ConnectJunctionsTable->SetHeading("FNConnectJunctionsTask");
+		ConnectJunctionsTable->Initialize({ "Metric", "Count" });
+		ConnectJunctionsTable->AddRow({"Open Junctions", FString::FromInt(ConnectJunctionsAnalytics.OpenJunctionCount)});
+		ConnectJunctionsTable->AddRow({"Candidate Pairs", FString::FromInt(ConnectJunctionsAnalytics.CandidatePairCount)});
+		ConnectJunctionsTable->AddRow({"Accepted", FString::FromInt(ConnectJunctionsAnalytics.AcceptedCount)});
+		ConnectJunctionsTable->AddRow({"Rejected (Length)", FString::FromInt(ConnectJunctionsAnalytics.RejectedByLengthCount)});
+		ConnectJunctionsTable->AddRow({"Rejected (Collision)", FString::FromInt(ConnectJunctionsAnalytics.RejectedByCollisionCount)});
+		ConnectJunctionsTable->AddRow({"Rejected (Existing Connection)", FString::FromInt(ConnectJunctionsAnalytics.RejectedByExistingConnectionCount)});
+		ConnectJunctionsTable->AddRow({"Avoidance Attempts", FString::FromInt(ConnectJunctionsAnalytics.AvoidanceAttemptCount)});
+		ConnectJunctionsTable->AddRow({"Avoidance Successes", FString::FromInt(ConnectJunctionsAnalytics.AvoidanceSuccessCount)});
+		ConnectJunctionsTable->AddRow({"Connector Hulls", FString::FromInt(ConnectJunctionsAnalytics.ConnectorHullCount)});
+	}
 
 	LoopTotal = 0;
 	const int32 SpawnCellProxiesTableTicket = Report->CreateTableBlock(TimespanContentTicket);
@@ -359,7 +398,8 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 float FNAssemblyTaskAnalytics::GetTotalDuration()
 {
 	double DurationTotal = TaskGraphCreationTimer.Duration + CreateVirtualWorldContextTimer.Duration +
-		ProcessVirtualWorldContextTimer.Duration + CreateSpawnCellsContextTimer.Duration;
+		ProcessVirtualWorldContextTimer.Duration + CreateSpawnCellsContextTimer.Duration +
+		ConnectJunctionsAnalytics.Timer.Duration;
 
 	for (const auto Analytic : OrganGraphBuilderAnalytics)
 	{

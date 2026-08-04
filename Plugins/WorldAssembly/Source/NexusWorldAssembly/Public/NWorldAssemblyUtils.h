@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Cell/NCellActor.h"
+#include "Cell/NCellJunctionDetails.h"
 #include "Math/NVectorUtils.h"
 
 class UNOrganComponent;
@@ -82,6 +83,50 @@ public:
 
 	/** @return Four centered corner points in world space for a rectangle of Width x Height, oriented perpendicular to Axis. */
 	static TArray<FVector> GetCenteredWorldCornerPoints2D(const float Width, const float Height, const ENAxis Axis = ENAxis::Z);
+
+	/**
+	 * The direction a junction opens onto — away from the cell that owns it, into the space a mating cell would fill.
+	 *
+	 * A junction's rotation faces *into* its own cell (the socket gizmo's arrow, drawn along the rotation's forward
+	 * vector by FNWorldAssemblyDebugDraw::DrawSocket, points inward), so this is the negated forward. Every consumer
+	 * that needs "which way is out" goes through here rather than negating at the call site, so the convention is
+	 * stated in exactly one place.
+	 * @param Rotation The junction's world rotation.
+	 * @return The unit direction pointing out of the owning cell.
+	 */
+	FORCEINLINE static FVector GetJunctionOutwardDirection(const FRotator& Rotation)
+	{
+		return -Rotation.Vector();
+	}
+
+	/** @return The unit direction Details opens onto, away from the cell that owns it. */
+	FORCEINLINE static FVector GetJunctionOutwardDirection(const FNCellJunctionDetails& Details)
+	{
+		return GetJunctionOutwardDirection(Details.WorldRotation);
+	}
+
+	/**
+	 * The four world-space corners of a junction's socket rectangle, in top-left, bottom-left, bottom-right,
+	 * top-right order.
+	 *
+	 * The rectangle is built in the local XZ plane then yaw-composed into the YZ plane, which leaves the socket
+	 * normal on the junction's local +X — the same construction the debug draw and the junction component both use,
+	 * shared here so the three cannot drift apart.
+	 * @param Location World-space center of the socket.
+	 * @param Rotation World-space rotation of the junction.
+	 * @param Units The socket's size in grid units.
+	 * @param UnitSize World size of a single grid unit, normally UNWorldAssemblySettings::SocketSize.
+	 * @return The four corner points in world space.
+	 */
+	static TArray<FVector> GetJunctionWorldCornerPoints(const FVector& Location, const FRotator& Rotation,
+		const FIntVector2& Units, const FVector2D& UnitSize);
+
+	/**
+	 * @param Details Junction whose baked world transform and socket size are used.
+	 * @param UnitSize World size of a single grid unit, normally UNWorldAssemblySettings::SocketSize.
+	 * @return The four corner points in world space, in the order described by the transform-taking overload.
+	 */
+	static TArray<FVector> GetJunctionWorldCornerPoints(const FNCellJunctionDetails& Details, const FVector2D& UnitSize);
 
 	/**
 	 * Axis-aligned box ray intersection detection

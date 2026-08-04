@@ -98,6 +98,9 @@ private:
 	/** Collection/pass tasks that gather results after graph construction. */
 	FGraphEventArray CollectionTasks;
 
+	/** The junction-connector matching task; gates the spawn-context stage so its pairings land before link details are generated. */
+	FGraphEventArray ConnectJunctionsTasks;
+
 	/** Spawn-context preparation tasks that flatten collected graphs ready for proxy spawning. */
 	FGraphEventArray SpawnContextTasks;
 

@@ -369,6 +369,10 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 			OrganContextPtr->CellGraph = MakeUnique<FNAssemblyGraph>(
 				BoneNode, OrganContextPtr->Origin, OrganContextPtr->Bounds, OrganContextPtr->bUnbound);
 
+			// Stamp the owning organ so downstream stages can resolve back to the authoring component; the graph
+			// outlives this context, so it cannot ask for it later.
+			OrganContextPtr->CellGraph->SetOrganIdentifier(OrganContextPtr->GetIdentifier());
+
 
 			// Create our first cell node, attaching it to the bone node
 			FNAssemblyGraphNodeParams NodeParams;

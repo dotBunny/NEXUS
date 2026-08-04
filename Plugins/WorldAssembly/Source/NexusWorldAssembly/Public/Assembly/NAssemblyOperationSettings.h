@@ -60,6 +60,14 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "World Collision")
 	FNWorldAssemblyWorldCollisionSettings WorldCollisionSettings;
 
+	/**
+	 * Tuning for this operation's junction-connector pass.
+	 * @note Carried on the operation rather than read from UNWorldAssemblySettings because the pass runs on a worker
+	 *       thread, which cannot touch the settings object.
+	 */
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Junction Connecting")
+	FNWorldAssemblyJunctionConnectorSettings JunctionConnectorSettings;
+
 	/** @return Default runtime-generation settings with a freshly generated friendly seed. */
 	static FNAssemblyOperationSettings GetDefaultSettings()
 	{
@@ -72,6 +80,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		Settings.CellSpawnTimeSlice = AssemblySettings->AssemblySpawningCellProxiesTimeSlice;
 		Settings.TagCounters = FNGameplayTagCounter(AssemblySettings->AssemblyTagCounters);
 		Settings.WorldCollisionSettings = AssemblySettings->WorldCollisionSettings;
+		Settings.JunctionConnectorSettings = AssemblySettings->JunctionConnectorSettings;
 
 		return Settings;
 	}
@@ -89,6 +98,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		Settings.CellSpawnTimeSlice = AssemblySettings->AssemblySpawningCellProxiesTimeSlice;
 		Settings.TagCounters = FNGameplayTagCounter(AssemblySettings->AssemblyTagCounters);
 		Settings.WorldCollisionSettings = AssemblySettings->WorldCollisionSettings;
+		Settings.JunctionConnectorSettings = AssemblySettings->JunctionConnectorSettings;
 
 		return Settings;
 	}

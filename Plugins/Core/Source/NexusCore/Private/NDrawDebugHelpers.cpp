@@ -57,6 +57,32 @@ void FNDrawDebugHelpers::DrawString(const UWorld* InWorld, const FString& String
 #endif // ENABLE_DRAW_DEBUG
 }
 
+void FNDrawDebugHelpers::DrawPointLine(const UWorld* InWorld, const TArray<FVector>& Points, const FColor& Color,
+	const bool bClosedLoop, const bool bPersistentLines, const float LifeTime, const uint8 DepthPriority,
+	const float Thickness)
+{
+#if ENABLE_DRAW_DEBUG
+	// A single point has no segment to draw, and an empty array nothing at all. Both are ordinary inputs — a path
+	// that has not been populated yet — rather than errors worth logging.
+	const int32 PointCount = Points.Num();
+	if (InWorld == nullptr || PointCount < 2)
+	{
+		return;
+	}
+
+	for (int32 i = 1; i < PointCount; i++)
+	{
+		DrawDebugLine(InWorld, Points[i - 1], Points[i], Color, bPersistentLines, LifeTime, DepthPriority, Thickness);
+	}
+
+	// Skipped for two points: the closing segment would retrace the only one already drawn.
+	if (bClosedLoop && PointCount > 2)
+	{
+		DrawDebugLine(InWorld, Points.Last(), Points[0], Color, bPersistentLines, LifeTime, DepthPriority, Thickness);
+	}
+#endif // ENABLE_DRAW_DEBUG
+}
+
 void FNDrawDebugHelpers::DrawBoxSweep(const UWorld* InWorld, const FVector& StartPosition,
 	const FVector& EndPosition, const FQuat& Quat, const FVector& HalfSize, const FColor& Color,
 	const bool bPersistentLines, const float LifeTime, const uint8 DepthPriority, const float Thickness)

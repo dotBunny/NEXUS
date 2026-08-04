@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include "NWorldAssemblyMinimal.h"
 #include "PrimitiveDrawInterface.h"
+#include "Cell/NCellJunctionConnection.h"
 #include "Cell/NCellJunctionDetails.h"
 #include "Cell/NCellVoxelData.h"
 #include "Engine/EngineTypes.h"
@@ -59,6 +61,29 @@ public:
 	 * @param DrawSettings Settings used for drawing the socket.
 	 */
 	static void DrawSocket(FPrimitiveDrawInterface* PDI, const FVector& Location, const FRotator& Rotation, const FNDrawSocketSettings& DrawSettings);
+
+	/**
+	 * Draws the route cached for a junction connector: its center curve plus the four socket-corner curves that
+	 * bound the volume a connector's geometry may occupy.
+	 *
+	 * The stored samples are drawn directly rather than re-evaluated from the curve definition, so what appears is
+	 * the geometry the connector pass actually swept for collisions. Drawing a smoothed curve would show a path that
+	 * was never tested.
+	 *
+	 * The socket rectangles at either end are deliberately not drawn — UNCellJunctionComponent::DrawDebugPDI already
+	 * covers those wherever the junction components exist, and the corner curves terminate exactly on the socket
+	 * corners regardless, so each end still reads as a rectangle.
+	 * @param PDI The draw interface to submit line segments to.
+	 * @param Path The cached route to draw. A path with no sampled center curve draws nothing.
+	 * @param CenterColor Colour of the center curve.
+	 * @param CornerColor Colour of the four corner curves.
+	 * @param Priority Scene depth priority group the segments are drawn in.
+	 * @param Thickness Thickness of the drawn lines.
+	 */
+	static void DrawConnectorPath(FPrimitiveDrawInterface* PDI, const FNCellJunctionConnectorPath& Path,
+		const FLinearColor& CenterColor, const FLinearColor& CornerColor,
+		ESceneDepthPriorityGroup Priority = SDPG_Foreground,
+		float Thickness = NEXUS::WorldAssembly::Debug::LineThickness);
 
 	/**
 	 * Draw the edges of Mesh as dashed line segments, offset and rotated into world space.

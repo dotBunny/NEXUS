@@ -160,6 +160,31 @@ public:
 	static FNRawMesh MakeBoxHull(const FBox& Box);
 
 	/**
+	 * Builds a closed, outward-wound prism hull spanning two quadrilateral caps.
+	 *
+	 * The sibling of MakeBoxHull for swept volumes: where that spans an axis-aligned box, this spans an arbitrary
+	 * pair of quads, so a caller sweeping a cross-section along a path can emit one prism per segment. Emits the same
+	 * shape as MakeBoxHull — polygonal FaceLoops plus a matching triangulated Loops buffer, populated Center/Bounds,
+	 * and eagerly validated flags.
+	 *
+	 * NearCorners[i] is paired with FarCorners[i], so the two caps must be supplied in the same corner order. Their
+	 * winding does not matter: the near cap's Newell normal is compared against the near-to-far sweep direction and
+	 * both caps are reversed together when it points the wrong way, so every face ends up wound away from the
+	 * interior either way.
+	 *
+	 * @param NearCorners The four corners of the cap the prism sweeps from.
+	 * @param FarCorners The four corners of the cap the prism sweeps to, in the same corner order as NearCorners.
+	 * @return A prism hull with 8 vertices, 6 quad FaceLoops, 12 triangle Loops, populated Center/Bounds, and
+	 *         validated flags.
+	 * @note Unlike MakeBoxHull the result is not convex by construction — a twisted or non-planar cap pair produces a
+	 *       closed but concave prism, and IsConvex() reports that honestly. Both are still usable: the containment
+	 *       and intersection paths fall back to their non-convex algorithms, whose closed-manifold requirement a
+	 *       prism satisfies. Degenerate input (coincident caps, a zero-area cap) yields a degenerate hull rather
+	 *       than a failure.
+	 */
+	static FNRawMesh MakeConvexPrism(const TStaticArray<FVector, 4>& NearCorners, const TStaticArray<FVector, 4>& FarCorners);
+
+	/**
 	 * Tests whether RelativePoint lies inside Mesh using the mesh's local space.
 	 *
 	 * For convex meshes (Mesh.IsConvex() == true), implemented as a half-space test against every triangle

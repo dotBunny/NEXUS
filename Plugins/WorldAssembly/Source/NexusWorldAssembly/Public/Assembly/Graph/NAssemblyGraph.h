@@ -89,6 +89,17 @@ public:
 	/** @return true if the graph was allowed to extend outside its organ bounds. */
 	bool IsUnbounded() const { return bUnbounded; }
 
+	/**
+	 * @return Identifier of the organ component whose build produced this graph, or an invalid Guid when the graph
+	 *         was built outside an organ (tests, ad-hoc construction).
+	 * @note Lets a later stage resolve back to the authoring UNOrganComponent — which the connector pass needs in
+	 *       order to honor organ-level connector overrides for the cells a graph placed.
+	 */
+	const FGuid& GetOrganIdentifier() const { return OrganIdentifier; }
+
+	/** Record which organ built this graph. Called by the organ graph builder once it takes ownership. */
+	void SetOrganIdentifier(const FGuid& Identifier) { OrganIdentifier = Identifier; }
+
 	/** Drop builder-only scratch state from each node; call before handing the graph to the spawn stage. */
 	void CleanupBuilderReferences();
 
@@ -104,6 +115,9 @@ private:
 
 	/** Ticket of the operation that built this graph. */
 	uint32 Ticket = 0;
+
+	/** Identifier of the organ component this graph was built for; invalid when built outside an organ. */
+	FGuid OrganIdentifier;
 
 	/** Starting node the builder expanded from. */
 	FNAssemblyGraphNode* RootNode = nullptr;

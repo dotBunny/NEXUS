@@ -54,6 +54,53 @@ public:
 	 */
 	TArray<FNRawMesh> NodeCollisionMeshes;
 
+	/**
+	 * Swept volumes of the junction connectors accepted so far, as one convex prism per sampled path segment.
+	 *
+	 * Kept separate from WorldCollisionMeshes rather than appended to it. That array is world-captured geometry
+	 * whose BVH is built once and then treated as immutable so every organ builder can share it lock-free; these
+	 * prisms are neither world geometry nor available at that point. Kept separate from NodeCollisionMeshes for the
+	 * same reason — that array is parallel to NodeIndex, and a connector has no cell node.
+	 *
+	 * Grown only by FNConnectJunctionsTask, a single task that runs after every organ builder has finished, so
+	 * unlike the arrays above this needs no cross-thread discipline.
+	 */
+	TArray<FNRawMesh> ConnectorCollisionMeshes;
+
+	/** Baked bounds parallel to ConnectorCollisionMeshes, so a probe can reject a prism without touching its geometry. */
+	TArray<FBox> ConnectorCollisionBounds;
+
+	/**
+	 * Broadphase over the leading ConnectorCollisionIndexedCount entries of ConnectorCollisionBounds.
+	 *
+	 * Accepted connectors arrive one pairing at a time while the same array is being queried, so rather than
+	 * rebuilding per acceptance the tree covers a prefix and the remainder is scanned linearly — the same amortised
+	 * arrangement FNAssemblyGraph uses for its cell-node index, and for the same reason.
+	 */
+	FNBoundsBVH ConnectorCollisionBVH;
+
+	/** How many leading entries of ConnectorCollisionBounds the tree covers; the rest are scanned. */
+	int32 ConnectorCollisionIndexedCount = 0;
+
+	/**
+	 * Rebuild ConnectorCollisionBVH once the unindexed tail exceeds this many prisms. Bounds the linear part of a
+	 * query while keeping rebuilds amortised, matching FNAssemblyGraph::CellNodeIndexTailThreshold.
+	 */
+	static constexpr int32 ConnectorCollisionIndexTailThreshold = 64;
+
+	/** Bring ConnectorCollisionBVH up to date when the unindexed tail has grown past the threshold. */
+	void EnsureConnectorCollisionIndex()
+	{
+		const int32 MeshCount = ConnectorCollisionBounds.Num();
+		if (MeshCount - ConnectorCollisionIndexedCount <= ConnectorCollisionIndexTailThreshold)
+		{
+			return;
+		}
+
+		ConnectorCollisionBVH = FNBoundsBVH(ConnectorCollisionBounds);
+		ConnectorCollisionIndexedCount = MeshCount;
+	}
+
 	/** World collision capture settings carried from the operation, controlling which actors are treated as collision sources. */
 	FNWorldAssemblyWorldCollisionSettings WorldCollisionSettings;
 

@@ -41,6 +41,8 @@ namespace NEXUS::WorldAssembly
 		inline const FString StartingTasks = TEXT("Starting Tasks");
 		/** Emitted as the per-organ graph-building pass begins. */
 		inline const FString BuildingOrgans = TEXT("Building Organs");
+		/** Emitted while unmatched junctions are being paired up and routed. */
+		inline const FString ConnectingJunctions = TEXT("Connecting Junctions");
 		/** Emitted once the spawn list is built, as cell proxies begin spawning into the world. */
 		inline const FString SpawningCells = TEXT("Spawning Cells");
 	}

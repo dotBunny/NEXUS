@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Assembly/NAssemblyOperationSettings.h"
+#include "Cell/NCellJunctionConnection.h"
 #include "Cell/NCellProxy.h"
 #include "Assembly/Graph/NAssemblyGraph.h"
 #include "Math/NMersenneTwister.h"
@@ -227,6 +228,14 @@ public:
 
 	/** Built per-organ graphs owned by this context. */
 	TArray<TUniquePtr<FNAssemblyGraph>> Graphs;
+
+	/**
+	 * Junction pairings accepted by the connector pass, each carrying the cleared route between its two sockets.
+	 * @note Written by FNConnectJunctionsTask and read by FNSpawnJunctionConnectorsTask. Both stages are single
+	 *       tasks, and the graph orders the second strictly after the first, so this needs no locking — unlike
+	 *       Graphs, which many organ builders write concurrently.
+	 */
+	TArray<FNCellJunctionConnection> JunctionConnections;
 
 	/** Context tags accumulated across the graphs built into this context. */
 	FGameplayTagContainer ContextTags;

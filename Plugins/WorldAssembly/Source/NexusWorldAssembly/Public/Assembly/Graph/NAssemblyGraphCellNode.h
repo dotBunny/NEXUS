@@ -56,6 +56,21 @@ public:
 	/** Link the junction with the given key to Node — used by the builder when expanding connections. */
 	void LinkJunction(int32 JunctionKey, FNAssemblyGraphNode* Node);
 
+	/**
+	 * Link the junction with the given key to Node as a connector pairing — two junctions the connector pass matched
+	 * up across open space rather than two cells mating directly.
+	 *
+	 * Behaves as LinkJunction, and additionally records ConnectorIdentifier so GenerateLinkDetails can stamp it (and
+	 * the bConnector flag) onto the junction's link details.
+	 * @param JunctionKey The junction on this cell being paired.
+	 * @param Node The cell node on the far end of the pairing.
+	 * @param ConnectorIdentifier Operation-unique identifier of the pairing; the same value is recorded on both ends.
+	 * @note Called on both ends of a pairing. It deliberately does not wire the node-level Connect edge that makes
+	 *       the pairing visible to graph traversal — that edge is directional and belongs to the pair, not to one
+	 *       junction, so the caller makes a single Connect call from its chosen start node. See FNConnectJunctionsTask.
+	 */
+	void LinkJunctionConnector(int32 JunctionKey, FNAssemblyGraphNode* Node, int32 ConnectorIdentifier);
+
 	/** Drop the link on the given junction, returning it to the free pool. */
 	void UnlinkJunction(int32 JunctionKey);
 
@@ -213,6 +228,13 @@ private:
 
 	/** Map of junction key -> linked node (populated via Link/Unlink). */
 	TMap<int32, FNAssemblyGraphNode*> Links;
+
+	/**
+	 * Junction key -> connector pairing identifier, for the subset of Links the connector pass created. Kept beside
+	 * Links rather than inside it because every other consumer of Links only cares that a junction is linked at all,
+	 * and an entry here is the only thing that distinguishes a routed pairing from a direct cell mating.
+	 */
+	TMap<int32, int32> ConnectorLinks;
 
 	/** Cell junctions transformed into world space. Built on first access — read through EnsureJunctions. */
 	mutable TMap<int32, FNCellJunctionDetails> WorldJunctions;

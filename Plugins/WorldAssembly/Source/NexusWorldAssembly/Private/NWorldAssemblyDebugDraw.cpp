@@ -11,20 +11,54 @@
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMesh.h"
 
+namespace
+{
+	/** Submit one polyline's worth of segments; shared by the center and corner curves of a connector path. */
+	void DrawConnectorCurve(FPrimitiveDrawInterface* PDI, const TArray<FVector>& Points, const FLinearColor& Color,
+		const ESceneDepthPriorityGroup Priority, const float Thickness)
+	{
+		const int32 PointCount = Points.Num();
+		for (int32 i = 1; i < PointCount; i++)
+		{
+			PDI->DrawLine(Points[i - 1], Points[i], Color, Priority, Thickness);
+		}
+	}
+}
+
+void FNWorldAssemblyDebugDraw::DrawConnectorPath(FPrimitiveDrawInterface* PDI, const FNCellJunctionConnectorPath& Path,
+	const FLinearColor& CenterColor, const FLinearColor& CornerColor, const ESceneDepthPriorityGroup Priority,
+	const float Thickness)
+{
+	const int32 SampleCount = Path.Center.Points.Num();
+	if (SampleCount < 2)
+	{
+		return;
+	}
+
+	// Center plus one segment per corner curve, all sampled in lockstep — so the whole path is a known line count
+	// and can be reserved in one go rather than growing the batch per segment.
+	const int32 SegmentCount = SampleCount - 1;
+	PDI->AddReserveLines(Priority, SegmentCount * (1 + Path.Corners.Num()), false, false);
+
+	DrawConnectorCurve(PDI, Path.Center.Points, CenterColor, Priority, Thickness);
+	for (const FNCellJunctionConnectorCurve& Corner : Path.Corners)
+	{
+		DrawConnectorCurve(PDI, Corner.Points, CornerColor, Priority, Thickness);
+	}
+}
+
 void FNWorldAssemblyDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FVector& Location, const FRotator& Rotation, const FNDrawSocketSettings& DrawSettings)
 {
-	// Compose: yaw-align the local XZ-plane corners into the YZ-plane (rect normal becomes +X),
-	// then apply the socket rotation. Rotator addition is component-wise and only matches
-	// composition for yaw-only inputs; quaternions compose correctly for pitch and roll too.
+	// Yaw-aligns the local XZ-plane corners into the YZ-plane so the rect normal becomes +X, then applies the socket
+	// rotation; shared with the junction component so the two cannot drift.
 	const FQuat DisplayQuat = FQuat(Rotation) * FQuat(FRotator(0.0f, 90.0f, 0.0f));
 	const FRotator DisplayRotation = DisplayQuat.Rotator();
 	const FVector FacingRotation = Rotation.Vector();
 
-	const FVector2D Size = FNWorldAssemblyUtils::GetWorldSize2D(DrawSettings.UnitSize, DrawSettings.SocketSize);
 	const float LineLength = DrawSettings.SocketSize.X * 0.25f;
 
-	const TArray<FVector> UnrotatedCornerPoints = FNWorldAssemblyUtils::GetCenteredWorldCornerPoints2D(Size.X,Size.Y, ENAxis::Z);
-	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, Location);
+	const TArray<FVector> RotatedCornerPoints = FNWorldAssemblyUtils::GetJunctionWorldCornerPoints(
+		Location, Rotation, DrawSettings.UnitSize, DrawSettings.SocketSize);
 	const TArray<FVector2D> UnrotatedSocketPoints = FNWorldAssemblyUtils::GetSocketPoints2D(DrawSettings.UnitSize, DrawSettings.SocketSize);
 	const int32 SocketPointsCount = UnrotatedSocketPoints.Num();
 
