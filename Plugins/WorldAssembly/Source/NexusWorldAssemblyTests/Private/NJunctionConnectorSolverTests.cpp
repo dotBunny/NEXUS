@@ -29,7 +29,22 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolverHarness
 		Settings.MaximumAvoidanceAttempts = 16;
 		Settings.AvoidanceOffsetStep = 200.f;
 		Settings.EndpointExclusion = 100.f;
+		// Off by default here so the tests below stay about the constraint each one targets; the turn-radius tests
+		// opt back in explicitly. The always-on fold rejection still applies.
+		Settings.MinimumTurnRadiusScale = 0.f;
 		return Settings;
+	}
+
+	/**
+	 * Build a route at the settings' own tangent scale.
+	 * @return true when the solver accepted it; the tests that care *why* one was rejected call the solver directly.
+	 */
+	static bool BuildRoute(const FNCellJunctionDetails& Start, const FNCellJunctionDetails& End,
+		const FVector2D& UnitSize, const FNWorldAssemblyJunctionConnectorSettings& Settings,
+		const FVector* MidPoint, FNJunctionConnectorRoute& OutRoute)
+	{
+		return FNJunctionConnectorSolver::BuildRoute(Start, End, UnitSize, Settings, MidPoint,
+			Settings.TangentScale, OutRoute) == ENJunctionConnectorRouteResult::Success;
 	}
 
 	/**
@@ -89,7 +104,7 @@ N_TEST_CRITICAL(FNJunctionConnectorSolverTests_Route_FacingJunctionsRouteStraigh
 
 	FNJunctionConnectorRoute Route;
 	CHECK_MESSAGE(TEXT("A clear, facing pair must produce a route."),
-		FNJunctionConnectorSolver::BuildRoute(Start, End, SocketUnitSize, MakeSettings(), nullptr, Route))
+		BuildRoute(Start, End, SocketUnitSize, MakeSettings(), nullptr, Route))
 
 	CHECK_MESSAGE(TEXT("A straight route must be within a hair of the chord length."),
 		FMath::IsNearlyEqual(static_cast<double>(Route.Path.Center.Length), Distance, 1.0))
@@ -111,7 +126,7 @@ N_TEST_CRITICAL(FNJunctionConnectorSolverTests_Route_LeavesAndArrivesAlongTheSoc
 	auto CheckRoute = [this](const FNCellJunctionDetails& Start, const FNCellJunctionDetails& End, const TCHAR* Label)
 	{
 		FNJunctionConnectorRoute Route;
-		if (!FNJunctionConnectorSolver::BuildRoute(Start, End, SocketUnitSize, MakeSettings(), nullptr, Route))
+		if (!BuildRoute(Start, End, SocketUnitSize, MakeSettings(), nullptr, Route))
 		{
 			ADD_ERROR(FString::Printf(TEXT("Expected %s to route."), Label));
 			return;
@@ -139,13 +154,9 @@ N_TEST_CRITICAL(FNJunctionConnectorSolverTests_Route_LeavesAndArrivesAlongTheSoc
 			FVector::DotProduct(LastStep, EndInward) > 0.0)
 	};
 
-	// Facing each other across open space: the ordinary case.
+	// Facing each other across open space: the ordinary case, and the only one that produces a buildable route — see
+	// the fold test for why a back-to-back pair no longer does.
 	CheckRoute(MakeStartJunction(), MakeEndJunction(500.0), TEXT("a facing pair"));
-
-	// Opening away from each other. Nothing gates on facing, so this pair is still routed — and it must still meet
-	// both sockets square on, which means backing out of each opening before crossing between them.
-	CheckRoute(MakeJunction(FVector::ZeroVector, 0.f), MakeJunction(FVector(0.0, 500.0, 0.0), 180.f),
-		TEXT("a back-to-back pair"));
 }
 
 N_TEST_HIGH(FNJunctionConnectorSolverTests_Route_LengthBudgetRejectsALongRoute,
@@ -161,9 +172,9 @@ N_TEST_HIGH(FNJunctionConnectorSolverTests_Route_LengthBudgetRejectsALongRoute,
 
 	FNJunctionConnectorRoute Route;
 	CHECK_MESSAGE(TEXT("A pair inside the budget must route."),
-		FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(300.0), SocketUnitSize, Settings, nullptr, Route))
+		BuildRoute(MakeStartJunction(), MakeEndJunction(300.0), SocketUnitSize, Settings, nullptr, Route))
 	CHECK_FALSE_MESSAGE(TEXT("A pair beyond the budget must be rejected even though it is well within range."),
-		FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(900.0), SocketUnitSize, Settings, nullptr, Route))
+		BuildRoute(MakeStartJunction(), MakeEndJunction(900.0), SocketUnitSize, Settings, nullptr, Route))
 }
 
 N_TEST_CRITICAL(FNJunctionConnectorSolverTests_Corners_MatedPairResolvesToTheMirrorPairing,
@@ -221,7 +232,7 @@ N_TEST_CRITICAL(FNJunctionConnectorSolverTests_Corners_CurvesTerminateOnTheAutho
 	const FNCellJunctionDetails End = MakeEndJunction(500.0);
 
 	FNJunctionConnectorRoute Route;
-	if (!FNJunctionConnectorSolver::BuildRoute(Start, End, SocketUnitSize, MakeSettings(), nullptr, Route))
+	if (!BuildRoute(Start, End, SocketUnitSize, MakeSettings(), nullptr, Route))
 	{
 		ADD_ERROR("Expected a clear, facing pair to route.");
 		return;
@@ -251,7 +262,7 @@ N_TEST_HIGH(FNJunctionConnectorSolverTests_Corners_CurvesTrackTheCenterSampleCou
 	using namespace NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolverHarness;
 
 	FNJunctionConnectorRoute Route;
-	if (!FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(500.0), SocketUnitSize, MakeSettings(), nullptr, Route))
+	if (!BuildRoute(MakeStartJunction(), MakeEndJunction(500.0), SocketUnitSize, MakeSettings(), nullptr, Route))
 	{
 		ADD_ERROR("Expected a clear, facing pair to route.");
 		return;
@@ -279,8 +290,8 @@ N_TEST_HIGH(FNJunctionConnectorSolverTests_Route_IsDeterministic,
 
 	FNJunctionConnectorRoute First;
 	FNJunctionConnectorRoute Second;
-	if (!FNJunctionConnectorSolver::BuildRoute(Start, End, SocketUnitSize, MakeSettings(), nullptr, First)
-		|| !FNJunctionConnectorSolver::BuildRoute(Start, End, SocketUnitSize, MakeSettings(), nullptr, Second))
+	if (!BuildRoute(Start, End, SocketUnitSize, MakeSettings(), nullptr, First)
+		|| !BuildRoute(Start, End, SocketUnitSize, MakeSettings(), nullptr, Second))
 	{
 		ADD_ERROR("Expected a clear, facing pair to route.");
 		return;
@@ -355,9 +366,11 @@ N_TEST_MEDIUM(FNJunctionConnectorSolverTests_Avoidance_MidPointRoutesAroundTheDi
 
 	FNJunctionConnectorRoute Direct;
 	FNJunctionConnectorRoute Detoured;
-	const FVector MidPoint = FVector(250.0, 300.0, 0.0);
-	if (!FNJunctionConnectorSolver::BuildRoute(Start, End, SocketUnitSize, MakeSettings(), nullptr, Direct)
-		|| !FNJunctionConnectorSolver::BuildRoute(Start, End, SocketUnitSize, MakeSettings(), &MidPoint, Detoured))
+	// Kept gentle enough to stay buildable: a harder swerve off a chord this short folds the connector's geometry at
+	// the socket, which the fold check rejects outright.
+	const FVector MidPoint = FVector(250.0, 150.0, 0.0);
+	if (!BuildRoute(Start, End, SocketUnitSize, MakeSettings(), nullptr, Direct)
+		|| !BuildRoute(Start, End, SocketUnitSize, MakeSettings(), &MidPoint, Detoured))
 	{
 		ADD_ERROR("Expected both the direct and detoured routes to build.");
 		return;
@@ -378,6 +391,31 @@ N_TEST_MEDIUM(FNJunctionConnectorSolverTests_Avoidance_MidPointRoutesAroundTheDi
 	CHECK_MESSAGE(TEXT("A detoured route must bend meaningfully off the direct path."), MaximumOffset > 100.0)
 }
 
+N_TEST_HIGH(FNJunctionConnectorSolverTests_TurnRadius_StraighteningRecoversATooTightRoute,
+	"NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolver::TurnRadius::StraighteningRecoversATooTightRoute",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The recovery the pass relies on: the same pair and the same detour, rejected as too tight at one tangent scale,
+	// builds at a wider one. Without this a hard swerve would simply be lost rather than opened up.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolverHarness;
+
+	FNWorldAssemblyJunctionConnectorSettings Settings = MakeSettings();
+	Settings.MinimumTurnRadiusScale = 0.f;
+
+	const FVector MidPoint = FVector(250.0, 300.0, 0.0);
+	FNJunctionConnectorRoute Route;
+
+	CHECK_EQUALS("The detour must be too tight to build at a short tangent scale.",
+		static_cast<int32>(FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(500.0),
+			SocketUnitSize, Settings, &MidPoint, 0.5f, Route)),
+		static_cast<int32>(ENJunctionConnectorRouteResult::TooTight))
+
+	CHECK_EQUALS("The same detour must build once the tangents are widened.",
+		static_cast<int32>(FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(500.0),
+			SocketUnitSize, Settings, &MidPoint, 1.0f, Route)),
+		static_cast<int32>(ENJunctionConnectorRouteResult::Success))
+}
+
 N_TEST_HIGH(FNJunctionConnectorSolverTests_Sweep_HullsSpanEverySegment,
 	"NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolver::Sweep::HullsSpanEverySegment",
 	N_TEST_CONTEXT_ANYWHERE)
@@ -386,7 +424,7 @@ N_TEST_HIGH(FNJunctionConnectorSolverTests_Sweep_HullsSpanEverySegment,
 	using namespace NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolverHarness;
 
 	FNJunctionConnectorRoute Route;
-	if (!FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(500.0), SocketUnitSize, MakeSettings(), nullptr, Route))
+	if (!BuildRoute(MakeStartJunction(), MakeEndJunction(500.0), SocketUnitSize, MakeSettings(), nullptr, Route))
 	{
 		ADD_ERROR("Expected a clear, facing pair to route.");
 		return;
@@ -412,7 +450,7 @@ N_TEST_CRITICAL(FNJunctionConnectorSolverTests_Sweep_CornerHullsDetectBlockingGe
 	using namespace NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolverHarness;
 
 	FNJunctionConnectorRoute Route;
-	if (!FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(500.0), SocketUnitSize, MakeSettings(), nullptr, Route))
+	if (!BuildRoute(MakeStartJunction(), MakeEndJunction(500.0), SocketUnitSize, MakeSettings(), nullptr, Route))
 	{
 		ADD_ERROR("Expected a clear, facing pair to route.");
 		return;
@@ -453,6 +491,237 @@ N_TEST_CRITICAL(FNJunctionConnectorSolverTests_Sweep_CornerHullsDetectBlockingGe
 	CHECK_FALSE_MESSAGE(TEXT("Geometry well clear of the route must not be reported as blocking."), bFalsePositive)
 }
 
+N_TEST_CRITICAL(FNJunctionConnectorSolverTests_TurnRadius_GentleRoutesPassWhereHairpinsFail,
+	"NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolver::TurnRadius::GentleRoutesPassWhereHairpinsFail",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The point of the limit: on identical settings, a route that barely bends is accepted and one forced into a
+	// hairpin is not.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolverHarness;
+
+	FNWorldAssemblyJunctionConnectorSettings Settings = MakeSettings();
+	Settings.MinimumTurnRadiusScale = 2.f;
+
+	FNJunctionConnectorRoute Route;
+	CHECK_MESSAGE(TEXT("A near-straight route must clear the turn-radius limit."),
+		FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(800.0), SocketUnitSize, Settings,
+			nullptr, Settings.TangentScale, Route) == ENJunctionConnectorRouteResult::Success)
+
+	// A detour yanked hard off a short chord: the same pair, bent sharply.
+	const FVector Hairpin = FVector(150.0, 900.0, 0.0);
+	CHECK_EQUALS("A hairpin route must be rejected as too tight.",
+		static_cast<int32>(FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(300.0),
+			SocketUnitSize, Settings, &Hairpin, Settings.TangentScale, Route)),
+		static_cast<int32>(ENJunctionConnectorRouteResult::TooTight))
+}
+
+N_TEST_CRITICAL(FNJunctionConnectorSolverTests_TurnRadius_MeasuredAgainstTheSocketExtentOfTheTurnPlane,
+	"NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolver::TurnRadius::MeasuredAgainstTheSocketExtentOfTheTurnPlane",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Turns are not always horizontal, and the socket is not square: the default is twice as tall as it is wide. So
+	// the same turn radius leaves twice as much room to spare bending sideways as it does bending vertically, and the
+	// reported scale has to reflect that rather than assuming a yaw turn.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolverHarness;
+
+	const FNWorldAssemblyJunctionConnectorSettings Settings = MakeSettings();
+	const FVector2D SocketWorldSize = FNWorldAssemblyUtils::GetWorldSize2D(SocketUnits, SocketUnitSize);
+
+	// Confirm the fixture really is non-square, or the comparison below proves nothing.
+	CHECK_MESSAGE(TEXT("The socket fixture must be taller than it is wide for this test to mean anything."),
+		SocketWorldSize.Y > SocketWorldSize.X)
+
+	// Gentle enough that the turn clears the socket's *height* extent, not just its width — the vertical twin below
+	// has only half the clearance, and a harder bend would fold it before the comparison could be made.
+	constexpr double Distance = 600.0;
+	constexpr double Offset = 150.0;
+	constexpr float TangentScale = 1.0f;
+
+	// The same bend, once swung sideways and once swung upward.
+	const FVector HorizontalMid = FVector(Distance * 0.5, Offset, 0.0);
+	const FVector VerticalMid = FVector(Distance * 0.5, 0.0, Offset);
+
+	FNJunctionConnectorRoute Horizontal;
+	FNJunctionConnectorRoute Vertical;
+	if (FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(Distance), SocketUnitSize, Settings,
+			&HorizontalMid, TangentScale, Horizontal) != ENJunctionConnectorRouteResult::Success
+		|| FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(Distance), SocketUnitSize, Settings,
+			&VerticalMid, TangentScale, Vertical) != ENJunctionConnectorRouteResult::Success)
+	{
+		ADD_ERROR("Expected both the horizontal and vertical detours to build with the radius check disabled.");
+		return;
+	}
+
+	const float HorizontalScale = FNJunctionConnectorSolver::GetMinimumTurnRadiusScale(Horizontal, SocketWorldSize);
+	const float VerticalScale = FNJunctionConnectorSolver::GetMinimumTurnRadiusScale(Vertical, SocketWorldSize);
+
+	CHECK_MESSAGE(TEXT("Both mirrored detours must report a measurable turn."),
+		HorizontalScale < MAX_flt && VerticalScale < MAX_flt)
+
+	// Geometrically the two curves are the same shape, so any difference in the reported scale comes entirely from
+	// which socket extent the turn has to clear. The taller extent must yield the smaller ratio.
+	CHECK_MESSAGE(TEXT("A vertical turn must report less room to spare than the same turn taken sideways, because the socket is taller than it is wide."),
+		VerticalScale < HorizontalScale)
+
+	// And the ratio between them must track the socket's aspect, not some arbitrary factor.
+	const float ExpectedRatio = static_cast<float>(SocketWorldSize.X / SocketWorldSize.Y);
+	CHECK_MESSAGE(TEXT("The two scales must differ by the socket's own width-to-height ratio."),
+		FMath::IsNearlyEqual(VerticalScale / HorizontalScale, ExpectedRatio, 0.05f))
+}
+
+N_TEST_HIGH(FNJunctionConnectorSolverTests_TurnRadius_VerticalTurnIsRejectedWhereTheSameHorizontalOneIsNot,
+	"NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolver::TurnRadius::VerticalTurnIsRejectedWhereTheSameHorizontalOneIsNot",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The consequence of the above, at the gate: there is a band of curvature a sideways turn survives and the
+	// identical vertical turn does not, because the connector's geometry is taller than it is wide.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolverHarness;
+
+	// Gentle enough that the turn clears the socket's *height* extent, not just its width — the vertical twin below
+	// has only half the clearance, and a harder bend would fold it before the comparison could be made.
+	constexpr double Distance = 600.0;
+	constexpr double Offset = 150.0;
+	constexpr float TangentScale = 1.0f;
+	const FVector HorizontalMid = FVector(Distance * 0.5, Offset, 0.0);
+	const FVector VerticalMid = FVector(Distance * 0.5, 0.0, Offset);
+
+	const FVector2D SocketWorldSize = FNWorldAssemblyUtils::GetWorldSize2D(SocketUnits, SocketUnitSize);
+
+	// Measure the horizontal route, then set the limit just under it — the vertical twin has proportionally less
+	// clearance, so it must fall the other side of that line.
+	FNWorldAssemblyJunctionConnectorSettings Settings = MakeSettings();
+	FNJunctionConnectorRoute Route;
+	if (FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(Distance), SocketUnitSize, Settings,
+		&HorizontalMid, TangentScale, Route) != ENJunctionConnectorRouteResult::Success)
+	{
+		ADD_ERROR("Expected the horizontal detour to build with the radius check disabled.");
+		return;
+	}
+	Settings.MinimumTurnRadiusScale = FNJunctionConnectorSolver::GetMinimumTurnRadiusScale(Route, SocketWorldSize) * 0.95f;
+
+	CHECK_EQUALS("The horizontal turn must clear a limit set just below its own measured radius.",
+		static_cast<int32>(FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(Distance),
+			SocketUnitSize, Settings, &HorizontalMid, TangentScale, Route)),
+		static_cast<int32>(ENJunctionConnectorRouteResult::Success))
+
+	CHECK_EQUALS("The identical vertical turn must be rejected at that same limit.",
+		static_cast<int32>(FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(Distance),
+			SocketUnitSize, Settings, &VerticalMid, TangentScale, Route)),
+		static_cast<int32>(ENJunctionConnectorRouteResult::TooTight))
+}
+
+N_TEST_CRITICAL(FNJunctionConnectorSolverTests_TurnRadius_FoldedRoutesAreRejectedWithTheCheckDisabled,
+	"NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolver::TurnRadius::FoldedRoutesAreRejectedWithTheCheckDisabled",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// A route bent tighter than the socket is wide has its inner wall pass through itself, and no connector could
+	// build geometry along it. That is a validity failure, so it must be rejected even with the tunable limit turned
+	// all the way off.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolverHarness;
+
+	FNWorldAssemblyJunctionConnectorSettings Settings = MakeSettings();
+	Settings.MinimumTurnRadiusScale = 0.f;
+
+	// A violent detour off a very short chord, well inside the socket's own half-extent.
+	const FVector Fold = FVector(20.0, 1200.0, 0.0);
+
+	FNJunctionConnectorRoute Route;
+	CHECK_EQUALS("A folded route must be rejected even with the turn-radius limit disabled.",
+		static_cast<int32>(FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(120.0),
+			SocketUnitSize, Settings, &Fold, Settings.TangentScale, Route)),
+		static_cast<int32>(ENJunctionConnectorRouteResult::TooTight))
+
+	// And a route that is merely gentle must not trip the fold detector.
+	if (!BuildRoute(MakeStartJunction(), MakeEndJunction(800.0), SocketUnitSize, Settings, nullptr, Route))
+	{
+		ADD_ERROR("Expected a near-straight route to build.");
+		return;
+	}
+	CHECK_FALSE_MESSAGE(TEXT("A gentle route must not be reported as folded."), FNJunctionConnectorSolver::DoesRouteFold(Route))
+}
+
+N_TEST_HIGH(FNJunctionConnectorSolverTests_TurnRadius_BackToBackPairsFoldAtEveryTangentScale,
+	"NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolver::TurnRadius::BackToBackPairsFoldAtEveryTangentScale",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Nothing gates candidate pairs on whether their junctions face each other, so a back-to-back pair reaches the
+	// solver. Meeting both sockets square on then forces the route to double back out of each opening, and no tangent
+	// scale opens that turn far enough to clear the socket — so the fold check is what actually rejects these.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolverHarness;
+
+	FNWorldAssemblyJunctionConnectorSettings Settings = MakeSettings();
+	Settings.MinimumTurnRadiusScale = 0.f;
+
+	// Sockets side by side, each opening away from the other.
+	const FNCellJunctionDetails Start = MakeJunction(FVector::ZeroVector, 0.f);
+	const FNCellJunctionDetails End = MakeJunction(FVector(0.0, 500.0, 0.0), 180.f);
+
+	FNJunctionConnectorRoute Route;
+	for (const float TangentScale : { 0.5f, 1.0f, 1.5f, 2.0f })
+	{
+		CHECK_EQUALS("A back-to-back pair must be rejected as too tight at every tangent scale.",
+			static_cast<int32>(FNJunctionConnectorSolver::BuildRoute(Start, End, SocketUnitSize, Settings,
+				nullptr, TangentScale, Route)),
+			static_cast<int32>(ENJunctionConnectorRouteResult::TooTight))
+	}
+}
+
+N_TEST_HIGH(FNJunctionConnectorSolverTests_TurnRadius_LengthRisesWithEveryStraighteningStep,
+	"NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolver::TurnRadius::LengthRisesWithEveryStraighteningStep",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The straightening retry abandons a detour the moment one of its steps blows the length budget, on the grounds
+	// that every later step is longer still. That shortcut is only safe if length rises monotonically with the tangent
+	// scale — so this pins it.
+	//
+	// Note that curvature deliberately is *not* asserted to improve monotonically: longer tangents open a turn up to
+	// a point and then overshoot into a tighter one, which is exactly why the retry tries every step instead of
+	// jumping to the widest.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolverHarness;
+
+	FNWorldAssemblyJunctionConnectorSettings Settings = MakeSettings();
+	Settings.MinimumTurnRadiusScale = 0.f;
+
+	// Two facing sockets offset sideways, producing a gentle S. Gentle enough to stay buildable across the whole
+	// tangent range, which a detour is not — the point here is the length trend, not the turn.
+	const FNCellJunctionDetails Start = MakeStartJunction();
+	const FNCellJunctionDetails End = MakeJunction(FVector(800.0, 100.0, 0.0), 0.f);
+
+	float PreviousLength = 0.f;
+	for (const float TangentScale : { 0.25f, 0.5f, 1.0f, 1.5f, 2.0f })
+	{
+		FNJunctionConnectorRoute Route;
+		if (FNJunctionConnectorSolver::BuildRoute(Start, End, SocketUnitSize, Settings, nullptr, TangentScale, Route)
+			!= ENJunctionConnectorRouteResult::Success)
+		{
+			ADD_ERROR(FString::Printf(TEXT("Expected the route to build at tangent scale %.2f."), TangentScale));
+			return;
+		}
+
+		CHECK_MESSAGE(TEXT("Each straightening step must produce a longer route than the one before it."),
+			Route.Path.Center.Length > PreviousLength)
+		PreviousLength = Route.Path.Center.Length;
+	}
+}
+
+N_TEST_MEDIUM(FNJunctionConnectorSolverTests_TurnRadius_StraightRoutesReportNoTurn,
+	"NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolver::TurnRadius::StraightRoutesReportNoTurn",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// A route with no curvature to measure must report an unbounded scale rather than a degenerate zero, or the gate
+	// would reject exactly the routes that are most obviously fine.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolverHarness;
+
+	FNWorldAssemblyJunctionConnectorSettings Settings = MakeSettings();
+	Settings.MinimumTurnRadiusScale = 10.f;
+
+	FNJunctionConnectorRoute Route;
+	CHECK_EQUALS("A dead-straight route must clear even a demanding turn-radius limit.",
+		static_cast<int32>(FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(500.0),
+			SocketUnitSize, Settings, nullptr, Settings.TangentScale, Route)),
+		static_cast<int32>(ENJunctionConnectorRouteResult::Success))
+}
+
 N_TEST_MEDIUM(FNJunctionConnectorSolverTests_Route_CoincidentSocketsAreRejected,
 	"NEXUS::UnitTests::NWorldAssembly::FNJunctionConnectorSolver::Route::CoincidentSocketsAreRejected",
 	N_TEST_CONTEXT_ANYWHERE)
@@ -462,7 +731,7 @@ N_TEST_MEDIUM(FNJunctionConnectorSolverTests_Route_CoincidentSocketsAreRejected,
 
 	FNJunctionConnectorRoute Route;
 	CHECK_FALSE_MESSAGE(TEXT("Coincident sockets must not produce a route."),
-		FNJunctionConnectorSolver::BuildRoute(MakeStartJunction(), MakeEndJunction(0.0), SocketUnitSize, MakeSettings(), nullptr, Route))
+		BuildRoute(MakeStartJunction(), MakeEndJunction(0.0), SocketUnitSize, MakeSettings(), nullptr, Route))
 }
 
 #endif //WITH_TESTS

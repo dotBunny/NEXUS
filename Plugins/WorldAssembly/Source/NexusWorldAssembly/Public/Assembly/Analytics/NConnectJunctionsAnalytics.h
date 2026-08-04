@@ -21,6 +21,13 @@ struct FNConnectJunctionsAnalytics
 	/** Junctions the graph builders left unmatched, and which this pass therefore considered. */
 	int32 OpenJunctionCount = 0;
 
+	/**
+	 * Unmatched junctions skipped for having Disable Connecting authored on them.
+	 * @note Excluded from OpenJunctionCount, so that stays a count of what this pass could actually work with — this
+	 *       is what explains the difference when a layout connects up less than the open sockets suggest.
+	 */
+	int32 DisabledJunctionCount = 0;
+
 	/** Pairs that cleared the cheap gates (different cell, matching socket size, within range) and were routed. */
 	int32 CandidatePairCount = 0;
 
@@ -32,6 +39,22 @@ struct FNConnectJunctionsAnalytics
 
 	/** Pairs abandoned because every variant of their route hit geometry. */
 	int32 RejectedByCollisionCount = 0;
+
+	/** Pairs abandoned because no variant of their route turned gently enough for the configured minimum radius. */
+	int32 RejectedByTurnRadiusCount = 0;
+
+	/**
+	 * Pairs whose tightest variant would have folded the connector's geometry through itself.
+	 * @note A subset of the turn-radius rejections, broken out because it is a validity failure rather than a tuning
+	 *       one — these are rejected no matter how the minimum radius is configured.
+	 */
+	int32 RejectedByFoldCount = 0;
+
+	/** Straighter variants attempted across every pair, including those that went on to fail anyway. */
+	int32 StraighteningAttemptCount = 0;
+
+	/** Pairs that only succeeded because a straighter variant cleared where the configured tangent scale did not. */
+	int32 StraighteningSuccessCount = 0;
 
 	/**
 	 * Pairs abandoned because their two cells were already joined and Allow Multiple Cell Connections is off.

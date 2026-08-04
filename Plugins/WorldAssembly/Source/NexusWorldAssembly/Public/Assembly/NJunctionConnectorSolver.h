@@ -10,6 +10,31 @@
 
 struct FNRawMesh;
 
+/**
+ * Why a candidate route was or was not usable.
+ *
+ * Distinguished rather than collapsed to a bool because the reasons call for different responses: a route that is
+ * too tight can often be saved by straightening, while one that is already too long cannot — every straighter
+ * variant is longer still.
+ */
+enum class ENJunctionConnectorRouteResult : uint8
+{
+	/** The route is within every limit and ready for collision testing. */
+	Success,
+
+	/** The two sockets are too close together to define a curve at all. */
+	Degenerate,
+
+	/** The center curve or one of the corner curves exceeds the maximum spline length. */
+	TooLong,
+
+	/**
+	 * The route turns tighter than the configured minimum radius, or tightly enough that the connector's geometry
+	 * would fold through itself.
+	 */
+	TooTight,
+};
+
 /** One cross-section frame along a routed connector path: where it is, which way it heads, and how it is oriented. */
 struct FNJunctionConnectorFrame
 {
@@ -112,21 +137,46 @@ public:
 		bool bSquareSocket);
 
 	/**
-	 * Build a complete candidate route, including the four corner curves.
+	 * Build a complete candidate route, including the four corner curves, and check it against every shape limit.
 	 * @param Start The junction the route leaves from.
 	 * @param End The junction the route arrives at.
 	 * @param SocketUnitSize World size of a single socket grid unit, normally UNWorldAssemblySettings::SocketSize.
-	 * @param Settings Connector tuning supplying the tangent scale, sample step, and length limit.
+	 * @param Settings Connector tuning supplying the sample step, length limit, and minimum turn radius.
 	 * @param MidPoint Optional detour point the curve is routed through; null builds the direct route.
-	 * @param OutRoute Receives the built route. Left in an unspecified state when the call returns false.
-	 * @return false when the center curve or any corner curve exceeds the configured maximum spline length, or when
-	 *         the two sockets are too close together to define a curve at all.
+	 * @param TangentScale Tangent magnitude as a fraction of the distance between the sockets, overriding the
+	 *        configured value so a caller can retry a too-tight route with a straighter one.
+	 * @param OutRoute Receives the built route. Left in an unspecified state on any result but Success.
+	 * @return Why the route was rejected, or Success.
 	 * @note Length is checked before the corner curves are built where possible, so a route that is obviously too
 	 *       long costs little.
 	 */
-	static bool BuildRoute(const FNCellJunctionDetails& Start, const FNCellJunctionDetails& End,
+	static ENJunctionConnectorRouteResult BuildRoute(const FNCellJunctionDetails& Start, const FNCellJunctionDetails& End,
 		const FVector2D& SocketUnitSize, const FNWorldAssemblyJunctionConnectorSettings& Settings,
-		const FVector* MidPoint, FNJunctionConnectorRoute& OutRoute);
+		const FVector* MidPoint, float TangentScale, FNJunctionConnectorRoute& OutRoute);
+
+	/**
+	 * Measure the tightest turn a built route makes, relative to how much room its own socket needs there.
+	 *
+	 * Reported as a ratio rather than a world radius because what counts as too tight depends on which way the route
+	 * bends: the connector's geometry spans the whole socket, so a tall narrow opening tolerates a far sharper turn
+	 * to the side than it does upward. Dividing the turn radius by the socket's extent in the direction of that
+	 * particular turn makes one number comparable across every turn plane and socket size — and puts the point at
+	 * which the geometry folds through itself at exactly 1.
+	 * @param Route The route to measure; needs its frames and sampled center curve.
+	 * @param SocketWorldSize World size of the socket, width in X and height in Y.
+	 * @return The smallest radius-to-extent ratio along the route, or MAX_flt for a route with no measurable turn.
+	 */
+	static float GetMinimumTurnRadiusScale(const FNJunctionConnectorRoute& Route, const FVector2D& SocketWorldSize);
+
+	/**
+	 * @param Route The route to test; needs its corner curves and frames.
+	 * @return true when any corner curve doubles back on the direction of travel, which is what a connector's inner
+	 *         wall does once the turn is tighter than the socket is wide. Geometry lofted through such a route
+	 *         self-intersects, so this is a validity failure rather than a tuning preference.
+	 * @note Tested against the generated corner points rather than inferred from curvature, so it reports on the
+	 *       geometry a connector would actually receive.
+	 */
+	static bool DoesRouteFold(const FNJunctionConnectorRoute& Route);
 
 	/**
 	 * Deterministic detour midpoints to try when the direct route is blocked, ordered least-deviating first.
