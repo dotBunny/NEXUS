@@ -236,6 +236,20 @@ public:
 		meta=(ToolTip="The maximum depth of penetration a cell's hull can penetrate world geometry to make a junction connection.", ClampMin="1", ClampMax="100", UIMin="1", UIMax="100", SliderExponent = 1))
 	float AssemblyJunctionMatchingWorldPenetration = 2.f;
 
+	/**
+	 * When true, two unmatched junctions that already occupy the same opening facing opposite ways are mated as if
+	 * the builder had joined them.
+	 *
+	 * The builders only ever grow a *new* cell off an open junction, so a graph that loops back on itself — or two
+	 * organs that grow into each other — can leave two junctions sitting in exactly the same place facing opposite
+	 * ways with no link between them. Both are then capped, walling off what is physically an open doorway.
+	 * @note Nothing is spawned for these: the two cells are already flush, so the pairing is a plain mating rather
+	 *       than a routed connector.
+	 */
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Matching", DisplayName="Connect Coincidences",
+		meta=(ToolTip="Should two unmatched junctions that sit in the same place facing opposite directions be linked to each other? These are cells that ended up flush without the builder joining them, and would otherwise both be capped off."))
+	bool bJunctionMatchingCoincidences = false;
+
 	/** Default context tags seeded into every assembly operation. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Tagging", DisplayName="Context Tags",
 		meta=(ToolTip="The default Context Tags to provide to the Assembly Operation."))

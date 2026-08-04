@@ -21,6 +21,10 @@
  * later pairs route around it. Nothing here consults a random stream: candidate ordering, corner correspondence and
  * detour ordering are all derived from the geometry, so the same layout always connects up the same way.
  *
+ * Ahead of the routing walk, and independently of whether it is enabled at all, the stage can also mate junctions
+ * that already sit in the same opening facing opposite ways — cells left flush by a graph looping back on itself,
+ * which the builders cannot join because they only ever grow *new* cells off an open junction.
+ *
  * Runs on any worker thread (see GetDesiredThread). It reads the graphs and the virtual world snapshot, both of
  * which are complete and no longer being mutated by the time its prerequisites have finished, and is the only
  * writer of the connector collision arrays and the connection list.
@@ -82,13 +86,36 @@ private:
 	};
 
 	/**
-	 * Collect every unmatched junction across every graph, in a stable order, skipping those authored to opt out.
+	 * Collect every unmatched junction across every graph, in a stable order.
 	 * @param OutJunctions Receives the junctions this pass may pair. Reset first.
-	 * @param OutDisabledCount Receives how many were skipped for having Disable Connecting set.
+	 * @param OutDisabledCount Receives how many carry Disable Connecting.
+	 * @note Junctions authored to opt out are gathered rather than dropped: the flag turns off routed connector
+	 *       geometry, and an inverse mating produces none — so only the routing pass gates on it.
 	 */
 	void GatherOpenJunctions(TArray<FOpenJunction>& OutJunctions, int32& OutDisabledCount) const;
 
-	/** Emit each unordered pair that clears the socket-size, distinct-cell and range gates, ordered nearest-first. */
+	/**
+	 * Mate every pair of junctions that already occupies the same opening facing opposite ways.
+	 *
+	 * Linked as a plain cell mating rather than as a connector pairing: the two cells are flush, so there is nothing
+	 * to route and nothing to spawn — this is the join the builder would have made had it been able to grow into a
+	 * cell that already existed.
+	 * @param Junctions The gathered open junctions. Both ends of each mating are flagged matched.
+	 * @return How many pairings were made.
+	 * @note Runs before the routing walk so the links it creates are visible to the Allow Multiple Cell Connections
+	 *       check, and so a coincident pair is never handed to the solver — which would reject it as degenerate.
+	 */
+	int32 MatchInverseJunctions(TArray<FOpenJunction>& Junctions);
+
+	/**
+	 * Route and greedily accept connectors between the junctions still open after inverse matching.
+	 * @param Junctions The gathered open junctions. Both ends of each acceptance are flagged matched.
+	 * @param OutCandidateCount Receives how many pairs cleared the cheap gates and were attempted.
+	 * @return How many pairings were accepted.
+	 */
+	int32 RouteConnectors(TArray<FOpenJunction>& Junctions, int32& OutCandidateCount);
+
+	/** Emit each unordered pair that clears the socket-size, distinct-cell, opt-out and range gates, nearest-first. */
 	void BuildCandidatePairs(const TArray<FOpenJunction>& Junctions, TArray<FCandidatePair>& OutPairs) const;
 
 	/**

@@ -481,7 +481,12 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 			// Runtime Connected
 			if (LinkDetails.bConnected)
 			{
-				const bool bConnectedDrawer = LinkDetails.ConnectedNodeIdentifier > LinkDetails.NodeIdentifier;
+				// A mated pair has its two sockets co-located, so one end is elected to draw the rectangle rather than
+				// both rendering it twice. Node identifiers are unique within a graph but restart between them, so an
+				// inverse mating that spans two graphs can hold the same one on both ends — and a strict comparison
+				// would then elect neither, leaving a visible hole. Ties draw twice instead, which on two identical
+				// co-located rectangles looks the same as drawing once.
+				const bool bConnectedDrawer = LinkDetails.ConnectedNodeIdentifier >= LinkDetails.NodeIdentifier;
 				JunctionComponent->DrawDebugPDI(PDI,
 					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsValid,
 					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsInvalid,

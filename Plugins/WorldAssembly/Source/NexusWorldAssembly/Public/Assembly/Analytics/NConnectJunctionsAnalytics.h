@@ -22,11 +22,19 @@ struct FNConnectJunctionsAnalytics
 	int32 OpenJunctionCount = 0;
 
 	/**
-	 * Unmatched junctions skipped for having Disable Connecting authored on them.
-	 * @note Excluded from OpenJunctionCount, so that stays a count of what this pass could actually work with — this
-	 *       is what explains the difference when a layout connects up less than the open sockets suggest.
+	 * Unmatched junctions carrying Disable Connecting, which the routing walk therefore skipped.
+	 * @note A subset of OpenJunctionCount rather than a deduction from it: these junctions remain eligible for
+	 *       inverse matching, since that spawns no connector for them to have opted out of.
 	 */
 	int32 DisabledJunctionCount = 0;
+
+	/**
+	 * Junctions mated to a coincident, oppositely-facing partner rather than routed to one, counted per pairing.
+	 * @note These never reach the routing walk at all, so they are absent from CandidatePairCount and from every
+	 *       rejection counter below — a layout that suddenly connects up better after enabling Connect Inverse shows
+	 *       it here rather than in AcceptedCount.
+	 */
+	int32 InverseMatchCount = 0;
 
 	/** Pairs that cleared the cheap gates (different cell, matching socket size, within range) and were routed. */
 	int32 CandidatePairCount = 0;

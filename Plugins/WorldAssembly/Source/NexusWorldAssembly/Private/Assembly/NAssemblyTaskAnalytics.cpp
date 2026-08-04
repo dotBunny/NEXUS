@@ -171,6 +171,11 @@ void FNAssemblyTaskAnalytics::ConnectJunctions_SetJunctionCounts(const int32 Ope
 	ConnectJunctionsAnalytics.DisabledJunctionCount = DisabledCount;
 }
 
+void FNAssemblyTaskAnalytics::ConnectJunctions_InverseMatched()
+{
+	ConnectJunctionsAnalytics.InverseMatchCount++;
+}
+
 void FNAssemblyTaskAnalytics::ConnectJunctions_SetCandidatePairCount(const int32 Count)
 {
 	ConnectJunctionsAnalytics.CandidatePairCount = Count;
@@ -339,6 +344,7 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 		ConnectJunctionsTable->Initialize({ "Metric", "Count" });
 		ConnectJunctionsTable->AddRow({"Open Junctions", FString::FromInt(ConnectJunctionsAnalytics.OpenJunctionCount)});
 		ConnectJunctionsTable->AddRow({"Disabled Junctions", FString::FromInt(ConnectJunctionsAnalytics.DisabledJunctionCount)});
+		ConnectJunctionsTable->AddRow({"Inverse Matched", FString::FromInt(ConnectJunctionsAnalytics.InverseMatchCount)});
 		ConnectJunctionsTable->AddRow({"Candidate Pairs", FString::FromInt(ConnectJunctionsAnalytics.CandidatePairCount)});
 		ConnectJunctionsTable->AddRow({"Accepted", FString::FromInt(ConnectJunctionsAnalytics.AcceptedCount)});
 		ConnectJunctionsTable->AddRow({"Rejected (Length)", FString::FromInt(ConnectJunctionsAnalytics.RejectedByLengthCount)});

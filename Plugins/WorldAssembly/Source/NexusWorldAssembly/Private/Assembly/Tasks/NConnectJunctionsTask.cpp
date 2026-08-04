@@ -5,6 +5,7 @@
 
 #include "NWorldAssemblyMinimal.h"
 #include "NWorldAssemblySettings.h"
+#include "NWorldAssemblyUtils.h"
 #include "Assembly/NJunctionConnectorSolver.h"
 #include "Types/NRawMeshUtils.h"
 
@@ -16,6 +17,16 @@ namespace
 	 *       could not author by hand, and could not reproduce by raising the setting.
 	 */
 	constexpr float MaximumTangentScale = 2.f;
+
+	/**
+	 * World-space slack allowed between two socket corners still considered the same point, in centimetres.
+	 *
+	 * Deliberately not a setting. A genuine coincidence comes out of the builder's own quaternion placement, so the
+	 * only gap between the two sockets is accumulated floating-point error along a chain of compositions — orders of
+	 * magnitude under this. There is nothing to tune: a larger value would only start mating sockets that are
+	 * visibly offset, leaving a seam no geometry closes.
+	 */
+	constexpr float InverseCoincidenceTolerance = 1.f;
 }
 
 FNConnectJunctionsTask::FNConnectJunctionsTask(const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr,
@@ -61,13 +72,12 @@ void FNConnectJunctionsTask::GatherOpenJunctions(TArray<FOpenJunction>& OutJunct
 				const FNCellJunctionDetails* Details = CellNode->GetJunctionDetails(JunctionKey);
 				if (Details == nullptr) continue;
 
-				// Opted out by the author. Dropped here rather than gated later so it never reaches the broadphase
-				// or the candidate list at all, and so the reported open-junction count reflects what this pass can
-				// actually work with.
+				// Counted here, but still gathered: Disable Connecting opts a junction out of *connector geometry*,
+				// and an inverse mating spawns none — the two cells are already flush. So the flag is applied where
+				// the routing candidates are built, and these junctions remain available for inverse matching.
 				if (Details->bDisableConnector)
 				{
 					OutDisabledCount++;
-					continue;
 				}
 
 				FOpenJunction& Junction = OutJunctions.AddDefaulted_GetRef();
@@ -79,6 +89,73 @@ void FNConnectJunctionsTask::GatherOpenJunctions(TArray<FOpenJunction>& OutJunct
 			}
 		}
 	}
+}
+
+int32 FNConnectJunctionsTask::MatchInverseJunctions(TArray<FOpenJunction>& Junctions)
+{
+	const int32 JunctionCount = Junctions.Num();
+
+	// Broadphase over the junction points. Zero-extent boxes queried with one expanded by the tolerance, so a dense
+	// layout does not pay an N^2 sweep to find what is almost always a handful of coincidences.
+	TArray<FBox> JunctionBounds;
+	JunctionBounds.Reserve(JunctionCount);
+	for (const FOpenJunction& Junction : Junctions)
+	{
+		JunctionBounds.Add(FBox(Junction.Details.WorldLocation, Junction.Details.WorldLocation));
+	}
+	const FNBoundsBVH JunctionBVH(JunctionBounds);
+
+	const FVector ToleranceExtent(InverseCoincidenceTolerance);
+	int32 MatchCount = 0;
+
+	TArray<int32, TInlineAllocator<8>> Overlaps;
+	for (int32 StartIndex = 0; StartIndex < JunctionCount; StartIndex++)
+	{
+		FOpenJunction& Start = Junctions[StartIndex];
+		if (Start.bMatched) continue;
+
+		JunctionBVH.QueryOverlaps(FBox(Start.Details.WorldLocation - ToleranceExtent,
+			Start.Details.WorldLocation + ToleranceExtent), Overlaps);
+
+		// The tree returns traversal order, not index order. Sorting is what makes the winner of a three-way pile-up
+		// depend only on the gather order, which is itself derived from the graph contents.
+		Overlaps.Sort();
+
+		for (const int32 EndIndex : Overlaps)
+		{
+			// Each unordered pair is considered once, from its lower index.
+			if (EndIndex <= StartIndex) continue;
+
+			FOpenJunction& End = Junctions[EndIndex];
+			if (End.bMatched) continue;
+
+			// A cell's own junctions all face out of the same interior, so two of them can never be coincident
+			// inverses of each other — but the check is free and states the intent.
+			if (Start.CellNode == End.CellNode) continue;
+
+			if (!FNWorldAssemblyUtils::AreJunctionsInverseCoincident(Start.Details, End.Details, SocketUnitSize,
+				InverseCoincidenceTolerance)) continue;
+
+			// LinkJunction, not LinkJunctionConnector: this is a direct mating, so GenerateLinkDetails reports it
+			// connected without the connector flag, and nothing is queued to spawn between the two openings.
+			Start.CellNode->LinkJunction(Start.JunctionKey, End.CellNode);
+			End.CellNode->LinkJunction(End.JunctionKey, Start.CellNode);
+
+			// Same node-level edge the builder wires for a mating it made itself, so graph traversal — hot pathing in
+			// particular — walks through the opening rather than around it. Called once, from the lower index, because
+			// the edge belongs to the pair. May join two graphs; see FNConnectJunctionsTask::DoTask for why the
+			// cross-graph pointers that leaves are safe.
+			Start.CellNode->Connect(End.CellNode);
+
+			Start.bMatched = true;
+			End.bMatched = true;
+			MatchCount++;
+			N_ASSEMBLY_ANALYTICS(ConnectJunctions_InverseMatched)
+			break;
+		}
+	}
+
+	return MatchCount;
 }
 
 void FNConnectJunctionsTask::BuildCandidatePairs(const TArray<FOpenJunction>& Junctions, TArray<FCandidatePair>& OutPairs) const
@@ -105,6 +182,12 @@ void FNConnectJunctionsTask::BuildCandidatePairs(const TArray<FOpenJunction>& Ju
 	for (int32 StartIndex = 0; StartIndex < JunctionCount; StartIndex++)
 	{
 		const FOpenJunction& Start = Junctions[StartIndex];
+
+		// Already mated as a coincident inverse, or opted out of connector geometry by its author. Both are dropped
+		// here rather than at gather time so an opted-out junction stays eligible for inverse matching, and so the
+		// reported candidate count reflects only what the routing walk will actually attempt.
+		if (Start.bMatched || Start.Details.bDisableConnector) continue;
+
 		JunctionBVH.QueryOverlaps(FBox(Start.Details.WorldLocation - RangeExtent, Start.Details.WorldLocation + RangeExtent), Overlaps);
 
 		for (const int32 EndIndex : Overlaps)
@@ -113,6 +196,7 @@ void FNConnectJunctionsTask::BuildCandidatePairs(const TArray<FOpenJunction>& Ju
 			if (EndIndex <= StartIndex) continue;
 
 			const FOpenJunction& End = Junctions[EndIndex];
+			if (End.bMatched || End.Details.bDisableConnector) continue;
 
 			// Two junctions on the same cell face into the same interior; connecting them is never what was meant.
 			if (Start.CellNode == End.CellNode) continue;
@@ -255,17 +339,21 @@ void FNConnectJunctionsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 {
 	N_ASSEMBLY_ANALYTICS(ConnectJunctionsStart)
 
-	const FNWorldAssemblyJunctionConnectorSettings& Settings = TaskGraphContextPtr->OperationSettings.JunctionConnectorSettings;
-	if (!Settings.bEnabled || TaskGraphContextPtr->IsCancelled())
+	const FNAssemblyOperationSettings& OperationSettings = TaskGraphContextPtr->OperationSettings;
+	const FNWorldAssemblyJunctionConnectorSettings& Settings = OperationSettings.JunctionConnectorSettings;
+
+	// Inverse matching stands on its own switch. It is junction *matching* — it produces a plain cell mating and
+	// spawns nothing — so it is worth doing on a layout that has routed connectors turned off entirely.
+	const bool bConnectInverse = OperationSettings.bJunctionMatchingConnectInverse;
+	if ((!Settings.bEnabled && !bConnectInverse) || TaskGraphContextPtr->IsCancelled())
 	{
 		N_ASSEMBLY_ANALYTICS(ConnectJunctionsFinish)
 		return;
 	}
 
 	// Diagnostic counts go through the analytics object so they compile out of shipping entirely, matching every
-	// other stage. AcceptedCount is the exception: the progress channel and the completion log both report it, and
-	// neither of those is shipping-only, so it stays a plain local.
-	int32 AcceptedCount = 0;
+	// other stage. These are the exceptions: the progress channel and the completion log both report them, and
+	// neither of those is shipping-only, so they stay plain locals.
 	int32 DisabledJunctionCount = 0;
 
 	TArray<FOpenJunction> Junctions;
@@ -279,14 +367,36 @@ void FNConnectJunctionsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		return;
 	}
 
+	// Ahead of routing, so the links it creates are visible to the existing-connection check below, and so a
+	// coincident pair never reaches the solver — which has nothing to route between two sockets in the same place.
+	const int32 InverseMatchCount = bConnectInverse ? MatchInverseJunctions(Junctions) : 0;
+
+	int32 CandidateCount = 0;
+	const int32 AcceptedCount = Settings.bEnabled ? RouteConnectors(Junctions, CandidateCount) : 0;
+
+	// Kept to the counts that survive into shipping. The per-reason breakdown lives in the operation report, which is
+	// itself a non-shipping feature, so reaching for it here would tie this log to a build configuration.
+	UE_LOG(LogNexusWorldAssembly, Log,
+		TEXT("Junction connectors: %i accepted from %i candidates across %i open junctions (%i inverse matched, %i opted out)."),
+		AcceptedCount, CandidateCount, Junctions.Num(), InverseMatchCount, DisabledJunctionCount);
+
+	N_ASSEMBLY_ANALYTICS(ConnectJunctionsFinish)
+}
+
+int32 FNConnectJunctionsTask::RouteConnectors(TArray<FOpenJunction>& Junctions, int32& OutCandidateCount)
+{
+	const FNWorldAssemblyJunctionConnectorSettings& Settings = TaskGraphContextPtr->OperationSettings.JunctionConnectorSettings;
+
+	int32 AcceptedCount = 0;
+
 	TArray<FCandidatePair> Pairs;
 	BuildCandidatePairs(Junctions, Pairs);
+	OutCandidateCount = Pairs.Num();
 	N_ASSEMBLY_ANALYTICS_ONE_PARAM(ConnectJunctions_SetCandidatePairCount, Pairs.Num())
 
 	if (Pairs.Num() == 0)
 	{
-		N_ASSEMBLY_ANALYTICS(ConnectJunctionsFinish)
-		return;
+		return 0;
 	}
 
 	TaskGraphContextPtr->SetStatusMessage(FString::Printf(TEXT("%s (%i)"),
@@ -518,11 +628,5 @@ void FNConnectJunctionsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		FString::Printf(TEXT("Connected %i"), AcceptedCount), 1.f);
 	TaskGraphContextPtr->CloseStatusChannel(StatusChannelId);
 
-	// Kept to the counts that survive into shipping. The per-reason breakdown lives in the operation report, which is
-	// itself a non-shipping feature, so reaching for it here would tie this log to a build configuration.
-	UE_LOG(LogNexusWorldAssembly, Log,
-		TEXT("Junction connectors: %i accepted from %i candidates across %i open junctions (%i junctions opted out)."),
-		AcceptedCount, Pairs.Num(), Junctions.Num(), DisabledJunctionCount);
-
-	N_ASSEMBLY_ANALYTICS(ConnectJunctionsFinish)
+	return AcceptedCount;
 }

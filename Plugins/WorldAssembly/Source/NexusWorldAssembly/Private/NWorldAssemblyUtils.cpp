@@ -483,6 +483,49 @@ TArray<FVector> FNWorldAssemblyUtils::GetJunctionWorldCornerPoints(const FNCellJ
 	return GetJunctionWorldCornerPoints(Details.WorldLocation, Details.WorldRotation, Details.SocketSize, UnitSize);
 }
 
+bool FNWorldAssemblyUtils::AreJunctionsInverseCoincident(const FNCellJunctionDetails& A, const FNCellJunctionDetails& B,
+	const FVector2D& UnitSize, const float Tolerance)
+{
+	// Cheap rejections first: both are a single comparison, and between them they discard nearly everything a
+	// proximity broadphase hands over.
+	if (A.SocketSize != B.SocketSize) return false;
+	if (!A.WorldLocation.Equals(B.WorldLocation, Tolerance)) return false;
+
+	// Opposed, not merely parallel. Two junctions in the same place opening onto the *same* direction are two cells
+	// stacked back to back, and their socket rectangles coincide just as neatly — so without this the corner test
+	// below would happily accept them. Only the sign matters: coincident rectangles share a plane, which already
+	// pins the normals to parallel or antiparallel.
+	if (FVector::DotProduct(GetJunctionOutwardDirection(A), GetJunctionOutwardDirection(B)) >= 0.0) return false;
+
+	const TArray<FVector> CornersA = GetJunctionWorldCornerPoints(A, UnitSize);
+	const TArray<FVector> CornersB = GetJunctionWorldCornerPoints(B, UnitSize);
+	if (CornersA.Num() != 4 || CornersB.Num() != 4) return false;
+
+	// Every corner of A must claim a distinct corner of B. The two rectangles are built in opposite winding order, so
+	// there is no index correspondence to rely on; claiming by mask is what stops one corner of B standing in for two
+	// of A. Greedy claiming is exact here rather than merely approximate, because a socket's corners are separated by
+	// at least its shortest side and the tolerance is far below that — no corner is ever ambiguous between two
+	// partners.
+	uint8 ClaimedMask = 0;
+	for (const FVector& Corner : CornersA)
+	{
+		bool bClaimed = false;
+		for (int32 i = 0; i < 4; i++)
+		{
+			if ((ClaimedMask & 1 << i) != 0) continue;
+			if (!Corner.Equals(CornersB[i], Tolerance)) continue;
+
+			ClaimedMask |= 1 << i;
+			bClaimed = true;
+			break;
+		}
+
+		if (!bClaimed) return false;
+	}
+
+	return true;
+}
+
 void FNWorldAssemblyUtils::GetVoxelQueryPoints(const FVector& WorldCenter, const FVector& VoxelSize, TArray<FVector>& OutPositions)
 {
 	/** Directional Vectors (26)
