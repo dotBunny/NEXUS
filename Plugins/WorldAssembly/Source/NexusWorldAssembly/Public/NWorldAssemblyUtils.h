@@ -129,6 +129,28 @@ public:
 	static TArray<FVector> GetJunctionWorldCornerPoints(const FNCellJunctionDetails& Details, const FVector2D& UnitSize);
 
 	/**
+	 * Do these two junctions already occupy the same opening, facing opposite ways?
+	 *
+	 * This is the geometry the graph builder produces when it mates two cells: it flips the target 180 degrees about
+	 * the junction's local up axis and places it so the two junction world locations coincide, leaving the two socket
+	 * rectangles exactly on top of each other with opposed normals. Two junctions that satisfy this without being
+	 * linked are a mating the builder never made — it only ever grows a *new* cell off an open junction, so a graph
+	 * that loops back on itself leaves both ends open.
+	 *
+	 * The test is on the socket rectangles rather than on the centers and normals alone, which settles position,
+	 * facing, roll and socket dimensions in one go: a rectangle that maps onto another has to share its plane, so a
+	 * non-square socket rolled against its partner is rejected while a square one rolled 90 degrees — a real mating —
+	 * is not.
+	 * @param A The first junction, in world space.
+	 * @param B The second junction, in world space.
+	 * @param UnitSize World size of a single socket grid unit, normally UNWorldAssemblySettings::SocketSize.
+	 * @param Tolerance Maximum world-space distance between two corners that still counts as the same point.
+	 * @return true when the two sockets coincide and open onto opposite directions.
+	 */
+	static bool AreJunctionsInverseCoincident(const FNCellJunctionDetails& A, const FNCellJunctionDetails& B,
+		const FVector2D& UnitSize, float Tolerance);
+
+	/**
 	 * Axis-aligned box ray intersection detection
 	 * @remark Slab method (t = (box_coord - ray_origin_coord) / ray_direction_coord)
 	 */

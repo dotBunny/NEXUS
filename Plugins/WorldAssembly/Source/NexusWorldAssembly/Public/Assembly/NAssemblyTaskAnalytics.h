@@ -197,9 +197,12 @@ public:
 	/**
 	 * Record how many junctions the connector stage had to work with.
 	 * @param OpenCount Unmatched junctions eligible for pairing.
-	 * @param DisabledCount Unmatched junctions skipped for having Disable Connecting authored on them.
+	 * @param DisabledCount How many of those carry Disable Connecting, and so are skipped by the routing walk.
 	 */
 	void ConnectJunctions_SetJunctionCounts(int32 OpenCount, int32 DisabledCount);
+
+	/** Increment the counter for junction pairs mated as coincident inverses rather than routed. */
+	void ConnectJunctions_InverseMatched();
 
 	/** Record how many pairs cleared the cheap gates and were routed. @param Count The candidate pair count. */
 	void ConnectJunctions_SetCandidatePairCount(int32 Count);

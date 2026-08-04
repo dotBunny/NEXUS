@@ -68,6 +68,15 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Junction Connecting")
 	FNWorldAssemblyJunctionConnectorSettings JunctionConnectorSettings;
 
+	/**
+	 * When true, this operation mates two unmatched junctions that already occupy the same opening facing opposite
+	 * ways, rather than leaving both to be capped.
+	 * @note Kept beside JunctionConnectorSettings rather than inside it because it is junction *matching*: it produces
+	 *       a plain cell mating and applies whether or not the connector pass itself is enabled.
+	 */
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Junction Matching")
+	bool bJunctionMatchingConnectInverse = false;
+
 	/** @return Default runtime-generation settings with a freshly generated friendly seed. */
 	static FNAssemblyOperationSettings GetDefaultSettings()
 	{
@@ -81,6 +90,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		Settings.TagCounters = FNGameplayTagCounter(AssemblySettings->AssemblyTagCounters);
 		Settings.WorldCollisionSettings = AssemblySettings->WorldCollisionSettings;
 		Settings.JunctionConnectorSettings = AssemblySettings->JunctionConnectorSettings;
+		Settings.bJunctionMatchingConnectInverse = AssemblySettings->bJunctionMatchingCoincidences;
 
 		return Settings;
 	}
@@ -99,6 +109,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		Settings.TagCounters = FNGameplayTagCounter(AssemblySettings->AssemblyTagCounters);
 		Settings.WorldCollisionSettings = AssemblySettings->WorldCollisionSettings;
 		Settings.JunctionConnectorSettings = AssemblySettings->JunctionConnectorSettings;
+		Settings.bJunctionMatchingConnectInverse = AssemblySettings->bJunctionMatchingCoincidences;
 
 		return Settings;
 	}
