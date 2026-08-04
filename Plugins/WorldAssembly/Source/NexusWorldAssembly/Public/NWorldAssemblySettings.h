@@ -91,6 +91,32 @@ struct FNWorldAssemblyJunctionConnectorSettings
 		meta=(ToolTip="How strongly the spline leaves each socket along its facing, as a fraction of the distance between the two junctions.", ClampMin="0", ClampMax="2"))
 	float TangentScale = 0.5f;
 
+	/**
+	 * Tightest turn a route may make, as a multiple of the socket's half-extent in the direction of the turn.
+	 *
+	 * Expressed relative to the socket rather than as a world distance because the point at which a turn becomes
+	 * impossible depends on which way it bends: the connector's geometry spans the full socket, so a tall narrow
+	 * opening can turn far more sharply left than it can up. One multiple covers every turn plane, and every socket
+	 * size, without re-tuning.
+	 * @note 1.0 is the geometric floor — below it the inside of the connector folds through itself and no geometry
+	 *       can be built. Around 2.0 reads as a corridor-width turn. 0 disables the check, leaving only the
+	 *       always-on fold rejection.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Minimum Turn Radius Scale",
+		meta=(ToolTip="How gentle a connector's turns must be, as a multiple of the socket size. 1.0 is the tightest turn that can physically have geometry built through it; higher values keep routes walkable. 0 disables the check.", ClampMin="0"))
+	float MinimumTurnRadiusScale = 2.f;
+
+	/**
+	 * Number of progressively straighter variants tried when a route turns too tightly, before the pair is abandoned.
+	 * @note Each step lengthens the route, so Maximum Spline Length is what ultimately bounds this — escalation stops
+	 *       as soon as a variant blows that budget, since every later one is longer still.
+	 * @note Worth more than one or two steps: longer tangents open a turn up to a point and then overshoot into a
+	 *       tighter one again, so the value that works often sits in the middle of the range rather than at its top.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Maximum Straightening Attempts",
+		meta=(ToolTip="How many progressively straighter paths to try when a route turns too tightly.", ClampMin="0"))
+	int32 MaximumStraighteningAttempts = 4;
+
 	/** Number of detour variants tried when the natural path collides, before the pair is abandoned. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Maximum Avoidance Attempts",
 		meta=(ToolTip="How many alternate spline paths to try when the direct path is blocked.", ClampMin="0"))

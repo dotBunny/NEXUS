@@ -35,6 +35,9 @@ namespace NEXUS::PerfTests::NWorldAssembly::FNJunctionConnectorSolverHarness
 		Settings.SplineRadius = 200.f;
 		Settings.SampleStep = 50.f;
 		Settings.TangentScale = 0.5f;
+		// Measuring build cost, not gating: the fixture pairs are near-straight and would clear the limit anyway, but
+		// disabling it keeps the timing independent of how that default is tuned.
+		Settings.MinimumTurnRadiusScale = 0.f;
 		return Settings;
 	}
 
@@ -79,7 +82,8 @@ public:
 				NEXUS::PerfTests::NWorldAssembly::FNJunctionConnectorSolverHarness::BuildRouteMaxDuration)
 			for (int32 i = 0; i < RouteCount; i++)
 			{
-				FNJunctionConnectorSolver::BuildRoute(Pairs[i].Key, Pairs[i].Value, SocketUnitSize, Settings, nullptr, Route);
+				FNJunctionConnectorSolver::BuildRoute(Pairs[i].Key, Pairs[i].Value, SocketUnitSize, Settings, nullptr,
+					Settings.TangentScale, Route);
 			}
 			NTestTimer.ManualStop();
 		}
@@ -94,10 +98,10 @@ public:
 		const FNWorldAssemblyJunctionConnectorSettings Settings = MakeSettings();
 
 		FNJunctionConnectorRoute Route;
-		if (!FNJunctionConnectorSolver::BuildRoute(
+		if (FNJunctionConnectorSolver::BuildRoute(
 			MakeJunction(FVector::ZeroVector, 180.f),
 			MakeJunction(FVector(PairDistance, 0.0, 0.0), 0.f),
-			SocketUnitSize, Settings, nullptr, Route))
+			SocketUnitSize, Settings, nullptr, Settings.TangentScale, Route) != ENJunctionConnectorRouteResult::Success)
 		{
 			return;
 		}

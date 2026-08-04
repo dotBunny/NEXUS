@@ -8,6 +8,16 @@
 #include "Assembly/NJunctionConnectorSolver.h"
 #include "Types/NRawMeshUtils.h"
 
+namespace
+{
+	/**
+	 * Ceiling the straightening retries escalate toward, matching the ClampMax on the Tangent Scale setting.
+	 * @note Kept in step with that clamp deliberately: retries that pushed past it would produce routes a designer
+	 *       could not author by hand, and could not reproduce by raising the setting.
+	 */
+	constexpr float MaximumTangentScale = 2.f;
+}
+
 FNConnectJunctionsTask::FNConnectJunctionsTask(const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr,
 	const TSharedPtr<FNAssemblyTaskGraphContext>& TaskGraphContextPtr, const FVector2D& SocketUnitSize
 	N_ASSEMBLY_ANALYTICS_CONSTRUCTOR)
@@ -17,9 +27,10 @@ FNConnectJunctionsTask::FNConnectJunctionsTask(const TSharedPtr<FNVirtualWorldCo
 {
 }
 
-void FNConnectJunctionsTask::GatherOpenJunctions(TArray<FOpenJunction>& OutJunctions) const
+void FNConnectJunctionsTask::GatherOpenJunctions(TArray<FOpenJunction>& OutJunctions, int32& OutDisabledCount) const
 {
 	OutJunctions.Reset();
+	OutDisabledCount = 0;
 
 	// The virtual world stores placed-cell hulls in a flat array parallel to NodeIndex; a reverse lookup lets a
 	// route exempt its own endpoint cells without re-searching that array per probe.
@@ -49,6 +60,15 @@ void FNConnectJunctionsTask::GatherOpenJunctions(TArray<FOpenJunction>& OutJunct
 			{
 				const FNCellJunctionDetails* Details = CellNode->GetJunctionDetails(JunctionKey);
 				if (Details == nullptr) continue;
+
+				// Opted out by the author. Dropped here rather than gated later so it never reaches the broadphase
+				// or the candidate list at all, and so the reported open-junction count reflects what this pass can
+				// actually work with.
+				if (Details->bDisableConnector)
+				{
+					OutDisabledCount++;
+					continue;
+				}
 
 				FOpenJunction& Junction = OutJunctions.AddDefaulted_GetRef();
 				Junction.GraphIndex = GraphIndex;
@@ -245,7 +265,7 @@ void FNConnectJunctionsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	FNConnectJunctionsAnalytics Analytics;
 
 	TArray<FOpenJunction> Junctions;
-	GatherOpenJunctions(Junctions);
+	GatherOpenJunctions(Junctions, Analytics.DisabledJunctionCount);
 	Analytics.OpenJunctionCount = Junctions.Num();
 
 	// A single open junction has nothing to pair with, and zero means the layout closed itself off entirely.
@@ -325,21 +345,55 @@ void FNConnectJunctionsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		}
 
 		// Try the direct route first, then progressively larger detours. AvoidanceMidPoints is built lazily because
-		// most pairs either clear on the direct route or fail on length, and never need it.
+		// most pairs either clear on the direct route or fail outright, and never need it.
 		AvoidanceMidPoints.Reset();
 		bool bBuiltAvoidance = false;
 		bool bAccepted = false;
-		bool bLengthRejected = false;
+		bool bStraightened = false;
 		int32 Attempt = 0;
+
+		// The reason the last attempt failed, so a pair that never succeeds is attributed to the right cause. Seeded
+		// with the outcome the very first build would report if it fell through every branch.
+		ENJunctionConnectorRouteResult LastResult = ENJunctionConnectorRouteResult::Degenerate;
 
 		while (true)
 		{
 			const FVector* MidPoint = (Attempt == 0) ? nullptr : &AvoidanceMidPoints[Attempt - 1];
 
-			if (FNJunctionConnectorSolver::BuildRoute(Start.Details, End.Details, SocketUnitSize, Settings, MidPoint, Route))
+			// Straightening pass: a route rejected for bending too hard is retried with progressively longer tangents
+			// before this detour is abandoned, escalating toward the tangent scale's own ceiling so the retries stay
+			// inside the range the property allows.
+			//
+			// This is a search across shapes, not a monotonic improvement. Longer tangents open up a turn to a point,
+			// but past it the curve overshoots and tightens again — on a detour the peak sits nearer the middle of the
+			// range than the top of it. So every step is tried and the first that clears wins, rather than jumping
+			// straight to the ceiling.
+			for (int32 Straighten = 0; Straighten <= Settings.MaximumStraighteningAttempts; Straighten++)
 			{
-				bLengthRejected = false;
+				const float TangentScale = Settings.MaximumStraighteningAttempts > 0
+					? FMath::Lerp(Settings.TangentScale, MaximumTangentScale,
+						static_cast<float>(Straighten) / Settings.MaximumStraighteningAttempts)
+					: Settings.TangentScale;
 
+				LastResult = FNJunctionConnectorSolver::BuildRoute(Start.Details, End.Details, SocketUnitSize,
+					Settings, MidPoint, TangentScale, Route);
+
+				if (LastResult == ENJunctionConnectorRouteResult::TooTight)
+				{
+					// Worth another, straighter pass — that is the one failure straightening can actually fix.
+					Analytics.StraighteningAttemptCount++;
+					continue;
+				}
+
+				// Anything else is settled for this detour. Length does rise monotonically with the tangent scale even
+				// though curvature does not, so a variant that already blew the budget cannot be rescued by a longer
+				// one — and a Success needs collision testing rather than another shape.
+				bStraightened = Straighten > 0;
+				break;
+			}
+
+			if (LastResult == ENJunctionConnectorRouteResult::Success)
+			{
 				const float SegmentLength = Route.Path.Center.Length / FMath::Max(Route.Path.Center.Points.Num() - 1, 1);
 
 				// Coarse pass first: a fixed-radius tube is cheaper to build and test than the socket-shaped one, and
@@ -354,12 +408,14 @@ void FNConnectJunctionsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 						break;
 					}
 				}
+
+				// Cleared the shape limits but hit geometry, which only a different path can fix.
+				LastResult = ENJunctionConnectorRouteResult::Success;
 			}
-			else if (Attempt == 0)
+			else if (Attempt == 0 && LastResult != ENJunctionConnectorRouteResult::TooTight)
 			{
-				// The direct route already fails on length. A detour only ever adds length, so there is nothing to
-				// try — record the reason and move on rather than burning the whole avoidance budget.
-				bLengthRejected = true;
+				// The direct route fails on something a detour cannot mend — it is either degenerate, or already too
+				// long, and every detour is longer still. Bail rather than burning the whole avoidance budget.
 				break;
 			}
 
@@ -378,13 +434,28 @@ void FNConnectJunctionsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 
 		if (!bAccepted)
 		{
-			if (bLengthRejected)
+			switch (LastResult)
 			{
+				using enum ENJunctionConnectorRouteResult;
+			case TooLong:
+			case Degenerate:
 				Analytics.RejectedByLengthCount++;
-			}
-			else
-			{
+				break;
+			case TooTight:
+				// The fold check runs regardless of how the minimum radius is configured, so separating the two tells
+				// a designer whether raising or lowering that setting would have changed anything.
+				if (FNJunctionConnectorSolver::DoesRouteFold(Route))
+				{
+					Analytics.RejectedByFoldCount++;
+				}
+				else
+				{
+					Analytics.RejectedByTurnRadiusCount++;
+				}
+				break;
+			default:
 				Analytics.RejectedByCollisionCount++;
+				break;
 			}
 			continue;
 		}
@@ -392,6 +463,10 @@ void FNConnectJunctionsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		if (Attempt > 0)
 		{
 			Analytics.AvoidanceSuccessCount++;
+		}
+		if (bStraightened)
+		{
+			Analytics.StraighteningSuccessCount++;
 		}
 
 		const int32 ConnectorIdentifier = NextConnectorIdentifier++;

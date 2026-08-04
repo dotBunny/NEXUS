@@ -428,7 +428,7 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 
 			// Draw debug information
 			RootComponent->DrawDebugPDI(PDI, static_cast<uint8>(GetCellVoxelMode()), GetCachedCellBoundsColor(), GetCachedCellHullColor());
-			// We can't use caching because we are drawing ALL of the possible roots
+			// We can't use caching because we are drawing ALL the possible roots
 		}
 	}
 	if (FNWorldAssemblyRegistry::HasJunctionComponents() || FNWorldAssemblyRegistry::HasBoneComponents())
@@ -462,7 +462,7 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 
 			// Runtime Connected, by a routed connector rather than by mating directly with another cell. Tested
 			// ahead of bConnected because a connector pairing sets both, and it is the more specific state — the
-			// socket is spanned by geometry that arrives separately, not closed off against a neighbouring cell.
+			// socket is spanned by geometry that arrives separately, not closed off against a neighboring cell.
 			if (LinkDetails.bConnector)
 			{
 				// Both ends draw, unlike the mated case below. A mated pair has its two sockets co-located, so that
@@ -523,10 +523,11 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 
 			for (const FNCellJunctionConnection& Connection : Entry.Value.Connections)
 			{
-				// Center and corners share the one connector color; the junction sockets at either end are drawn in
-				// the ordinary valid color by the loop above, so the route is what reads as distinct.
+				// The center curve shares the valid-junction color with the sockets it runs between, so the route
+				// reads as one continuous connection; the corner curves keep their own color to stay legible as the
+				// bounding volume rather than part of that line.
 				FNWorldAssemblyDebugDraw::DrawConnectorPath(PDI, Connection.Path,
-					GetCachedJunctionConnectorCornersColor(), GetCachedJunctionConnectorCornersColor());
+					GetCachedJunctionValidColor(), GetCachedJunctionConnectorCornersColor());
 			}
 		}
 	}

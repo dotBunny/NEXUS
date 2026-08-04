@@ -72,6 +72,19 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 	UPROPERTY(EditInstanceOnly)
 	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::AllowBlocking;
 
+	/**
+	 * When true, the junction-connector pass will not pair this junction with another cell's.
+	 *
+	 * Only affects connectors. A junction opted out here still mates normally during graph building, and if it ends
+	 * up unconnected it is still filled according to its Requirements.
+	 * @note Lives here rather than beside UNCellJunctionComponent::bDisableFill because the connector pass runs
+	 *       against the cell's side-car junction data on a worker thread and never sees the component. Filling
+	 *       happens on the component itself at begin play, which is why that flag can live there.
+	 */
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, DisplayName="Disable Connecting",
+		meta=(ToolTip="Should this junction be excluded from being paired up with another cell's junction by the connector pass?"))
+	bool bDisableConnector = false;
+
 	/** Size of the junction socket in grid units (width, height). */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	FIntVector2 SocketSize = FIntVector2(2, 4);
@@ -155,6 +168,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 			&& Weighting == Other.Weighting
 
 			&& Requirements == Other.Requirements
+			&& bDisableConnector == Other.bDisableConnector
 			&& Type == Other.Type
 			&& SocketSize == Other.SocketSize
 

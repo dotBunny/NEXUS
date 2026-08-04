@@ -81,8 +81,12 @@ private:
 		double DistanceSquared = 0.0;
 	};
 
-	/** Collect every unmatched junction across every graph, in a stable order. */
-	void GatherOpenJunctions(TArray<FOpenJunction>& OutJunctions) const;
+	/**
+	 * Collect every unmatched junction across every graph, in a stable order, skipping those authored to opt out.
+	 * @param OutJunctions Receives the junctions this pass may pair. Reset first.
+	 * @param OutDisabledCount Receives how many were skipped for having Disable Connecting set.
+	 */
+	void GatherOpenJunctions(TArray<FOpenJunction>& OutJunctions, int32& OutDisabledCount) const;
 
 	/** Emit each unordered pair that clears the socket-size, distinct-cell and range gates, ordered nearest-first. */
 	void BuildCandidatePairs(const TArray<FOpenJunction>& Junctions, TArray<FCandidatePair>& OutPairs) const;

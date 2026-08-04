@@ -304,9 +304,102 @@ void FNJunctionConnectorSolver::BuildFrames(const TArray<FVector>& Points, const
 	}
 }
 
-bool FNJunctionConnectorSolver::BuildRoute(const FNCellJunctionDetails& Start, const FNCellJunctionDetails& End,
+float FNJunctionConnectorSolver::GetMinimumTurnRadiusScale(const FNJunctionConnectorRoute& Route, const FVector2D& SocketWorldSize)
+{
+	const TArray<FVector>& Points = Route.Path.Center.Points;
+	const int32 PointCount = Points.Num();
+	if (PointCount < 3 || Route.Frames.Num() != PointCount)
+	{
+		return MAX_flt;
+	}
+
+	const double HalfWidth = SocketWorldSize.X * 0.5;
+	const double HalfHeight = SocketWorldSize.Y * 0.5;
+
+	double MinimumScale = MAX_flt;
+	for (int32 i = 1; i < PointCount - 1; i++)
+	{
+		const FVector& Previous = Points[i - 1];
+		const FVector& Current = Points[i];
+		const FVector& Next = Points[i + 1];
+
+		const FVector Incoming = Current - Previous;
+		const FVector Outgoing = Next - Current;
+
+		// Menger curvature: the radius of the circle through three consecutive samples. Robust on the unevenly
+		// spaced samples the parameter-uniform sampler produces, where a difference-based estimate would skew with
+		// the spacing.
+		const double TwiceArea = FVector::CrossProduct(Incoming, Outgoing).Size();
+		if (TwiceArea <= DegenerateLengthSquared)
+		{
+			// Collinear samples: no turn here to measure.
+			continue;
+		}
+
+		const double Radius = (Incoming.Size() * Outgoing.Size() * (Next - Previous).Size()) / (2.0 * TwiceArea);
+
+		// The direction the curve is bending toward. The second difference points at the center of curvature, and
+		// projecting out the tangent leaves the pure turn direction — in whatever plane the turn happens to be in,
+		// which is what keeps this honest for vertical and oblique turns rather than just yaw.
+		const FNJunctionConnectorFrame& Frame = Route.Frames[i];
+		const FVector TurnNormal = SafeDirection(
+			FVector::VectorPlaneProject(Incoming.GetSafeNormal() - Outgoing.GetSafeNormal(), Frame.Tangent),
+			FVector::ZeroVector);
+		if (TurnNormal.IsNearlyZero())
+		{
+			continue;
+		}
+
+		// How far the connector's own geometry reaches toward the inside of this turn. A turn toward the socket's
+		// up axis has to clear its half-height; one toward the right axis, its half-width; anything between, a
+		// blend. This is what makes a single ratio meaningful for every turn plane and socket shape.
+		const double Extent = FMath::Abs(FVector::DotProduct(Frame.Right, TurnNormal)) * HalfWidth
+			+ FMath::Abs(FVector::DotProduct(Frame.Up, TurnNormal)) * HalfHeight;
+		if (Extent <= UE_DOUBLE_SMALL_NUMBER)
+		{
+			continue;
+		}
+
+		MinimumScale = FMath::Min(MinimumScale, Radius / Extent);
+	}
+
+	return static_cast<float>(MinimumScale);
+}
+
+bool FNJunctionConnectorSolver::DoesRouteFold(const FNJunctionConnectorRoute& Route)
+{
+	if (Route.Path.Corners.Num() != 4)
+	{
+		return false;
+	}
+
+	const int32 FrameCount = Route.Frames.Num();
+	for (const FNCellJunctionConnectorCurve& Corner : Route.Path.Corners)
+	{
+		const int32 PointCount = Corner.Points.Num();
+		if (PointCount != FrameCount)
+		{
+			continue;
+		}
+
+		for (int32 i = 1; i < PointCount; i++)
+		{
+			// Once the turn is tighter than the socket reaches, the inside corner of the connector travels backwards
+			// while the center still moves forward — the wall passes through itself. Comparing the corner's own step
+			// against the direction of travel catches exactly that, on the points a connector would be handed.
+			if (FVector::DotProduct(Corner.Points[i] - Corner.Points[i - 1], Route.Frames[i - 1].Tangent) <= 0.0)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+ENJunctionConnectorRouteResult FNJunctionConnectorSolver::BuildRoute(const FNCellJunctionDetails& Start, const FNCellJunctionDetails& End,
 	const FVector2D& SocketUnitSize, const FNWorldAssemblyJunctionConnectorSettings& Settings,
-	const FVector* MidPoint, FNJunctionConnectorRoute& OutRoute)
+	const FVector* MidPoint, const float TangentScale, FNJunctionConnectorRoute& OutRoute)
 {
 	OutRoute.Frames.Reset();
 	OutRoute.Path = FNCellJunctionConnectorPath();
@@ -315,26 +408,31 @@ bool FNJunctionConnectorSolver::BuildRoute(const FNCellJunctionDetails& Start, c
 	// Coincident sockets have no direction to route along, and nothing sensible to hand a connector actor.
 	if (FVector::DistSquared(Start.WorldLocation, End.WorldLocation) <= DegenerateLengthSquared)
 	{
-		return false;
+		return ENJunctionConnectorRouteResult::Degenerate;
 	}
 
-	BuildControlPoints(Start, End, Settings.TangentScale, MidPoint, OutRoute.Path.ControlPoints, OutRoute.Path.ControlTangents);
+	BuildControlPoints(Start, End, TangentScale, MidPoint, OutRoute.Path.ControlPoints, OutRoute.Path.ControlTangents);
 
 	OutRoute.Path.Center.Length = SampleCurve(OutRoute.Path.ControlPoints, OutRoute.Path.ControlTangents,
 		Settings.SampleStep, OutRoute.Path.Center.Points);
 
+	if (OutRoute.Path.Center.Points.Num() < 2)
+	{
+		return ENJunctionConnectorRouteResult::Degenerate;
+	}
+
 	// Checked before any corner work: the corners can only be longer than the center on the outside of a bend, so a
 	// center that already blows the budget can never be rescued.
-	if (OutRoute.Path.Center.Length > Settings.MaximumSplineLength || OutRoute.Path.Center.Points.Num() < 2)
+	if (OutRoute.Path.Center.Length > Settings.MaximumSplineLength)
 	{
-		return false;
+		return ENJunctionConnectorRouteResult::TooLong;
 	}
 
 	const TArray<FVector> StartCorners = FNWorldAssemblyUtils::GetJunctionWorldCornerPoints(Start, SocketUnitSize);
 	const TArray<FVector> EndCorners = FNWorldAssemblyUtils::GetJunctionWorldCornerPoints(End, SocketUnitSize);
 	if (StartCorners.Num() != 4 || EndCorners.Num() != 4)
 	{
-		return false;
+		return ENJunctionConnectorRouteResult::Degenerate;
 	}
 
 	const FVector2D SocketWorldSize = FNWorldAssemblyUtils::GetWorldSize2D(Start.SocketSize, SocketUnitSize);
@@ -389,11 +487,25 @@ bool FNJunctionConnectorSolver::BuildRoute(const FNCellJunctionDetails& Start, c
 
 		if (CornerCurve.Length > Settings.MaximumSplineLength)
 		{
-			return false;
+			return ENJunctionConnectorRouteResult::TooLong;
 		}
 	}
 
-	return true;
+	// Always rejected, whatever the configured minimum: a folded route is one whose geometry passes through itself,
+	// which no connector can build. Tested first because it is exact and cheap, where the radius below is a measure.
+	if (DoesRouteFold(OutRoute))
+	{
+		return ENJunctionConnectorRouteResult::TooTight;
+	}
+
+	// Zero opts out of the navigability floor, leaving only the fold rejection above.
+	if (Settings.MinimumTurnRadiusScale > 0.f
+		&& GetMinimumTurnRadiusScale(OutRoute, SocketWorldSize) < Settings.MinimumTurnRadiusScale)
+	{
+		return ENJunctionConnectorRouteResult::TooTight;
+	}
+
+	return ENJunctionConnectorRouteResult::Success;
 }
 
 void FNJunctionConnectorSolver::BuildAvoidanceMidPoints(const FVector& Start, const FVector& End,

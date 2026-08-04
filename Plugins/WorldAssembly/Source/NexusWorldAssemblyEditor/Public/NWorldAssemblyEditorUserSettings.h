@@ -75,7 +75,7 @@ public:
 	UPROPERTY(EditAnywhere, config,  Category="Quick Assembly", DisplayName="Load Level Instances", meta=(Tooltip="Create and load the level instances from the ANCellProxy(s)."))
 	bool bQuickAssemblyLoadLevelInstances = true;
 
-	/** Continuously re-trigger Assembly Operations for the target organ on a timer until cancelled. */
+	/** Continuously re-trigger Assembly Operations for the target organ on a timer until canceled. */
 	UPROPERTY(EditAnywhere, config,  Category="Quick Assembly", DisplayName="Auto Assembly", meta=(Tooltip="Continuously trigger Assembly Operations for the target organ on a timer, until cancelled."))
 	bool bQuickAssemblyAutoAssembly = false;
 

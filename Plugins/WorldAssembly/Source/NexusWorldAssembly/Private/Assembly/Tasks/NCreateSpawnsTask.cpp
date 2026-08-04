@@ -30,7 +30,7 @@ void FNCreateSpawnsTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphE
 	// We need to prepopulate some data elsewhere
 	FNWorldAssemblyContextCache::AddOperationContext(TaskGraphContextPtr->OperationTicket, TaskGraphContextPtr->TagCounter, TaskGraphContextPtr->ContextTags);
 
-	// Resolve every graph's hot path before generating any link details, so each junction can read its neighbour's
+	// Resolve every graph's hot path before generating any link details, so each junction can read its neighbor's
 	// flags. This has to complete across all graphs first, not per graph: the junction-connector pass links cells
 	// that can belong to different graphs, and a link detail generated before the far graph was flagged would bake
 	// in a stale false. Flags are only ever set, never cleared, so the passes compose in any order.

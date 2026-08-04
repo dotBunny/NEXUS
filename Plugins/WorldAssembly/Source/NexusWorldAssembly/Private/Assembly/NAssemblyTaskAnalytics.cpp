@@ -273,18 +273,23 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 
 	// Junction connector breakdown, laid out so the dominant rejection reason is the thing that stands out — that is
 	// what tells a designer whether a sparse result is the length budget or genuinely dense geometry.
-	if (ConnectJunctionsAnalytics.OpenJunctionCount > 0)
+	if (ConnectJunctionsAnalytics.OpenJunctionCount > 0 || ConnectJunctionsAnalytics.DisabledJunctionCount > 0)
 	{
 		const int32 ConnectJunctionsTableTicket = Report->CreateTableBlock(TimespanContentTicket);
 		FNReportTableBlock* ConnectJunctionsTable = Report->GetTableBlock(ConnectJunctionsTableTicket);
 		ConnectJunctionsTable->SetHeading("FNConnectJunctionsTask");
 		ConnectJunctionsTable->Initialize({ "Metric", "Count" });
 		ConnectJunctionsTable->AddRow({"Open Junctions", FString::FromInt(ConnectJunctionsAnalytics.OpenJunctionCount)});
+		ConnectJunctionsTable->AddRow({"Disabled Junctions", FString::FromInt(ConnectJunctionsAnalytics.DisabledJunctionCount)});
 		ConnectJunctionsTable->AddRow({"Candidate Pairs", FString::FromInt(ConnectJunctionsAnalytics.CandidatePairCount)});
 		ConnectJunctionsTable->AddRow({"Accepted", FString::FromInt(ConnectJunctionsAnalytics.AcceptedCount)});
 		ConnectJunctionsTable->AddRow({"Rejected (Length)", FString::FromInt(ConnectJunctionsAnalytics.RejectedByLengthCount)});
 		ConnectJunctionsTable->AddRow({"Rejected (Collision)", FString::FromInt(ConnectJunctionsAnalytics.RejectedByCollisionCount)});
 		ConnectJunctionsTable->AddRow({"Rejected (Existing Connection)", FString::FromInt(ConnectJunctionsAnalytics.RejectedByExistingConnectionCount)});
+		ConnectJunctionsTable->AddRow({"Rejected (Turn Radius)", FString::FromInt(ConnectJunctionsAnalytics.RejectedByTurnRadiusCount)});
+		ConnectJunctionsTable->AddRow({"Rejected (Folded)", FString::FromInt(ConnectJunctionsAnalytics.RejectedByFoldCount)});
+		ConnectJunctionsTable->AddRow({"Straightening Attempts", FString::FromInt(ConnectJunctionsAnalytics.StraighteningAttemptCount)});
+		ConnectJunctionsTable->AddRow({"Straightening Successes", FString::FromInt(ConnectJunctionsAnalytics.StraighteningSuccessCount)});
 		ConnectJunctionsTable->AddRow({"Avoidance Attempts", FString::FromInt(ConnectJunctionsAnalytics.AvoidanceAttemptCount)});
 		ConnectJunctionsTable->AddRow({"Avoidance Successes", FString::FromInt(ConnectJunctionsAnalytics.AvoidanceSuccessCount)});
 		ConnectJunctionsTable->AddRow({"Connector Hulls", FString::FromInt(ConnectJunctionsAnalytics.ConnectorHullCount)});
