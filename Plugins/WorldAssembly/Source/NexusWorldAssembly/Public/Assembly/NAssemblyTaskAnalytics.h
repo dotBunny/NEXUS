@@ -195,10 +195,47 @@ public:
 	void ConnectJunctionsFinish();
 
 	/**
-	 * Record the outcome of the junction-connector matching stage.
-	 * @param Analytics The populated counters; the stage's timer is preserved rather than overwritten.
+	 * Record how many junctions the connector stage had to work with.
+	 * @param OpenCount Unmatched junctions eligible for pairing.
+	 * @param DisabledCount Unmatched junctions skipped for having Disable Connecting authored on them.
 	 */
-	void ConnectJunctions_SetResult(const FNConnectJunctionsAnalytics& Analytics);
+	void ConnectJunctions_SetJunctionCounts(int32 OpenCount, int32 DisabledCount);
+
+	/** Record how many pairs cleared the cheap gates and were routed. @param Count The candidate pair count. */
+	void ConnectJunctions_SetCandidatePairCount(int32 Count);
+
+	/** Record how many swept prisms were retained as collision for later pairs. @param Count The prism count. */
+	void ConnectJunctions_SetConnectorHullCount(int32 Count);
+
+	/** Increment the accepted-pairing counter. */
+	void ConnectJunctions_Accepted();
+
+	/** Increment the counter for pairs abandoned because no variant fit inside the maximum spline length. */
+	void ConnectJunctions_RejectedByLength();
+
+	/** Increment the counter for pairs abandoned because every variant hit geometry. */
+	void ConnectJunctions_RejectedByCollision();
+
+	/** Increment the counter for pairs abandoned because their cells were already connected. */
+	void ConnectJunctions_RejectedByExistingConnection();
+
+	/** Increment the counter for pairs abandoned because no variant turned gently enough. */
+	void ConnectJunctions_RejectedByTurnRadius();
+
+	/** Increment the counter for pairs abandoned because their geometry would fold through itself. */
+	void ConnectJunctions_RejectedByFold();
+
+	/** Increment the detour-variant attempt counter. */
+	void ConnectJunctions_AvoidanceAttempt();
+
+	/** Increment the counter for pairs saved by a detour variant. */
+	void ConnectJunctions_AvoidanceSuccess();
+
+	/** Increment the straightening-variant attempt counter. */
+	void ConnectJunctions_StraighteningAttempt();
+
+	/** Increment the counter for pairs saved by a straighter variant. */
+	void ConnectJunctions_StraighteningSuccess();
 
 	/** Start the timer for the create-spawn-cells-context stage. */
 	void CreateSpawnCellsContextStart();

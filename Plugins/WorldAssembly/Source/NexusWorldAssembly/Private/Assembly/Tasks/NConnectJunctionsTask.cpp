@@ -262,27 +262,29 @@ void FNConnectJunctionsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		return;
 	}
 
-	FNConnectJunctionsAnalytics Analytics;
+	// Diagnostic counts go through the analytics object so they compile out of shipping entirely, matching every
+	// other stage. AcceptedCount is the exception: the progress channel and the completion log both report it, and
+	// neither of those is shipping-only, so it stays a plain local.
+	int32 AcceptedCount = 0;
+	int32 DisabledJunctionCount = 0;
 
 	TArray<FOpenJunction> Junctions;
-	GatherOpenJunctions(Junctions, Analytics.DisabledJunctionCount);
-	Analytics.OpenJunctionCount = Junctions.Num();
+	GatherOpenJunctions(Junctions, DisabledJunctionCount);
+	N_ASSEMBLY_ANALYTICS_TWO_PARAM(ConnectJunctions_SetJunctionCounts, Junctions.Num(), DisabledJunctionCount)
 
 	// A single open junction has nothing to pair with, and zero means the layout closed itself off entirely.
 	if (Junctions.Num() < 2)
 	{
-		N_ASSEMBLY_ANALYTICS_ONE_PARAM(ConnectJunctions_SetResult, Analytics)
 		N_ASSEMBLY_ANALYTICS(ConnectJunctionsFinish)
 		return;
 	}
 
 	TArray<FCandidatePair> Pairs;
 	BuildCandidatePairs(Junctions, Pairs);
-	Analytics.CandidatePairCount = Pairs.Num();
+	N_ASSEMBLY_ANALYTICS_ONE_PARAM(ConnectJunctions_SetCandidatePairCount, Pairs.Num())
 
 	if (Pairs.Num() == 0)
 	{
-		N_ASSEMBLY_ANALYTICS_ONE_PARAM(ConnectJunctions_SetResult, Analytics)
 		N_ASSEMBLY_ANALYTICS(ConnectJunctionsFinish)
 		return;
 	}
@@ -319,7 +321,7 @@ void FNConnectJunctionsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		if ((PairIndex % 16) == 0)
 		{
 			TaskGraphContextPtr->SetChannelStatus(StatusChannelId,
-				FString::Printf(TEXT("Connected %i/%i"), Analytics.AcceptedCount, PairCount),
+				FString::Printf(TEXT("Connected %i/%i"), AcceptedCount, PairCount),
 				static_cast<float>(PairIndex) / PairCount);
 		}
 
@@ -340,7 +342,7 @@ void FNConnectJunctionsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 			&& (Start.CellNode->FindJunctionKeyLinkedTo(End.CellNode) != INDEX_NONE
 				|| End.CellNode->FindJunctionKeyLinkedTo(Start.CellNode) != INDEX_NONE))
 		{
-			Analytics.RejectedByExistingConnectionCount++;
+			N_ASSEMBLY_ANALYTICS(ConnectJunctions_RejectedByExistingConnection)
 			continue;
 		}
 
@@ -381,7 +383,7 @@ void FNConnectJunctionsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 				if (LastResult == ENJunctionConnectorRouteResult::TooTight)
 				{
 					// Worth another, straighter pass — that is the one failure straightening can actually fix.
-					Analytics.StraighteningAttemptCount++;
+					N_ASSEMBLY_ANALYTICS(ConnectJunctions_StraighteningAttempt)
 					continue;
 				}
 
@@ -429,7 +431,7 @@ void FNConnectJunctionsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 			if (Attempt >= AvoidanceMidPoints.Num()) break;
 
 			Attempt++;
-			Analytics.AvoidanceAttemptCount++;
+			N_ASSEMBLY_ANALYTICS(ConnectJunctions_AvoidanceAttempt)
 		}
 
 		if (!bAccepted)
@@ -439,22 +441,22 @@ void FNConnectJunctionsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 				using enum ENJunctionConnectorRouteResult;
 			case TooLong:
 			case Degenerate:
-				Analytics.RejectedByLengthCount++;
+				N_ASSEMBLY_ANALYTICS(ConnectJunctions_RejectedByLength)
 				break;
 			case TooTight:
 				// The fold check runs regardless of how the minimum radius is configured, so separating the two tells
 				// a designer whether raising or lowering that setting would have changed anything.
 				if (FNJunctionConnectorSolver::DoesRouteFold(Route))
 				{
-					Analytics.RejectedByFoldCount++;
+					N_ASSEMBLY_ANALYTICS(ConnectJunctions_RejectedByFold)
 				}
 				else
 				{
-					Analytics.RejectedByTurnRadiusCount++;
+					N_ASSEMBLY_ANALYTICS(ConnectJunctions_RejectedByTurnRadius)
 				}
 				break;
 			default:
-				Analytics.RejectedByCollisionCount++;
+				N_ASSEMBLY_ANALYTICS(ConnectJunctions_RejectedByCollision)
 				break;
 			}
 			continue;
@@ -462,11 +464,11 @@ void FNConnectJunctionsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 
 		if (Attempt > 0)
 		{
-			Analytics.AvoidanceSuccessCount++;
+			N_ASSEMBLY_ANALYTICS(ConnectJunctions_AvoidanceSuccess)
 		}
 		if (bStraightened)
 		{
-			Analytics.StraighteningSuccessCount++;
+			N_ASSEMBLY_ANALYTICS(ConnectJunctions_StraighteningSuccess)
 		}
 
 		const int32 ConnectorIdentifier = NextConnectorIdentifier++;
@@ -506,20 +508,21 @@ void FNConnectJunctionsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		// approximation and can be fatter or thinner than the geometry that will actually occupy this space.
 		RetainConnectorHulls(CornerHulls);
 
-		Analytics.AcceptedCount++;
+		AcceptedCount++;
+		N_ASSEMBLY_ANALYTICS(ConnectJunctions_Accepted)
 	}
 
-	Analytics.ConnectorHullCount = WorldContextPtr->ConnectorCollisionMeshes.Num();
+	N_ASSEMBLY_ANALYTICS_ONE_PARAM(ConnectJunctions_SetConnectorHullCount, WorldContextPtr->ConnectorCollisionMeshes.Num())
 
 	TaskGraphContextPtr->SetChannelStatus(StatusChannelId,
-		FString::Printf(TEXT("Connected %i"), Analytics.AcceptedCount), 1.f);
+		FString::Printf(TEXT("Connected %i"), AcceptedCount), 1.f);
 	TaskGraphContextPtr->CloseStatusChannel(StatusChannelId);
 
+	// Kept to the counts that survive into shipping. The per-reason breakdown lives in the operation report, which is
+	// itself a non-shipping feature, so reaching for it here would tie this log to a build configuration.
 	UE_LOG(LogNexusWorldAssembly, Log,
-		TEXT("Junction connectors: %i accepted from %i candidates across %i open junctions (%i rejected on length, %i on collision)."),
-		Analytics.AcceptedCount, Analytics.CandidatePairCount, Analytics.OpenJunctionCount,
-		Analytics.RejectedByLengthCount, Analytics.RejectedByCollisionCount);
+		TEXT("Junction connectors: %i accepted from %i candidates across %i open junctions (%i junctions opted out)."),
+		AcceptedCount, Pairs.Num(), Junctions.Num(), DisabledJunctionCount);
 
-	N_ASSEMBLY_ANALYTICS_ONE_PARAM(ConnectJunctions_SetResult, Analytics)
 	N_ASSEMBLY_ANALYTICS(ConnectJunctionsFinish)
 }

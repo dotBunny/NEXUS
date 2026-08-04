@@ -165,12 +165,70 @@ void FNAssemblyTaskAnalytics::ConnectJunctionsFinish()
 	ConnectJunctionsAnalytics.Timer.Stop();
 }
 
-void FNAssemblyTaskAnalytics::ConnectJunctions_SetResult(const FNConnectJunctionsAnalytics& Analytics)
+void FNAssemblyTaskAnalytics::ConnectJunctions_SetJunctionCounts(const int32 OpenCount, const int32 DisabledCount)
 {
-	// Copy the counters but keep our own timer: the caller builds its record without one, and Start has already run.
-	const FNWorldAssemblyTaskTimer Timer = ConnectJunctionsAnalytics.Timer;
-	ConnectJunctionsAnalytics = Analytics;
-	ConnectJunctionsAnalytics.Timer = Timer;
+	ConnectJunctionsAnalytics.OpenJunctionCount = OpenCount;
+	ConnectJunctionsAnalytics.DisabledJunctionCount = DisabledCount;
+}
+
+void FNAssemblyTaskAnalytics::ConnectJunctions_SetCandidatePairCount(const int32 Count)
+{
+	ConnectJunctionsAnalytics.CandidatePairCount = Count;
+}
+
+void FNAssemblyTaskAnalytics::ConnectJunctions_SetConnectorHullCount(const int32 Count)
+{
+	ConnectJunctionsAnalytics.ConnectorHullCount = Count;
+}
+
+void FNAssemblyTaskAnalytics::ConnectJunctions_Accepted()
+{
+	ConnectJunctionsAnalytics.AcceptedCount++;
+}
+
+void FNAssemblyTaskAnalytics::ConnectJunctions_RejectedByLength()
+{
+	ConnectJunctionsAnalytics.RejectedByLengthCount++;
+}
+
+void FNAssemblyTaskAnalytics::ConnectJunctions_RejectedByCollision()
+{
+	ConnectJunctionsAnalytics.RejectedByCollisionCount++;
+}
+
+void FNAssemblyTaskAnalytics::ConnectJunctions_RejectedByExistingConnection()
+{
+	ConnectJunctionsAnalytics.RejectedByExistingConnectionCount++;
+}
+
+void FNAssemblyTaskAnalytics::ConnectJunctions_RejectedByTurnRadius()
+{
+	ConnectJunctionsAnalytics.RejectedByTurnRadiusCount++;
+}
+
+void FNAssemblyTaskAnalytics::ConnectJunctions_RejectedByFold()
+{
+	ConnectJunctionsAnalytics.RejectedByFoldCount++;
+}
+
+void FNAssemblyTaskAnalytics::ConnectJunctions_AvoidanceAttempt()
+{
+	ConnectJunctionsAnalytics.AvoidanceAttemptCount++;
+}
+
+void FNAssemblyTaskAnalytics::ConnectJunctions_AvoidanceSuccess()
+{
+	ConnectJunctionsAnalytics.AvoidanceSuccessCount++;
+}
+
+void FNAssemblyTaskAnalytics::ConnectJunctions_StraighteningAttempt()
+{
+	ConnectJunctionsAnalytics.StraighteningAttemptCount++;
+}
+
+void FNAssemblyTaskAnalytics::ConnectJunctions_StraighteningSuccess()
+{
+	ConnectJunctionsAnalytics.StraighteningSuccessCount++;
 }
 
 void FNAssemblyTaskAnalytics::CreateSpawnCellsContextStart()
