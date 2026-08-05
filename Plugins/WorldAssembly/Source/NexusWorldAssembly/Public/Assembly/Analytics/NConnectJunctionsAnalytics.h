@@ -39,6 +39,15 @@ struct FNConnectJunctionsAnalytics
 	/** Pairs that cleared the cheap gates (different cell, matching socket size, within range) and were routed. */
 	int32 CandidatePairCount = 0;
 
+	/**
+	 * Pairs discarded because the two junctions were not oriented sensibly enough with respect to each other.
+	 * @note The only rejection counted before a pair becomes a candidate, so unlike every counter below it these are
+	 *       absent from CandidatePairCount rather than a breakdown of it. Broken out because a gate that silently
+	 *       halves the candidate count is otherwise invisible: a large number here against few acceptances points at
+	 *       the angle limits, not at the routing budget.
+	 */
+	int32 RejectedByAngleCount = 0;
+
 	/** Pairs that produced a clear route and were recorded. */
 	int32 AcceptedCount = 0;
 

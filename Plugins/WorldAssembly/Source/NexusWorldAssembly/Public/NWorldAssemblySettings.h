@@ -73,6 +73,45 @@ struct FNWorldAssemblyJunctionConnectorSettings
 		meta=(ToolTip="The maximum spline length allowed to connect two unmatched Junctions.", ClampMin="0", Units="cm"))
 	float MaximumSplineLength = 1000.f;
 
+	/**
+	 * How far from directly facing each other two junctions may be and still be paired.
+	 *
+	 * Measured between one socket's outward direction and the other's inward: 0 degrees is the head-on pairing the
+	 * graph builder produces itself, 90 degrees is perpendicular, and 180 degrees is two sockets opening away from
+	 * one another.
+	 * @note This alone cannot separate a right-angle corridor bend from a ceiling hatch joined to a wall door —
+	 *       both are 90 degrees. Maximum Elevation Difference is what distinguishes the two, which is why the
+	 *       default here is loose enough to leave horizontal bends alone.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Maximum Facing Angle",
+		meta=(ToolTip="How far from directly facing each other two junctions may be and still be connected. 180 accepts any facing.", ClampMin="0", ClampMax="180", Units="deg"))
+	float MaximumFacingAngle = 180.f;
+
+	/**
+	 * How far off its own facing a junction's partner may sit and still be paired.
+	 *
+	 * Measured between a socket's outward direction and the straight line to its partner, tested at both ends. Past
+	 * 90 degrees the partner is behind the socket plane, so the route has to leave the opening and immediately double
+	 * back around the cell it came from — which is what the default rejects.
+	 * @note Tightening much below 90 also rejects the jog between two parallel corridors, where the partner sits
+	 *       almost side-on despite the two openings facing each other perfectly well.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Maximum Approach Angle",
+		meta=(ToolTip="How far off its own facing a junction's partner may sit. Past 90 the partner is behind the opening and the route has to double back. 180 accepts a partner anywhere.", ClampMin="0", ClampMax="180", Units="deg"))
+	float MaximumApproachAngle = 180.f;
+
+	/**
+	 * How far two junctions may differ in how steeply they face up or down and still be paired.
+	 *
+	 * Elevation is a socket's angle above or below horizontal, so a ceiling hatch is 90 degrees, a floor hatch -90,
+	 * and every wall opening 0 regardless of which way it points. Taking the difference is what separates the two
+	 * cases a facing angle alone cannot: a right-angle corridor bend is two wall openings, so its difference is 0,
+	 * while a hatch joined to a wall door is a full 90 and is rejected.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Maximum Elevation Difference",
+		meta=(ToolTip="How far two junctions may differ in how steeply they face up or down. Keeps ceiling and floor hatches from being connected to wall openings. 180 accepts any difference.", ClampMin="0", ClampMax="180", Units="deg"))
+	float MaximumElevationDifference = 45.f;
+
 	/** Radius of the coarse clearance sweep run along the center spline before the exact socket-corner test. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Spline Radius",
 		meta=(ToolTip="The collision check distance around the spline.", ClampMin="0", Units="cm"))

@@ -54,6 +54,57 @@ enum class ENCellJunctionRequirements : uint8
 };
 
 /**
+ * Per-junction override of the angle limits the connector pass gates candidate pairings on.
+ *
+ * The operation's limits (FNWorldAssemblyJunctionConnectorSettings) apply to every junction by default; one that
+ * opts in here supplies its own instead, for any pairing it takes part in. Both ends of a pair are consulted and
+ * the stricter limit wins, so an override can only ever narrow what a junction accepts — a permissive override on
+ * one end never loosens a stricter partner.
+ *
+ * Only the routed connector pass reads these. Junctions the graph builder mated, and flush pairs picked up by
+ * inverse matching, are aligned by construction and are not gated on angle at all.
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/cell-junction-connection-constraints/">FNCellJunctionConnectionConstraints</a>
+ */
+USTRUCT(BlueprintType)
+struct FNCellJunctionConnectionConstraints
+{
+	GENERATED_BODY()
+
+	/** Enables the limits below in place of the operation's. */
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, DisplayName="Override Angle Limits?",
+		meta=(ToolTip="Should this junction gate its connector pairings on its own angle limits instead of the operation's?"))
+	bool bOverrideAngleLimits = false;
+
+	/** This junction's replacement for the operation's Maximum Facing Angle. */
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, DisplayName="Maximum Facing Angle",
+		meta=(EditCondition="bOverrideAngleLimits", EditConditionHides, ClampMin="0", ClampMax="180", Units="deg",
+			ToolTip="How far from directly facing each other this junction and its partner may be. 180 accepts any facing."))
+	float MaximumFacingAngle = 90.f;
+
+	/** This junction's replacement for the operation's Maximum Approach Angle. */
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, DisplayName="Maximum Approach Angle",
+		meta=(EditCondition="bOverrideAngleLimits", EditConditionHides, ClampMin="0", ClampMax="180", Units="deg",
+			ToolTip="How far off this junction's own facing its partner may sit. 180 accepts a partner anywhere, including directly behind."))
+	float MaximumApproachAngle = 90.f;
+
+	/** This junction's replacement for the operation's Maximum Elevation Difference. */
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, DisplayName="Maximum Elevation Difference",
+		meta=(EditCondition="bOverrideAngleLimits", EditConditionHides, ClampMin="0", ClampMax="180", Units="deg",
+			ToolTip="How far this junction and its partner may differ in how steeply they face up or down. 180 accepts any difference."))
+	float MaximumElevationDifference = 45.f;
+
+	/** @return true if every field matches; folded into FNCellJunctionDetails::IsEqual. */
+	bool IsEqual(const FNCellJunctionConnectionConstraints& Other) const
+	{
+		return bOverrideAngleLimits == Other.bOverrideAngleLimits &&
+			MaximumFacingAngle == Other.MaximumFacingAngle &&
+			MaximumApproachAngle == Other.MaximumApproachAngle &&
+			MaximumElevationDifference == Other.MaximumElevationDifference;
+	}
+};
+
+
+/**
  * Persistent data describing a single junction on a cell.
  *
  * Stored both on UNCellJunctionComponent (live in the level) and in UNCell::Junctions (side-car asset)
@@ -107,6 +158,15 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 	/** Allowed rotations for this junction when the owning cell is placed by the generator. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	FNRotationConstraints RotationConstraints;
+
+	/**
+	 * Optional per-junction tightening of the angle limits the connector pass pairs this junction on.
+	 * @note Distinct from RotationConstraints above, which governs how the owning *cell* may be rotated when the
+	 *       generator places it. By the time the connector pass runs both cells are already down and nothing is
+	 *       being rotated, so what is gated there is the world-space relationship between two fixed openings.
+	 */
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, DisplayName="Connection Constraints")
+	FNCellJunctionConnectionConstraints ConnectionConstraints;
 
 	/**
 	 * Relative weight for preferred selection.
@@ -177,6 +237,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 
 			&& WorldLocation == Other.WorldLocation
 			&& WorldRotation == Other.WorldRotation
-			&& RotationConstraints.IsEqual(Other.RotationConstraints);
+			&& RotationConstraints.IsEqual(Other.RotationConstraints)
+			&& ConnectionConstraints.IsEqual(Other.ConnectionConstraints);
 	}
 };

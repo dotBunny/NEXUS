@@ -181,6 +181,11 @@ void FNAssemblyTaskAnalytics::ConnectJunctions_SetCandidatePairCount(const int32
 	ConnectJunctionsAnalytics.CandidatePairCount = Count;
 }
 
+void FNAssemblyTaskAnalytics::ConnectJunctions_RejectedByAngle()
+{
+	ConnectJunctionsAnalytics.RejectedByAngleCount++;
+}
+
 void FNAssemblyTaskAnalytics::ConnectJunctions_SetConnectorHullCount(const int32 Count)
 {
 	ConnectJunctionsAnalytics.ConnectorHullCount = Count;
@@ -345,6 +350,7 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 		ConnectJunctionsTable->AddRow({"Open Junctions", FString::FromInt(ConnectJunctionsAnalytics.OpenJunctionCount)});
 		ConnectJunctionsTable->AddRow({"Disabled Junctions", FString::FromInt(ConnectJunctionsAnalytics.DisabledJunctionCount)});
 		ConnectJunctionsTable->AddRow({"Inverse Matched", FString::FromInt(ConnectJunctionsAnalytics.InverseMatchCount)});
+		ConnectJunctionsTable->AddRow({"Rejected (Angle)", FString::FromInt(ConnectJunctionsAnalytics.RejectedByAngleCount)});
 		ConnectJunctionsTable->AddRow({"Candidate Pairs", FString::FromInt(ConnectJunctionsAnalytics.CandidatePairCount)});
 		ConnectJunctionsTable->AddRow({"Accepted", FString::FromInt(ConnectJunctionsAnalytics.AcceptedCount)});
 		ConnectJunctionsTable->AddRow({"Rejected (Length)", FString::FromInt(ConnectJunctionsAnalytics.RejectedByLengthCount)});
