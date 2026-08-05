@@ -13,6 +13,7 @@
 #include "NEditorUtils.h"
 #include "NWorldAssemblyDebugDraw.h"
 #include "NWorldAssemblyEditorSettings.h"
+#include "NWorldAssemblyEditorStyle.h"
 #include "NWorldAssemblyEditorSubsystem.h"
 #include "NWorldAssemblyEditorUserSettings.h"
 #include "Developer/NPrimitiveFont.h"
@@ -27,7 +28,7 @@
 #include "Developer/NMethodScopeTimer.h"
 #include "UObject/UnrealType.h"
 
-void FNWorldAssemblyEdMode::ProtectCellEdMode()
+void UNWorldAssemblyEdMode::ProtectCellEdMode()
 {
 	if (ANCellActor* Actor = CellActor.Get();
 		Actor != nullptr && Actor->GetCellRoot()->Details.Hull.HasNonTris() &&
@@ -37,7 +38,7 @@ void FNWorldAssemblyEdMode::ProtectCellEdMode()
 	}
 }
 
-void FNWorldAssemblyEdMode::OnActorDeleted(AActor* Actor)
+void UNWorldAssemblyEdMode::OnActorDeleted(AActor* Actor)
 {
 	if (Actor == CellActor.Get())
 	{
@@ -59,7 +60,7 @@ void FNWorldAssemblyEdMode::OnActorDeleted(AActor* Actor)
 	}
 }
 
-TObjectPtr<ANDebugActor> FNWorldAssemblyEdMode::CreateCollisionVisualizer(UWorld* World)
+TObjectPtr<ANDebugActor> UNWorldAssemblyEdMode::CreateCollisionVisualizer(UWorld* World)
 {
 	const bool bWasAlive = CollisionVisualizer != nullptr;
 
@@ -100,7 +101,7 @@ TObjectPtr<ANDebugActor> FNWorldAssemblyEdMode::CreateCollisionVisualizer(UWorld
 	return CollisionVisualizer;
 }
 
-void FNWorldAssemblyEdMode::DestroyCollisionVisualizer()
+void UNWorldAssemblyEdMode::DestroyCollisionVisualizer()
 {
 	UnbindWorldChangeDelegates();
 	CollisionSourceActors.Reset();
@@ -117,27 +118,27 @@ void FNWorldAssemblyEdMode::DestroyCollisionVisualizer()
 	}
 }
 
-void FNWorldAssemblyEdMode::BindWorldChangeDelegates()
+void UNWorldAssemblyEdMode::BindWorldChangeDelegates()
 {
 	if (!OnLevelActorAddedHandle.IsValid())
 	{
-		OnLevelActorAddedHandle = GEngine->OnLevelActorAdded().AddStatic(&FNWorldAssemblyEdMode::OnLevelActorAdded);
+		OnLevelActorAddedHandle = GEngine->OnLevelActorAdded().AddStatic(&UNWorldAssemblyEdMode::OnLevelActorAdded);
 	}
 	if (!OnObjectMovedHandle.IsValid())
 	{
-		OnObjectMovedHandle = GEditor->OnEndObjectMovement().AddStatic(&FNWorldAssemblyEdMode::OnObjectMoved);
+		OnObjectMovedHandle = GEditor->OnEndObjectMovement().AddStatic(&UNWorldAssemblyEdMode::OnObjectMoved);
 	}
 	if (!OnObjectPropertyChangedHandle.IsValid())
 	{
-		OnObjectPropertyChangedHandle = FCoreUObjectDelegates::OnObjectPropertyChanged.AddStatic(&FNWorldAssemblyEdMode::OnObjectPropertyChanged);
+		OnObjectPropertyChangedHandle = FCoreUObjectDelegates::OnObjectPropertyChanged.AddStatic(&UNWorldAssemblyEdMode::OnObjectPropertyChanged);
 	}
 	if (!OnUndoRedoHandle.IsValid())
 	{
-		OnUndoRedoHandle = FEditorDelegates::PostUndoRedo.AddStatic(&FNWorldAssemblyEdMode::OnUndoRedo);
+		OnUndoRedoHandle = FEditorDelegates::PostUndoRedo.AddStatic(&UNWorldAssemblyEdMode::OnUndoRedo);
 	}
 }
 
-void FNWorldAssemblyEdMode::UnbindWorldChangeDelegates()
+void UNWorldAssemblyEdMode::UnbindWorldChangeDelegates()
 {
 	if (OnLevelActorAddedHandle.IsValid())
 	{
@@ -161,7 +162,7 @@ void FNWorldAssemblyEdMode::UnbindWorldChangeDelegates()
 	}
 }
 
-bool FNWorldAssemblyEdMode::ShouldRebuildForActor(const AActor* Actor)
+bool UNWorldAssemblyEdMode::ShouldRebuildForActor(const AActor* Actor)
 {
 	if (Actor == nullptr || CollisionVisualizer == nullptr) return false;
 
@@ -172,7 +173,7 @@ bool FNWorldAssemblyEdMode::ShouldRebuildForActor(const AActor* Actor)
 	return FNActorUtils::PassesFilter(Actor, FNCreateVirtualWorldTask::CreateWorldActorFilterSettings(UNWorldAssemblySettings::Get()->WorldCollisionSettings));
 }
 
-AActor* FNWorldAssemblyEdMode::ResolveAffectedActor(UObject* Object)
+AActor* UNWorldAssemblyEdMode::ResolveAffectedActor(UObject* Object)
 {
 	if (Object == nullptr) return nullptr;
 	if (AActor* Actor = Cast<AActor>(Object)) return Actor;
@@ -180,7 +181,7 @@ AActor* FNWorldAssemblyEdMode::ResolveAffectedActor(UObject* Object)
 	return nullptr;
 }
 
-void FNWorldAssemblyEdMode::OnLevelActorAdded(AActor* Actor)
+void UNWorldAssemblyEdMode::OnLevelActorAdded(AActor* Actor)
 {
 	if (ShouldRebuildForActor(Actor))
 	{
@@ -188,7 +189,7 @@ void FNWorldAssemblyEdMode::OnLevelActorAdded(AActor* Actor)
 	}
 }
 
-void FNWorldAssemblyEdMode::OnObjectMoved(UObject& Object)
+void UNWorldAssemblyEdMode::OnObjectMoved(UObject& Object)
 {
 	if (ShouldRebuildForActor(ResolveAffectedActor(&Object)))
 	{
@@ -196,7 +197,7 @@ void FNWorldAssemblyEdMode::OnObjectMoved(UObject& Object)
 	}
 }
 
-void FNWorldAssemblyEdMode::OnObjectPropertyChanged(UObject* Object, FPropertyChangedEvent& PropertyChangedEvent)
+void UNWorldAssemblyEdMode::OnObjectPropertyChanged(UObject* Object, FPropertyChangedEvent& PropertyChangedEvent)
 {
 	// Ignore the continuous mid-edit stream (slider scrubs, gizmo drags); we rebuild on the finalizing change instead.
 	if (PropertyChangedEvent.ChangeType == EPropertyChangeType::Interactive) return;
@@ -207,7 +208,7 @@ void FNWorldAssemblyEdMode::OnObjectPropertyChanged(UObject* Object, FPropertyCh
 	}
 }
 
-void FNWorldAssemblyEdMode::OnUndoRedo()
+void UNWorldAssemblyEdMode::OnUndoRedo()
 {
 	if (CollisionVisualizer != nullptr)
 	{
@@ -215,7 +216,7 @@ void FNWorldAssemblyEdMode::OnUndoRedo()
 	}
 }
 
-void FNWorldAssemblyEdMode::CacheUserSettings()
+void UNWorldAssemblyEdMode::CacheUserSettings()
 {
 	const UNWorldAssemblyEditorUserSettings* Settings = UNWorldAssemblyEditorUserSettings::Get();
 
@@ -228,51 +229,66 @@ void FNWorldAssemblyEdMode::CacheUserSettings()
 	CachedJunctionConnectorCornersColor = Settings->ColorPaletteJunctionsConnectorCorners;
 }
 
-const FEditorModeID FNWorldAssemblyEdMode::Identifier = TEXT("NWorldAssemblyEdMode");
-const FText FNWorldAssemblyEdMode::DirtyMessage = FText::FromString("Dirty Cell Actor");
-const FText FNWorldAssemblyEdMode::AutoBoundsMessage = FText::FromString("Cell Bounds not calculated on save.");
-const FText FNWorldAssemblyEdMode::AutoBoundsHullMessage = FText::FromString("Cell Bounds and Hull not calculated on save.");
-const FText FNWorldAssemblyEdMode::AutoHullMessage = FText::FromString("Cell Hull not calculated on save.");
-const FText FNWorldAssemblyEdMode::AutoVoxelMessage = FText::FromString("Cell Voxel not calculated on save.");
+const FEditorModeID UNWorldAssemblyEdMode::Identifier = TEXT("NWorldAssemblyEdMode");
+const FText UNWorldAssemblyEdMode::DirtyMessage = FText::FromString("Dirty Cell Actor");
+const FText UNWorldAssemblyEdMode::AutoBoundsMessage = FText::FromString("Cell Bounds not calculated on save.");
+const FText UNWorldAssemblyEdMode::AutoBoundsHullMessage = FText::FromString("Cell Bounds and Hull not calculated on save.");
+const FText UNWorldAssemblyEdMode::AutoHullMessage = FText::FromString("Cell Hull not calculated on save.");
+const FText UNWorldAssemblyEdMode::AutoVoxelMessage = FText::FromString("Cell Voxel not calculated on save.");
 
-TWeakObjectPtr<ANCellActor> FNWorldAssemblyEdMode::CellActor = nullptr;
-FNWorldAssemblyEdMode::ENCellEdMode FNWorldAssemblyEdMode::CellEdMode = ENCellEdMode::Bounds;
-TArray<FVector> FNWorldAssemblyEdMode::CachedHullVertices;
-TArray<FIntVector2> FNWorldAssemblyEdMode::CachedHullEdges;
+TWeakObjectPtr<ANCellActor> UNWorldAssemblyEdMode::CellActor = nullptr;
+UNWorldAssemblyEdMode::ENCellEdMode UNWorldAssemblyEdMode::CellEdMode = ENCellEdMode::Bounds;
+TArray<FVector> UNWorldAssemblyEdMode::CachedHullVertices;
+TArray<FIntVector2> UNWorldAssemblyEdMode::CachedHullEdges;
 
-FBox FNWorldAssemblyEdMode::CachedBounds;
-FNCellVoxelData FNWorldAssemblyEdMode::CachedVoxelData;
+FBox UNWorldAssemblyEdMode::CachedBounds;
+FNCellVoxelData UNWorldAssemblyEdMode::CachedVoxelData;
 
-FLinearColor FNWorldAssemblyEdMode::CachedCellHullColor = NEXUS::WorldAssembly::DefaultColors::CellHull;
-FLinearColor FNWorldAssemblyEdMode::CachedCellBoundsColor = NEXUS::WorldAssembly::DefaultColors::CellBounds;
-FLinearColor FNWorldAssemblyEdMode::CachedJunctionUnfilledColor = NEXUS::WorldAssembly::DefaultColors::JunctionUnfilled;
-FLinearColor FNWorldAssemblyEdMode::CachedJunctionInvalidColor = NEXUS::WorldAssembly::DefaultColors::JunctionInvalid;
-FLinearColor FNWorldAssemblyEdMode::CachedJunctionValidColor = NEXUS::WorldAssembly::DefaultColors::JunctionValid;
-FLinearColor FNWorldAssemblyEdMode::CachedJunctionConnectorCornersColor = NEXUS::WorldAssembly::DefaultColors::JunctionConnectorCorners;
-FLinearColor FNWorldAssemblyEdMode::CachedBoneValidColor = NEXUS::WorldAssembly::DefaultColors::BoneValid;
-FLinearColor FNWorldAssemblyEdMode::CachedBoneInvalidColor = NEXUS::WorldAssembly::DefaultColors::BoneInvalid;
+FLinearColor UNWorldAssemblyEdMode::CachedCellHullColor = NEXUS::WorldAssembly::DefaultColors::CellHull;
+FLinearColor UNWorldAssemblyEdMode::CachedCellBoundsColor = NEXUS::WorldAssembly::DefaultColors::CellBounds;
+FLinearColor UNWorldAssemblyEdMode::CachedJunctionUnfilledColor = NEXUS::WorldAssembly::DefaultColors::JunctionUnfilled;
+FLinearColor UNWorldAssemblyEdMode::CachedJunctionInvalidColor = NEXUS::WorldAssembly::DefaultColors::JunctionInvalid;
+FLinearColor UNWorldAssemblyEdMode::CachedJunctionValidColor = NEXUS::WorldAssembly::DefaultColors::JunctionValid;
+FLinearColor UNWorldAssemblyEdMode::CachedJunctionConnectorCornersColor = NEXUS::WorldAssembly::DefaultColors::JunctionConnectorCorners;
+FLinearColor UNWorldAssemblyEdMode::CachedBoneValidColor = NEXUS::WorldAssembly::DefaultColors::BoneValid;
+FLinearColor UNWorldAssemblyEdMode::CachedBoneInvalidColor = NEXUS::WorldAssembly::DefaultColors::BoneInvalid;
 
-TArray<FVector> FNWorldAssemblyEdMode::CachedBoundsVertices;
-FNWorldAssemblyEdMode::ENCellVoxelMode FNWorldAssemblyEdMode::CellVoxelMode = ENCellVoxelMode::None;
-TObjectPtr<ANDebugActor> FNWorldAssemblyEdMode::CollisionVisualizer = nullptr;
-ENWorldAssemblyEdModeRenderMode FNWorldAssemblyEdMode::RenderMode = ENWorldAssemblyEdModeRenderMode::All;
-TSet<FObjectKey> FNWorldAssemblyEdMode::CollisionSourceActors;
-bool FNWorldAssemblyEdMode::bCollisionVisualizerDirty = false;
-FDelegateHandle FNWorldAssemblyEdMode::OnLevelActorAddedHandle;
-FDelegateHandle FNWorldAssemblyEdMode::OnObjectMovedHandle;
-FDelegateHandle FNWorldAssemblyEdMode::OnObjectPropertyChangedHandle;
-FDelegateHandle FNWorldAssemblyEdMode::OnUndoRedoHandle;
+TArray<FVector> UNWorldAssemblyEdMode::CachedBoundsVertices;
+UNWorldAssemblyEdMode::ENCellVoxelMode UNWorldAssemblyEdMode::CellVoxelMode = ENCellVoxelMode::None;
+TObjectPtr<ANDebugActor> UNWorldAssemblyEdMode::CollisionVisualizer = nullptr;
+ENWorldAssemblyEdModeRenderMode UNWorldAssemblyEdMode::RenderMode = ENWorldAssemblyEdModeRenderMode::All;
+TSet<FObjectKey> UNWorldAssemblyEdMode::CollisionSourceActors;
+bool UNWorldAssemblyEdMode::bCollisionVisualizerDirty = false;
+FDelegateHandle UNWorldAssemblyEdMode::OnLevelActorAddedHandle;
+FDelegateHandle UNWorldAssemblyEdMode::OnObjectMovedHandle;
+FDelegateHandle UNWorldAssemblyEdMode::OnObjectPropertyChangedHandle;
+FDelegateHandle UNWorldAssemblyEdMode::OnUndoRedoHandle;
 
-FNWorldAssemblyEdMode::~FNWorldAssemblyEdMode()
+UNWorldAssemblyEdMode::UNWorldAssemblyEdMode()
 {
+	// A UEdMode carries its own registration data rather than being handed it by the caller, so what used to be
+	// arguments to FEditorModeRegistry::RegisterMode live here. The registry discovers the mode from its UCLASS.
+	Info = FEditorModeInfo(
+		Identifier,
+		NSLOCTEXT("NexusWorldAssemblyEditor", "UNWorldAssemblyEdMode", "NEXUS: World Assembly"),
+		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Icon.WorldAssembly"),
+		true);
+}
+
+void UNWorldAssemblyEdMode::BeginDestroy()
+{
+	// Exit() already does this on every ordinary deactivation; this is the backstop for a mode torn down without one,
+	// which under FEdMode was the destructor's job.
 	if (OrganGenerator != nullptr)
 	{
 		OrganGenerator->TearDownOperation();
 		OrganGenerator = nullptr;
 	}
+
+	Super::BeginDestroy();
 }
 
-void FNWorldAssemblyEdMode::Enter()
+void UNWorldAssemblyEdMode::Enter()
 {
 	// Initialize cached values
 	CellActor = nullptr;
@@ -290,14 +306,13 @@ void FNWorldAssemblyEdMode::Enter()
 	// Create our temp organ generator to use with any selections
 	OrganGenerator = NewObject<UNAssemblyOperation>(GetTransientPackage(), NEXUS::WorldAssembly::Operations::EditorMode);
 	OrganGenerator->DisplayName = FText::FromName(NEXUS::WorldAssembly::Operations::EditorMode);
-	OrganGenerator->AddToRoot();
 
-	OnLevelActorDeletedHandle = GEngine->OnLevelActorDeleted().AddStatic(&FNWorldAssemblyEdMode::OnActorDeleted);
+	OnLevelActorDeletedHandle = GEngine->OnLevelActorDeleted().AddStatic(&UNWorldAssemblyEdMode::OnActorDeleted);
 
-	FEdMode::Enter();
+	Super::Enter();
 }
 
-void FNWorldAssemblyEdMode::Exit()
+void UNWorldAssemblyEdMode::Exit()
 {
 	CellActor = nullptr;
 	bCanTick = false;
@@ -314,10 +329,10 @@ void FNWorldAssemblyEdMode::Exit()
 		OrganGenerator = nullptr;
 	}
 
-	FEdMode::Exit();
+	Super::Exit();
 }
 
-void FNWorldAssemblyEdMode::Tick(FEditorViewportClient* ViewportClient, float DeltaTime)
+void UNWorldAssemblyEdMode::Tick(FEditorViewportClient* ViewportClient, float DeltaTime)
 {
 	if (bCanTick == false) return;
 
@@ -387,10 +402,10 @@ void FNWorldAssemblyEdMode::Tick(FEditorViewportClient* ViewportClient, float De
 		}
 	}
 
-	FEdMode::Tick(ViewportClient, DeltaTime);
+	Super::Tick(ViewportClient, DeltaTime);
 }
 
-void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI)
+void UNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI)
 {
 	bHasDirtyActors = false;
 
@@ -399,7 +414,7 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 		RenderMode == ENWorldAssemblyEdModeRenderMode::None ||
 		RenderMode == ENWorldAssemblyEdModeRenderMode::LevelScreenshot)
 	{
-		FEdMode::Render(View, Viewport, PDI);
+		Super::Render(View, Viewport, PDI);
 		return;
 	}
 
@@ -583,16 +598,16 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 		PreviousSelectedOrganHash = 0;
 	}
 
-	FEdMode::Render(View, Viewport, PDI);
+	Super::Render(View, Viewport, PDI);
 }
 
-void FNWorldAssemblyEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FViewport* Viewport, const FSceneView* View, FCanvas* Canvas)
+void UNWorldAssemblyEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FViewport* Viewport, const FSceneView* View, FCanvas* Canvas)
 {
 	// Messages disabled
 	if (!UNWorldAssemblyEditorUserSettings::Get()->bNotificationsDisplayViewportMessages || FNEditorUtils::IsPlayInEditor() ||
 		RenderMode != ENWorldAssemblyEdModeRenderMode::All)
 	{
-		FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);
+		Super::DrawHUD(ViewportClient, Viewport, View, Canvas);
 		return;
 	}
 
@@ -626,5 +641,5 @@ void FNWorldAssemblyEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FView
 		FNCanvasUtils::DrawCanvasTextBox(&CanvasMessageBox, Canvas, FVector2D(10,10));
 	}
 
-	FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);
+	Super::DrawHUD(ViewportClient, Viewport, View, Canvas);
 }

@@ -83,7 +83,7 @@ class NEXUSWORLDASSEMBLY_API UNAssemblyOperation : public UObject
 {
 	friend class UNWorldAssemblySubsystem;
 	friend class UNWorldAssemblyEditorSubsystem;
-	friend class FNWorldAssemblyEdMode;
+	friend class UNWorldAssemblyEdMode;
 
 	friend class FNAssemblyTaskGraph;
 	friend struct FNOrganGeneratorFinalizeTask;

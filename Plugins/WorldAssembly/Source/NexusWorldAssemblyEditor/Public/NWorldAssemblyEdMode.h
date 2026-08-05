@@ -4,13 +4,15 @@
 #pragma once
 
 #include "EditorModeManager.h"
-#include "EdMode.h"
 #include "NWorldAssemblyEditorModule.h"
 #include "CanvasItems/NMultiLineTextBoxCanvasItem.h"
 #include "Cell/NCellActor.h"
 #include "Developer/NDebugActor.h"
+#include "Tools/LegacyEdModeWidgetHelpers.h"
 #include "UObject/ObjectKey.h"
 #include "Visualizers/NCellRootComponentVisualizer.h"
+
+#include "NWorldAssemblyEdMode.generated.h"
 
 class FNAssemblyOperationContext;
 class UNAssemblyOperation;
@@ -54,10 +56,19 @@ namespace NEXUS::WorldAssembly::DefaultColors
  * Provides viewport overlays (bounds/hull/voxel) for the focused cell actor, orchestrates the
  * editor-side preview generation for the selected organ, and surfaces auto-generate warnings
  * to the user via on-screen HUD messages.
+ *
+ * Derives from UBaseLegacyWidgetEdMode — the UEdMode Epic supplies for exactly this transition — rather than from
+ * the legacy FEdMode. That base implements ILegacyEdModeWidgetInterface and ILegacyEdModeViewportInterface, which is
+ * what keeps Render, DrawHUD and Tick available: UEdMode itself has none of the three, and every pixel this mode
+ * puts on screen goes through them.
  */
-class FNWorldAssemblyEdMode final : public FEdMode
+UCLASS()
+class UNWorldAssemblyEdMode final : public UBaseLegacyWidgetEdMode
 {
+	GENERATED_BODY()
+
 public:
+	UNWorldAssemblyEdMode();
 
 	/**
 	 * Which side-car slot the cell-editor view is currently focused on.
@@ -197,9 +208,11 @@ public:
 	/** HUD message shown when auto-voxel is disabled. */
 	const static FText AutoVoxelMessage;
 
-	virtual ~FNWorldAssemblyEdMode() override;
+	//~UObject
+	virtual void BeginDestroy() override;
+	//End UObject
 
-	//~FEdMode
+	//~UBaseLegacyWidgetEdMode
 	virtual void Enter() override;
 	virtual void Exit() override;
 	virtual void Tick(FEditorViewportClient* ViewportClient, float DeltaTime) override;
@@ -208,18 +221,30 @@ public:
 
 	/**
 	 * @return Always false: this mode draws, it does not interact.
-	 * @note ILegacyEdModeViewportInterface defaults this to true, and FEdMode inherits that, so an editor mode gets
-	 *       "I need the non-ITF gizmo and viewport input system" for free whether or not it is true. It is not true
-	 *       here — the overrides above are the whole of this mode, and none of the legacy interaction surface
-	 *       (InputKey, InputDelta, Start/EndTracking, HandleClick, the transform and property widget hooks) is
-	 *       implemented. Left at the default, activating the mode makes the editor switch ITF gizmos and controls
-	 *       off for as long as it is open, and warn that it did.
+	 * @note ILegacyEdModeViewportInterface defaults this to true, so any mode implementing it — FEdMode before, and
+	 *       UBaseLegacyWidgetEdMode now — claims "I need the non-ITF gizmo and viewport input system" for free,
+	 *       whether or not it is true. It is not true here: the overrides above are the whole of this mode, and none
+	 *       of the legacy interaction surface (InputKey, InputDelta, Start/EndTracking, HandleClick, the transform
+	 *       and property widget hooks) is implemented. Left at the default, activating the mode makes the editor
+	 *       switch ITF gizmos and controls off for as long as it is open, and warn that it did.
+	 * @note Porting to UEdMode did not make this override redundant. UBaseLegacyWidgetEdMode is a UEdMode, but it
+	 *       still implements the legacy interface — that is what supplies Render, DrawHUD and Tick — so it inherits
+	 *       the same default. Only a mode implementing no legacy interface at all avoids the claim structurally.
 	 * @remark Render and DrawHUD are not part of the ITF, so the overlays are unaffected by this. The component
 	 *         visualizers this mode drives are the level editor's own FComponentVisualizer system rather than the ed
 	 *         mode viewport interface, and are likewise unaffected.
 	 */
 	virtual bool RequiresLegacyViewportInteractions() const override { return false; }
-	//End FEdMode
+
+	/**
+	 * @return Always false, for now.
+	 * @note UEdMode supports a mode panel and a secondary mode toolbar through FModeToolkit, and this mode's UI is a
+	 *       natural fit for both. None of that is built yet, though — the UI still lives in the level editor toolbar
+	 *       (FNWorldAssemblyEditorToolMenu), gated on IsActive(). Opting in before there is a toolkit to show would
+	 *       only open an empty panel, so this stays false until that work lands.
+	 */
+	virtual bool UsesToolkits() const override { return false; }
+	//End UBaseLegacyWidgetEdMode
 
 	static void CacheUserSettings();
 
@@ -292,7 +317,13 @@ private:
 	static FDelegateHandle OnObjectPropertyChangedHandle;
 	static FDelegateHandle OnUndoRedoHandle;
 
-	/** Editor-side operation used to preview organ generation. */
+	/**
+	 * Editor-side operation used to preview organ generation.
+	 * @note A real UPROPERTY now that the mode is a UObject, which is what keeps it alive. Under FEdMode it was held
+	 *       by an AddToRoot in Enter, balanced by the RemoveFromRoot inside TearDownOperation — correct, but only for
+	 *       as long as every exit path reached that call.
+	 */
+	UPROPERTY()
 	TObjectPtr<UNAssemblyOperation> OrganGenerator;
 
 	/** Gate that lets Tick skip work when nothing relevant has changed. */

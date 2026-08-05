@@ -104,14 +104,14 @@ public:
 			PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteJunctionsInvalid) ||
 			PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteJunctionsConnectorCorners))
 		{
-			FNWorldAssemblyEdMode::CacheUserSettings();
+			UNWorldAssemblyEdMode::CacheUserSettings();
 		}
 	}
 
 	/** Re-cache the color palette on the edit mode after an undo/redo, since the changed properties bypass PostEditChangeProperty. */
 	virtual void PostEditUndo() override
 	{
-		FNWorldAssemblyEdMode::CacheUserSettings();
+		UNWorldAssemblyEdMode::CacheUserSettings();
 	}
 	//End UObject
 

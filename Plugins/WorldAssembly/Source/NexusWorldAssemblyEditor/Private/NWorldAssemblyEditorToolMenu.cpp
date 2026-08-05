@@ -71,7 +71,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 					"NWorldAssemblyEdMode_Button",
 					FUIAction(
 						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::WorldAssemblyEdMode),
-						FCanExecuteAction::CreateStatic(&FNWorldAssemblyEdMode::IsNotActive),
+						FCanExecuteAction::CreateStatic(&UNWorldAssemblyEdMode::IsNotActive),
 						FIsActionChecked(),
 						FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorCommands::WorldAssemblyEdMode_CanShow)),
 						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_Button", "Switch To WorldAssembly Editor Mode"),
@@ -84,7 +84,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		FToolMenuSection& EdModeSection = Menu->AddSection(MenuSection);
 		EdModeSection.Visibility =  TAttribute<EVisibility>::CreateLambda([]()
 		{
-			if (FNWorldAssemblyEdMode::IsActive())
+			if (UNWorldAssemblyEdMode::IsActive())
 			{
 				return EVisibility::Visible;
 			}
@@ -229,7 +229,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 					"NCellActor_AddButton",
 					FUIAction(
 						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::CellAddActor),
-						FCanExecuteAction::CreateStatic(&FNWorldAssemblyEdMode::HasNoCellActor),
+						FCanExecuteAction::CreateStatic(&UNWorldAssemblyEdMode::HasNoCellActor),
 						FIsActionChecked(),
 						FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorCommands::CellAddActor_CanShow)),
 						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_AddActor", "Add Actor"),
@@ -386,7 +386,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		EdModeSection.AddEntry(NCellJunctionDropdownMenu);
 
 		// Visualizers Section
-		EdModeSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_VisualizersSeparator", FNWorldAssemblyEdMode::IsActive() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
+		EdModeSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_VisualizersSeparator", UNWorldAssemblyEdMode::IsActive() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
 
 		// Toggle Drawing Voxel Data
 		FToolMenuEntry NCellActor_DrawVoxelData = FToolMenuEntry::InitToolBarButton(
@@ -410,7 +410,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 				FExecuteAction::CreateStatic(&CollisionVisualizerToggle),
 				FCanExecuteAction::CreateStatic(&FNEditorUtils::IsNotPlayInEditor),
 				FIsActionChecked(),
-				FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEdMode::IsActive)),
+				FIsActionButtonVisible::CreateStatic(&UNWorldAssemblyEdMode::IsActive)),
 				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_ToggleCollisionVisualizer", "Toggle Collision Visualizer"),
 				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_ToggleCollisionVisualizer_Tooltip", "Creates and destroys a temporary/transient visualizer of the worlds collision geometry used during assembly."),
 				TAttribute<FSlateIcon>::Create(
@@ -419,7 +419,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		EdModeSection.AddEntry(CollisionVisualizerEntry);
 
 		// Actions Section - based on selection
-		EdModeSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_ActionsSeparator", FNWorldAssemblyEdMode::IsActive() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
+		EdModeSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_ActionsSeparator", UNWorldAssemblyEdMode::IsActive() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
 
 		// Ignore Actor Toggle
 		FToolMenuEntry CellIgnoreToggle  = FToolMenuEntry::InitToolBarButton(
@@ -536,7 +536,7 @@ void FNWorldAssemblyEditorToolMenu::RemoveMenuEntries()
 bool FNWorldAssemblyEditorToolMenu::ShowCellEditMode()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
-	if (!FNWorldAssemblyEdMode::IsActive()) return false;
+	if (!UNWorldAssemblyEdMode::IsActive()) return false;
 
 	return FNWorldAssemblyEditorUtils::IsCellActorSelected();
 }
@@ -544,7 +544,7 @@ bool FNWorldAssemblyEditorToolMenu::ShowCellEditMode()
 bool FNWorldAssemblyEditorToolMenu::ShowDrawVoxels()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
-	if (!FNWorldAssemblyEdMode::IsActive()) return false;
+	if (!UNWorldAssemblyEdMode::IsActive()) return false;
 	if (!FNWorldAssemblyRegistry::HasRootComponents()) return false;
 
 	return true;
@@ -554,14 +554,14 @@ bool FNWorldAssemblyEditorToolMenu::ShowCellDropdown()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
 
-	return FNWorldAssemblyEdMode::IsActive() && FNWorldAssemblyEdMode::HasCellActor();
+	return UNWorldAssemblyEdMode::IsActive() && UNWorldAssemblyEdMode::HasCellActor();
 }
 
 bool FNWorldAssemblyEditorToolMenu::ShowCellJunctionDropdown()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
 
-	return FNWorldAssemblyEdMode::HasCellActor();
+	return UNWorldAssemblyEdMode::HasCellActor();
 }
 
 bool FNWorldAssemblyEditorToolMenu::ShowOrganDropdown()
@@ -571,13 +571,13 @@ bool FNWorldAssemblyEditorToolMenu::ShowOrganDropdown()
 
 void FNWorldAssemblyEditorToolMenu::CollisionVisualizerToggle()
 {
-	if (FNWorldAssemblyEdMode::HasCollisionVisualizer())
+	if (UNWorldAssemblyEdMode::HasCollisionVisualizer())
 	{
-		FNWorldAssemblyEdMode::DestroyCollisionVisualizer();
+		UNWorldAssemblyEdMode::DestroyCollisionVisualizer();
 	}
 	else
 	{
-		const TObjectPtr<ANDebugActor> NewVisualizer = FNWorldAssemblyEdMode::CreateCollisionVisualizer(FNEditorUtils::GetCurrentWorld());
+		const TObjectPtr<ANDebugActor> NewVisualizer = UNWorldAssemblyEdMode::CreateCollisionVisualizer(FNEditorUtils::GetCurrentWorld());
 		if (NewVisualizer != nullptr)
 		{
 			GEditor->SelectActor(NewVisualizer, true, false, false);
@@ -618,7 +618,7 @@ void FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore()
 
 bool FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore_CanShow()
 {
-	return FNWorldAssemblyEdMode::HasCellActor()
+	return UNWorldAssemblyEdMode::HasCellActor()
 		&& FNEditorUtils::HasActorsSelected()
 		&& !FNWorldAssemblyEditorUtils::IsCellActorSelected();
 }
@@ -688,7 +688,7 @@ void FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldCollisionIgnore()
 
 bool FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldCollisionIgnore_CanShow()
 {
-	return FNWorldAssemblyEdMode::IsActive() && !FNWorldAssemblyEdMode::HasCellActor() && FNEditorUtils::HasActorsSelected();
+	return UNWorldAssemblyEdMode::IsActive() && !UNWorldAssemblyEdMode::HasCellActor() && FNEditorUtils::HasActorsSelected();
 }
 
 int32 FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldIgnore_Mode()
@@ -739,12 +739,12 @@ void FNWorldAssemblyEditorToolMenu::Hull_SplitEdge()
 
 bool FNWorldAssemblyEditorToolMenu::Hull_SplitEdge_CanShow()
 {
-	if (FNWorldAssemblyEdMode::GetCellEdMode() != FNWorldAssemblyEdMode::ENCellEdMode::Hull)
+	if (UNWorldAssemblyEdMode::GetCellEdMode() != UNWorldAssemblyEdMode::ENCellEdMode::Hull)
 	{
 		return false;
 	}
 
-	if (!FNWorldAssemblyEdMode::HasCellActor())
+	if (!UNWorldAssemblyEdMode::HasCellActor())
 	{
 		return false;
 	}

@@ -52,7 +52,7 @@ void FNWorldAssemblyEditorUserSettingsCustomization::OverrideColorReset(
 		FResetToDefaultHandler::CreateLambda([DefaultColor](TSharedPtr<IPropertyHandle> Handle)
 		{
 			// Route through the handle so the change is transacted, written to config, and fires
-			// PostEditChangeProperty (which refreshes FNWorldAssemblyEdMode's cached colors).
+			// PostEditChangeProperty (which refreshes UNWorldAssemblyEdMode's cached colors).
 			Handle->SetValueFromFormattedString(DefaultColor.ToString());
 		}));
 

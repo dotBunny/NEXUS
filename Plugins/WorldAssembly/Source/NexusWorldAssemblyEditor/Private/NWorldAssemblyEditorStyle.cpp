@@ -13,7 +13,7 @@ N_EDITOR_STYLE(FNWorldAssemblyEditorStyle)
 
 FSlateIcon FNWorldAssemblyEditorStyle::CellActorEditHullModeIcon()
 {
-	if (FNWorldAssemblyEdMode::GetCellEdMode() == FNWorldAssemblyEdMode::ENCellEdMode::Hull)
+	if (UNWorldAssemblyEdMode::GetCellEdMode() == UNWorldAssemblyEdMode::ENCellEdMode::Hull)
 	{
 		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.Hull.Selected");
 	}
@@ -22,7 +22,7 @@ FSlateIcon FNWorldAssemblyEditorStyle::CellActorEditHullModeIcon()
 
 FSlateIcon FNWorldAssemblyEditorStyle::CellActorEditBoundsModeIcon()
 {
-	if (FNWorldAssemblyEdMode::GetCellEdMode() == FNWorldAssemblyEdMode::ENCellEdMode::Bounds)
+	if (UNWorldAssemblyEdMode::GetCellEdMode() == UNWorldAssemblyEdMode::ENCellEdMode::Bounds)
 	{
 		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.Bounds.Selected");
 	}
@@ -31,7 +31,7 @@ FSlateIcon FNWorldAssemblyEditorStyle::CellActorEditBoundsModeIcon()
 
 FSlateIcon FNWorldAssemblyEditorStyle::CellActorEditVoxelModeIcon()
 {
-	if (FNWorldAssemblyEdMode::GetCellEdMode() == FNWorldAssemblyEdMode::ENCellEdMode::Voxel)
+	if (UNWorldAssemblyEdMode::GetCellEdMode() == UNWorldAssemblyEdMode::ENCellEdMode::Voxel)
 	{
 		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.Voxel.Points.Selected");
 	}
@@ -40,11 +40,11 @@ FSlateIcon FNWorldAssemblyEditorStyle::CellActorEditVoxelModeIcon()
 
 FSlateIcon FNWorldAssemblyEditorStyle::CellActorToggleDrawVoxelDataIcon()
 {
-	switch (FNWorldAssemblyEdMode::GetCellVoxelMode())
+	switch (UNWorldAssemblyEdMode::GetCellVoxelMode())
 	{
-	case FNWorldAssemblyEdMode::ENCellVoxelMode::Grid:
+	case UNWorldAssemblyEdMode::ENCellVoxelMode::Grid:
 		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.Voxel.Grid.Selected");
-	case FNWorldAssemblyEdMode::ENCellVoxelMode::Points:
+	case UNWorldAssemblyEdMode::ENCellVoxelMode::Points:
 		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.Voxel.Points.Selected");
 	default:
 		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.Voxel.Grid");
@@ -53,7 +53,7 @@ FSlateIcon FNWorldAssemblyEditorStyle::CellActorToggleDrawVoxelDataIcon()
 
 FSlateIcon FNWorldAssemblyEditorStyle::CollisionVisualizerToggleIcon()
 {
-	if (FNWorldAssemblyEdMode::HasCollisionVisualizer())
+	if (UNWorldAssemblyEdMode::HasCollisionVisualizer())
 	{
 		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.HasCollisionVisualizer");
 	}
