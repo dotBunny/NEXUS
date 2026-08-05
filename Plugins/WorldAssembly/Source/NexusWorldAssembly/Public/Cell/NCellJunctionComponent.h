@@ -84,7 +84,7 @@ public:
 	 * Takes priority over the owning organ's list and the project-wide default. When a pairing has a list at both
 	 * ends, the start end's wins; see FNCellJunctionConnection for which end that is.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction|Connect", meta=(TitleProperty="{Actor}"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction|Connection", meta=(TitleProperty="{Actor}"))
 	TArray<FNCellJunctionConnectorEntry> Connectors;
 
 	/** When true, bypass filler time-slicing and spawn this junction's filler immediately during BeginPlay. */

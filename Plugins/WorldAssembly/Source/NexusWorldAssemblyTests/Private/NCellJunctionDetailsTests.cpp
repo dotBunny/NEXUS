@@ -20,7 +20,7 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNCellJunctionDetailsHarness
 		Junction.WorldRotation = FRotator(10.0, 20.0, 30.0);
 		Junction.Weighting = 7;
 		Junction.InstanceIdentifier = 42;
-		Junction.bDisableConnector = true;
+		Junction.bDisableConnecting = true;
 		Junction.RotationConstraints.bEnforceMatchingRotation = true;
 		Junction.ConnectionConstraints.bOverrideAngleLimits = true;
 		return Junction;
@@ -66,8 +66,8 @@ N_TEST_CRITICAL(FNCellJunctionDetailsTests_IsEqual_EachComparedFieldBreaksEquali
 	}
 	{
 		FNCellJunctionDetails Other = Baseline;
-		Other.bDisableConnector = !Baseline.bDisableConnector;
-		CHECK_FALSE_MESSAGE(TEXT("A differing bDisableConnector must break equality."), Baseline.IsEqual(Other))
+		Other.bDisableConnecting = !Baseline.bDisableConnecting;
+		CHECK_FALSE_MESSAGE(TEXT("A differing bDisableConnecting must break equality."), Baseline.IsEqual(Other))
 	}
 	{
 		FNCellJunctionDetails Other = Baseline;

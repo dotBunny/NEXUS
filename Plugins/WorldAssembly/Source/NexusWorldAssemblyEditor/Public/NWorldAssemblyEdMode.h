@@ -205,6 +205,20 @@ public:
 	virtual void Tick(FEditorViewportClient* ViewportClient, float DeltaTime) override;
 	virtual void Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI) override;
 	virtual void DrawHUD(FEditorViewportClient* ViewportClient, FViewport* Viewport, const FSceneView* View, FCanvas* Canvas) override;
+
+	/**
+	 * @return Always false: this mode draws, it does not interact.
+	 * @note ILegacyEdModeViewportInterface defaults this to true, and FEdMode inherits that, so an editor mode gets
+	 *       "I need the non-ITF gizmo and viewport input system" for free whether or not it is true. It is not true
+	 *       here — the overrides above are the whole of this mode, and none of the legacy interaction surface
+	 *       (InputKey, InputDelta, Start/EndTracking, HandleClick, the transform and property widget hooks) is
+	 *       implemented. Left at the default, activating the mode makes the editor switch ITF gizmos and controls
+	 *       off for as long as it is open, and warn that it did.
+	 * @remark Render and DrawHUD are not part of the ITF, so the overlays are unaffected by this. The component
+	 *         visualizers this mode drives are the level editor's own FComponentVisualizer system rather than the ed
+	 *         mode viewport interface, and are likewise unaffected.
+	 */
+	virtual bool RequiresLegacyViewportInteractions() const override { return false; }
 	//End FEdMode
 
 	static void CacheUserSettings();
