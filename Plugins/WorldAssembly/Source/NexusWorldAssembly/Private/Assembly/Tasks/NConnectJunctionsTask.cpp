@@ -75,7 +75,7 @@ void FNConnectJunctionsTask::GatherOpenJunctions(TArray<FOpenJunction>& OutJunct
 				// Counted here, but still gathered: Disable Connecting opts a junction out of *connector geometry*,
 				// and an inverse mating spawns none — the two cells are already flush. So the flag is applied where
 				// the routing candidates are built, and these junctions remain available for inverse matching.
-				if (Details->bDisableConnector)
+				if (Details->bDisableConnecting)
 				{
 					OutDisabledCount++;
 				}
@@ -186,7 +186,7 @@ void FNConnectJunctionsTask::BuildCandidatePairs(const TArray<FOpenJunction>& Ju
 		// Already mated as a coincident inverse, or opted out of connector geometry by its author. Both are dropped
 		// here rather than at gather time so an opted-out junction stays eligible for inverse matching, and so the
 		// reported candidate count reflects only what the routing walk will actually attempt.
-		if (Start.bMatched || Start.Details.bDisableConnector) continue;
+		if (Start.bMatched || Start.Details.bDisableConnecting) continue;
 
 		JunctionBVH.QueryOverlaps(FBox(Start.Details.WorldLocation - RangeExtent, Start.Details.WorldLocation + RangeExtent), Overlaps);
 
@@ -196,7 +196,7 @@ void FNConnectJunctionsTask::BuildCandidatePairs(const TArray<FOpenJunction>& Ju
 			if (EndIndex <= StartIndex) continue;
 
 			const FOpenJunction& End = Junctions[EndIndex];
-			if (End.bMatched || End.Details.bDisableConnector) continue;
+			if (End.bMatched || End.Details.bDisableConnecting) continue;
 
 			// Two junctions on the same cell face into the same interior; connecting them is never what was meant.
 			if (Start.CellNode == End.CellNode) continue;
