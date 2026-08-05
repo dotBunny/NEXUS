@@ -15,10 +15,10 @@ void FNCellJunctionComponentVisualizer::DrawVisualization(const UActorComponent*
 	}
 
 	// We need to draw the base wireframes
-	if (!FNWorldAssemblyEdMode::IsActive())
+	if (!UNWorldAssemblyEdMode::IsActive())
 	{
 		JunctionComponent->DrawDebugPDI(PDI,
-			FNWorldAssemblyEdMode::GetCachedJunctionValidColor(),
-			FNWorldAssemblyEdMode::GetCachedJunctionInvalidColor(), false);
+			UNWorldAssemblyEdMode::GetCachedJunctionValidColor(),
+			UNWorldAssemblyEdMode::GetCachedJunctionInvalidColor(), false);
 	}
 }

@@ -27,40 +27,40 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 
 
 	// We need to draw the base wireframes
-	if (!FNWorldAssemblyEdMode::IsActive())
+	if (!UNWorldAssemblyEdMode::IsActive())
 	{
-		CellRootComponent->DrawDebugPDI(PDI, static_cast<uint8>(FNWorldAssemblyEdMode::GetCellVoxelMode()), FNWorldAssemblyEdMode::GetCachedCellBoundsColor(), FNWorldAssemblyEdMode::GetCachedCellHullColor());
+		CellRootComponent->DrawDebugPDI(PDI, static_cast<uint8>(UNWorldAssemblyEdMode::GetCellVoxelMode()), UNWorldAssemblyEdMode::GetCachedCellBoundsColor(), UNWorldAssemblyEdMode::GetCachedCellHullColor());
 		return;
 	}
 
-	if (FNWorldAssemblyEdMode::GetCellEdMode() == FNWorldAssemblyEdMode::ENCellEdMode::Bounds)
+	if (UNWorldAssemblyEdMode::GetCellEdMode() == UNWorldAssemblyEdMode::ENCellEdMode::Bounds)
 	{
-		const FBox Bounds = FNWorldAssemblyEdMode::GetCachedBounds();
-		const TArray<FVector>& BoundsVertices = FNWorldAssemblyEdMode::GetCachedBoundsVertices();
+		const FBox Bounds = UNWorldAssemblyEdMode::GetCachedBounds();
+		const TArray<FVector>& BoundsVertices = UNWorldAssemblyEdMode::GetCachedBoundsVertices();
 
 		// Draw Min Max
 		PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, 0));
-		PDI->DrawPoint(Bounds.Min, FNWorldAssemblyEdMode::GetCachedCellBoundsColor(), PointSize, SDPG_World);
+		PDI->DrawPoint(Bounds.Min, UNWorldAssemblyEdMode::GetCachedCellBoundsColor(), PointSize, SDPG_World);
 		PDI->SetHitProxy(nullptr);
 		PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, 1));
-		PDI->DrawPoint(Bounds.Max, FNWorldAssemblyEdMode::GetCachedCellBoundsColor(), PointSize, SDPG_World);
+		PDI->DrawPoint(Bounds.Max, UNWorldAssemblyEdMode::GetCachedCellBoundsColor(), PointSize, SDPG_World);
 		PDI->SetHitProxy(nullptr);
 
 	}
-	else if (FNWorldAssemblyEdMode::GetCellEdMode() == FNWorldAssemblyEdMode::ENCellEdMode::Hull)
+	else if (UNWorldAssemblyEdMode::GetCellEdMode() == UNWorldAssemblyEdMode::ENCellEdMode::Hull)
 	{
-		const TArray<FVector>& WorldVertices = FNWorldAssemblyEdMode::GetCachedHullVertices();
+		const TArray<FVector>& WorldVertices = UNWorldAssemblyEdMode::GetCachedHullVertices();
 
 		const int32 VertCount = WorldVertices.Num();
 		for (int32 i = 0; i < VertCount; i++)
 		{
 			// TODO: Selection color?
 			PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, i));
-			PDI->DrawPoint(WorldVertices[i], FNWorldAssemblyEdMode::GetCachedCellHullColor(), PointSize, SDPG_World);
+			PDI->DrawPoint(WorldVertices[i], UNWorldAssemblyEdMode::GetCachedCellHullColor(), PointSize, SDPG_World);
 			PDI->SetHitProxy(nullptr);
 		}
 
-		const TArray<FIntVector2>& WorldEdges = FNWorldAssemblyEdMode::GetCachedHullEdges();
+		const TArray<FIntVector2>& WorldEdges = UNWorldAssemblyEdMode::GetCachedHullEdges();
 		// TODO: if selected color?
 		const int32 EdgeCount = WorldEdges.Num();
 		for (int32 i = 0; i < EdgeCount; i++)
@@ -74,21 +74,21 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 			}
 			else
 			{
-				PDI->DrawLine(WorldVertices[WorldEdges[i].X], WorldVertices[WorldEdges[i].Y], FNWorldAssemblyEdMode::GetCachedCellHullColor(), 2.f, SDPG_World);
+				PDI->DrawLine(WorldVertices[WorldEdges[i].X], WorldVertices[WorldEdges[i].Y], UNWorldAssemblyEdMode::GetCachedCellHullColor(), 2.f, SDPG_World);
 
 			}
 			PDI->SetHitProxy(nullptr);
 		}
 	}
-	else if (FNWorldAssemblyEdMode::GetCellEdMode() == FNWorldAssemblyEdMode::ENCellEdMode::Voxel)
+	else if (UNWorldAssemblyEdMode::GetCellEdMode() == UNWorldAssemblyEdMode::ENCellEdMode::Voxel)
 	{
 		// Forcibly disable drawing of the voxel Mode
-		if (FNWorldAssemblyEdMode::GetCellVoxelMode() != FNWorldAssemblyEdMode::ENCellVoxelMode::None)
+		if (UNWorldAssemblyEdMode::GetCellVoxelMode() != UNWorldAssemblyEdMode::ENCellVoxelMode::None)
 		{
-			FNWorldAssemblyEdMode::SetCellVoxelMode(FNWorldAssemblyEdMode::ENCellVoxelMode::None);
+			UNWorldAssemblyEdMode::SetCellVoxelMode(UNWorldAssemblyEdMode::ENCellVoxelMode::None);
 		}
 
-		const FNCellVoxelData& CachedData = FNWorldAssemblyEdMode::GetCachedVoxelData();
+		const FNCellVoxelData& CachedData = UNWorldAssemblyEdMode::GetCachedVoxelData();
 		if (!CachedData.IsValid())
 		{
 			return;
@@ -132,16 +132,16 @@ bool FNCellRootComponentVisualizer::VisProxyHandleClick(FEditorViewportClient* I
 		if (VisProxy->IsA(HNIndexComponentVisProxy::StaticGetType()))
 		{
 			const HNIndexComponentVisProxy* IndexProxy = static_cast<HNIndexComponentVisProxy*>(VisProxy);
-			using enum FNWorldAssemblyEdMode::ENCellEdMode;
-			if (FNWorldAssemblyEdMode::GetCellEdMode() == Bounds)
+			using enum UNWorldAssemblyEdMode::ENCellEdMode;
+			if (UNWorldAssemblyEdMode::GetCellEdMode() == Bounds)
 			{
 				return EditBoundsVertex(IndexComponent, IndexProxy->Index);
 			}
-			if (FNWorldAssemblyEdMode::GetCellEdMode() == Hull)
+			if (UNWorldAssemblyEdMode::GetCellEdMode() == Hull)
 			{
 				return EditHullVertex(IndexComponent, IndexProxy->Index);
 			}
-			if (FNWorldAssemblyEdMode::GetCellEdMode() == Voxel)
+			if (UNWorldAssemblyEdMode::GetCellEdMode() == Voxel)
 			{
 				return ToggleVoxelPoint(IndexComponent, IndexProxy->Index);
 			}
@@ -150,8 +150,8 @@ bool FNCellRootComponentVisualizer::VisProxyHandleClick(FEditorViewportClient* I
 		if (VisProxy->IsA(HNEdgeComponentVisProxy::StaticGetType()))
 		{
 			const HNEdgeComponentVisProxy* EdgeProxy = static_cast<HNEdgeComponentVisProxy*>(VisProxy);
-			using enum FNWorldAssemblyEdMode::ENCellEdMode;
-			if (FNWorldAssemblyEdMode::GetCellEdMode() == Hull)
+			using enum UNWorldAssemblyEdMode::ENCellEdMode;
+			if (UNWorldAssemblyEdMode::GetCellEdMode() == Hull)
 			{
 				return EditHullEdge(IndexComponent,EdgeProxy->StartIndex,EdgeProxy->EndIndex);
 			}
@@ -340,14 +340,14 @@ bool FNCellRootComponentVisualizer::GetWidgetLocation(const FEditorViewportClien
 	case ENCellEditMode::HullVertex:
 	{
 		// The cached hull is rebuilt every tick; a recompute (Calculate Hull, undo/redo) can shrink it beneath a captured index.
-		const TArray<FVector>& Vertices = FNWorldAssemblyEdMode::GetCachedHullVertices();
+		const TArray<FVector>& Vertices = UNWorldAssemblyEdMode::GetCachedHullVertices();
 		if (!Vertices.IsValidIndex(VertexIndex)) return false;
 		OutLocation = Vertices[VertexIndex];
 		return true;
 	}
 	case ENCellEditMode::HullEdge:
 	{
-		const TArray<FVector>& Vertices = FNWorldAssemblyEdMode::GetCachedHullVertices();
+		const TArray<FVector>& Vertices = UNWorldAssemblyEdMode::GetCachedHullVertices();
 		if (!Vertices.IsValidIndex(EdgeStartIndex) || !Vertices.IsValidIndex(EdgeEndIndex)) return false;
 		OutLocation = (Vertices[EdgeStartIndex] + Vertices[EdgeEndIndex]) * 0.5f;
 		return true;
@@ -356,11 +356,11 @@ bool FNCellRootComponentVisualizer::GetWidgetLocation(const FEditorViewportClien
 		if (VertexIndex == -1) return false;
 		if (VertexIndex == 0)
 		{
-			OutLocation = FNWorldAssemblyEdMode::GetCachedBounds().Min;
+			OutLocation = UNWorldAssemblyEdMode::GetCachedBounds().Min;
 		}
 		else
 		{
-			OutLocation = FNWorldAssemblyEdMode::GetCachedBounds().Max;
+			OutLocation = UNWorldAssemblyEdMode::GetCachedBounds().Max;
 		}
 		return true;
 	default:

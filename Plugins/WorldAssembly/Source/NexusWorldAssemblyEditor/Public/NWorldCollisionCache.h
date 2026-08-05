@@ -185,7 +185,7 @@ private:
 	/**
 	 * @return true when a change to Actor could alter the merged world-collision mesh — i.e. it was part of the
 	 * geometry we last gathered for its world (covers delete / collision-off / ignore-tag transitions) or it passes
-	 * the world-actor filter now (covers add / collision-on). Mirrors FNWorldAssemblyEdMode::ShouldRebuildForActor so
+	 * the world-actor filter now (covers add / collision-on). Mirrors UNWorldAssemblyEdMode::ShouldRebuildForActor so
 	 * the cache and the ed mode's collision visualizer invalidate on exactly the same events — notably NOT on moving a
 	 * bone, which is a generation input rather than collision geometry.
 	 */

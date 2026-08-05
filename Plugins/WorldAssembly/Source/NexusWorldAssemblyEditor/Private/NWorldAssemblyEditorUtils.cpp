@@ -284,7 +284,7 @@ bool FNWorldAssemblyEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor
 	if (CellActor->CellRoot->Details.HullSettings.bCalculateOnSave)
 	{
 		CellActor->CalculateHull();
-		FNWorldAssemblyEdMode::ProtectCellEdMode();
+		UNWorldAssemblyEdMode::ProtectCellEdMode();
 	}
 
 	// STEP 4 - Calculate Voxel Data

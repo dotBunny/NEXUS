@@ -42,7 +42,7 @@ public:
 
 	/**
 	 * Toggles the world-collision visualizer for the currently-edited world. Spawns a fresh visualizer via
-	 * FNWorldAssemblyEdMode::CreateCollisionVisualizer when none is alive, otherwise destroys the existing one.
+	 * UNWorldAssemblyEdMode::CreateCollisionVisualizer when none is alive, otherwise destroys the existing one.
 	 */
 	static void CollisionVisualizerToggle();
 

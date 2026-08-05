@@ -338,18 +338,18 @@ void FNWorldAssemblyEditorCommands::UnregisterGlobalActions(const TSharedRef<FUI
 
 void FNWorldAssemblyEditorCommands::WorldAssemblyEdMode()
 {
-	GLevelEditorModeTools().ActivateMode(FNWorldAssemblyEdMode::Identifier);
+	GLevelEditorModeTools().ActivateMode(UNWorldAssemblyEdMode::Identifier);
 }
 
 bool FNWorldAssemblyEditorCommands::WorldAssemblyEdMode_CanShow()
 {
-	if (FNWorldAssemblyEdMode::IsActive()) return false;
+	if (UNWorldAssemblyEdMode::IsActive()) return false;
 	return FNWorldAssemblyEditorUtils::IsOrganComponentPresentInCurrentWorld() || FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld();
 }
 
 void FNWorldAssemblyEditorCommands::CellActorEditHullMode()
 {
-	FNWorldAssemblyEdMode::SetCellEdMode(FNWorldAssemblyEdMode::ENCellEdMode::Hull);
+	UNWorldAssemblyEdMode::SetCellEdMode(UNWorldAssemblyEdMode::ENCellEdMode::Hull);
 }
 
 bool FNWorldAssemblyEditorCommands::CellActorEditHullMode_CanExecute()
@@ -364,27 +364,27 @@ bool FNWorldAssemblyEditorCommands::CellActorEditHullMode_CanExecute()
 
 void FNWorldAssemblyEditorCommands::CellActorEditBoundsMode()
 {
-	FNWorldAssemblyEdMode::SetCellEdMode(FNWorldAssemblyEdMode::ENCellEdMode::Bounds);
+	UNWorldAssemblyEdMode::SetCellEdMode(UNWorldAssemblyEdMode::ENCellEdMode::Bounds);
 }
 
 void FNWorldAssemblyEditorCommands::CellActorEditVoxelMode()
 {
-	FNWorldAssemblyEdMode::SetCellEdMode(FNWorldAssemblyEdMode::ENCellEdMode::Voxel);
+	UNWorldAssemblyEdMode::SetCellEdMode(UNWorldAssemblyEdMode::ENCellEdMode::Voxel);
 }
 
 void FNWorldAssemblyEditorCommands::CellActorToggleDrawVoxelData()
 {
-	switch (FNWorldAssemblyEdMode::GetCellVoxelMode())
+	switch (UNWorldAssemblyEdMode::GetCellVoxelMode())
 	{
-		using enum FNWorldAssemblyEdMode::ENCellVoxelMode;
+		using enum UNWorldAssemblyEdMode::ENCellVoxelMode;
 	case Grid:
-		FNWorldAssemblyEdMode::SetCellVoxelMode(Points);
+		UNWorldAssemblyEdMode::SetCellVoxelMode(Points);
 		break;
 	case None:
-		FNWorldAssemblyEdMode::SetCellVoxelMode(Grid);
+		UNWorldAssemblyEdMode::SetCellVoxelMode(Grid);
 		break;
 	default:
-		FNWorldAssemblyEdMode::SetCellVoxelMode(None);
+		UNWorldAssemblyEdMode::SetCellVoxelMode(None);
 	}
 }
 
@@ -436,7 +436,7 @@ void FNWorldAssemblyEditorCommands::CellAddActor()
 bool FNWorldAssemblyEditorCommands::CellAddActor_CanShow()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
-	return FNWorldAssemblyEdMode::IsActive() && !FNWorldAssemblyEdMode::HasCellActor() && !FNWorldAssemblyEditorUtils::IsOrganComponentPresentInCurrentWorld();
+	return UNWorldAssemblyEdMode::IsActive() && !UNWorldAssemblyEdMode::HasCellActor() && !FNWorldAssemblyEditorUtils::IsOrganComponentPresentInCurrentWorld();
 }
 
 void FNWorldAssemblyEditorCommands::OrganGenerateProxies()
@@ -507,7 +507,7 @@ void FNWorldAssemblyEditorCommands::CellSelectActor()
 
 bool FNWorldAssemblyEditorCommands::CellSelectActor_CanExecute()
 {
-	return FNWorldAssemblyEdMode::HasCellActor() && GEditor->CanSelectActor(FNWorldAssemblyEdMode::GetCellActor(), false);
+	return UNWorldAssemblyEdMode::HasCellActor() && GEditor->CanSelectActor(UNWorldAssemblyEdMode::GetCellActor(), false);
 }
 
 bool FNWorldAssemblyEditorCommands::CellSelectActor_CanShow()
@@ -515,7 +515,7 @@ bool FNWorldAssemblyEditorCommands::CellSelectActor_CanShow()
 	if (FNEditorUtils::IsPlayInEditor()) return false;
 
 	// Use cached version
-	return FNWorldAssemblyEdMode::IsActive() && FNWorldAssemblyEdMode::HasCellActor() &&  !FNWorldAssemblyEditorUtils::IsCellActorSelected();;
+	return UNWorldAssemblyEdMode::IsActive() && UNWorldAssemblyEdMode::HasCellActor() &&  !FNWorldAssemblyEditorUtils::IsCellActorSelected();;
 }
 
 void FNWorldAssemblyEditorCommands::CellCalculateAll()
@@ -540,7 +540,7 @@ void FNWorldAssemblyEditorCommands::CellCalculateHull()
 	if (!ensure(CellActor != nullptr)) return;
 	CellActor->CalculateHull();
 
-	FNWorldAssemblyEdMode::ProtectCellEdMode();
+	UNWorldAssemblyEdMode::ProtectCellEdMode();
 }
 
 void FNWorldAssemblyEditorCommands::CellCalculateVoxelData()
@@ -952,7 +952,7 @@ void FNWorldAssemblyEditorCommands::CellCaptureThumbnail()
 		}
 		if (SelectedAssets.Num() > 0)
 		{
-			FNWorldAssemblyEdMode::SetRenderMode(ENWorldAssemblyEdModeRenderMode::LevelScreenshot);
+			UNWorldAssemblyEdMode::SetRenderMode(ENWorldAssemblyEdModeRenderMode::LevelScreenshot);
 			Viewport->Draw();
 			AssetViewUtils::CaptureThumbnailFromViewport(Viewport, SelectedAssets);
 		}
@@ -967,13 +967,13 @@ void FNWorldAssemblyEditorCommands::CellCaptureThumbnail()
 		}
 		if (SelectedAssets.Num() > 0)
 		{
-			FNWorldAssemblyEdMode::SetRenderMode(ENWorldAssemblyEdModeRenderMode::CellScreenshot);
+			UNWorldAssemblyEdMode::SetRenderMode(ENWorldAssemblyEdModeRenderMode::CellScreenshot);
 			Viewport->Draw();
 			AssetViewUtils::CaptureThumbnailFromViewport(Viewport, SelectedAssets);
 		}
 
 		GCurrentLevelEditingViewportClient = OldViewportClient;
-		FNWorldAssemblyEdMode::SetRenderMode(ENWorldAssemblyEdModeRenderMode::All);
+		UNWorldAssemblyEdMode::SetRenderMode(ENWorldAssemblyEdModeRenderMode::All);
 		Viewport->Draw();
 	}
 }

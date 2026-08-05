@@ -34,7 +34,7 @@ void FNBoneComponentVisualizer::DrawVisualization(const UActorComponent* Compone
 	}
 
 	// We are always going to draw this
-	BoneComponent->DrawDebugPDI(PDI, FNWorldAssemblyEdMode::GetCachedBoneValidColor(),  FNWorldAssemblyEdMode::GetCachedBoneInvalidColor(),
+	BoneComponent->DrawDebugPDI(PDI, UNWorldAssemblyEdMode::GetCachedBoneValidColor(),  UNWorldAssemblyEdMode::GetCachedBoneInvalidColor(),
 		true,  true, Settings, WorldPenetration);
 }
 

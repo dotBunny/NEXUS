@@ -12,7 +12,6 @@
 // This is used by the save delegate to get a definition for FObjectPreSaveContext
 // ReSharper disable once CppUnusedIncludeDirective
 #include "UObject/ObjectSaveContext.h"
-#include "EditorModeRegistry.h"
 #include "IPlacementModeModule.h"
 #include "NEditorDefaults.h"
 #include "NPropertySections.h"
@@ -79,7 +78,6 @@ void FNWorldAssemblyEditorModule::ShutdownModule()
 	// for RemoveAll to match) and RegisterStartupCallback usually runs them immediately. Kept
 	// for symmetry with Epic's module template; the real menu teardown is below.
 	UToolMenus::UnRegisterStartupCallback(this);
-	FEditorModeRegistry::Get().UnregisterMode(FNWorldAssemblyEdMode::Identifier);
 
 	if (GUnrealEd)
 	{
@@ -157,10 +155,9 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNWorldAssemblyEditorToolMenu::AddMenuEntries));
 	}
 
-	// Editor Mode
-	FEditorModeRegistry::Get().RegisterMode<FNWorldAssemblyEdMode>(
-		FNWorldAssemblyEdMode::Identifier,NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEdMode", "NEXUS: World Assembly"),
-		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Icon.WorldAssembly"), true);
+	// Editor Mode: nothing to register. UNWorldAssemblyEdMode is a UEdMode, so FEditorModeRegistry discovers it from
+	// its UCLASS and reads the identifier, name, icon and visibility off the FEditorModeInfo the mode builds in its
+	// own constructor.
 
 	// Visualizers
 	if (GUnrealEd != nullptr)
@@ -240,7 +237,7 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 
 
 	// Cache stuff
-	FNWorldAssemblyEdMode::CacheUserSettings();
+	UNWorldAssemblyEdMode::CacheUserSettings();
 }
 
 IMPLEMENT_MODULE(FNWorldAssemblyEditorModule, NexusWorldAssemblyEditor)
