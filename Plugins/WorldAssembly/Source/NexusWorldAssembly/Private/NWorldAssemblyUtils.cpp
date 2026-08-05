@@ -526,6 +526,63 @@ bool FNWorldAssemblyUtils::AreJunctionsInverseCoincident(const FNCellJunctionDet
 	return true;
 }
 
+bool FNWorldAssemblyUtils::AreJunctionsWithinConnectionAngles(const FNCellJunctionDetails& A, const FNCellJunctionDetails& B,
+	const float DefaultMaximumFacingAngle, const float DefaultMaximumApproachAngle, const float DefaultMaximumElevationDifference)
+{
+	// Resolve each end's limits up front. An opted-in junction supplies its own; where a test spans the pair the
+	// stricter of the two is taken, which is what stops a permissive override loosening a strict partner.
+	const FNCellJunctionConnectionConstraints& ConstraintsA = A.ConnectionConstraints;
+	const FNCellJunctionConnectionConstraints& ConstraintsB = B.ConnectionConstraints;
+
+	const float ApproachLimitA = ConstraintsA.bOverrideAngleLimits ? ConstraintsA.MaximumApproachAngle : DefaultMaximumApproachAngle;
+	const float ApproachLimitB = ConstraintsB.bOverrideAngleLimits ? ConstraintsB.MaximumApproachAngle : DefaultMaximumApproachAngle;
+	const float FacingLimit = FMath::Min(
+		ConstraintsA.bOverrideAngleLimits ? ConstraintsA.MaximumFacingAngle : DefaultMaximumFacingAngle,
+		ConstraintsB.bOverrideAngleLimits ? ConstraintsB.MaximumFacingAngle : DefaultMaximumFacingAngle);
+	const float ElevationLimit = FMath::Min(
+		ConstraintsA.bOverrideAngleLimits ? ConstraintsA.MaximumElevationDifference : DefaultMaximumElevationDifference,
+		ConstraintsB.bOverrideAngleLimits ? ConstraintsB.MaximumElevationDifference : DefaultMaximumElevationDifference);
+
+	const FVector OutwardA = GetJunctionOutwardDirection(A);
+	const FVector OutwardB = GetJunctionOutwardDirection(B);
+
+	// Compared as cosines rather than angles: a dot product against one precomputed cosine settles each test, where
+	// converting back would spend an inverse trig call per candidate pair. Cosine falls as an angle opens, so a
+	// wider angle is a smaller dot and the comparison inverts. The slack keeps a limit landing exactly on its
+	// boundary — 90 degrees against a perfectly perpendicular pair — inclusive, matching how the limits read.
+	if (FVector::DotProduct(OutwardA, -OutwardB) < FMath::Cos(FMath::DegreesToRadians(FacingLimit)) - UE_KINDA_SMALL_NUMBER)
+	{
+		return false;
+	}
+
+	// Coincident sockets have no line between them to measure against. Skipping rather than rejecting leaves the
+	// pair to the solver, which reports it degenerate; inverse matching, which is where such a pair belongs, runs
+	// ahead of this and never asks.
+	const FVector Chord = B.WorldLocation - A.WorldLocation;
+	const double ChordLengthSquared = Chord.SizeSquared();
+	if (ChordLengthSquared > UE_DOUBLE_SMALL_NUMBER)
+	{
+		const FVector ChordDirection = Chord * (1.0 / FMath::Sqrt(ChordLengthSquared));
+
+		if (FVector::DotProduct(OutwardA, ChordDirection) < FMath::Cos(FMath::DegreesToRadians(ApproachLimitA)) - UE_KINDA_SMALL_NUMBER)
+		{
+			return false;
+		}
+		if (FVector::DotProduct(OutwardB, -ChordDirection) < FMath::Cos(FMath::DegreesToRadians(ApproachLimitB)) - UE_KINDA_SMALL_NUMBER)
+		{
+			return false;
+		}
+	}
+
+	// Elevation is the only one of the three that cannot collapse to a dot product: it compares two angles measured
+	// against the horizontal rather than the angle between two directions, so the difference has to be taken in
+	// angle space. Both outward directions are unit length, which makes the Z component the sine of the elevation
+	// directly. Left until last so the two dot-product tests above reject first.
+	const double ElevationA = FMath::Asin(FMath::Clamp(OutwardA.Z, -1.0, 1.0));
+	const double ElevationB = FMath::Asin(FMath::Clamp(OutwardB.Z, -1.0, 1.0));
+	return FMath::Abs(ElevationA - ElevationB) <= FMath::DegreesToRadians(ElevationLimit) + UE_KINDA_SMALL_NUMBER;
+}
+
 void FNWorldAssemblyUtils::GetVoxelQueryPoints(const FVector& WorldCenter, const FVector& VoxelSize, TArray<FVector>& OutPositions)
 {
 	/** Directional Vectors (26)

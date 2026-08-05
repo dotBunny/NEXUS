@@ -115,7 +115,14 @@ private:
 	 */
 	int32 RouteConnectors(TArray<FOpenJunction>& Junctions, int32& OutCandidateCount);
 
-	/** Emit each unordered pair that clears the socket-size, distinct-cell, opt-out and range gates, nearest-first. */
+	/**
+	 * Emit each unordered pair that clears the socket-size, distinct-cell, opt-out, range and orientation gates,
+	 * nearest-first.
+	 * @note The orientation gate (FNWorldAssemblyUtils::AreJunctionsWithinConnectionAngles) is deliberately here
+	 *       rather than beside the shape limits in the solver: those reject a pairing only when the sockets sit
+	 *       close enough to force a tight turn, where this rejects it on the orientations alone however much room
+	 *       the route is given.
+	 */
 	void BuildCandidatePairs(const TArray<FOpenJunction>& Junctions, TArray<FCandidatePair>& OutPairs) const;
 
 	/**

@@ -207,6 +207,9 @@ public:
 	/** Record how many pairs cleared the cheap gates and were routed. @param Count The candidate pair count. */
 	void ConnectJunctions_SetCandidatePairCount(int32 Count);
 
+	/** Increment the counter for pairs discarded before routing because the two junctions were badly oriented. */
+	void ConnectJunctions_RejectedByAngle();
+
 	/** Record how many swept prisms were retained as collision for later pairs. @param Count The prism count. */
 	void ConnectJunctions_SetConnectorHullCount(int32 Count);
 

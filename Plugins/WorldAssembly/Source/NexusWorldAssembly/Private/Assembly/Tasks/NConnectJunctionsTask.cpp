@@ -207,6 +207,17 @@ void FNConnectJunctionsTask::BuildCandidatePairs(const TArray<FOpenJunction>& Ju
 			const double DistanceSquared = FVector::DistSquared(Start.Details.WorldLocation, End.Details.WorldLocation);
 			if (DistanceSquared > MaximumRangeSquared) continue;
 
+			// Orientation gate, ahead of any routing. The shape limits downstream reject a badly-turned route only
+			// when the two sockets are close enough that the turn has to be tight — give the same pair room and a
+			// spline will loop from a ceiling hatch around to a wall door perfectly gently. That is a pairing no
+			// amount of routing budget makes sensible, so it is settled here on the orientations alone.
+			if (!FNWorldAssemblyUtils::AreJunctionsWithinConnectionAngles(Start.Details, End.Details,
+				Settings.MaximumFacingAngle, Settings.MaximumApproachAngle, Settings.MaximumElevationDifference))
+			{
+				N_ASSEMBLY_ANALYTICS(ConnectJunctions_RejectedByAngle)
+				continue;
+			}
+
 			FCandidatePair& Pair = OutPairs.AddDefaulted_GetRef();
 			Pair.StartIndex = StartIndex;
 			Pair.EndIndex = EndIndex;

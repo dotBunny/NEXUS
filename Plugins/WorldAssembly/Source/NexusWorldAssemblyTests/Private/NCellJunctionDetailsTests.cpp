@@ -22,6 +22,7 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNCellJunctionDetailsHarness
 		Junction.InstanceIdentifier = 42;
 		Junction.bDisableConnector = true;
 		Junction.RotationConstraints.bEnforceMatchingRotation = true;
+		Junction.ConnectionConstraints.bOverrideAngleLimits = true;
 		return Junction;
 	}
 }
@@ -92,6 +93,18 @@ N_TEST_CRITICAL(FNCellJunctionDetailsTests_IsEqual_EachComparedFieldBreaksEquali
 		FNCellJunctionDetails Other = Baseline;
 		Other.RotationConstraints.bEnforceMatchingRotation = !Baseline.RotationConstraints.bEnforceMatchingRotation;
 		CHECK_FALSE_MESSAGE(TEXT("A differing RotationConstraints must break equality."), Baseline.IsEqual(Other))
+	}
+	{
+		FNCellJunctionDetails Other = Baseline;
+		Other.ConnectionConstraints.bOverrideAngleLimits = !Baseline.ConnectionConstraints.bOverrideAngleLimits;
+		CHECK_FALSE_MESSAGE(TEXT("A differing ConnectionConstraints opt-in must break equality."), Baseline.IsEqual(Other))
+	}
+	{
+		// The limits themselves and not just the opt-in flag: a junction retuned without toggling the flag is still
+		// drift the side-car has to notice.
+		FNCellJunctionDetails Other = Baseline;
+		Other.ConnectionConstraints.MaximumElevationDifference = Baseline.ConnectionConstraints.MaximumElevationDifference + 5.f;
+		CHECK_FALSE_MESSAGE(TEXT("A differing ConnectionConstraints limit must break equality."), Baseline.IsEqual(Other))
 	}
 }
 

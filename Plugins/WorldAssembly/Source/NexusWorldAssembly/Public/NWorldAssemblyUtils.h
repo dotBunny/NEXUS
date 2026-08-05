@@ -151,6 +151,37 @@ public:
 		const FVector2D& UnitSize, float Tolerance);
 
 	/**
+	 * Are these two junctions oriented sensibly enough with respect to each other to be worth connecting?
+	 *
+	 * The graph builder gates the cells it places on FNRotationConstraints, but the connector pass runs over cells
+	 * that are already down: nothing is being rotated, so what is left to judge is the world-space relationship
+	 * between two fixed openings. Three angles cover it, and a pair has to clear all three:
+	 *
+	 * - **Facing**, between one socket's outward direction and the other's inward. Zero is the head-on pairing the
+	 *   builder makes itself; 180 is two sockets opening away from one another.
+	 * - **Approach**, between each socket's outward direction and the line to its partner, tested at both ends. Past
+	 *   90 degrees the partner sits behind the socket plane, so the route has to leave the opening and double back
+	 *   around the cell that owns it.
+	 * - **Elevation difference**, between how steeply the two face up or down. This is the one that separates a
+	 *   right-angle corridor bend from a ceiling hatch joined to a wall door — both are 90 degrees of facing, but
+	 *   two wall openings differ in elevation by nothing while a hatch and a wall door differ by the full 90.
+	 *
+	 * Either junction may carry its own limits (FNCellJunctionConnectionConstraints); where both ends supply one the
+	 * stricter wins, so an override never loosens what its partner will accept. A limit of 180 opts that test out.
+	 * @param A The first junction, in world space.
+	 * @param B The second junction, in world space.
+	 * @param DefaultMaximumFacingAngle Facing limit in degrees for either end that supplies no override of its own.
+	 * @param DefaultMaximumApproachAngle Approach limit in degrees, on the same terms.
+	 * @param DefaultMaximumElevationDifference Elevation-difference limit in degrees, on the same terms.
+	 * @return true when the pair clears every limit and is worth routing.
+	 * @note Two junctions in the same place have no line between them to measure an approach against, so that test
+	 *       is skipped for them and the pair is left to be rejected as degenerate by the solver — or picked up ahead
+	 *       of it by inverse matching, which does not consult this predicate at all.
+	 */
+	static bool AreJunctionsWithinConnectionAngles(const FNCellJunctionDetails& A, const FNCellJunctionDetails& B,
+		float DefaultMaximumFacingAngle, float DefaultMaximumApproachAngle, float DefaultMaximumElevationDifference);
+
+	/**
 	 * Axis-aligned box ray intersection detection
 	 * @remark Slab method (t = (box_coord - ray_origin_coord) / ray_direction_coord)
 	 */
