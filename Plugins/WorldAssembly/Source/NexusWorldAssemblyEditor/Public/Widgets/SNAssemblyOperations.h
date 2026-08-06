@@ -20,9 +20,9 @@ struct FNStatusChannelUpdate;
  * invalidates on both the clear and the re-add. Anything added here that paints or caches state directly has to
  * re-earn it.
  *
- * @note Correctness, not a measurable win. The same panel holds FToolkitSections' details view, and SDetailsView does
- *       not opt in — so that panel cannot cache regardless of what this widget claims. This is here so the widget is
- *       not the answer next time someone goes looking, not because it buys a frame.
+ * @note Load-bearing. The mode panel's other non-opting-in widget was FToolkitSections' details view, which
+ *       FNWorldAssemblyEdModeToolkit no longer registers — so this widget is now the only thing standing between that
+ *       panel and a cached one. Anything added here that paints or caches state directly has to re-earn the claim.
  */
 template <>
 struct TWidgetTypeTraits<class SNAssemblyOperations>
