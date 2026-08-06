@@ -25,7 +25,7 @@ public:
 	/** The cell-root component visualizer registered by this module on startup. */
 	/**
 	 * @note Held only so ShutdownModule can release it. Nothing calls back into the derived type any more — the
-	 *       selection state the tool menu used to reach for lives on UNCellHullTool now — so the base interface is
+	 *       selection state the tool menu used to reach for lives on UNCellHullVertexTool now — so the base interface is
 	 *       all this needs to be.
 	 */
 	TSharedPtr<FComponentVisualizer> RootComponentVisualizer;

@@ -11,7 +11,7 @@ class UNCellRootComponent;
  * Component visualizer for UNCellRootComponent, drawing the cell's bounds/hull/voxel overlays in-viewport.
  *
  * Draw-only. The hit-proxy editing this used to carry — dragging hull and bounds vertices, toggling voxel points,
- * selecting an edge to split — moved to UNCellBoundsTool, UNCellHullTool and UNCellVoxelTool when the World Assembly
+ * selecting an edge to split — moved to UNCellBoundsTool, UNCellHullVertexTool and UNCellVoxelTool when the World Assembly
  * edit mode gained interactive tools. What is left is the wireframe pass for when the mode is *not* active, which the
  * tools cannot cover because they only exist while it is.
  *

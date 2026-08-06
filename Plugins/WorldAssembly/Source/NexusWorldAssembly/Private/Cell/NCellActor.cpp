@@ -125,6 +125,28 @@ void ANCellActor::SplitHullEdge(const int32 IndexA, const int32 IndexB)
 	SetActorDirty();
 }
 
+void ANCellActor::SplitHullEdge(const int32 IndexA, const int32 IndexB, const FVector& LocalPosition)
+{
+	CellRoot->Modify();
+
+	// Split first and move second. Everything FNRawMesh::SplitEdge does — splicing the new vertex into both sides of
+	// the edge, re-triangulating the faces that owned it — is independent of where along the edge it lands, so there
+	// is nothing to gain from teaching it about an arbitrary point. Sliding the midpoint it inserted afterwards
+	// reaches the same result through one code path instead of two.
+	const int32 NewIndex = CellRoot->Details.Hull.SplitEdge(IndexA, IndexB);
+	if (NewIndex != INDEX_NONE)
+	{
+		// SetVertex rather than writing into Vertices, for the reason SetVertex itself gives: a direct write leaves
+		// the convexity flags and face-plane cache describing the hull as it was before the move.
+		CellRoot->Details.Hull.SetVertex(NewIndex, LocalPosition);
+
+		// SplitEdge already did this for the midpoint it inserted, which the line above has just moved.
+		CellRoot->Details.Hull.CalculateCenterAndBounds();
+	}
+
+	SetActorDirty();
+}
+
 void ANCellActor::CalculateHull()
 {
 	CellRoot->Modify();

@@ -260,9 +260,9 @@ void FNWorldAssemblyEdModeToolkit::RegisterPalettes()
 	ToolkitCommandList->Append(Commands.CommandList_Organ.ToSharedRef());
 
 	// Order here is the order of the buttons on the rail.
+	Rails.Add(MakeShared<FNWorldAssemblyEdModeWorldRail>(ToolkitCommandList));
 	Rails.Add(MakeShared<FNWorldAssemblyEdModeCellRail>(ToolkitCommandList));
 	Rails.Add(MakeShared<FNWorldAssemblyEdModeJunctionRail>(ToolkitCommandList));
-	Rails.Add(MakeShared<FNWorldAssemblyEdModeWorldRail>(ToolkitCommandList));
 	Rails.Add(MakeShared<FNWorldAssemblyEdModeOrganRail>(ToolkitCommandList));
 
 	// Warnings are deliberately not handed to a FToolkitSections slot. ModeWarningArea sits above the palette, where a
@@ -280,6 +280,13 @@ void FNWorldAssemblyEdModeToolkit::RegisterPalettes()
 
 	const TSharedRef<FNWorldAssemblyEdModeToolkitBuilder> Builder = MakeShared<FNWorldAssemblyEdModeToolkitBuilder>(ToolkitBuilderArgs);
 	ToolkitBuilder = Builder;
+
+	// Leaving a category leaves the tool that belongs to it. The tools are scoped to their category — the hull tools
+	// drive the Cell rail's overlay, junction placement the Junction rail's — so one left running under a category
+	// that does not present it keeps drawing handles and swallowing viewport clicks with nothing on screen to say
+	// which tool is doing it or how to stop it. Safe from inside the broadcast: UEditorInteractiveToolsContext defers
+	// the shutdown to its next tick rather than tearing the tool down under the builder that is mid-switch.
+	Builder->OnActivePaletteChanged.AddStatic(&UNWorldAssemblyEdMode::EndActiveTool);
 
 	for (const TSharedRef<FNWorldAssemblyEdModeRail>& Rail : Rails)
 	{

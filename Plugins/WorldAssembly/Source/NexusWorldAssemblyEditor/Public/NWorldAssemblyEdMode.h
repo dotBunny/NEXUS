@@ -111,6 +111,13 @@ public:
 	/** Force the edit mode back to a safe state if the current one becomes invalid. */
 	static void ProtectCellEdMode();
 
+	/**
+	 * Shut down whichever interactive tool is running. No-op when none is, or when the mode is not active.
+	 * @note Completed, not Cancelled: these tools commit every edit as they make it, so there is nothing to roll back
+	 *       and asking for a cancel would misreport what happened to anything listening.
+	 */
+	static void EndActiveTool();
+
 	/** @return The currently active voxel visualization style, or None when the mode is not active. */
 	static ENCellVoxelMode GetCellVoxelMode();
 

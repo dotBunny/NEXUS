@@ -14,7 +14,9 @@
 #include "Organ/NOrganVolume.h"
 #include "Selection.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Widgets/SNAssemblyOperations.h"
 #include "Widgets/Input/SComboButton.h"
+#include "Widgets/SBoxPanel.h"
 #include "Widgets/Text/STextBlock.h"
 
 #define LOCTEXT_NAMESPACE "NexusWorldAssemblyEditor"
@@ -64,22 +66,6 @@ TAttribute<bool> FNWorldAssemblyEdModeOrganRail::GetEnabled() const
 	return TAttribute<bool>::CreateStatic(&FNWorldAssemblyEditorUtils::IsOrganComponentPresentInCurrentWorld);
 }
 
-TArray<TSharedPtr<FUICommandInfo>> FNWorldAssemblyEdModeOrganRail::GetPaletteCommands() const
-{
-	const FNWorldAssemblyEditorCommands& Commands = FNWorldAssemblyEditorCommands::Get();
-
-	return {
-		Commands.CommandInfo_OrganGenerateProxies,
-		Commands.CommandInfo_OrganClearProxies,
-		Commands.CommandInfo_OrganCreateLevelInstances,
-		Commands.CommandInfo_OrganUnloadLevelInstances,
-		Commands.CommandInfo_OrganGenerateAllProxies,
-		Commands.CommandInfo_OrganClearAllProxies,
-		Commands.CommandInfo_OrganCreateAllLevelInstances,
-		Commands.CommandInfo_OrganUnloadAllLevelInstances,
-	};
-}
-
 TSharedPtr<SWidget> FNWorldAssemblyEdModeOrganRail::CreateHeader() const
 {
 	return SNew(SComboButton)
@@ -123,6 +109,47 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeOrganRail::CreateHeader() const
 					? LOCTEXT("OrganPicker_Empty", "No Organs")
 					: LOCTEXT("OrganPicker_None", "Select Organ");
 			})
+		];
+}
+
+TSharedPtr<SWidget> FNWorldAssemblyEdModeOrganRail::CreateContent() const
+{
+	const FNWorldAssemblyEditorCommands& Commands = FNWorldAssemblyEditorCommands::Get();
+
+	return SNew(SVerticalBox)
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			CreateTitledCommandGrid(
+				LOCTEXT("OrganHeader_SelectedOrgan", "Selected Organ"),
+				{
+					Commands.CommandInfo_OrganGenerateProxies,
+					Commands.CommandInfo_OrganClearProxies,
+					Commands.CommandInfo_OrganCreateLevelInstances,
+					Commands.CommandInfo_OrganUnloadLevelInstances,
+				})
+		]
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			CreateTitledCommandList(
+				LOCTEXT("OrganHeader_World", "World"),
+				{
+					Commands.CommandInfo_OrganGenerateAllProxies,
+					Commands.CommandInfo_OrganClearAllProxies,
+					Commands.CommandInfo_OrganCreateAllLevelInstances,
+					Commands.CommandInfo_OrganUnloadAllLevelInstances,
+				})
+		]
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			CreateTitledContent(
+				LOCTEXT("OrganHeader_Operations", "Operations"),
+				SNew(SNAssemblyOperations))
 		];
 }
 

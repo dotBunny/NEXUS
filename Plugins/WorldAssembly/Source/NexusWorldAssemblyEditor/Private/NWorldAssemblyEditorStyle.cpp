@@ -6,8 +6,11 @@
 #include "NEditorUtils.h"
 #include "NWorldAssemblyEditorToolMenu.h"
 #include "NWorldAssemblyEdMode.h"
+#include "Brushes/SlateColorBrush.h"
 #include "Brushes/SlateImageBrush.h"
+#include "Styling/AppStyle.h"
 #include "Styling/SlateStyle.h"
+#include "Styling/ToolBarStyle.h"
 
 N_EDITOR_STYLE(FNWorldAssemblyEditorStyle)
 
@@ -196,6 +199,23 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 
 	Style.Set("Command.WorldAssemblyEd.QuickAssemblyOperation", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_QuickAssemblyOperation"), Icon128x128));
 	Style.Set("Command.WorldAssemblyEd.CancelQuickAssemblyOperation", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CancelQuickAssemblyOperation"), Icon128x128));
+
+	// The toolbars behind FNWorldAssemblyEdModeRail's CreateTitledCommandGrid and CreateTitledCommandList. Everything
+	// about the labelled full-width buttons comes from the engine's SlimPaletteToolBar, which the toolkit builder
+	// renders a palette with; only the recessed backing is ours, so these groups sit in the same dark well as the
+	// icon-tile groups beside them instead of the lighter panel fill an unheaded full-panel palette wants. The column
+	// count is the only difference between the two.
+	FToolBarStyle TitledCommandStyle = FAppStyle::Get().GetWidgetStyle<FToolBarStyle>("SlimPaletteToolBar");
+	TitledCommandStyle.SetBackground(FSlateColorBrush(FStyleColors::Recessed));
+	// Asymmetric because the buttons are: SlimPaletteToolBar pads each one 4 on its left and top and nothing on its
+	// right and bottom, so the two sides only read as an even 8-unit inset once this makes up the difference.
+	TitledCommandStyle.SetBackgroundPadding(FMargin(4.0f, 4.0f, 8.0f, 8.0f));
+
+	TitledCommandStyle.SetNumColumns(2);
+	Style.Set("WorldAssemblyEd.TitledCommandGrid", TitledCommandStyle);
+
+	TitledCommandStyle.SetNumColumns(1);
+	Style.Set("WorldAssemblyEd.TitledCommandList", TitledCommandStyle);
 
 	return StyleRef;
 }

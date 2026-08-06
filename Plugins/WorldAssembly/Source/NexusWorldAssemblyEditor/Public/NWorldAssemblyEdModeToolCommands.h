@@ -33,8 +33,11 @@ public:
 	/** Drag the focused cell's axis-aligned bounds by their min and max corners. */
 	TSharedPtr<FUICommandInfo> BeginCellBoundsTool;
 
-	/** Drag the focused cell's hull vertices, and split its edges. */
-	TSharedPtr<FUICommandInfo> BeginCellHullTool;
+	/** Drag the focused cell's hull vertices. */
+	TSharedPtr<FUICommandInfo> BeginCellHullVertexTool;
+
+	/** Split the focused cell's hull edges at the point clicked. */
+	TSharedPtr<FUICommandInfo> BeginCellHullSplitTool;
 
 	/** Toggle individual voxels of the focused cell between occupied and empty. */
 	TSharedPtr<FUICommandInfo> BeginCellVoxelTool;
@@ -47,7 +50,8 @@ namespace NEXUS::WorldAssembly::Tools
 {
 	/** Tool identifiers passed to UEdMode::RegisterTool; also what ShouldToolStartBeAllowed and the active-tool checks key off. */
 	inline const FString CellBounds = TEXT("NWorldAssembly.CellBoundsTool");
-	inline const FString CellHull = TEXT("NWorldAssembly.CellHullTool");
+	inline const FString CellHullVertex = TEXT("NWorldAssembly.CellHullVertexTool");
+	inline const FString CellHullSplit = TEXT("NWorldAssembly.CellHullSplitTool");
 	inline const FString CellVoxel = TEXT("NWorldAssembly.CellVoxelTool");
 	inline const FString JunctionPlacement = TEXT("NWorldAssembly.JunctionPlacementTool");
 }

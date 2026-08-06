@@ -69,6 +69,36 @@ protected:
 	 *       entries, which only the uniform builder reads. This is the path FModeToolkit::CreatePaletteWidget takes,
 	 *       so these groups match the Landscape and Foliage palettes rather than approximating them.
 	 */
+	TSharedRef<SWidget> CreateTitledCommandPalette(const FText& Title, const TArray<TSharedPtr<FUICommandInfo>>& Commands) const;
+
+	/**
+	 * Build a headed group of half-width command buttons, two to a row.
+	 *
+	 * @param Title Heading shown above the buttons.
+	 * @param Commands Commands to lay out, resolved against the toolkit command list.
+	 * @return A titled two-column toolbar widget, on the same recessed backing as CreateTitledCommandPalette's.
+	 * @note What FToolkitBuilder itself renders a palette as, reproduced here so a rail can head and split one. It is a
+	 *       different widget from CreateTitledCommandPalette's, not a wider setting on it: this is the plugin's
+	 *       WorldAssemblyEd.TitledCommandGrid style — SlimPaletteToolBar, recessed — on FSlimHorizontalUniformToolBarBuilder,
+	 *       whose SUniformWrapPanel fills its width across the style's two columns. The other builder's panel is
+	 *       left-aligned over fixed 48-unit cells, so it fits as many icon tiles per row as the panel is wide and the
+	 *       label under each is ellipsized to nothing useful.
+	 * @remark For commands whose labels have to be readable. The icon-tile groups suit a handful of commands the user
+	 *         learns by shape; these read as a list of named operations.
+	 */
+	TSharedRef<SWidget> CreateTitledCommandGrid(const FText& Title, const TArray<TSharedPtr<FUICommandInfo>>& Commands) const;
+
+	/**
+	 * Build a headed group of full-width command buttons, one to a row.
+	 *
+	 * @param Title Heading shown above the buttons.
+	 * @param Commands Commands to lay out, resolved against the toolkit command list.
+	 * @return A titled single-column toolbar widget.
+	 * @note CreateTitledCommandGrid's group at one column instead of two — the same builder, backing and inset, differing
+	 *       only in the NumColumns its style carries.
+	 * @remark For a short group whose labels are long enough that half a panel ellipsizes them, or one whose commands
+	 *         want reading down rather than scanning across.
+	 */
 	TSharedRef<SWidget> CreateTitledCommandList(const FText& Title, const TArray<TSharedPtr<FUICommandInfo>>& Commands) const;
 
 	/**
@@ -76,12 +106,26 @@ protected:
 	 *
 	 * @param Title Heading shown above the checkboxes.
 	 * @param Commands Toggle commands to lay out, resolved against the toolkit command list.
-	 * @return A titled column of checkboxes.
+	 * @return A titled column of checkboxes, on the same recessed backing as the command groups.
 	 * @note For commands that read as persistent settings rather than actions. The same commands rendered into a
 	 *       toolbar become icon buttons whose state is only legible from their highlight, which is the wrong shape
 	 *       for something the user is setting rather than doing.
+	 * @remark Built on CreateTitledContent, which is where the heading and backing come from — the checkboxes are the
+	 *         only part this adds.
 	 */
 	TSharedRef<SWidget> CreateTitledCheckList(const FText& Title, const TArray<TSharedPtr<FUICommandInfo>>& Commands) const;
+
+	/**
+	 * Put an arbitrary widget under a group heading, on the same recessed backing the command groups sit on.
+	 *
+	 * @param Title Heading shown above the content.
+	 * @param Content The widget to head.
+	 * @return A titled group wrapping Content.
+	 * @note The escape hatch for a section that is not a set of commands. The backing is drawn here rather than coming
+	 *       from a toolbar style, since there is no toolbar — same color and inset, so the section reads as a peer of
+	 *       the groups around it.
+	 */
+	TSharedRef<SWidget> CreateTitledContent(const FText& Title, const TSharedRef<SWidget>& Content) const;
 
 	/** The toolkit's command list; every button a rail builds resolves its action against this. */
 	TSharedRef<FUICommandList> CommandList;
