@@ -11,8 +11,31 @@
 #include "Styling/AppStyle.h"
 #include "Widgets/Input/SCheckBox.h"
 #include "Widgets/Layout/SBorder.h"
+#include "Widgets/Layout/SBox.h"
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/Text/STextBlock.h"
+
+/**
+ * Mark a widget and every descendant as needing a fresh prepass.
+ *
+ * @param Widget Root of the subtree to dirty.
+ * @note Recursive because a cached desired size is per-widget and Slate's fast path skips any widget whose own
+ *       prepass flag is clear — so dirtying only the root leaves the child that actually holds the stale size
+ *       untouched. SScaleBox marks its child rather than itself for the same reason; this walks the subtree because
+ *       the widget that needs it here is buried inside a multibox we get no handle to.
+ */
+static void MarkPrepassDirtyRecursive(const TSharedRef<SWidget>& Widget)
+{
+	Widget->MarkPrepassAsDirty();
+
+	FChildren* Children = Widget->GetAllChildren();
+	if (Children == nullptr) return;
+
+	for (int32 Index = 0; Index < Children->Num(); Index++)
+	{
+		MarkPrepassDirtyRecursive(Children->GetChildAt(Index));
+	}
+}
 
 /** @return The heading every titled group is topped with, so the four of them stay identical. */
 static TSharedRef<SWidget> CreateGroupHeading(const FText& Title)
@@ -83,6 +106,34 @@ TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateTitledCommandPalette(const 
 		ToolBarBuilder.AddToolBarButton(Command);
 	}
 
+	const TSharedRef<SWidget> ToolBar = ToolBarBuilder.MakeWidget();
+
+	// One deferred relayout, because SUniformWrapPanel decides its row count from last frame's geometry. The first
+	// time this group is laid out it has none, so ComputeDesiredSize falls back to guessing a square — ceil(sqrt(N))
+	// columns — which for three or more buttons reserves a row the panel does not need once it knows how wide it
+	// really is. The blank row then survives, because nothing recomputes a cached desired size on its own; that is
+	// why only resizing the panel clears it, and why it never comes back afterwards.
+	//
+	// Active timers run from Paint, so this fires on the first frame the group is actually visible rather than while
+	// its category is still collapsed — which is exactly when the geometry it needs has just become available.
+	//
+	// Grid and list groups are immune: their style carries NumColumnsOverride, so the guess is never reached.
+	TWeakPtr<SWidget> WeakToolBar = ToolBar;
+	ToolBar->RegisterActiveTimer(0.0f, FWidgetActiveTimerDelegate::CreateLambda(
+		[WeakToolBar](double, float)
+		{
+			const TSharedPtr<SWidget> PinnedToolBar = WeakToolBar.Pin();
+			if (!PinnedToolBar.IsValid()) return EActiveTimerReturnType::Stop;
+
+			// Nothing useful to recompute against yet — wait for a frame that has real geometry.
+			if (PinnedToolBar->GetTickSpaceGeometry().GetLocalSize().IsZero()) return EActiveTimerReturnType::Continue;
+
+			MarkPrepassDirtyRecursive(PinnedToolBar.ToSharedRef());
+			PinnedToolBar->Invalidate(EInvalidateWidgetReason::Layout);
+
+			return EActiveTimerReturnType::Stop;
+		}));
+
 	return SNew(SVerticalBox)
 
 		+ SVerticalBox::Slot()
@@ -96,7 +147,7 @@ TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateTitledCommandPalette(const 
 		.AutoHeight()
 		.Padding(4.0f, 0.0f, 4.0f, 6.0f)
 		[
-			ToolBarBuilder.MakeWidget()
+			ToolBar
 		];
 }
 
@@ -164,9 +215,20 @@ TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateTitledCheckList(const FText
 				// these are toggles, and driving them from the reported state would double-apply the change.
 				.OnCheckStateChanged_Lambda([Commands_CommandList, CommandRef](ECheckBoxState) { Commands_CommandList->ExecuteAction(CommandRef); })
 				[
-					SNew(STextBlock)
-					.Text(Command->GetLabel())
-					.Margin(FMargin(4.0f, 0.0f, 0.0f, 0.0f))
+					// SCheckBox sizes itself to its content, so a long label pushes the row past the panel rather than
+					// wrapping — the box has no width of its own to wrap against. Filling a slot gives it one: the row
+					// is now as wide as the group, and AutoWrapText has a bound to break on.
+					SNew(SBox)
+					.HAlign(HAlign_Fill)
+					[
+						SNew(STextBlock)
+						.Text(Command->GetLabel())
+						.Margin(FMargin(4.0f, 0.0f, 0.0f, 0.0f))
+						.AutoWrapText(true)
+						// The checkbox label is a name, not a heading — the same dim the group's own heading uses reads
+						// as secondary next to the palette buttons rather than competing with them.
+						.ColorAndOpacity(FStyleColors::Foreground)
+					]
 				]
 			];
 	}

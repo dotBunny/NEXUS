@@ -95,11 +95,12 @@ private:
 	 * @param Ray Ray to measure against.
 	 * @param Start First endpoint of the segment.
 	 * @param End Second endpoint of the segment.
-	 * @return The point on the segment closest to Ray, held clear of both endpoints.
-	 * @note Solved rather than sampled, unlike the pick above it: a pick only has to answer which edge, but the split
-	 *       position is what the user sees land, and snapping it to one of eight sample points would be visible.
+	 * @return Where along the segment it passes closest to Ray, in the 0..1 range.
+	 * @note Drives both halves of a pick: whether the edge was hit at all, and where a click on it would split. The
+	 *       first of those used to sample the edge at nine points instead, which made long edges hard to hit — see
+	 *       FindEdgeUnderRay. Endpoint clearance is applied by the caller, since only the split position wants it.
 	 */
-	static FVector FindClosestPointOnSegment(const FRay& Ray, const FVector& Start, const FVector& End);
+	static double FindClosestParameterOnSegment(const FRay& Ray, const FVector& Start, const FVector& End);
 
 	/** Insert a vertex into the hovered edge at the hovered position. */
 	void SplitHoveredEdge();

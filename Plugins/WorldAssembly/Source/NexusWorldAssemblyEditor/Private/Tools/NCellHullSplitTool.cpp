@@ -4,6 +4,7 @@
 #include "Tools/NCellHullSplitTool.h"
 
 #include "InteractiveToolManager.h"
+#include "NWorldAssemblyEditorColors.h"
 #include "NWorldAssemblyEditorMinimal.h"
 #include "SceneManagement.h"
 #include "ToolContextInterfaces.h"
@@ -144,12 +145,13 @@ void UNCellHullSplitTool::Render(IToolsContextRenderAPI* RenderAPI)
 	const FIntVector2& Edge = Edges[HoveredEdge.EdgeIndex];
 	if (!Vertices.IsValidIndex(Edge.X) || !Vertices.IsValidIndex(Edge.Y)) return;
 
-	// White, against the hull color the mode draws the wireframe in: which edge is armed and where the vertex will
-	// land are the whole answer this tool owes before a click, and they have to read as separate from the hull
-	// whatever the user has set that color to.
+	// The armed edge goes white so it reads as separate from the hull whatever color the user has set that to. The
+	// split point then takes the hull's own color rather than white as well: the two marks answer different questions
+	// — which edge, and where on it — and drawing a white dot on a white line left the more precise of the two with
+	// nothing to stand against.
 	PDI->DrawLine(Vertices[Edge.X], Vertices[Edge.Y], FLinearColor::White, SDPG_Foreground,
 		NEXUS::WorldAssembly::EdModeMetrics::HighlightThickness);
-	PDI->DrawPoint(HoveredEdge.SplitPosition, FLinearColor::White,
+	PDI->DrawPoint(HoveredEdge.SplitPosition, FNWorldAssemblyEditorColors::GetCellHull(),
 		NEXUS::WorldAssembly::EdModeMetrics::ActiveHandleSize, SDPG_Foreground);
 }
 
@@ -249,35 +251,33 @@ UNCellHullSplitTool::FNEdgeHit UNCellHullSplitTool::FindEdgeUnderRay(const FRay&
 		// GetEdgeIndices already normalizes each entry to (min,max), the same key the gather above builds.
 		if (!FrontFacingEdges.IsEmpty() && !FrontFacingEdges.Contains(Edges[i])) continue;
 
-		// Sampled along the segment rather than solved analytically, matching the pick UNCellHullVertexTool used: an
-		// exact segment-ray closest approach is more arithmetic than deciding *which* edge needs, and hull edges are
-		// short enough that a handful of samples covers them. Where on the edge the split lands is solved below.
-		constexpr int32 SampleCount = 8;
 		const FVector& Start = Vertices[Edges[i].X];
 		const FVector& End = Vertices[Edges[i].Y];
 
-		for (int32 Sample = 0; Sample <= SampleCount; Sample++)
-		{
-			const FVector Point = FMath::Lerp(Start, End, static_cast<double>(Sample) / SampleCount);
+		// One exact test against the closest point on the whole segment. This used to sample the edge at nine fixed
+		// points and test each, which left gaps: IsPickedByRay's threshold grows with distance along the ray, so an
+		// edge longer than roughly a fifth of the view distance had stretches between samples where the cursor was
+		// visibly on the line and matched nothing. Solving is both continuous and cheaper than nine approximations.
+		const double Parameter = FindClosestParameterOnSegment(Ray, Start, End);
 
-			double RayParameter = 0.0;
-			if (!IsPickedByRay(Ray, Point, RayParameter)) continue;
-			if (Best.IsValid() && RayParameter >= Best.RayParameter) continue;
+		double RayParameter = 0.0;
+		if (!IsPickedByRay(Ray, FMath::Lerp(Start, End, Parameter), RayParameter)) continue;
+		if (Best.IsValid() && RayParameter >= Best.RayParameter) continue;
 
-			Best.EdgeIndex = i;
-			Best.RayParameter = RayParameter;
-		}
-	}
+		Best.EdgeIndex = i;
+		Best.RayParameter = RayParameter;
 
-	if (Best.IsValid())
-	{
-		Best.SplitPosition = FindClosestPointOnSegment(Ray, Vertices[Edges[Best.EdgeIndex].X], Vertices[Edges[Best.EdgeIndex].Y]);
+		// Held clear of both endpoints, unlike the parameter the pick ran on: a split arbitrarily close to a corner
+		// makes a sliver face and two near-coincident vertices, but refusing to *pick* the last stretch of an edge
+		// would just be a dead zone of a different kind.
+		Best.SplitPosition = FMath::Lerp(Start, End,
+			FMath::Clamp(Parameter, EndpointClearance, 1.0 - EndpointClearance));
 	}
 
 	return Best;
 }
 
-FVector UNCellHullSplitTool::FindClosestPointOnSegment(const FRay& Ray, const FVector& Start, const FVector& End)
+double UNCellHullSplitTool::FindClosestParameterOnSegment(const FRay& Ray, const FVector& Start, const FVector& End)
 {
 	const FVector Segment = End - Start;
 	const FVector ToStart = Start - Ray.Origin;
@@ -290,15 +290,11 @@ FVector UNCellHullSplitTool::FindClosestPointOnSegment(const FRay& Ray, const FV
 
 	// Degenerate or edge-on-to-the-ray: there is no single closest point to prefer, so the midpoint is as good an
 	// answer as any and is the one the old Split Hull Edge always gave.
-	double Parameter = 0.5;
-	if (!FMath::IsNearlyZero(Denominator))
-	{
-		Parameter = (SegmentAlongRay * Ray.Direction.Dot(ToStart) - Segment.Dot(ToStart)) / Denominator;
-	}
+	if (FMath::IsNearlyZero(Denominator)) return 0.5;
 
-	Parameter = FMath::Clamp(Parameter, EndpointClearance, 1.0 - EndpointClearance);
+	const double Parameter = (SegmentAlongRay * Ray.Direction.Dot(ToStart) - Segment.Dot(ToStart)) / Denominator;
 
-	return Start + Segment * Parameter;
+	return FMath::Clamp(Parameter, 0.0, 1.0);
 }
 
 #undef LOCTEXT_NAMESPACE

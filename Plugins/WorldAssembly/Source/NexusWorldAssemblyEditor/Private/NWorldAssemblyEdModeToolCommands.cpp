@@ -28,12 +28,12 @@ void FNWorldAssemblyEdModeToolCommands::RegisterCommands()
 		"Command.WorldAssemblyEd.Bounds.Selected");
 
 	N_WORLDASSEMBLY_TOOL_COMMAND(BeginCellHullVertexTool, TEXT("BeginCellHullVertexTool"),
-		LOCTEXT("CellHullVertexToolLabel", "Hull"),
+		LOCTEXT("CellHullVertexToolLabel", "Vertices"),
 		LOCTEXT("CellHullVertexToolToolTip", "Drag the cell's hull vertices (requires a tri-based hull)."),
 		"Command.WorldAssemblyEd.Hull.Selected");
 
 	N_WORLDASSEMBLY_TOOL_COMMAND(BeginCellHullSplitTool, TEXT("BeginCellHullSplitTool"),
-		LOCTEXT("CellHullSplitToolLabel", "Split"),
+		LOCTEXT("CellHullSplitToolLabel", "Edges"),
 		LOCTEXT("CellHullSplitToolToolTip", "Split Hull Edge: click a hull edge to insert a vertex where you clicked."),
 		"Command.WorldAssemblyEd.Hull.SplitEdge");
 
