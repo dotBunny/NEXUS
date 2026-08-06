@@ -37,22 +37,8 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 					ToolCommands.BeginCellBoundsTool,
 					ToolCommands.BeginCellHullVertexTool,
 					ToolCommands.BeginCellHullSplitTool,
-					// We dont use Voxels right now so were going to hide the tooling
+					// We don't use Voxels right now so were going to hide the tooling
 					// ToolCommands.BeginCellVoxelTool,
-				})
-		]
-
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			CreateTitledCheckList(
-				LOCTEXT("CellHeader_QuickOptions", "Quick Options"),
-				{
-					Commands.CommandInfo_CellToggleBoundsCalculateOnSave,
-					Commands.CommandInfo_CellToggleHullCalculateOnSave,
-					Commands.CommandInfo_CellToggleHullAllowNonConvex,
-					//Commands.CommandInfo_CellToggleVoxelCalculateOnSave,
-					//Commands.CommandInfo_CellToggleVoxelData,
 				})
 		]
 
@@ -88,6 +74,20 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 					Commands.CommandInfo_CellSelectActor,
 					//Commands.CommandInfo_CellToggleDrawVoxelData,
 					Commands.CommandInfo_CellCaptureThumbnail
+				})
+		]
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			CreateTitledCheckList(
+				LOCTEXT("CellHeader_QuickOptions", "Quick Options"),
+				{
+					Commands.CommandInfo_CellToggleBoundsCalculateOnSave,
+					Commands.CommandInfo_CellToggleHullCalculateOnSave,
+					Commands.CommandInfo_CellToggleHullAllowNonConvex,
+					//Commands.CommandInfo_CellToggleVoxelCalculateOnSave,
+					//Commands.CommandInfo_CellToggleVoxelData,
 				})
 		]
 
