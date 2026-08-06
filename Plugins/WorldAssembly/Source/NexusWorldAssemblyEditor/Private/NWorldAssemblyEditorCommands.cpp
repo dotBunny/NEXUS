@@ -37,9 +37,9 @@ void FNWorldAssemblyEditorCommands::RegisterCommands()
 {
 	// Build NCell Command Info
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellCaptureThumbnail,
-			"NWorldAssembly.NCell.CaptureThumbnail",
-			NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CaptureThumbnail", "Capture Thumbnail"),
-			NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CaptureThumbnail_Tooltip", "Captures the active viewport (minus widgets) as the thumbnail for the level containing the NCell."),
+			"NWorldAssembly.NCell.CaptureThumbnails",
+			NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CaptureThumbnails", "Capture Thumbnails"),
+			NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CaptureThumbnails_Tooltip", "Captures the active viewport (minus widgets) as the thumbnails for the level containing the NCell, and the NCell data asset."),
 			FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
 			EUserInterfaceActionType::Button, FInputChord());
 
