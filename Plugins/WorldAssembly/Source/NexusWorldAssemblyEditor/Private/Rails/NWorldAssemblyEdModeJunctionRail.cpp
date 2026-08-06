@@ -105,20 +105,18 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeJunctionRail::CreateContent() const
 
 	return SNew(SVerticalBox)
 
-		// Acts on the world: you click where the junction goes.
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
-			CreateTitledCommandList(
+			CreateTitledCommandPalette(
 				LOCTEXT("JunctionHeader_Tools", "Tools"),
 				{ ToolCommands.BeginJunctionPlacementTool })
 		]
 
-		// Acts on what is already there: both depend on the current selection or level contents.
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
-			CreateTitledCommandList(
+			CreateTitledCommandGrid(
 				LOCTEXT("JunctionHeader_Component", "Component"),
 				{ Commands.CommandInfo_CellJunctionAddComponent, Commands.CommandInfo_CellJunctionCollectComponents })
 		];

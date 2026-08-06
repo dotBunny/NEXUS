@@ -21,7 +21,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellVoxelGenerationSettings
 
 	/** When true, voxel data is recomputed automatically whenever the cell is saved. */
 	UPROPERTY(EditAnywhere)
-	bool bCalculateOnSave = true;
+	bool bCalculateOnSave = false;
 
 	/** When true, actors without collision still contribute to voxel occupancy. */
 	UPROPERTY(EditAnywhere)

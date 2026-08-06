@@ -28,21 +28,20 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 
 	return SNew(SVerticalBox)
 
-		// The interactive tools: enter one and edit that aspect of the cell in the viewport.
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
-			CreateTitledCommandList(
+			CreateTitledCommandPalette(
 				LOCTEXT("CellHeader_Tools", "Tools"),
 				{
 					ToolCommands.BeginCellBoundsTool,
-					ToolCommands.BeginCellHullTool,
-					ToolCommands.BeginCellVoxelTool,
+					ToolCommands.BeginCellHullVertexTool,
+					ToolCommands.BeginCellHullSplitTool,
+					// We dont use Voxels right now so were going to hide the tooling
+					// ToolCommands.BeginCellVoxelTool,
 				})
 		]
 
-		// Persistent per-cell settings rather than actions, so checkboxes: each one reads as on or off at a glance
-		// and stays that way until changed.
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
@@ -50,14 +49,36 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 				LOCTEXT("CellHeader_QuickOptions", "Quick Options"),
 				{
 					Commands.CommandInfo_CellToggleBoundsCalculateOnSave,
-					Commands.CommandInfo_CellToggleHullAllowNonConvex,
 					Commands.CommandInfo_CellToggleHullCalculateOnSave,
-					Commands.CommandInfo_CellToggleVoxelCalculateOnSave,
-					Commands.CommandInfo_CellToggleVoxelData,
+					Commands.CommandInfo_CellToggleHullAllowNonConvex,
+					//Commands.CommandInfo_CellToggleVoxelCalculateOnSave,
+					//Commands.CommandInfo_CellToggleVoxelData,
 				})
 		]
 
-		// One-shot operations on the focused cell.
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			CreateTitledCommandGrid(
+				LOCTEXT("CellHeader_Calculate", "Calculate"),
+				{
+					Commands.CommandInfo_CellCalculateAll,
+					Commands.CommandInfo_CellCalculateBounds,
+					Commands.CommandInfo_CellCalculateHull,
+					//Commands.CommandInfo_CellCalculateVoxelData,
+				})
+		]
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			CreateTitledCommandList(
+				LOCTEXT("CellHeader_Tagging", "Tagging"),
+				{
+					Commands.CommandInfo_CellTagIgnore
+				})
+		]
+
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
@@ -65,17 +86,20 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 				LOCTEXT("CellHeader_Actions", "Actions"),
 				{
 					Commands.CommandInfo_CellSelectActor,
-					Commands.CommandInfo_CellCalculateAll,
-					Commands.CommandInfo_CellCalculateBounds,
-					Commands.CommandInfo_CellCalculateHull,
-					Commands.CommandInfo_CellCalculateVoxelData,
-					Commands.CommandInfo_CellToggleDrawVoxelData,
-					Commands.CommandInfo_CellHullSplitEdge,
-					Commands.CommandInfo_CellTagIgnore,
-					Commands.CommandInfo_CellCaptureThumbnail,
+					//Commands.CommandInfo_CellToggleDrawVoxelData,
+					Commands.CommandInfo_CellCaptureThumbnail
+				})
+		]
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			CreateTitledCommandGrid(
+				LOCTEXT("CellHeader_CellData", "Cell Data"),
+				{
 					Commands.CommandInfo_CellSaveCell,
 					Commands.CommandInfo_CellResetCell,
-					Commands.CommandInfo_CellRemoveActor,
+					Commands.CommandInfo_CellRemoveActor
 				})
 		];
 }

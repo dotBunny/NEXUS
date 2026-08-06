@@ -18,8 +18,6 @@
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyRegistry.h"
-#include "InteractiveToolManager.h"
-#include "Tools/NCellHullTool.h"
 #include "NWorldAssemblyUtils.h"
 #include "NUIEditorStyle.h"
 #include "NWorldAssemblyEditorToolMenu.h"
@@ -106,14 +104,14 @@ void FNWorldAssemblyEditorCommands::RegisterCommands()
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellResetCell,
 		"NWorldAssembly.NCell.ResetCell",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ResetCell", "Reset Cell"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ResetCell", "Reset"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ResetCell_Tooltip", "Reset the cell data."),
 		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellSaveCell,
 		"NWorldAssembly.NCell.SaveCell",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_SaveCell", "Save Cell"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_SaveCell", "Force Save"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_SaveCell_Tooltip", "Forcibly write out the Cells data to the sidecar file."),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Save"),
 		EUserInterfaceActionType::Button, FInputChord());
@@ -127,7 +125,7 @@ void FNWorldAssemblyEditorCommands::RegisterCommands()
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellAddActor,
 		"NWorldAssembly.NCell.AddActor",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_AddActor", "Add Actor"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_AddActor", "Add Cell Actor"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_AddActor_Tooltip", "Create the singleton-like actor which will facilitate creating a NCell from the level it is placed in."),
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.AddNCellActor"),
 		EUserInterfaceActionType::Button, FInputChord());
@@ -146,18 +144,11 @@ void FNWorldAssemblyEditorCommands::RegisterCommands()
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.Voxel.Points"),
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 
-	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellHullSplitEdge,
-		"NWorldAssembly.NCell.HullSplitEdge",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_HullSplitEdge", "Split Hull Edge"),
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_HullSplitEdge_Tooltip", "Splits the hull edge and retriangulates the Hull."),
-		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.Hull.SplitEdge"),
-		EUserInterfaceActionType::Button, FInputChord());
-
 	// Cell-scoped despite acting on the actor selection: the tag it toggles only means anything to a cell's
 	// bounds/hull/voxel calculations, which is why it sits with the Cell actions rather than the world ones.
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellTagIgnore,
 		"NWorldAssembly.NCell.TagIgnore",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_TagIgnore", "Ignore (Cell)"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_TagIgnore", "Ignore Cell Collision"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_TagIgnore_Tooltip", "Toggles the necessary tag to have the selected actors ignored when calculating the bounds/hull/etc for a Cell."),
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.CellIgnore_NotIgnored"),
 		EUserInterfaceActionType::Button, FInputChord());
@@ -178,10 +169,6 @@ void FNWorldAssemblyEditorCommands::RegisterCommands()
 		FExecuteAction::CreateStatic(&CellActorToggleDrawVoxelData),
 		FCanExecuteAction::CreateStatic(&CanEditCell),
 		FIsActionChecked::CreateStatic(&CellActorToggleDrawVoxelData_IsActionChecked));
-
-	CommandList_Cell->MapAction(Get().CommandInfo_CellHullSplitEdge,
-		FExecuteAction::CreateStatic(&CellHullSplitEdge),
-		FCanExecuteAction::CreateStatic(&CellHullSplitEdge_CanExecute));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellTagIgnore,
 		FExecuteAction::CreateStatic(&CellTagIgnore),
@@ -247,14 +234,14 @@ FExecuteAction::CreateStatic(&CellToggleVoxelData),
 	// Build World Command Info
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_WorldToggleCollisionVisualizer,
 		"NWorldAssembly.World.ToggleCollisionVisualizer",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_ToggleCollisionVisualizer", "Collision Visualizer"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_ToggleCollisionVisualizer", "Collision"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_ToggleCollisionVisualizer_Tooltip", "Creates and destroys a temporary/transient visualizer of the worlds collision geometry used during assembly."),
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.CreateCollisionVisualizer"),
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_WorldTagCollisionIgnore,
 		"NWorldAssembly.World.TagCollisionIgnore",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_TagCollisionIgnore", "Ignore (World Collision)"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_TagCollisionIgnore", "Ignore World Collision"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_TagCollisionIgnore_Tooltip", "Toggles the necessary tag to have the selected actors ignored in the world collision system when placing Cells during assembly."),
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.WorldCollisionIgnore_NotIgnored"),
 		EUserInterfaceActionType::Button, FInputChord());
@@ -288,7 +275,7 @@ FExecuteAction::CreateStatic(&CellToggleVoxelData),
 	// Collect Components
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellJunctionCollectComponents,
 		"NWorldAssembly.NCellJunction.CollectComponents",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_CollectComponents", "Collect"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_CollectComponents", "Collect All"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_CollectComponents_Tooltip", "Collects all Junctions and move them to the selected Actor, maintaining their world transforms."),
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.Junction.CollectJunctionComponents"),
 		EUserInterfaceActionType::Button, FInputChord());
@@ -307,7 +294,7 @@ FExecuteAction::CreateStatic(&CellJunctionCollectComponents),
 	// Organ
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganAddVolume,
 	"NWorldAssembly.NOrganComponent.AddVolume",
-	NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NOrganComponent_AddVolume", "Add Organ"),
+	NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NOrganComponent_AddVolume", "Add Organ Volume"),
 	NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NOrganComponent_AddVolume_Tooltip", "Place a new Organ Volume in the current level, which bounds where an assembly operation may generate."),
 	FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "ClassIcon.NOrganVolume"),
 	EUserInterfaceActionType::Button, FInputChord());
@@ -328,7 +315,7 @@ FExecuteAction::CreateStatic(&CellJunctionCollectComponents),
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganCreateLevelInstances,
 	"NWorldAssembly.NOrganComponent.LoadProxies",
-	NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NOrganComponent_LoadProxies", "Create Level Instances"),
+	NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NOrganComponent_LoadProxies", "Create Instances"),
 	NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NOrganComponent_LoadProxies_Tooltip", "Load the level instance from the selected proxies."),
 	FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.NCellLevelInstance"),
 	EUserInterfaceActionType::Button, FInputChord());
@@ -356,7 +343,7 @@ FExecuteAction::CreateStatic(&CellJunctionCollectComponents),
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganUnloadLevelInstances,
 	"NWorldAssembly.NOrganComponent.UnloadProxies",
-	NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NOrganComponent_UnloadProxies", "Unload Level Instances"),
+	NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NOrganComponent_UnloadProxies", "Unload Instances"),
 	NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NOrganComponent_UnloadProxies_Tooltip", "Unload the level instances from the selected proxies"),
 	FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.NCellLevelInstance"),
 	EUserInterfaceActionType::Button, FInputChord());
@@ -468,39 +455,6 @@ void FNWorldAssemblyEditorCommands::CellActorToggleDrawVoxelData()
 bool FNWorldAssemblyEditorCommands::CellActorToggleDrawVoxelData_IsActionChecked()
 {
 	return UNWorldAssemblyEdMode::GetCellVoxelMode() != UNWorldAssemblyEdMode::ENCellVoxelMode::None;
-}
-
-namespace
-{
-	/**
-	 * @return The running hull tool, or nullptr when it is not the active tool.
-	 * @note Edge selection belongs to the tool now rather than to the component visualizer, so the split command has
-	 *       to go through whichever tool instance currently holds it.
-	 */
-	UNCellHullTool* GetActiveHullTool()
-	{
-		const UNWorldAssemblyEdMode* Mode = UNWorldAssemblyEdMode::Get();
-		if (Mode == nullptr) return nullptr;
-
-		UInteractiveToolManager* ToolManager = Mode->GetToolManager();
-		if (ToolManager == nullptr) return nullptr;
-
-		return Cast<UNCellHullTool>(ToolManager->GetActiveTool(EToolSide::Mouse));
-	}
-}
-
-void FNWorldAssemblyEditorCommands::CellHullSplitEdge()
-{
-	if (UNCellHullTool* HullTool = GetActiveHullTool())
-	{
-		HullTool->SplitSelectedEdge();
-	}
-}
-
-bool FNWorldAssemblyEditorCommands::CellHullSplitEdge_CanExecute()
-{
-	const UNCellHullTool* HullTool = GetActiveHullTool();
-	return HullTool != nullptr && HullTool->HasEdgeSelected();
 }
 
 void FNWorldAssemblyEditorCommands::WorldToggleCollisionVisualizer()

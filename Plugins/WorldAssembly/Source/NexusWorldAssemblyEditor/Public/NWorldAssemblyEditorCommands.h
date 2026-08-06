@@ -59,11 +59,6 @@ public:
 	/** @return checked state of the draw-voxel-data toggle for UI binding. */
 	static bool CellActorToggleDrawVoxelData_IsActionChecked();
 
-	/** Splits the currently-selected hull edge on the focused cell. */
-	static void CellHullSplitEdge();
-	/** @return true if a hull edge is selected and can be split. */
-	static bool CellHullSplitEdge_CanExecute();
-
 	/** Spawn the world-collision visualizer, or destroy it if one is already alive. */
 	static void WorldToggleCollisionVisualizer();
 	/** @return checked state of the collision-visualizer toggle for UI binding. */
@@ -227,7 +222,6 @@ public:
 	TSharedPtr<FUICommandInfo> CommandInfo_CellAddActor;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellSelectActor;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleDrawVoxelData;
-	TSharedPtr<FUICommandInfo> CommandInfo_CellHullSplitEdge;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellTagIgnore;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCaptureThumbnail;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateAll;

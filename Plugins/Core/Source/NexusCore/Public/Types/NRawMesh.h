@@ -1,4 +1,4 @@
-﻿// Copyright dotBunny Inc. All Rights Reserved.
+// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
@@ -24,7 +24,7 @@ struct NEXUSCORE_API FNRawMesh
 	// Moves a hull vertex, which retires the mesh's chaos provenance — SetVertex deliberately leaves that flag alone,
 	// so the editing tool has to clear it. Replaces the same access previously granted to the component visualizer
 	// that did this job before the World Assembly edit mode gained interactive tools.
-	friend class UNCellHullTool;
+	friend class UNCellHullVertexTool;
 	friend class FNRawMeshUtils;
 	friend class FNRawMeshFactory;
 

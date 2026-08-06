@@ -115,6 +115,15 @@ public:
 	 */
 	void SplitHullEdge(int32 IndexA, int32 IndexB);
 	/**
+	 * Splits the convex-hull edge between the two given vertex indices, placing the new vertex at a chosen point.
+	 * @param IndexA First vertex index of the edge to split.
+	 * @param IndexB Second vertex index of the edge to split.
+	 * @param LocalPosition Where the new vertex lands, in the cell root's local space.
+	 * @note Nothing constrains LocalPosition to the edge, and pulling it off the edge is how a split makes a hull
+	 *       non-convex. Callers wanting to stay convex should pass a point on the segment.
+	 */
+	void SplitHullEdge(int32 IndexA, int32 IndexB, const FVector& LocalPosition);
+	/**
 	 * Recompute the cell's convex hull from its level content.
 	 */
 	void CalculateHull();

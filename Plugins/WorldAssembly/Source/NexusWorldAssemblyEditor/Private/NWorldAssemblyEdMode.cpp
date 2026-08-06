@@ -21,7 +21,8 @@
 #include "BaseGizmos/TransformGizmoUtil.h"
 #include "InteractiveToolManager.h"
 #include "Tools/NCellBoundsTool.h"
-#include "Tools/NCellHullTool.h"
+#include "Tools/NCellHullSplitTool.h"
+#include "Tools/NCellHullVertexTool.h"
 #include "Tools/NCellVoxelTool.h"
 #include "Tools/NJunctionPlacementTool.h"
 #include "Developer/NPrimitiveFont.h"
@@ -175,6 +176,17 @@ void UNWorldAssemblyEdMode::ProtectCellEdMode()
 	{
 		SetCellEdMode(ENCellEdMode::Bounds);
 	}
+}
+
+void UNWorldAssemblyEdMode::EndActiveTool()
+{
+	UNWorldAssemblyEdMode* Mode = Get();
+	if (Mode == nullptr) return;
+
+	UEditorInteractiveToolsContext* ToolsContext = Mode->GetInteractiveToolsContext();
+	if (ToolsContext == nullptr || !ToolsContext->CanCompleteActiveTool()) return;
+
+	ToolsContext->EndTool(EToolShutdownType::Completed);
 }
 
 void UNWorldAssemblyEdMode::OnActorDeleted(AActor* Actor)
@@ -413,8 +425,10 @@ void UNWorldAssemblyEdMode::BindCommands()
 
 	RegisterToggleableTool(ToolCommands.BeginCellBoundsTool, NEXUS::WorldAssembly::Tools::CellBounds,
 		NewObject<UNCellBoundsToolBuilder>(this));
-	RegisterToggleableTool(ToolCommands.BeginCellHullTool, NEXUS::WorldAssembly::Tools::CellHull,
-		NewObject<UNCellHullToolBuilder>(this));
+	RegisterToggleableTool(ToolCommands.BeginCellHullVertexTool, NEXUS::WorldAssembly::Tools::CellHullVertex,
+		NewObject<UNCellHullVertexToolBuilder>(this));
+	RegisterToggleableTool(ToolCommands.BeginCellHullSplitTool, NEXUS::WorldAssembly::Tools::CellHullSplit,
+		NewObject<UNCellHullSplitToolBuilder>(this));
 	RegisterToggleableTool(ToolCommands.BeginCellVoxelTool, NEXUS::WorldAssembly::Tools::CellVoxel,
 		NewObject<UNCellVoxelToolBuilder>(this));
 	RegisterToggleableTool(ToolCommands.BeginJunctionPlacementTool, NEXUS::WorldAssembly::Tools::JunctionPlacement,
@@ -462,10 +476,13 @@ bool UNWorldAssemblyEdMode::InputKey(FEditorViewportClient* ViewportClient, FVie
 {
 	if (Key == EKeys::Escape && Event == IE_Pressed)
 	{
-		if (UEditorInteractiveToolsContext* ToolsContext = GetInteractiveToolsContext();
+		if (const UEditorInteractiveToolsContext* ToolsContext = GetInteractiveToolsContext();
 			ToolsContext != nullptr && ToolsContext->CanCompleteActiveTool())
 		{
-			ToolsContext->EndTool(EToolShutdownType::Completed);
+			EndActiveTool();
+
+			// Handled only when there was a tool to end, so escape keeps falling through to the level editor's own
+			// handling — clearing the selection — the rest of the time.
 			return true;
 		}
 	}
