@@ -38,17 +38,6 @@ public:
 	virtual void RegisterCommands() override;
 	//End TCommands
 
-	/**
-	 * Appends the Organ command bindings to the supplied (global) command list so their input chords fire
-	 * regardless of which menu has focus.
-	 * @param GlobalActions The level editor's global action list to append to.
-	 * @remark Pair every call with UnregisterGlobalActions on the same list — the bindings reference module statics.
-	 */
-	void RegisterGlobalActions(const TSharedRef<FUICommandList>& GlobalActions) const;
-
-	/** Removes the Organ command bindings previously added by RegisterGlobalActions from GlobalActions. */
-	void UnregisterGlobalActions(const TSharedRef<FUICommandList>& GlobalActions) const;
-
 	/** Toggle the World Assembly editor mode on the active level editor. */
 	static void WorldAssemblyEdMode();
 	/** @return true if the World Assembly-edit-mode entry should be shown in the current context. */
@@ -67,11 +56,48 @@ public:
 
 	/** Toggle whether voxel data is drawn in the viewport overlay. */
 	static void CellActorToggleDrawVoxelData();
+	/** @return checked state of the draw-voxel-data toggle for UI binding. */
+	static bool CellActorToggleDrawVoxelData_IsActionChecked();
+
+	/** Splits the currently-selected hull edge on the focused cell. */
+	static void CellHullSplitEdge();
+	/** @return true if a hull edge is selected and can be split. */
+	static bool CellHullSplitEdge_CanExecute();
+
+	/** Spawn the world-collision visualizer, or destroy it if one is already alive. */
+	static void WorldToggleCollisionVisualizer();
+	/** @return checked state of the collision-visualizer toggle for UI binding. */
+	static bool WorldToggleCollisionVisualizer_IsActionChecked();
+
+	/** Add or remove the cell-ignore tag across the current actor selection. */
+	static void CellTagIgnore();
+	/** @return true if the cell-ignore tagging action can act on the current selection. */
+	static bool CellTagIgnore_CanExecute();
+
+	/** Add or remove the world-collision-ignore tag across the current actor selection. */
+	static void WorldTagCollisionIgnore();
+	/** @return true if the world-collision-ignore tagging action can act on the current selection. */
+	static bool WorldTagCollisionIgnore_CanExecute();
 
 	/** Place a new ANCellActor in the focused level at a sensible default location. */
 	static void CellAddActor();
-	/** @return true if the add-cell-actor entry should be shown (e.g. level is editable). */
-	static bool CellAddActor_CanShow();
+	/** @return true if a cell actor can be added: the level has none already, and holds no organs. */
+	static bool CellAddActor_CanExecute();
+
+	/**
+	 * @return true when the focused level has a cell actor to act on and we are not in PIE.
+	 * @note The default gate for cell commands. Every one of these mutates or saves cell data, which is authoring
+	 *       work with no meaning against a play world — the toolkit panel stays up during PIE, so without this they
+	 *       would happily run against it. Interactive tools get the same protection from
+	 *       UEdMode::ShouldToolStartBeAllowed; commands have no such default, so it is stated here.
+	 */
+	static bool CanEditCell();
+
+	/** @return true when the focused level has a cell actor, actors are selected, and we are not in PIE. */
+	static bool CanEditCellJunction();
+
+	/** Place a new ANOrganVolume in the focused level and select it. */
+	static void OrganAddVolume();
 
 	/** Kick off proxy generation for the currently-selected organ component(s). */
 	static void OrganGenerateProxies();
@@ -189,10 +215,20 @@ private:
 		FCanExecuteAction CanExecute;
 	};
 
-	/** @return every Organ command appended to the global action list (see FOrganGlobalAction). */
-	TArray<FNCommandInfoAction> GetGlobalOrganActions() const;
+	/** @return every Organ command, paired with the delegates CommandList_Organ maps it to. */
+	TArray<FNCommandInfoAction> GetOrganActions() const;
+
+public:
+
+	// The commands and their lists. Public, as a TCommands' members conventionally are: each rail of the edit mode's
+	// toolkit builds its own buttons from these, and friending every one of them says less than this does.
 
 	TSharedPtr<FUICommandList> CommandList_Cell;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellAddActor;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellSelectActor;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleDrawVoxelData;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellHullSplitEdge;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellTagIgnore;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCaptureThumbnail;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateAll;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateBounds;
@@ -213,6 +249,7 @@ private:
 	TSharedPtr<FUICommandInfo> CommandInfo_QuickAssemblyToggleAutoAssembly;
 
 	TSharedPtr<FUICommandList> CommandList_Organ;
+	TSharedPtr<FUICommandInfo> CommandInfo_OrganAddVolume;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganGenerateProxies;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganGenerateAllProxies;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganClearProxies;
@@ -221,6 +258,10 @@ private:
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganCreateAllLevelInstances;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganUnloadLevelInstances;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganUnloadAllLevelInstances;
+
+	TSharedPtr<FUICommandList> CommandList_World;
+	TSharedPtr<FUICommandInfo> CommandInfo_WorldToggleCollisionVisualizer;
+	TSharedPtr<FUICommandInfo> CommandInfo_WorldTagCollisionIgnore;
 
 	TSharedPtr<FUICommandList> CommandList_CellJunction;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellJunctionAddComponent;

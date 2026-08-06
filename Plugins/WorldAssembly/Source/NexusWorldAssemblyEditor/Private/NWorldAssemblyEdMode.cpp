@@ -16,6 +16,14 @@
 #include "NWorldAssemblyEditorStyle.h"
 #include "NWorldAssemblyEditorSubsystem.h"
 #include "NWorldAssemblyEditorUserSettings.h"
+#include "NWorldAssemblyEdModeToolkit.h"
+#include "NWorldAssemblyEdModeToolCommands.h"
+#include "BaseGizmos/TransformGizmoUtil.h"
+#include "InteractiveToolManager.h"
+#include "Tools/NCellBoundsTool.h"
+#include "Tools/NCellHullTool.h"
+#include "Tools/NCellVoxelTool.h"
+#include "Tools/NJunctionPlacementTool.h"
 #include "Developer/NPrimitiveFont.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblySettings.h"
@@ -26,13 +34,144 @@
 #include "Math/NVectorUtils.h"
 #include "Assembly/NAssemblyOperation.h"
 #include "Developer/NMethodScopeTimer.h"
+#include "Tools/EdModeInteractiveToolsContext.h"
 #include "UObject/UnrealType.h"
+
+namespace
+{
+	/** Fallbacks handed back by the cached-geometry accessors when there is no active mode to read from. */
+	const TArray<FVector> EmptyVertices;
+	const TArray<FIntVector2> EmptyEdges;
+	const FNCellVoxelData EmptyVoxelData;
+}
+
+UNWorldAssemblyEdMode* UNWorldAssemblyEdMode::Get()
+{
+	return Cast<UNWorldAssemblyEdMode>(GLevelEditorModeTools().GetActiveScriptableMode(Identifier));
+}
+
+FBox UNWorldAssemblyEdMode::GetCachedBounds()
+{
+	const UNWorldAssemblyEdMode* Mode = Get();
+	return Mode != nullptr ? Mode->CachedBounds : FBox(ForceInit);
+}
+
+const TArray<FVector>& UNWorldAssemblyEdMode::GetCachedBoundsVertices()
+{
+	const UNWorldAssemblyEdMode* Mode = Get();
+	return Mode != nullptr ? Mode->CachedBoundsVertices : EmptyVertices;
+}
+
+const FNCellVoxelData& UNWorldAssemblyEdMode::GetCachedVoxelData()
+{
+	const UNWorldAssemblyEdMode* Mode = Get();
+	return Mode != nullptr ? Mode->CachedVoxelData : EmptyVoxelData;
+}
+
+const TArray<FVector>& UNWorldAssemblyEdMode::GetCachedHullVertices()
+{
+	const UNWorldAssemblyEdMode* Mode = Get();
+	return Mode != nullptr ? Mode->CachedHullVertices : EmptyVertices;
+}
+
+const TArray<FIntVector2>& UNWorldAssemblyEdMode::GetCachedHullEdges()
+{
+	const UNWorldAssemblyEdMode* Mode = Get();
+	return Mode != nullptr ? Mode->CachedHullEdges : EmptyEdges;
+}
+
+ANCellActor* UNWorldAssemblyEdMode::GetCellActor()
+{
+	const UNWorldAssemblyEdMode* Mode = Get();
+	return Mode != nullptr ? Mode->CellActor.Get() : nullptr;
+}
+
+UNWorldAssemblyEdMode::ENCellEdMode UNWorldAssemblyEdMode::GetCellEdMode()
+{
+	const UNWorldAssemblyEdMode* Mode = Get();
+	return Mode != nullptr ? Mode->CellEdMode : ENCellEdMode::Bounds;
+}
+
+void UNWorldAssemblyEdMode::SetCellEdMode(const ENCellEdMode InCellEdMode)
+{
+	UNWorldAssemblyEdMode* Mode = Get();
+	if (Mode == nullptr || Mode->CellEdMode == InCellEdMode) return;
+
+	// No selection to clear here any more: each tool owns its own vertex/edge selection and drops it on shutdown, and
+	// switching sub-mode is now a consequence of starting a different tool rather than something done behind its back.
+	Mode->CellEdMode = InCellEdMode;
+}
+
+UNWorldAssemblyEdMode::ENCellVoxelMode UNWorldAssemblyEdMode::GetCellVoxelMode()
+{
+	const UNWorldAssemblyEdMode* Mode = Get();
+	return Mode != nullptr ? Mode->CellVoxelMode : ENCellVoxelMode::None;
+}
+
+void UNWorldAssemblyEdMode::SetCellVoxelMode(const ENCellVoxelMode InCellVoxelMode)
+{
+	if (UNWorldAssemblyEdMode* Mode = Get())
+	{
+		Mode->CellVoxelMode = InCellVoxelMode;
+	}
+}
+
+bool UNWorldAssemblyEdMode::HasCollisionVisualizer()
+{
+	const UNWorldAssemblyEdMode* Mode = Get();
+	return Mode != nullptr && Mode->CollisionVisualizer != nullptr;
+}
+
+void UNWorldAssemblyEdMode::SetRenderMode(const ENWorldAssemblyEdModeRenderMode InRenderMode)
+{
+	if (UNWorldAssemblyEdMode* Mode = Get())
+	{
+		Mode->RenderMode = InRenderMode;
+	}
+}
+
+FText UNWorldAssemblyEdMode::GetWarningText()
+{
+	const UNWorldAssemblyEdMode* Mode = Get();
+	if (Mode == nullptr) return FText::GetEmpty();
+
+	TArray<FText> Lines;
+
+	if (Mode->bHasDirtyActors)
+	{
+		Lines.Add(DirtyMessage);
+	}
+
+	// Matches the precedence the HUD text used: the combined bounds+hull line stands in for both, and the voxel line
+	// only surfaces once neither of those applies.
+	if (Mode->bAutoBoundsDisabled && Mode->bAutoHullDisabled)
+	{
+		Lines.Add(AutoBoundsHullMessage);
+	}
+	else if (Mode->bAutoBoundsDisabled)
+	{
+		Lines.Add(AutoBoundsMessage);
+	}
+	else if (Mode->bAutoHullDisabled)
+	{
+		Lines.Add(AutoHullMessage);
+	}
+	else if (Mode->bAutoVoxelDisabled)
+	{
+		Lines.Add(AutoVoxelMessage);
+	}
+
+	return Lines.IsEmpty() ? FText::GetEmpty() : FText::Join(FText::FromString(TEXT("\n")), Lines);
+}
 
 void UNWorldAssemblyEdMode::ProtectCellEdMode()
 {
-	if (ANCellActor* Actor = CellActor.Get();
+	UNWorldAssemblyEdMode* Mode = Get();
+	if (Mode == nullptr) return;
+
+	if (const ANCellActor* Actor = Mode->CellActor.Get();
 		Actor != nullptr && Actor->GetCellRoot()->Details.Hull.HasNonTris() &&
-		GetCellEdMode() == ENCellEdMode::Hull)
+		Mode->CellEdMode == ENCellEdMode::Hull)
 	{
 		SetCellEdMode(ENCellEdMode::Bounds);
 	}
@@ -61,6 +200,22 @@ void UNWorldAssemblyEdMode::OnActorDeleted(AActor* Actor)
 }
 
 TObjectPtr<ANDebugActor> UNWorldAssemblyEdMode::CreateCollisionVisualizer(UWorld* World)
+{
+	UNWorldAssemblyEdMode* Mode = Get();
+	if (Mode == nullptr) return nullptr;
+
+	return Mode->RefreshCollisionVisualizer(World);
+}
+
+void UNWorldAssemblyEdMode::DestroyCollisionVisualizer()
+{
+	if (UNWorldAssemblyEdMode* Mode = Get())
+	{
+		Mode->TearDownCollisionVisualizer();
+	}
+}
+
+TObjectPtr<ANDebugActor> UNWorldAssemblyEdMode::RefreshCollisionVisualizer(UWorld* World)
 {
 	const bool bWasAlive = CollisionVisualizer != nullptr;
 
@@ -101,7 +256,7 @@ TObjectPtr<ANDebugActor> UNWorldAssemblyEdMode::CreateCollisionVisualizer(UWorld
 	return CollisionVisualizer;
 }
 
-void UNWorldAssemblyEdMode::DestroyCollisionVisualizer()
+void UNWorldAssemblyEdMode::TearDownCollisionVisualizer()
 {
 	UnbindWorldChangeDelegates();
 	CollisionSourceActors.Reset();
@@ -120,21 +275,24 @@ void UNWorldAssemblyEdMode::DestroyCollisionVisualizer()
 
 void UNWorldAssemblyEdMode::BindWorldChangeDelegates()
 {
+	// AddUObject rather than the AddStatic these used while the handlers were static: the binding is now tied to this
+	// mode's lifetime, so a mode torn down without reaching UnbindWorldChangeDelegates unbinds itself rather than
+	// leaving a delegate pointing at a dead object.
 	if (!OnLevelActorAddedHandle.IsValid())
 	{
-		OnLevelActorAddedHandle = GEngine->OnLevelActorAdded().AddStatic(&UNWorldAssemblyEdMode::OnLevelActorAdded);
+		OnLevelActorAddedHandle = GEngine->OnLevelActorAdded().AddUObject(this, &UNWorldAssemblyEdMode::OnLevelActorAdded);
 	}
 	if (!OnObjectMovedHandle.IsValid())
 	{
-		OnObjectMovedHandle = GEditor->OnEndObjectMovement().AddStatic(&UNWorldAssemblyEdMode::OnObjectMoved);
+		OnObjectMovedHandle = GEditor->OnEndObjectMovement().AddUObject(this, &UNWorldAssemblyEdMode::OnObjectMoved);
 	}
 	if (!OnObjectPropertyChangedHandle.IsValid())
 	{
-		OnObjectPropertyChangedHandle = FCoreUObjectDelegates::OnObjectPropertyChanged.AddStatic(&UNWorldAssemblyEdMode::OnObjectPropertyChanged);
+		OnObjectPropertyChangedHandle = FCoreUObjectDelegates::OnObjectPropertyChanged.AddUObject(this, &UNWorldAssemblyEdMode::OnObjectPropertyChanged);
 	}
 	if (!OnUndoRedoHandle.IsValid())
 	{
-		OnUndoRedoHandle = FEditorDelegates::PostUndoRedo.AddStatic(&UNWorldAssemblyEdMode::OnUndoRedo);
+		OnUndoRedoHandle = FEditorDelegates::PostUndoRedo.AddUObject(this, &UNWorldAssemblyEdMode::OnUndoRedo);
 	}
 }
 
@@ -162,7 +320,7 @@ void UNWorldAssemblyEdMode::UnbindWorldChangeDelegates()
 	}
 }
 
-bool UNWorldAssemblyEdMode::ShouldRebuildForActor(const AActor* Actor)
+bool UNWorldAssemblyEdMode::ShouldRebuildForActor(const AActor* Actor) const
 {
 	if (Actor == nullptr || CollisionVisualizer == nullptr) return false;
 
@@ -216,19 +374,6 @@ void UNWorldAssemblyEdMode::OnUndoRedo()
 	}
 }
 
-void UNWorldAssemblyEdMode::CacheUserSettings()
-{
-	const UNWorldAssemblyEditorUserSettings* Settings = UNWorldAssemblyEditorUserSettings::Get();
-
-	CachedCellHullColor = Settings->ColorPaletteCellHull;
-	CachedCellBoundsColor = Settings->ColorPaletteCellBounds;
-
-	CachedJunctionUnfilledColor = Settings->ColorPaletteJunctionsUnfilled;
-	CachedJunctionValidColor = Settings->ColorPaletteJunctionsValid;
-	CachedJunctionInvalidColor = Settings->ColorPaletteJunctionsInvalid;
-	CachedJunctionConnectorCornersColor = Settings->ColorPaletteJunctionsConnectorCorners;
-}
-
 const FEditorModeID UNWorldAssemblyEdMode::Identifier = TEXT("NWorldAssemblyEdMode");
 const FText UNWorldAssemblyEdMode::DirtyMessage = FText::FromString("Dirty Cell Actor");
 const FText UNWorldAssemblyEdMode::AutoBoundsMessage = FText::FromString("Cell Bounds not calculated on save.");
@@ -236,43 +381,96 @@ const FText UNWorldAssemblyEdMode::AutoBoundsHullMessage = FText::FromString("Ce
 const FText UNWorldAssemblyEdMode::AutoHullMessage = FText::FromString("Cell Hull not calculated on save.");
 const FText UNWorldAssemblyEdMode::AutoVoxelMessage = FText::FromString("Cell Voxel not calculated on save.");
 
-TWeakObjectPtr<ANCellActor> UNWorldAssemblyEdMode::CellActor = nullptr;
-UNWorldAssemblyEdMode::ENCellEdMode UNWorldAssemblyEdMode::CellEdMode = ENCellEdMode::Bounds;
-TArray<FVector> UNWorldAssemblyEdMode::CachedHullVertices;
-TArray<FIntVector2> UNWorldAssemblyEdMode::CachedHullEdges;
-
-FBox UNWorldAssemblyEdMode::CachedBounds;
-FNCellVoxelData UNWorldAssemblyEdMode::CachedVoxelData;
-
-FLinearColor UNWorldAssemblyEdMode::CachedCellHullColor = NEXUS::WorldAssembly::DefaultColors::CellHull;
-FLinearColor UNWorldAssemblyEdMode::CachedCellBoundsColor = NEXUS::WorldAssembly::DefaultColors::CellBounds;
-FLinearColor UNWorldAssemblyEdMode::CachedJunctionUnfilledColor = NEXUS::WorldAssembly::DefaultColors::JunctionUnfilled;
-FLinearColor UNWorldAssemblyEdMode::CachedJunctionInvalidColor = NEXUS::WorldAssembly::DefaultColors::JunctionInvalid;
-FLinearColor UNWorldAssemblyEdMode::CachedJunctionValidColor = NEXUS::WorldAssembly::DefaultColors::JunctionValid;
-FLinearColor UNWorldAssemblyEdMode::CachedJunctionConnectorCornersColor = NEXUS::WorldAssembly::DefaultColors::JunctionConnectorCorners;
-FLinearColor UNWorldAssemblyEdMode::CachedBoneValidColor = NEXUS::WorldAssembly::DefaultColors::BoneValid;
-FLinearColor UNWorldAssemblyEdMode::CachedBoneInvalidColor = NEXUS::WorldAssembly::DefaultColors::BoneInvalid;
-
-TArray<FVector> UNWorldAssemblyEdMode::CachedBoundsVertices;
-UNWorldAssemblyEdMode::ENCellVoxelMode UNWorldAssemblyEdMode::CellVoxelMode = ENCellVoxelMode::None;
-TObjectPtr<ANDebugActor> UNWorldAssemblyEdMode::CollisionVisualizer = nullptr;
-ENWorldAssemblyEdModeRenderMode UNWorldAssemblyEdMode::RenderMode = ENWorldAssemblyEdModeRenderMode::All;
-TSet<FObjectKey> UNWorldAssemblyEdMode::CollisionSourceActors;
-bool UNWorldAssemblyEdMode::bCollisionVisualizerDirty = false;
-FDelegateHandle UNWorldAssemblyEdMode::OnLevelActorAddedHandle;
-FDelegateHandle UNWorldAssemblyEdMode::OnObjectMovedHandle;
-FDelegateHandle UNWorldAssemblyEdMode::OnObjectPropertyChangedHandle;
-FDelegateHandle UNWorldAssemblyEdMode::OnUndoRedoHandle;
-
 UNWorldAssemblyEdMode::UNWorldAssemblyEdMode()
 {
 	// A UEdMode carries its own registration data rather than being handed it by the caller, so what used to be
 	// arguments to FEditorModeRegistry::RegisterMode live here. The registry discovers the mode from its UCLASS.
 	Info = FEditorModeInfo(
 		Identifier,
-		NSLOCTEXT("NexusWorldAssemblyEditor", "UNWorldAssemblyEdMode", "NEXUS: World Assembly"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "UNWorldAssemblyEdMode", "World Assembly"),
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Icon.WorldAssembly"),
 		true);
+
+	// Names the multibox the toolkit's palettes are built into, which is what lets the editor persist per-user
+	// customization of them. Not a constructor argument — FEditorModeInfo leaves it default and expects the mode to
+	// fill it in — but FToolkitBuilderArgs requires one, so it is set here alongside the rest of the registration data.
+	Info.ToolbarCustomizationName = TEXT("NWorldAssemblyEdModeToolbar");
+}
+
+void UNWorldAssemblyEdMode::CreateToolkit()
+{
+	Toolkit = MakeShared<FNWorldAssemblyEdModeToolkit>();
+}
+
+void UNWorldAssemblyEdMode::BindCommands()
+{
+	Super::BindCommands();
+
+	// RegisterTool maps each command into the toolkit's command list — the same list the rail palettes resolve their
+	// buttons against — so the palette entries added in FNWorldAssemblyEdModeToolkit::RegisterPalettes light up from
+	// here even though the toolkit was built first.
+	const FNWorldAssemblyEdModeToolCommands& ToolCommands = FNWorldAssemblyEdModeToolCommands::Get();
+
+	RegisterToggleableTool(ToolCommands.BeginCellBoundsTool, NEXUS::WorldAssembly::Tools::CellBounds,
+		NewObject<UNCellBoundsToolBuilder>(this));
+	RegisterToggleableTool(ToolCommands.BeginCellHullTool, NEXUS::WorldAssembly::Tools::CellHull,
+		NewObject<UNCellHullToolBuilder>(this));
+	RegisterToggleableTool(ToolCommands.BeginCellVoxelTool, NEXUS::WorldAssembly::Tools::CellVoxel,
+		NewObject<UNCellVoxelToolBuilder>(this));
+	RegisterToggleableTool(ToolCommands.BeginJunctionPlacementTool, NEXUS::WorldAssembly::Tools::JunctionPlacement,
+		NewObject<UNJunctionPlacementToolBuilder>(this));
+}
+
+void UNWorldAssemblyEdMode::RegisterToggleableTool(const TSharedPtr<FUICommandInfo>& UICommand,
+	const FString& ToolIdentifier, UInteractiveToolBuilder* Builder)
+{
+	// Register normally first: this is what makes the tool type known to the manager, which the re-mapped action
+	// below still relies on to start it.
+	RegisterTool(UICommand, ToolIdentifier, Builder);
+
+	if (!Toolkit.IsValid()) return;
+
+	UEditorInteractiveToolsContext* ToolsContext = GetInteractiveToolsContext();
+	if (ToolsContext == nullptr) return;
+
+	const TSharedRef<FUICommandList>& CommandList = Toolkit->GetToolkitCommands();
+	CommandList->UnmapAction(UICommand);
+	CommandList->MapAction(UICommand,
+		FExecuteAction::CreateWeakLambda(ToolsContext, [ToolsContext, ToolIdentifier]()
+		{
+			if (ToolsContext->IsToolActive(EToolSide::Mouse, ToolIdentifier))
+			{
+				// Completed, not Cancelled: these tools have already committed every edit, so there is nothing to roll
+				// back and asking for a cancel would misreport what happened to anything listening.
+				ToolsContext->EndTool(EToolShutdownType::Completed);
+				return;
+			}
+			ToolsContext->StartTool(ToolIdentifier);
+		}),
+		FCanExecuteAction::CreateWeakLambda(ToolsContext, [this, ToolsContext, ToolIdentifier]()
+		{
+			// An active tool can always be switched off; an inactive one has to pass the usual start checks.
+			return ToolsContext->IsToolActive(EToolSide::Mouse, ToolIdentifier)
+				|| (ShouldToolStartBeAllowed(ToolIdentifier)
+					&& ToolsContext->ToolManager->CanActivateTool(EToolSide::Mouse, ToolIdentifier));
+		}),
+		FIsActionChecked::CreateUObject(ToolsContext, &UEdModeInteractiveToolsContext::IsToolActive, EToolSide::Mouse, ToolIdentifier),
+		EUIActionRepeatMode::RepeatDisabled);
+}
+
+bool UNWorldAssemblyEdMode::InputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event)
+{
+	if (Key == EKeys::Escape && Event == IE_Pressed)
+	{
+		if (UEditorInteractiveToolsContext* ToolsContext = GetInteractiveToolsContext();
+			ToolsContext != nullptr && ToolsContext->CanCompleteActiveTool())
+		{
+			ToolsContext->EndTool(EToolShutdownType::Completed);
+			return true;
+		}
+	}
+
+	return Super::InputKey(ViewportClient, Viewport, Key, Event);
 }
 
 void UNWorldAssemblyEdMode::BeginDestroy()
@@ -290,7 +488,9 @@ void UNWorldAssemblyEdMode::BeginDestroy()
 
 void UNWorldAssemblyEdMode::Enter()
 {
-	// Initialize cached values
+	// Reset the cached state. Still required even though this is instance state now: FEditorModeTools recycles mode
+	// objects (RecycledScriptableModes), so re-entering the mode hands back the same instance carrying whatever the
+	// previous session left on it.
 	CellActor = nullptr;
 	CachedHullVertices.Empty();
 	CachedHullEdges.Empty();
@@ -299,7 +499,7 @@ void UNWorldAssemblyEdMode::Enter()
 	CachedBoundsVertices.Empty();
 	RenderMode = ENWorldAssemblyEdModeRenderMode::All;
 
-	CacheUserSettings();
+	FNWorldAssemblyEditorColors::Refresh();
 
 	bCanTick = true;
 
@@ -307,9 +507,22 @@ void UNWorldAssemblyEdMode::Enter()
 	OrganGenerator = NewObject<UNAssemblyOperation>(GetTransientPackage(), NEXUS::WorldAssembly::Operations::EditorMode);
 	OrganGenerator->DisplayName = FText::FromName(NEXUS::WorldAssembly::Operations::EditorMode);
 
-	OnLevelActorDeletedHandle = GEngine->OnLevelActorDeleted().AddStatic(&UNWorldAssemblyEdMode::OnActorDeleted);
+	OnLevelActorDeletedHandle = GEngine->OnLevelActorDeleted().AddUObject(this, &UNWorldAssemblyEdMode::OnActorDeleted);
 
 	Super::Enter();
+
+	// Put a UCombinedTransformGizmoContextObject in this mode's tools context. Nothing supplies one by default —
+	// FEditorModeTools registers the *editor* gizmo context (UEditorTransformGizmoContextObject) instead, which is a
+	// different type — so without this every UE::TransformGizmoUtil::Create*TransformGizmo call quietly returns
+	// nullptr, and the tools that build gizmos in Setup crash on the result. Modeling Mode registers it the same way.
+	//
+	// Deliberately after Super::Enter, which is what constructs the tools context (CreateInteractiveToolsContexts):
+	// registered any earlier there is nothing to register into, and the call ensure-fails on a null context. The tools
+	// themselves only ask for a gizmo when one is started, so registering this late is still well ahead of any use.
+	if (UEditorInteractiveToolsContext* ToolsContext = GetInteractiveToolsContext())
+	{
+		UE::TransformGizmoUtil::RegisterTransformGizmoContextObject(ToolsContext);
+	}
 }
 
 void UNWorldAssemblyEdMode::Exit()
@@ -319,8 +532,18 @@ void UNWorldAssemblyEdMode::Exit()
 
 	GEngine->OnLevelActorDeleted().Remove(OnLevelActorDeletedHandle);
 
-	// Destroy any visualizer kicking around
-	DestroyCollisionVisualizer();
+	// Balances the registration in Enter, and before Super::Exit for the same reason that one sits after Super::Enter:
+	// the base is what destroys the tools context. The mode object is recycled between activations, so keeping this
+	// paired stops a re-entry inheriting anything stale.
+	if (UEditorInteractiveToolsContext* ToolsContext = GetInteractiveToolsContext())
+	{
+		UE::TransformGizmoUtil::DeregisterTransformGizmoContextObject(ToolsContext);
+	}
+
+	// Destroy any visualizer kicking around. Deliberately the instance method rather than the static facade: the mode
+	// manager drops us from its active list before calling Exit, so Get() would already return nullptr here and the
+	// facade would quietly no-op, leaking the visualizer actor into the level.
+	TearDownCollisionVisualizer();
 
 	// Remove our temp organ generator
 	if (OrganGenerator != nullptr)
@@ -332,16 +555,17 @@ void UNWorldAssemblyEdMode::Exit()
 	Super::Exit();
 }
 
-void UNWorldAssemblyEdMode::Tick(FEditorViewportClient* ViewportClient, float DeltaTime)
+void UNWorldAssemblyEdMode::ModeTick(float DeltaTime)
 {
 	if (bCanTick == false) return;
+
 
 	// Coalesce any world changes flagged since the last tick into a single in-place rebuild of the visualizer.
 	if (bCollisionVisualizerDirty && CollisionVisualizer != nullptr)
 	{
 		if (UWorld* VisualizerWorld = CollisionVisualizer->GetWorld())
 		{
-			CreateCollisionVisualizer(VisualizerWorld);
+			RefreshCollisionVisualizer(VisualizerWorld);
 		}
 		bCollisionVisualizerDirty = false;
 	}
@@ -402,7 +626,7 @@ void UNWorldAssemblyEdMode::Tick(FEditorViewportClient* ViewportClient, float De
 		}
 	}
 
-	Super::Tick(ViewportClient, DeltaTime);
+	Super::ModeTick(DeltaTime);
 }
 
 void UNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI)
@@ -442,7 +666,8 @@ void UNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 			}
 
 			// Draw debug information
-			RootComponent->DrawDebugPDI(PDI, static_cast<uint8>(GetCellVoxelMode()), GetCachedCellBoundsColor(), GetCachedCellHullColor());
+			RootComponent->DrawDebugPDI(PDI, static_cast<uint8>(CellVoxelMode),
+				FNWorldAssemblyEditorColors::GetCellBounds(), FNWorldAssemblyEditorColors::GetCellHull());
 			// We can't use caching because we are drawing ALL the possible roots
 		}
 	}
@@ -547,7 +772,7 @@ void UNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 				// reads as one continuous connection; the corner curves keep their own color to stay legible as the
 				// bounding volume rather than part of that line.
 				FNWorldAssemblyDebugDraw::DrawConnectorPath(PDI, Connection.Path,
-					GetCachedJunctionValidColor(), GetCachedJunctionConnectorCornersColor());
+					FNWorldAssemblyEditorColors::GetJunctionValid(), FNWorldAssemblyEditorColors::GetJunctionConnectorCorners());
 			}
 		}
 	}
@@ -601,45 +826,3 @@ void UNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 	Super::Render(View, Viewport, PDI);
 }
 
-void UNWorldAssemblyEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FViewport* Viewport, const FSceneView* View, FCanvas* Canvas)
-{
-	// Messages disabled
-	if (!UNWorldAssemblyEditorUserSettings::Get()->bNotificationsDisplayViewportMessages || FNEditorUtils::IsPlayInEditor() ||
-		RenderMode != ENWorldAssemblyEdModeRenderMode::All)
-	{
-		Super::DrawHUD(ViewportClient, Viewport, View, Canvas);
-		return;
-	}
-
-	CanvasMessageBox.Clear();
-
-	if (bHasDirtyActors)
-	{
-		CanvasMessageBox.AddSeverity(ENSeverity::Warning);
-		CanvasMessageBox.AddSmallLine(DirtyMessage, FLinearColor::Yellow);
-	}
-
-	if (bAutoBoundsDisabled && bAutoHullDisabled)
-	{
-		CanvasMessageBox.AddSmallLine(AutoBoundsHullMessage);
-	}
-	else if (bAutoBoundsDisabled)
-	{
-		CanvasMessageBox.AddSmallLine(AutoBoundsMessage);
-	}
-	else if (bAutoHullDisabled)
-	{
-		CanvasMessageBox.AddSmallLine(AutoHullMessage);
-	}
-	else if (bAutoVoxelDisabled)
-	{
-		CanvasMessageBox.AddSmallLine(AutoVoxelMessage);
-	}
-
-	if (CanvasMessageBox.HasContent())
-	{
-		FNCanvasUtils::DrawCanvasTextBox(&CanvasMessageBox, Canvas, FVector2D(10,10));
-	}
-
-	Super::DrawHUD(ViewportClient, Viewport, View, Canvas);
-}

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "NEditorDefaults.h"
-#include "NWorldAssemblyEdMode.h"
+#include "NWorldAssemblyEditorColors.h"
 #include "Engine/DeveloperSettings.h"
 #include "Macros/NEditorSettingsMacros.h"
 #include "NWorldAssemblyEditorUserSettings.generated.h"
@@ -63,10 +63,6 @@ public:
 		meta=(Tooltip="Draws the center and socket-corner curves of every route the connector pass accepted during the last operation."))
 	bool bDebugWorldDrawJunctionConnectors = true;
 
-	/** Show alerts and HUD messages in the viewport while editing cells. */
-	UPROPERTY(EditAnywhere, config,  Category="Notifications", DisplayName="Display Viewport Messages", meta=(Tooltip="Shows relevant alerts and messages in the viewport upper-left corner."))
-	bool bNotificationsDisplayViewportMessages = true;
-
 	/** Show a toast notification when an editor-triggered Assembly Operation completes, and summarize Quick Assembly runs. */
 	UPROPERTY(EditAnywhere, config,  Category="Notifications", DisplayName="Toast Editor Assembly Operations", meta=(Tooltip="Show a toast notification when an editor-triggered Assembly Operation completes and/or summarize Quick Assembly operations."))
 	bool bNotificationsToastEditorAssemblyOperations = true;
@@ -104,14 +100,14 @@ public:
 			PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteJunctionsInvalid) ||
 			PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteJunctionsConnectorCorners))
 		{
-			UNWorldAssemblyEdMode::CacheUserSettings();
+			FNWorldAssemblyEditorColors::Refresh();
 		}
 	}
 
-	/** Re-cache the color palette on the edit mode after an undo/redo, since the changed properties bypass PostEditChangeProperty. */
+	/** Re-cache the color palette after an undo/redo, since the changed properties bypass PostEditChangeProperty. */
 	virtual void PostEditUndo() override
 	{
-		UNWorldAssemblyEdMode::CacheUserSettings();
+		FNWorldAssemblyEditorColors::Refresh();
 	}
 	//End UObject
 

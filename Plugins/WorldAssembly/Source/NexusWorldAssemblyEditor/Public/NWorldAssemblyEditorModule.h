@@ -8,7 +8,7 @@
 #include "Menus/NToolsMenuMacros.h"
 #include "Modules/ModuleInterface.h"
 
-class FNCellRootComponentVisualizer;
+class FComponentVisualizer;
 class FPlacementModeID;
 class FNWorldAssemblyEditorUndo;
 
@@ -23,7 +23,12 @@ public:
 	N_MODULE_BASE(FNWorldAssemblyEditorModule, "NexusWorldAssemblyEditor")
 
 	/** The cell-root component visualizer registered by this module on startup. */
-	TSharedPtr<FNCellRootComponentVisualizer> RootComponentVisualizer;
+	/**
+	 * @note Held only so ShutdownModule can release it. Nothing calls back into the derived type any more — the
+	 *       selection state the tool menu used to reach for lives on UNCellHullTool now — so the base interface is
+	 *       all this needs to be.
+	 */
+	TSharedPtr<FComponentVisualizer> RootComponentVisualizer;
 
 private:
 	/** Custom undo handler that intercepts World Assembly-related transactions. */

@@ -21,7 +21,10 @@ USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNRawMesh
 {
 	friend class FNWorldAssemblyUtils;
-	friend class FNCellRootComponentVisualizer;
+	// Moves a hull vertex, which retires the mesh's chaos provenance — SetVertex deliberately leaves that flag alone,
+	// so the editing tool has to clear it. Replaces the same access previously granted to the component visualizer
+	// that did this job before the World Assembly edit mode gained interactive tools.
+	friend class UNCellHullTool;
 	friend class FNRawMeshUtils;
 	friend class FNRawMeshFactory;
 

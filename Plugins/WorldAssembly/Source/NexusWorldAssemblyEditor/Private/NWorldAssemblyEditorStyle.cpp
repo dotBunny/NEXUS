@@ -103,6 +103,7 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 {
 	N_EDITOR_STYLE_CREATE
 
+
 	// NCellActor
 	Style.Set("ClassIcon.NCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellActor"), Icon16x16));
 	Style.Set("ClassThumbnail.NCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellActor"), Icon128x128));
@@ -145,6 +146,10 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 	Style.Set("ClassThumbnail.NTissue",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NTissue"), Icon128x128));
 
 	Style.Set("Icon.WorldAssembly", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Icon_WorldAssembly"), Icon128x128));
+	// FSlateIcon derives its small brush by appending ".Small" to the style name, so anything asking for the small
+	// variant of the mode icon — the toolkit rail's World category, and the Mode Toolbox tab header — silently fell
+	// back to the 128x128 brush above and sized itself to it.
+	Style.Set("Icon.WorldAssembly.Small", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Icon_WorldAssembly"), Icon16x16));
 
 	Style.Set("Command.WorldAssemblyEd.NCellLevelInstance", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NCellLevelInstance"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.NCellProxy", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NCellProxy"), Icon16x16));

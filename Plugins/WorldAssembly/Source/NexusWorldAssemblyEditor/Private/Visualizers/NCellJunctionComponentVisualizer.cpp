@@ -3,6 +3,7 @@
 
 #include "Visualizers/NCellJunctionComponentVisualizer.h"
 #include "Cell/NCellJunctionComponent.h"
+#include "NWorldAssemblyEditorColors.h"
 #include "NWorldAssemblyEdMode.h"
 
 void FNCellJunctionComponentVisualizer::DrawVisualization(const UActorComponent* Component, const FSceneView* View, FPrimitiveDrawInterface* PDI)
@@ -18,7 +19,7 @@ void FNCellJunctionComponentVisualizer::DrawVisualization(const UActorComponent*
 	if (!UNWorldAssemblyEdMode::IsActive())
 	{
 		JunctionComponent->DrawDebugPDI(PDI,
-			UNWorldAssemblyEdMode::GetCachedJunctionValidColor(),
-			UNWorldAssemblyEdMode::GetCachedJunctionInvalidColor(), false);
+			FNWorldAssemblyEditorColors::GetJunctionValid(),
+			FNWorldAssemblyEditorColors::GetJunctionInvalid(), false);
 	}
 }
