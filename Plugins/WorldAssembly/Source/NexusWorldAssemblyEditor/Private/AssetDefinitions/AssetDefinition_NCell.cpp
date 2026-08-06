@@ -17,137 +17,134 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetViewUtils.h"
 #include "Cell/NTissue.h"
+#include "ContentBrowserMenuContexts.h"
 #include "ContentBrowserModule.h"
 #include "Factories/DataAssetFactory.h"
 #include "IContentBrowserSingleton.h"
 #include "Misc/DataValidation.h"
 #include "Misc/ScopedSlowTask.h"
+#include "ToolMenus.h"
 #include "UObject/ObjectSaveContext.h"
-#include "Widgets/Images/SImage.h"
-#include "Widgets/Input/SButton.h"
 
-namespace
+/**
+ * Queue a side-car package for deletion on the next editor tick.
+ *
+ * Both OnAssetRemoved and OnAssetRenamed can fire while the engine is still unwinding an asset
+ * rename/delete (a rename is internally a create-new + delete-old). UEditorAssetLibrary::DeleteAsset
+ * runs CollectGarbage, so calling it synchronously from those broadcasts can free the very package
+ * the engine's CleanupAfterSuccessfulDelete loop is mid-iteration over, leaving FUnsavedAssetsTracker
+ * with a stale UPackage* that crashes in GetPathName. Deferring moves the delete (and its GC) out of
+ * that call stack entirely.
+ */
+static void ScheduleSidecarDelete(const FString& SidecarPath)
 {
-	/**
-	 * Queue a side-car package for deletion on the next editor tick.
-	 *
-	 * Both OnAssetRemoved and OnAssetRenamed can fire while the engine is still unwinding an asset
-	 * rename/delete (a rename is internally a create-new + delete-old). UEditorAssetLibrary::DeleteAsset
-	 * runs CollectGarbage, so calling it synchronously from those broadcasts can free the very package
-	 * the engine's CleanupAfterSuccessfulDelete loop is mid-iteration over, leaving FUnsavedAssetsTracker
-	 * with a stale UPackage* that crashes in GetPathName. Deferring moves the delete (and its GC) out of
-	 * that call stack entirely.
-	 */
-	void ScheduleSidecarDelete(const FString& SidecarPath)
+	if (!FPackageName::DoesPackageExist(SidecarPath))
 	{
-		if (!FPackageName::DoesPackageExist(SidecarPath))
-		{
-			return;
-		}
-
-		GEditor->GetTimerManager()->SetTimerForNextTick(FTimerDelegate::CreateLambda([SidecarPath]()
-		{
-			if (FPackageName::DoesPackageExist(SidecarPath))
-			{
-				UEditorAssetLibrary::DeleteAsset(SidecarPath);
-			}
-		}));
+		return;
 	}
 
-	/**
-	 * Side-cars dirtied by OnPreSaveWorldWithContext that still need their own SavePackage. The flush is deferred to the
-	 * matching OnPostSaveWorldWithContext so the write happens as a fresh top-level save, never re-entrantly inside the
-	 * host world's pre-save broadcast. Held as weak pointers so a side-car GC'd between pre- and post-save simply drops out.
-	 */
-	TSet<TWeakObjectPtr<UNCell>> PendingSidecarFlushes;
-
-	/** @return the full object path of the side-car asset within the given side-car package. */
-	FSoftObjectPath MakeSidecarObjectPath(const FString& SidecarPackage)
+	GEditor->GetTimerManager()->SetTimerForNextTick(FTimerDelegate::CreateLambda([SidecarPath]()
 	{
-		// The side-car object name matches its package short name (see GetOrCreatePackage), so the
-		// object path is "<Package>.<ShortName>".
-		const FString AssetName = FPackageName::GetShortName(SidecarPackage);
-		return FSoftObjectPath(FString::Printf(TEXT("%s.%s"), *SidecarPackage, *AssetName));
+		if (FPackageName::DoesPackageExist(SidecarPath))
+		{
+			UEditorAssetLibrary::DeleteAsset(SidecarPath);
+		}
+	}));
+}
+
+/**
+ * Side-cars dirtied by OnPreSaveWorldWithContext that still need their own SavePackage. The flush is deferred to the
+ * matching OnPostSaveWorldWithContext so the write happens as a fresh top-level save, never re-entrantly inside the
+ * host world's pre-save broadcast. Held as weak pointers so a side-car GC'd between pre- and post-save simply drops out.
+ */
+static TSet<TWeakObjectPtr<UNCell>> PendingSidecarFlushes;
+
+/** @return the full object path of the side-car asset within the given side-car package. */
+static FSoftObjectPath MakeSidecarObjectPath(const FString& SidecarPackage)
+{
+	// The side-car object name matches its package short name (see GetOrCreatePackage), so the
+	// object path is "<Package>.<ShortName>".
+	const FString AssetName = FPackageName::GetShortName(SidecarPackage);
+	return FSoftObjectPath(FString::Printf(TEXT("%s.%s"), *SidecarPackage, *AssetName));
+}
+
+/** Pending old-cell -> new-cell side-car remaps accumulated across a rename batch. */
+static TMap<FSoftObjectPath, FSoftObjectPath> PendingTissueRepoints;
+
+/**
+ * Scan every UNTissue once and apply all pending cell-reference remaps, saving changed tissues.
+ *
+ * The cell side-car is delete+recreated on rename rather than truly renamed, so no redirector exists
+ * for UE's reference fixup to follow — tissue TSoftObjectPtr<UNCell> entries are left dangling. We scan
+ * the tissues directly (rather than GetReferencers on the deleted side-car, whose dependency data the
+ * registry may already have dropped) and rewrite the soft paths ourselves. Renaming several cells at
+ * once queues multiple remaps that this single deferred pass resolves together.
+ */
+static void FlushTissueRepoints()
+{
+	const TMap<FSoftObjectPath, FSoftObjectPath> Remaps = MoveTemp(PendingTissueRepoints);
+	PendingTissueRepoints.Reset();
+	if (Remaps.IsEmpty())
+	{
+		return;
 	}
 
-	/** Pending old-cell -> new-cell side-car remaps accumulated across a rename batch. */
-	TMap<FSoftObjectPath, FSoftObjectPath> PendingTissueRepoints;
+	const IAssetRegistry& AssetRegistry =
+		FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
 
-	/**
-	 * Scan every UNTissue once and apply all pending cell-reference remaps, saving changed tissues.
-	 *
-	 * The cell side-car is delete+recreated on rename rather than truly renamed, so no redirector exists
-	 * for UE's reference fixup to follow — tissue TSoftObjectPtr<UNCell> entries are left dangling. We scan
-	 * the tissues directly (rather than GetReferencers on the deleted side-car, whose dependency data the
-	 * registry may already have dropped) and rewrite the soft paths ourselves. Renaming several cells at
-	 * once queues multiple remaps that this single deferred pass resolves together.
-	 */
-	void FlushTissueRepoints()
+	TArray<FAssetData> Tissues;
+	AssetRegistry.GetAssetsByClass(UNTissue::StaticClass()->GetClassPathName(), Tissues);
+	if (Tissues.IsEmpty())
 	{
-		const TMap<FSoftObjectPath, FSoftObjectPath> Remaps = MoveTemp(PendingTissueRepoints);
-		PendingTissueRepoints.Reset();
-		if (Remaps.IsEmpty())
-		{
-			return;
-		}
-
-		const IAssetRegistry& AssetRegistry =
-			FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
-
-		TArray<FAssetData> Tissues;
-		AssetRegistry.GetAssetsByClass(UNTissue::StaticClass()->GetClassPathName(), Tissues);
-		if (Tissues.IsEmpty())
-		{
-			return;
-		}
-
-		FScopedSlowTask SlowTask(static_cast<float>(Tissues.Num()),
-			NSLOCTEXT("NexusWorldAssemblyEditor", "RepointTissues", "Updating tissue cell references..."));
-		SlowTask.MakeDialog();
-
-		for (const FAssetData& TissueData : Tissues)
-		{
-			SlowTask.EnterProgressFrame(1.0f, FText::Format(
-				NSLOCTEXT("NexusWorldAssemblyEditor", "RepointTissuesItem", "Checking {0}"),
-				FText::FromName(TissueData.AssetName)));
-
-			UNTissue* Tissue = Cast<UNTissue>(TissueData.GetAsset());
-			if (Tissue == nullptr)
-			{
-				continue;
-			}
-
-			bool bChanged = false;
-			for (FNTissueEntry& Entry : Tissue->Cells)
-			{
-				if (const FSoftObjectPath* NewCell = Remaps.Find(Entry.Cell.ToSoftObjectPath()))
-				{
-					Entry.Cell = TSoftObjectPtr<UNCell>(*NewCell);
-					bChanged = true;
-				}
-			}
-
-			if (bChanged)
-			{
-				Tissue->MarkPackageDirty();
-				UEditorAssetLibrary::SaveLoadedAsset(Tissue, false);
-			}
-		}
+		return;
 	}
 
-	/**
-	 * Queue a cell remap and ensure a single deferred FlushTissueRepoints is scheduled for the batch.
-	 * The first call of a batch arms the next-tick flush; subsequent calls only add to the map, so
-	 * renaming N cells results in one tissue scan rather than N.
-	 */
-	void QueueTissueRepoint(const FSoftObjectPath& OldCell, const FSoftObjectPath& NewCell)
+	FScopedSlowTask SlowTask(static_cast<float>(Tissues.Num()),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "RepointTissues", "Updating tissue cell references..."));
+	SlowTask.MakeDialog();
+
+	for (const FAssetData& TissueData : Tissues)
 	{
-		const bool bAlreadyScheduled = !PendingTissueRepoints.IsEmpty();
-		PendingTissueRepoints.Add(OldCell, NewCell);
-		if (!bAlreadyScheduled)
+		SlowTask.EnterProgressFrame(1.0f, FText::Format(
+			NSLOCTEXT("NexusWorldAssemblyEditor", "RepointTissuesItem", "Checking {0}"),
+			FText::FromName(TissueData.AssetName)));
+
+		UNTissue* Tissue = Cast<UNTissue>(TissueData.GetAsset());
+		if (Tissue == nullptr)
 		{
-			GEditor->GetTimerManager()->SetTimerForNextTick(FTimerDelegate::CreateLambda(&FlushTissueRepoints));
+			continue;
 		}
+
+		bool bChanged = false;
+		for (FNTissueEntry& Entry : Tissue->Cells)
+		{
+			if (const FSoftObjectPath* NewCell = Remaps.Find(Entry.Cell.ToSoftObjectPath()))
+			{
+				Entry.Cell = TSoftObjectPtr<UNCell>(*NewCell);
+				bChanged = true;
+			}
+		}
+
+		if (bChanged)
+		{
+			Tissue->MarkPackageDirty();
+			UEditorAssetLibrary::SaveLoadedAsset(Tissue, false);
+		}
+	}
+}
+
+/**
+ * Queue a cell remap and ensure a single deferred FlushTissueRepoints is scheduled for the batch.
+ * The first call of a batch arms the next-tick flush; subsequent calls only add to the map, so
+ * renaming N cells results in one tissue scan rather than N.
+ */
+static void QueueTissueRepoint(const FSoftObjectPath& OldCell, const FSoftObjectPath& NewCell)
+{
+	const bool bAlreadyScheduled = !PendingTissueRepoints.IsEmpty();
+	PendingTissueRepoints.Add(OldCell, NewCell);
+	if (!bAlreadyScheduled)
+	{
+		GEditor->GetTimerManager()->SetTimerForNextTick(FTimerDelegate::CreateLambda(&FlushTissueRepoints));
 	}
 }
 
@@ -166,41 +163,59 @@ FText UAssetDefinition_NCell::GetAssetDescription(const FAssetData& AssetData) c
 	return FText::GetEmpty();
 }
 
-bool UAssetDefinition_NCell::GetThumbnailActionOverlay(const FAssetData& InAssetData, FAssetActionThumbnailOverlayInfo& OutActionOverlayInfo) const
+/** Jump the Content Browser to the level the selected NCell describes. */
+static void SelectLevelForCell(const FToolMenuContext& InContext)
 {
-	// NCell displays a custom static overlay brush rather than a play/stop toggle. UE 5.8 deprecated
-	// ActionImageWidget in favor of IsActionPlayingDelegate, but that path is hard-wired to the engine
-	// Play/Stop icons and cannot render a custom brush, so we keep the still-honored widget path and
-	// locally silence the deprecation — mirroring how the engine's own SAssetThumbnail continues to use it.
-	PRAGMA_DISABLE_DEPRECATION_WARNINGS
-	OutActionOverlayInfo.ActionImageWidget = SNew(SImage)
-		.Image(FNWorldAssemblyEditorStyle::Get().GetBrush("AssetOverlay.NCell"));
-	PRAGMA_ENABLE_DEPRECATION_WARNINGS
+	const UContentBrowserAssetContextMenuContext* Context = UContentBrowserAssetContextMenuContext::FindContextWithAssets(InContext);
+	if (Context == nullptr || Context->SelectedAssets.IsEmpty()) return;
 
-	OutActionOverlayInfo.ActionButtonArgs = SButton::FArguments()
-		.ToolTipText(NSLOCTEXT("NexusWorldAssemblyEditor", "NCell_SelectInContentBrowser", "Select Level in Content Browser"))
-		.OnClicked_Lambda([InAssetData]() -> FReply
-		{
-			const UNCell* Cell = Cast<UNCell>(InAssetData.GetAsset());
-			if (Cell == nullptr || Cell->World.IsNull())
-			{
-				return FReply::Handled();
-			}
+	const UNCell* Cell = Cast<UNCell>(Context->SelectedAssets[0].GetAsset());
+	if (Cell == nullptr || Cell->World.IsNull()) return;
 
-			const IAssetRegistry& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
-			const FAssetData WorldAssetData = AssetRegistry.GetAssetByObjectPath(Cell->World.ToSoftObjectPath());
-			if (!WorldAssetData.IsValid())
-			{
-				return FReply::Handled();
-			}
+	const IAssetRegistry& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
+	const FAssetData WorldAssetData = AssetRegistry.GetAssetByObjectPath(Cell->World.ToSoftObjectPath());
+	if (!WorldAssetData.IsValid()) return;
 
-			FContentBrowserModule& ContentBrowser = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
-			ContentBrowser.Get().SyncBrowserToAssets({ WorldAssetData });
-			return FReply::Handled();
-		});
-
-	return true;
+	FContentBrowserModule& ContentBrowser = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+	ContentBrowser.Get().SyncBrowserToAssets({ WorldAssetData });
 }
+
+/**
+ * Register the NCell asset context-menu entries.
+ *
+ * @note Where "Select Level in Content Browser" lives now. It used to be the click action on a thumbnail overlay,
+ *       which had to be abandoned: FAssetActionThumbnailOverlayInfo carries a single ActionImageWidget that
+ *       SAssetThumbnail parents into two slots at once — the engine's own comment there calls it out as wrong and
+ *       kept only for API compatibility — and a widget with a mismatched parent fails
+ *       SWidget::SupportsInvalidationRecursive, which disables caching for the whole Content Browser asset view.
+ *       The context menu is what UAssetDefinition's own documentation points at for asset actions anyway.
+ */
+static FDelayedAutoRegisterHelper RegisterNCellAssetMenu(EDelayedRegisterRunPhase::EndOfEngineInit, []
+{
+	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateLambda([]()
+	{
+		FToolMenuOwnerScoped OwnerScoped(UE_MODULE_NAME);
+
+		UToolMenu* Menu = UE::ContentBrowser::ExtendToolMenu_AssetContextMenu(UNCell::StaticClass());
+		if (Menu == nullptr) return;
+
+		FToolMenuSection& Section = Menu->FindOrAddSection("GetAssetActions");
+		Section.AddDynamicEntry(NAME_None, FNewToolMenuSectionDelegate::CreateLambda([](FToolMenuSection& InSection)
+		{
+			const UContentBrowserAssetContextMenuContext* Context = UContentBrowserAssetContextMenuContext::FindContextWithAssets(InSection);
+			if (Context == nullptr || Context->SelectedAssets.IsEmpty()) return;
+
+			FToolUIAction UIAction;
+			UIAction.ExecuteAction = FToolMenuExecuteAction::CreateStatic(&SelectLevelForCell);
+
+			InSection.AddMenuEntry("NCell_SelectLevel",
+				NSLOCTEXT("NexusWorldAssemblyEditor", "NCell_SelectInContentBrowser", "Select Level in Content Browser"),
+				NSLOCTEXT("NexusWorldAssemblyEditor", "NCell_SelectInContentBrowserTooltip", "Jump the Content Browser to the level this NCell describes."),
+				FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "ClassIcon.NCellLevelInstance"),
+				UIAction);
+		}));
+	}));
+});
 
 FText UAssetDefinition_NCell::GetAssetDisplayName() const
 {

@@ -11,6 +11,26 @@ class UNAssemblyOperation;
 struct FNStatusChannelUpdate;
 
 /**
+ * Declares this widget as invalidation-aware, which SCompoundWidget is not by default.
+ *
+ * FCategoryDrivenContentBuilderBase wraps the whole mode panel in an SInvalidationPanel with dynamic invalidation on,
+ * and such a panel only caches when every descendant opts in. The claim holds here: this widget declares no
+ * SlateAttributes of its own and overrides neither OnPaint nor Tick, its per-frame bindings all sit on stock widgets
+ * whose registered attributes invalidate correctly, and Rebuild mutates its column through TPanelChildren, which
+ * invalidates on both the clear and the re-add. Anything added here that paints or caches state directly has to
+ * re-earn it.
+ *
+ * @note Correctness, not a measurable win. The same panel holds FToolkitSections' details view, and SDetailsView does
+ *       not opt in — so that panel cannot cache regardless of what this widget claims. This is here so the widget is
+ *       not the answer next time someone goes looking, not because it buys a frame.
+ */
+template <>
+struct TWidgetTypeTraits<class SNAssemblyOperations>
+{
+	static constexpr bool SupportsInvalidation() { return true; }
+};
+
+/**
  * Live progress for every World Assembly operation the registry currently knows about.
  *
  * The Slate counterpart to UNWorldAssemblyDeveloperOverlay: one block per operation showing its name, task counts,

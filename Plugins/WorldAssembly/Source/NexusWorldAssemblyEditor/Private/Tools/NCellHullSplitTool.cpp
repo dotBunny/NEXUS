@@ -4,6 +4,7 @@
 #include "Tools/NCellHullSplitTool.h"
 
 #include "InteractiveToolManager.h"
+#include "NWorldAssemblyEditorMinimal.h"
 #include "SceneManagement.h"
 #include "ToolContextInterfaces.h"
 #include "BaseBehaviors/MouseHoverBehavior.h"
@@ -12,89 +13,86 @@
 
 #define LOCTEXT_NAMESPACE "NexusWorldAssemblyEditor"
 
-namespace
+/**
+ * Collect the edges of every hull face turned toward a viewer.
+ *
+ * @param Hull The cell's hull, read for its loops — the world positions come from WorldVertices instead.
+ * @param WorldVertices The mode's cached hull vertices, parallel to the hull's own vertex indices.
+ * @param ViewOrigin Where the viewer is; for a pick this is the ray's origin.
+ * @return Undirected (min,max) keys of the edges on at least one front-facing face, matching the form
+ *         FNRawMesh::GetEdgeIndices produces. Empty when the hull has no usable faces.
+ * @note Normals are computed here from WorldVertices rather than read from the hull's cached face planes: those
+ *       are per-triangle in the hull's own space, and the cell root's offset would have to be undone to compare
+ *       them against a world-space viewer. Newell's method, so an n-gon loop works as well as a triangle.
+ */
+static TSet<FIntVector2> GatherFrontFacingEdgeKeys(const FNRawMesh& Hull, const TArray<FVector>& WorldVertices, const FVector& ViewOrigin)
 {
-	/**
-	 * Collect the edges of every hull face turned toward a viewer.
-	 *
-	 * @param Hull The cell's hull, read for its loops — the world positions come from WorldVertices instead.
-	 * @param WorldVertices The mode's cached hull vertices, parallel to the hull's own vertex indices.
-	 * @param ViewOrigin Where the viewer is; for a pick this is the ray's origin.
-	 * @return Undirected (min,max) keys of the edges on at least one front-facing face, matching the form
-	 *         FNRawMesh::GetEdgeIndices produces. Empty when the hull has no usable faces.
-	 * @note Normals are computed here from WorldVertices rather than read from the hull's cached face planes: those
-	 *       are per-triangle in the hull's own space, and the cell root's offset would have to be undone to compare
-	 *       them against a world-space viewer. Newell's method, so an n-gon loop works as well as a triangle.
-	 */
-	TSet<FIntVector2> GatherFrontFacingEdgeKeys(const FNRawMesh& Hull, const TArray<FVector>& WorldVertices, const FVector& ViewOrigin)
+	TSet<FIntVector2> Keys;
+
+	// The hull's own Center is in local space; this is the same quantity in the space the vertices arrive in, and
+	// it is what orients the normals below outward without trusting the loops to share a winding.
+	FVector Centroid = FVector::ZeroVector;
+	for (const FVector& Vertex : WorldVertices)
 	{
-		TSet<FIntVector2> Keys;
-
-		// The hull's own Center is in local space; this is the same quantity in the space the vertices arrive in, and
-		// it is what orients the normals below outward without trusting the loops to share a winding.
-		FVector Centroid = FVector::ZeroVector;
-		for (const FVector& Vertex : WorldVertices)
-		{
-			Centroid += Vertex;
-		}
-		if (!WorldVertices.IsEmpty())
-		{
-			Centroid /= WorldVertices.Num();
-		}
-
-		for (const FNRawMeshLoop& Loop : Hull.Loops)
-		{
-			const int32 Count = Loop.Indices.Num();
-			if (Count < 3) continue;
-
-			FVector Normal = FVector::ZeroVector;
-			FVector LoopCenter = FVector::ZeroVector;
-			bool bIndicesValid = true;
-
-			for (int32 i = 0; i < Count; i++)
-			{
-				if (!WorldVertices.IsValidIndex(Loop.Indices[i]) || !WorldVertices.IsValidIndex(Loop.Indices[(i + 1) % Count]))
-				{
-					bIndicesValid = false;
-					break;
-				}
-
-				const FVector& A = WorldVertices[Loop.Indices[i]];
-				const FVector& B = WorldVertices[Loop.Indices[(i + 1) % Count]];
-
-				Normal.X += (A.Y - B.Y) * (A.Z + B.Z);
-				Normal.Y += (A.Z - B.Z) * (A.X + B.X);
-				Normal.Z += (A.X - B.X) * (A.Y + B.Y);
-
-				LoopCenter += A;
-			}
-
-			if (!bIndicesValid) continue;
-
-			Normal = Normal.GetSafeNormal();
-			if (Normal.IsNearlyZero()) continue;
-
-			LoopCenter /= Count;
-
-			// Point the normal away from the hull rather than relying on winding order, which SplitEdge's
-			// fan-triangulation is under no obligation to keep consistent with the rest of the mesh.
-			if (Normal.Dot(LoopCenter - Centroid) < 0.0)
-			{
-				Normal = -Normal;
-			}
-
-			if (Normal.Dot(ViewOrigin - LoopCenter) <= 0.0) continue;
-
-			for (int32 i = 0; i < Count; i++)
-			{
-				const int32 V0 = Loop.Indices[i];
-				const int32 V1 = Loop.Indices[(i + 1) % Count];
-				Keys.Add(FIntVector2(FMath::Min(V0, V1), FMath::Max(V0, V1)));
-			}
-		}
-
-		return Keys;
+		Centroid += Vertex;
 	}
+	if (!WorldVertices.IsEmpty())
+	{
+		Centroid /= WorldVertices.Num();
+	}
+
+	for (const FNRawMeshLoop& Loop : Hull.Loops)
+	{
+		const int32 Count = Loop.Indices.Num();
+		if (Count < 3) continue;
+
+		FVector Normal = FVector::ZeroVector;
+		FVector LoopCenter = FVector::ZeroVector;
+		bool bIndicesValid = true;
+
+		for (int32 i = 0; i < Count; i++)
+		{
+			if (!WorldVertices.IsValidIndex(Loop.Indices[i]) || !WorldVertices.IsValidIndex(Loop.Indices[(i + 1) % Count]))
+			{
+				bIndicesValid = false;
+				break;
+			}
+
+			const FVector& A = WorldVertices[Loop.Indices[i]];
+			const FVector& B = WorldVertices[Loop.Indices[(i + 1) % Count]];
+
+			Normal.X += (A.Y - B.Y) * (A.Z + B.Z);
+			Normal.Y += (A.Z - B.Z) * (A.X + B.X);
+			Normal.Z += (A.X - B.X) * (A.Y + B.Y);
+
+			LoopCenter += A;
+		}
+
+		if (!bIndicesValid) continue;
+
+		Normal = Normal.GetSafeNormal();
+		if (Normal.IsNearlyZero()) continue;
+
+		LoopCenter /= Count;
+
+		// Point the normal away from the hull rather than relying on winding order, which SplitEdge's
+		// fan-triangulation is under no obligation to keep consistent with the rest of the mesh.
+		if (Normal.Dot(LoopCenter - Centroid) < 0.0)
+		{
+			Normal = -Normal;
+		}
+
+		if (Normal.Dot(ViewOrigin - LoopCenter) <= 0.0) continue;
+
+		for (int32 i = 0; i < Count; i++)
+		{
+			const int32 V0 = Loop.Indices[i];
+			const int32 V1 = Loop.Indices[(i + 1) % Count];
+			Keys.Add(FIntVector2(FMath::Min(V0, V1), FMath::Max(V0, V1)));
+		}
+	}
+
+	return Keys;
 }
 
 UInteractiveTool* UNCellHullSplitToolBuilder::BuildTool(const FToolBuilderState& SceneState) const
@@ -149,8 +147,10 @@ void UNCellHullSplitTool::Render(IToolsContextRenderAPI* RenderAPI)
 	// White, against the hull color the mode draws the wireframe in: which edge is armed and where the vertex will
 	// land are the whole answer this tool owes before a click, and they have to read as separate from the hull
 	// whatever the user has set that color to.
-	PDI->DrawLine(Vertices[Edge.X], Vertices[Edge.Y], FLinearColor::White, SDPG_Foreground, HoveredEdgeThickness);
-	PDI->DrawPoint(HoveredEdge.SplitPosition, FLinearColor::White, SplitPointSize, SDPG_Foreground);
+	PDI->DrawLine(Vertices[Edge.X], Vertices[Edge.Y], FLinearColor::White, SDPG_Foreground,
+		NEXUS::WorldAssembly::EdModeMetrics::HighlightThickness);
+	PDI->DrawPoint(HoveredEdge.SplitPosition, FLinearColor::White,
+		NEXUS::WorldAssembly::EdModeMetrics::ActiveHandleSize, SDPG_Foreground);
 }
 
 FInputRayHit UNCellHullSplitTool::IsHitByClick(const FInputDeviceRay& ClickPos)

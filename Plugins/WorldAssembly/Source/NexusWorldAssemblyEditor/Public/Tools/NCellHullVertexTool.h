@@ -135,15 +135,4 @@ private:
 
 	/** True while ctrl is held, per the click behavior's modifier reporting. */
 	bool bCtrlDown = false;
-
-	/**
-	 * Pixel size of a drawn vertex handle.
-	 * @note Matches FNCellRootComponentVisualizer's, so a hull vertex looks the same whichever of the two drew it. It
-	 *       also lands near the pick radius IsPickedByRay resolves to on a typical viewport, which is what makes the
-	 *       dot a fair advertisement of what clicking near it will hit.
-	 */
-	static constexpr float VertexPointSize = 12.0f;
-
-	/** Pixel size of a selected vertex handle. Larger so a selection reads at a glance, not only by its color. */
-	static constexpr float SelectedVertexPointSize = 16.0f;
 };

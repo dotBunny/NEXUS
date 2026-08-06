@@ -14,66 +14,63 @@
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/Text/STextBlock.h"
 
-namespace
+/** @return The heading every titled group is topped with, so the four of them stay identical. */
+static TSharedRef<SWidget> CreateGroupHeading(const FText& Title)
 {
-	/** @return The heading every titled group is topped with, so the four of them stay identical. */
-	TSharedRef<SWidget> CreateGroupHeading(const FText& Title)
+	return SNew(STextBlock)
+		.Text(Title)
+		.Font(FAppStyle::Get().GetFontStyle("EditorModesPanel.CategoryFontStyle"))
+		.ColorAndOpacity(FStyleColors::White25);
+}
+
+/**
+ * Build a headed group of labelled buttons laid out by one of the plugin's uniform toolbar styles.
+ *
+ * @param CommandList The toolkit's command list, which every button resolves against.
+ * @param StyleName A WorldAssemblyEd.TitledCommand* style; its NumColumns is what decides the layout.
+ * @param Title Heading shown above the buttons.
+ * @param Commands Commands to lay out.
+ * @return A titled toolbar widget.
+ */
+static TSharedRef<SWidget> CreateTitledUniformToolBar(const TSharedRef<FUICommandList>& CommandList, const FName StyleName,
+	const FText& Title, const TArray<TSharedPtr<FUICommandInfo>>& Commands)
+{
+	FSlimHorizontalUniformToolBarBuilder ToolBarBuilder(CommandList, FMultiBoxCustomization::None);
+	ToolBarBuilder.SetStyle(&FNWorldAssemblyEditorStyle::Get(), StyleName);
+
+	for (const TSharedPtr<FUICommandInfo>& Command : Commands)
 	{
-		return SNew(STextBlock)
-			.Text(Title)
-			.Font(FAppStyle::Get().GetFontStyle("EditorModesPanel.CategoryFontStyle"))
-			.ColorAndOpacity(FStyleColors::White25);
+		if (!Command.IsValid()) continue;
+
+		// This builder overrides only the FButtonArgs overload, which hides the plain command one the palette
+		// groups use. Leaving UserInterfaceActionType unset would be read as None and silently become a Button, so
+		// it is carried across from the command instead — a toggle registered here has to still render as one.
+		FButtonArgs ButtonArgs;
+		ButtonArgs.Command = Command;
+		ButtonArgs.CommandList = CommandList;
+		ButtonArgs.UserInterfaceActionType = Command->GetUserInterfaceType();
+
+		ToolBarBuilder.AddToolBarButton(ButtonArgs);
 	}
 
-	/**
-	 * Build a headed group of labelled buttons laid out by one of the plugin's uniform toolbar styles.
-	 *
-	 * @param CommandList The toolkit's command list, which every button resolves against.
-	 * @param StyleName A WorldAssemblyEd.TitledCommand* style; its NumColumns is what decides the layout.
-	 * @param Title Heading shown above the buttons.
-	 * @param Commands Commands to lay out.
-	 * @return A titled toolbar widget.
-	 */
-	TSharedRef<SWidget> CreateTitledUniformToolBar(const TSharedRef<FUICommandList>& CommandList, const FName StyleName,
-		const FText& Title, const TArray<TSharedPtr<FUICommandInfo>>& Commands)
-	{
-		FSlimHorizontalUniformToolBarBuilder ToolBarBuilder(CommandList, FMultiBoxCustomization::None);
-		ToolBarBuilder.SetStyle(&FNWorldAssemblyEditorStyle::Get(), StyleName);
+	return SNew(SVerticalBox)
 
-		for (const TSharedPtr<FUICommandInfo>& Command : Commands)
-		{
-			if (!Command.IsValid()) continue;
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(8.0f, 10.0f, 8.0f, 2.0f)
+		[
+			CreateGroupHeading(Title)
+		]
 
-			// This builder overrides only the FButtonArgs overload, which hides the plain command one the palette
-			// groups use. Leaving UserInterfaceActionType unset would be read as None and silently become a Button, so
-			// it is carried across from the command instead — a toggle registered here has to still render as one.
-			FButtonArgs ButtonArgs;
-			ButtonArgs.Command = Command;
-			ButtonArgs.CommandList = CommandList;
-			ButtonArgs.UserInterfaceActionType = Command->GetUserInterfaceType();
-
-			ToolBarBuilder.AddToolBarButton(ButtonArgs);
-		}
-
-		return SNew(SVerticalBox)
-
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			.Padding(8.0f, 10.0f, 8.0f, 2.0f)
-			[
-				CreateGroupHeading(Title)
-			]
-
-			// Same outer inset the palette groups use, so every kind of group lines its backing up down the panel. What
-			// separates the buttons from that backing is the style's own BackgroundPadding, not this.
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			.HAlign(HAlign_Fill)
-			.Padding(4.0f, 0.0f, 4.0f, 6.0f)
-			[
-				ToolBarBuilder.MakeWidget()
-			];
-	}
+		// Same outer inset the palette groups use, so every kind of group lines its backing up down the panel. What
+		// separates the buttons from that backing is the style's own BackgroundPadding, not this.
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.HAlign(HAlign_Fill)
+		.Padding(4.0f, 0.0f, 4.0f, 6.0f)
+		[
+			ToolBarBuilder.MakeWidget()
+		];
 }
 
 TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateTitledCommandPalette(const FText& Title, const TArray<TSharedPtr<FUICommandInfo>>& Commands) const

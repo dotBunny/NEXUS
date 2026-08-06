@@ -12,14 +12,11 @@
 
 #define LOCTEXT_NAMESPACE "NexusWorldAssemblyEditor"
 
-namespace
-{
-	/** How far along the click ray a junction lands when the click misses world geometry entirely. */
-	constexpr double FallbackPlacementDistance = 500.0;
+/** How far along the click ray a junction lands when the click misses world geometry entirely. */
+static constexpr double FallbackPlacementDistance = 500.0;
 
-	/** How far the trace reaches before giving up and using the fallback. */
-	constexpr double TraceDistance = 1000000.0;
-}
+/** How far the trace reaches before giving up and using the fallback. */
+static constexpr double TraceDistance = 1000000.0;
 
 UInteractiveTool* UNJunctionPlacementToolBuilder::BuildTool(const FToolBuilderState& SceneState) const
 {

@@ -34,6 +34,8 @@ namespace UnrealBuildTool.Rules
 					"EditorSubsystem",
 					"Engine",
 					"GameplayTags",
+					// Supplies FImage/FImage::ResizeTo, used to scale the badge stamped into NCell thumbnails.
+					"ImageCore",
 					"InputCore",
 					"InteractiveToolsFramework",
 					"LevelEditor",

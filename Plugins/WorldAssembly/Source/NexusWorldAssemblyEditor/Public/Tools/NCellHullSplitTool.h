@@ -107,12 +107,6 @@ private:
 	/** The edge under the cursor, refreshed on every hover update and cleared when the cursor leaves. */
 	FNEdgeHit HoveredEdge;
 
-	/** Pixel size of the marker previewing where a click would split. */
-	static constexpr float SplitPointSize = 16.0f;
-
-	/** Line thickness of the highlight drawn over the hovered edge. */
-	static constexpr float HoveredEdgeThickness = 4.0f;
-
 	/**
 	 * How far along an edge a split is held clear of either endpoint, as a fraction of its length.
 	 * @note A split arbitrarily close to an endpoint produces a sliver face and two near-coincident vertices, which

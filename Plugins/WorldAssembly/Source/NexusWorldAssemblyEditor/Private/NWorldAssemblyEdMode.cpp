@@ -38,13 +38,10 @@
 #include "Tools/EdModeInteractiveToolsContext.h"
 #include "UObject/UnrealType.h"
 
-namespace
-{
-	/** Fallbacks handed back by the cached-geometry accessors when there is no active mode to read from. */
-	const TArray<FVector> EmptyVertices;
-	const TArray<FIntVector2> EmptyEdges;
-	const FNCellVoxelData EmptyVoxelData;
-}
+/** Fallbacks handed back by the cached-geometry accessors when there is no active mode to read from. */
+static const TArray<FVector> EmptyVertices;
+static const TArray<FIntVector2> EmptyEdges;
+static const FNCellVoxelData EmptyVoxelData;
 
 UNWorldAssemblyEdMode* UNWorldAssemblyEdMode::Get()
 {

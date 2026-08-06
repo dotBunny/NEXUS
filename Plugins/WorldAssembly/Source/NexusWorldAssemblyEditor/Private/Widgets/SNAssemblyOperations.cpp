@@ -17,30 +17,27 @@
 
 #define LOCTEXT_NAMESPACE "NexusWorldAssemblyEditor"
 
-namespace
+/** @return The small dim font the secondary lines of a block are set in. */
+static FSlateFontInfo GetDetailFont()
 {
-	/** @return The small dim font the secondary lines of a block are set in. */
-	FSlateFontInfo GetDetailFont()
-	{
-		return FCoreStyle::GetDefaultFontStyle("Regular", 8);
-	}
+	return FCoreStyle::GetDefaultFontStyle("Regular", 8);
+}
 
-	/**
-	 * @param Height How tall to draw the bar.
-	 * @param Percent Binding supplying the 0..1 fill.
-	 * @return A progress bar pinned to Height.
-	 * @note Height-capped because SProgressBar sizes itself from its style's background brush, which is built for a
-	 *       dialog rather than a mode panel — left alone, one bar is taller than the two text lines around it.
-	 */
-	TSharedRef<SWidget> CreateBar(const float Height, TAttribute<TOptional<float>> Percent)
-	{
-		return SNew(SBox)
-			.HeightOverride(Height)
-			[
-				SNew(SProgressBar)
-				.Percent(MoveTemp(Percent))
-			];
-	}
+/**
+ * @param Height How tall to draw the bar.
+ * @param Percent Binding supplying the 0..1 fill.
+ * @return A progress bar pinned to Height.
+ * @note Height-capped because SProgressBar sizes itself from its style's background brush, which is built for a
+ *       dialog rather than a mode panel — left alone, one bar is taller than the two text lines around it.
+ */
+static TSharedRef<SWidget> CreateBar(const float Height, TAttribute<TOptional<float>> Percent)
+{
+	return SNew(SBox)
+		.HeightOverride(Height)
+		[
+			SNew(SProgressBar)
+			.Percent(MoveTemp(Percent))
+		];
 }
 
 void SNAssemblyOperations::Construct(const FArguments& InArgs)
