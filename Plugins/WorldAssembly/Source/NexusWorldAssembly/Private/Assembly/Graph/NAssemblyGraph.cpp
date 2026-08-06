@@ -6,94 +6,91 @@
 
 #include "Algo/Reverse.h"
 
-namespace
+/** @return The start cell: Root if it is a cell, otherwise the first cell linked downstream of it. */
+static FNAssemblyGraphCellNode* ResolveStartCell(FNAssemblyGraphNode* Root)
 {
-	/** @return The start cell: Root if it is a cell, otherwise the first cell linked downstream of it. */
-	FNAssemblyGraphCellNode* ResolveStartCell(FNAssemblyGraphNode* Root)
+	if (Root == nullptr) return nullptr;
+	if (Root->GetNodeType() == ENAssemblyGraphNodeType::Cell)
 	{
-		if (Root == nullptr) return nullptr;
-		if (Root->GetNodeType() == ENAssemblyGraphNodeType::Cell)
-		{
-			return static_cast<FNAssemblyGraphCellNode*>(Root);
-		}
-		for (FNAssemblyGraphNode* Downstream : Root->GetDownstreamNodes())
-		{
-			if (Downstream->GetNodeType() == ENAssemblyGraphNodeType::Cell)
-			{
-				return static_cast<FNAssemblyGraphCellNode*>(Downstream);
-			}
-		}
-		return nullptr;
+		return static_cast<FNAssemblyGraphCellNode*>(Root);
 	}
-
-	/**
-	 * Unweighted BFS from Source over the undirected graph (downstream ∪ upstream), stopping at the first
-	 * node satisfying IsTarget. Because every edge has weight 1, the first target reached is a shortest one.
-	 * @return The node path from Source to that target inclusive, or empty if no target is reachable.
-	 */
-	template <typename TPredicate>
-	TArray<FNAssemblyGraphNode*> BreadthFirstPathTo(FNAssemblyGraphNode* Source, TPredicate&& IsTarget)
+	for (FNAssemblyGraphNode* Downstream : Root->GetDownstreamNodes())
 	{
-		TArray<FNAssemblyGraphNode*> Path;
-		if (Source == nullptr) return Path;
-
-		if (IsTarget(Source))
+		if (Downstream->GetNodeType() == ENAssemblyGraphNodeType::Cell)
 		{
-			Path.Add(Source);
-			return Path;
+			return static_cast<FNAssemblyGraphCellNode*>(Downstream);
 		}
+	}
+	return nullptr;
+}
 
-		// node -> predecessor along the BFS tree; also doubles as the visited set.
-		TMap<FNAssemblyGraphNode*, FNAssemblyGraphNode*> CameFrom;
-		CameFrom.Add(Source, nullptr);
+/**
+ * Unweighted BFS from Source over the undirected graph (downstream ∪ upstream), stopping at the first
+ * node satisfying IsTarget. Because every edge has weight 1, the first target reached is a shortest one.
+ * @return The node path from Source to that target inclusive, or empty if no target is reachable.
+ */
+template <typename TPredicate>
+static TArray<FNAssemblyGraphNode*> BreadthFirstPathTo(FNAssemblyGraphNode* Source, TPredicate&& IsTarget)
+{
+	TArray<FNAssemblyGraphNode*> Path;
+	if (Source == nullptr) return Path;
 
-		TQueue<FNAssemblyGraphNode*> Frontier;
-		Frontier.Enqueue(Source);
-
-		FNAssemblyGraphNode* Found = nullptr;
-		FNAssemblyGraphNode* Current = nullptr;
-		while (Found == nullptr && Frontier.Dequeue(Current))
-		{
-			// Treat the graph as undirected: scan both directions.
-			for (int32 Direction = 0; Direction < 2 && Found == nullptr; Direction++)
-			{
-				const TArray<FNAssemblyGraphNode*>& Neighbours =
-					Direction == 0 ? Current->GetDownstreamNodes() : Current->GetUpstreamNodes();
-				for (FNAssemblyGraphNode* Neighbour : Neighbours)
-				{
-					if (CameFrom.Contains(Neighbour)) continue;
-					CameFrom.Add(Neighbour, Current);
-					if (IsTarget(Neighbour))
-					{
-						Found = Neighbour;
-						break;
-					}
-					Frontier.Enqueue(Neighbour);
-				}
-			}
-		}
-
-		if (Found == nullptr) return Path;
-
-		// Walk predecessors back to Source, then flip to Source -> Found order.
-		for (FNAssemblyGraphNode* Node = Found; Node != nullptr; Node = CameFrom[Node])
-		{
-			Path.Add(Node);
-		}
-		Algo::Reverse(Path);
+	if (IsTarget(Source))
+	{
+		Path.Add(Source);
 		return Path;
 	}
 
-	/** Apply Setter to every cell node in OnPath (non-cell nodes carry no hot path flag). */
-	template <typename TSetter>
-	void FlagCellsOnPath(const TSet<FNAssemblyGraphNode*>& OnPath, TSetter&& Setter)
+	// node -> predecessor along the BFS tree; also doubles as the visited set.
+	TMap<FNAssemblyGraphNode*, FNAssemblyGraphNode*> CameFrom;
+	CameFrom.Add(Source, nullptr);
+
+	TQueue<FNAssemblyGraphNode*> Frontier;
+	Frontier.Enqueue(Source);
+
+	FNAssemblyGraphNode* Found = nullptr;
+	FNAssemblyGraphNode* Current = nullptr;
+	while (Found == nullptr && Frontier.Dequeue(Current))
 	{
-		for (FNAssemblyGraphNode* Node : OnPath)
+		// Treat the graph as undirected: scan both directions.
+		for (int32 Direction = 0; Direction < 2 && Found == nullptr; Direction++)
 		{
-			if (Node->GetNodeType() == ENAssemblyGraphNodeType::Cell)
+			const TArray<FNAssemblyGraphNode*>& Neighbours =
+				Direction == 0 ? Current->GetDownstreamNodes() : Current->GetUpstreamNodes();
+			for (FNAssemblyGraphNode* Neighbour : Neighbours)
 			{
-				Setter(static_cast<FNAssemblyGraphCellNode*>(Node));
+				if (CameFrom.Contains(Neighbour)) continue;
+				CameFrom.Add(Neighbour, Current);
+				if (IsTarget(Neighbour))
+				{
+					Found = Neighbour;
+					break;
+				}
+				Frontier.Enqueue(Neighbour);
 			}
+		}
+	}
+
+	if (Found == nullptr) return Path;
+
+	// Walk predecessors back to Source, then flip to Source -> Found order.
+	for (FNAssemblyGraphNode* Node = Found; Node != nullptr; Node = CameFrom[Node])
+	{
+		Path.Add(Node);
+	}
+	Algo::Reverse(Path);
+	return Path;
+}
+
+/** Apply Setter to every cell node in OnPath (non-cell nodes carry no hot path flag). */
+template <typename TSetter>
+static void FlagCellsOnPath(const TSet<FNAssemblyGraphNode*>& OnPath, TSetter&& Setter)
+{
+	for (FNAssemblyGraphNode* Node : OnPath)
+	{
+		if (Node->GetNodeType() == ENAssemblyGraphNodeType::Cell)
+		{
+			Setter(static_cast<FNAssemblyGraphCellNode*>(Node));
 		}
 	}
 }

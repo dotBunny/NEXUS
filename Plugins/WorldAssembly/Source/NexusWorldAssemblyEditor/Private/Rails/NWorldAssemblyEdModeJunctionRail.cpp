@@ -20,23 +20,20 @@
 
 #define LOCTEXT_NAMESPACE "NexusWorldAssemblyEditor"
 
-namespace
+/** @return The junction component in the current editor selection, or nullptr when none is selected. */
+static UNCellJunctionComponent* GetSelectedJunction()
 {
-	/** @return The junction component in the current editor selection, or nullptr when none is selected. */
-	UNCellJunctionComponent* GetSelectedJunction()
-	{
-		USelection* SelectedComponents = GEditor->GetSelectedComponents();
-		if (SelectedComponents == nullptr) return nullptr;
+	USelection* SelectedComponents = GEditor->GetSelectedComponents();
+	if (SelectedComponents == nullptr) return nullptr;
 
-		for (FSelectionIterator It(*SelectedComponents); It; ++It)
+	for (FSelectionIterator It(*SelectedComponents); It; ++It)
+	{
+		if (UNCellJunctionComponent* Junction = Cast<UNCellJunctionComponent>(*It))
 		{
-			if (UNCellJunctionComponent* Junction = Cast<UNCellJunctionComponent>(*It))
-			{
-				return Junction;
-			}
+			return Junction;
 		}
-		return nullptr;
 	}
+	return nullptr;
 }
 
 TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeJunctionRail::GetCategoryCommand() const

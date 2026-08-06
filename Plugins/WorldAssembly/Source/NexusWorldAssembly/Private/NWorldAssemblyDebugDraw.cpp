@@ -11,17 +11,14 @@
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMesh.h"
 
-namespace
+/** Submit one polyline's worth of segments; shared by the center and corner curves of a connector path. */
+static void DrawConnectorCurve(FPrimitiveDrawInterface* PDI, const TArray<FVector>& Points, const FLinearColor& Color,
+	const ESceneDepthPriorityGroup Priority, const float Thickness)
 {
-	/** Submit one polyline's worth of segments; shared by the center and corner curves of a connector path. */
-	void DrawConnectorCurve(FPrimitiveDrawInterface* PDI, const TArray<FVector>& Points, const FLinearColor& Color,
-		const ESceneDepthPriorityGroup Priority, const float Thickness)
+	const int32 PointCount = Points.Num();
+	for (int32 i = 1; i < PointCount; i++)
 	{
-		const int32 PointCount = Points.Num();
-		for (int32 i = 1; i < PointCount; i++)
-		{
-			PDI->DrawLine(Points[i - 1], Points[i], Color, Priority, Thickness);
-		}
+		PDI->DrawLine(Points[i - 1], Points[i], Color, Priority, Thickness);
 	}
 }
 

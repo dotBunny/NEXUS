@@ -58,7 +58,6 @@ public:
 	virtual TSoftClassPtr<UObject> GetAssetClass() const override { return UNCell::StaticClass(); }
 	virtual TConstArrayView<FAssetCategoryPath> GetAssetCategories() const override;
 	virtual FText GetAssetDescription(const FAssetData& AssetData) const override;
-	virtual bool GetThumbnailActionOverlay(const FAssetData& InAssetData, FAssetActionThumbnailOverlayInfo& OutActionOverlayInfo) const override;
 
 
 	// We do not want NCells to be duplicated as they are tied to a specific world.

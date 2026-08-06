@@ -5,6 +5,7 @@
 
 #include "Cell/NCellRootComponent.h"
 #include "NWorldAssemblyEditorColors.h"
+#include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblySettings.h"
 
@@ -40,15 +41,15 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 	{
 		const FBox Bounds = UNWorldAssemblyEdMode::GetCachedBounds();
 
-		PDI->DrawPoint(Bounds.Min, FNWorldAssemblyEditorColors::GetCellBounds(), PointSize, SDPG_World);
-		PDI->DrawPoint(Bounds.Max, FNWorldAssemblyEditorColors::GetCellBounds(), PointSize, SDPG_World);
+		PDI->DrawPoint(Bounds.Min, FNWorldAssemblyEditorColors::GetCellBounds(), NEXUS::WorldAssembly::EdModeMetrics::HandleSize, SDPG_World);
+		PDI->DrawPoint(Bounds.Max, FNWorldAssemblyEditorColors::GetCellBounds(), NEXUS::WorldAssembly::EdModeMetrics::HandleSize, SDPG_World);
 	}
 	else if (UNWorldAssemblyEdMode::GetCellEdMode() == UNWorldAssemblyEdMode::ENCellEdMode::Hull)
 	{
 		const TArray<FVector>& WorldVertices = UNWorldAssemblyEdMode::GetCachedHullVertices();
 		for (const FVector& WorldVertex : WorldVertices)
 		{
-			PDI->DrawPoint(WorldVertex, FNWorldAssemblyEditorColors::GetCellHull(), PointSize, SDPG_World);
+			PDI->DrawPoint(WorldVertex, FNWorldAssemblyEditorColors::GetCellHull(), NEXUS::WorldAssembly::EdModeMetrics::HandleSize, SDPG_World);
 		}
 
 		for (const TArray<FIntVector2>& WorldEdges = UNWorldAssemblyEdMode::GetCachedHullEdges();
@@ -87,7 +88,7 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 			FVector VoxelCenter = BaseOffset + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
 
 			const bool bOccupied = N_FLAGS_HAS(CachedData.GetData(i), static_cast<uint8>(ENCellVoxel::Occupied));
-			PDI->DrawPoint(VoxelCenter, bOccupied ? FColor::Blue : FColor::Green, PointSize, SDPG_Foreground);
+			PDI->DrawPoint(VoxelCenter, bOccupied ? FColor::Blue : FColor::Green, NEXUS::WorldAssembly::EdModeMetrics::HandleSize, SDPG_Foreground);
 		}
 	}
 }

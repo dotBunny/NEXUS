@@ -19,6 +19,10 @@
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyRegistry.h"
 #include "NWorldAssemblyUtils.h"
+#include "ImageUtils.h"
+#include "ObjectTools.h"
+#include "Interfaces/IPluginManager.h"
+#include "Misc/ObjectThumbnail.h"
 #include "NUIEditorStyle.h"
 #include "NWorldAssemblyEditorToolMenu.h"
 #include "Selection.h"
@@ -1094,6 +1098,104 @@ void FNWorldAssemblyEditorCommands::OrganSelectComponent(UNOrganComponent* Organ
 	GEditor->SelectComponent(Organ, true, true, true);
 }
 
+/** Edge length of the badge composited into a captured NCell thumbnail, in thumbnail pixels. */
+static constexpr int32 CellThumbnailBadgeSize = 48;
+
+/** Gap left between the badge and the top-left corner of the thumbnail, in thumbnail pixels. */
+static constexpr int32 CellThumbnailBadgeMargin = 8;
+
+/**
+ * Blend the NCell badge into the top-left corner of an asset's freshly captured thumbnail.
+ *
+ * @param AssetData The asset whose cached thumbnail to stamp.
+ * @note Baked into the image rather than drawn as a Content Browser overlay. The overlay path this replaces handed
+ *       SAssetThumbnail one widget that it parented into two slots at once, which fails
+ *       SWidget::SupportsInvalidationRecursive and disabled caching for the whole asset view. Baking also puts the
+ *       badge on every surface that shows a thumbnail — asset pickers, the reference viewer — not just tiles.
+ * @remark Only affects thumbnails captured from here on. An NCell whose thumbnail predates this, or that has none,
+ *         goes unbadged until it is captured again.
+ */
+static void ApplyCellThumbnailBadge(const FAssetData& AssetData)
+{
+	UObject* Asset = AssetData.GetAsset();
+	if (Asset == nullptr) return;
+
+	FObjectThumbnail* Thumbnail = ThumbnailTools::GetThumbnailForObject(Asset);
+	if (Thumbnail == nullptr) return;
+
+	const int32 Width = Thumbnail->GetImageWidth();
+	const int32 Height = Thumbnail->GetImageHeight();
+
+	// Only when the pixels are genuinely absent. DecompressImageData resets ImageData before consulting the
+	// compressor, and the compressor is null while CompressedImageData is empty — which is exactly the state
+	// CaptureThumbnailFromViewport leaves behind, since it fills ImageData and never compresses. Calling it
+	// unconditionally throws the freshly captured pixels away and puts nothing back.
+	if (Thumbnail->AccessImageData().IsEmpty())
+	{
+		Thumbnail->DecompressImageData();
+	}
+
+	TArray<uint8>& Pixels = Thumbnail->AccessImageData();
+	if (Width <= 0 || Height <= 0 || Pixels.Num() < Width * Height * 4) return;
+
+	const TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(TEXT("NexusWorldAssembly"));
+	if (!Plugin.IsValid()) return;
+
+	const FString BadgePath = Plugin->GetBaseDir() / TEXT("Resources") / TEXT("AssetOverlay_NCell.png");
+
+	FImage Badge;
+	if (!FImageUtils::LoadImage(*BadgePath, Badge)) return;
+
+	// ResizeTo rather than FImageUtils::ImageResize: that one defaults to forcing an opaque result, which would
+	// discard the alpha this needs to blend the logo over the square below.
+	//
+	// The margin comes out of the space available to the badge, so a thumbnail too small to hold both still gets
+	// a proportionally inset badge rather than one clipped off its own edge.
+	const int32 Margin = FMath::Min3(CellThumbnailBadgeMargin, Width / 2, Height / 2);
+	const int32 BadgeSize = FMath::Min3(CellThumbnailBadgeSize, Width - Margin, Height - Margin);
+	if (BadgeSize <= 0) return;
+
+	FImage ScaledBadge;
+	Badge.ResizeTo(ScaledBadge, BadgeSize, BadgeSize, ERawImageFormat::BGRA8, EGammaSpace::sRGB);
+
+	const TArrayView64<const FColor> BadgePixels = ScaledBadge.AsBGRA8();
+	if (BadgePixels.Num() < static_cast<int64>(BadgeSize) * BadgeSize) return;
+
+	// The thumbnail buffer is BGRA8, matching the format the badge was just converted into.
+	FColor* ThumbnailPixels = reinterpret_cast<FColor*>(Pixels.GetData());
+
+	for (int32 Y = 0; Y < BadgeSize; Y++)
+	{
+		for (int32 X = 0; X < BadgeSize; X++)
+		{
+			const FColor& Source = BadgePixels[static_cast<int64>(Y) * BadgeSize + X];
+			FColor& Destination = ThumbnailPixels[(Y + Margin) * Width + (X + Margin)];
+
+			// The square first, so the logo reads against the captured viewport whatever happened to be behind it.
+			Destination = FColor::Black;
+
+			if (Source.A == 0) continue;
+
+			// Straight alpha over the square. Kept opaque: a thumbnail has no transparency to preserve.
+			const int32 Alpha = Source.A;
+			Destination.R = static_cast<uint8>((Source.R * Alpha) / 255);
+			Destination.G = static_cast<uint8>((Source.G * Alpha) / 255);
+			Destination.B = static_cast<uint8>((Source.B * Alpha) / 255);
+			Destination.A = 255;
+		}
+	}
+
+	// Refresh the compressed copy, which is what actually gets written to the package — leaving the pre-badge one
+	// in place would discard every pixel above on save.
+	Thumbnail->CompressImageData();
+	Thumbnail->MarkAsDirty();
+
+	if (UPackage* Package = Asset->GetOutermost())
+	{
+		Package->MarkPackageDirty();
+	}
+}
+
 void FNWorldAssemblyEditorCommands::CellCaptureThumbnail()
 {
 	FViewport* Viewport = GEditor->GetActiveViewport();
@@ -1132,6 +1234,13 @@ void FNWorldAssemblyEditorCommands::CellCaptureThumbnail()
 			UNWorldAssemblyEdMode::SetRenderMode(ENWorldAssemblyEdModeRenderMode::CellScreenshot);
 			Viewport->Draw();
 			AssetViewUtils::CaptureThumbnailFromViewport(Viewport, SelectedAssets);
+
+			// Only the sidecar gets the badge. The level captured above is an ordinary world asset and has no reason
+			// to advertise itself as an NCell.
+			for (const FAssetData& CellAssetData : SelectedAssets)
+			{
+				ApplyCellThumbnailBadge(CellAssetData);
+			}
 		}
 
 		GCurrentLevelEditingViewportClient = OldViewportClient;

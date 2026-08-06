@@ -14,23 +14,20 @@
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
 
-namespace
+// Unbound organs are deliberately scheduled into their own trailing passes (see LockAndPreprocess), so a
+// container must never wait on an unbound organ it merely encloses — doing so would leave the container
+// permanently unschedulable and dropped as a false "circular cycle". Returns true only when Data has at
+// least one *bound* contained organ that genuinely gates its ordering.
+static bool HasBoundContainedOrgan(const FNWorldOrganData& Data)
 {
-	// Unbound organs are deliberately scheduled into their own trailing passes (see LockAndPreprocess), so a
-	// container must never wait on an unbound organ it merely encloses — doing so would leave the container
-	// permanently unschedulable and dropped as a false "circular cycle". Returns true only when Data has at
-	// least one *bound* contained organ that genuinely gates its ordering.
-	bool HasBoundContainedOrgan(const FNWorldOrganData& Data)
+	for (const TObjectPtr<UNOrganComponent>& Contained : Data.ContainedComponents)
 	{
-		for (const TObjectPtr<UNOrganComponent>& Contained : Data.ContainedComponents)
+		if (Contained != nullptr && !Contained->bUnbound)
 		{
-			if (Contained != nullptr && !Contained->bUnbound)
-			{
-				return true;
-			}
+			return true;
 		}
-		return false;
 	}
+	return false;
 }
 
 FNAssemblyOperationContext::FNAssemblyOperationContext(const int32 NewOperationTicket)

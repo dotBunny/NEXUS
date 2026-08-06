@@ -440,24 +440,21 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 	while (OrganContextPtr->CellGraph == nullptr);
 }
 
-namespace
+/**
+ * The per-mesh collision verdict, lifted verbatim out of the original scan loop so the broadphase and
+ * full-sweep paths below cannot drift apart.
+ * @return true when CellNode's hull collides with Mesh by the caller's penetration rule.
+ */
+static bool TestCollisionMesh(const FNAssemblyGraphCellNode* CellNode, const FNRawMesh& Mesh, const float MaxPenetration)
 {
-	/**
-	 * The per-mesh collision verdict, lifted verbatim out of the original scan loop so the broadphase and
-	 * full-sweep paths below cannot drift apart.
-	 * @return true when CellNode's hull collides with Mesh by the caller's penetration rule.
-	 */
-	bool TestCollisionMesh(const FNAssemblyGraphCellNode* CellNode, const FNRawMesh& Mesh, const float MaxPenetration)
+	const float PenetrationDepth = CellNode->GetHullIntersectDepth(Mesh, MaxPenetration);
+	if (PenetrationDepth == 0.0f)
 	{
-		const float PenetrationDepth = CellNode->GetHullIntersectDepth(Mesh, MaxPenetration);
-		if (PenetrationDepth == 0.0f)
-		{
-			// Depth of exactly zero means the AABBs overlap but no vertex of either hull is inside the other;
-			// only a surface-crossing test can settle it.
-			return CellNode->CheckHullIntersects(Mesh);
-		}
-		return PenetrationDepth >= MaxPenetration;
+		// Depth of exactly zero means the AABBs overlap but no vertex of either hull is inside the other;
+		// only a surface-crossing test can settle it.
+		return CellNode->CheckHullIntersects(Mesh);
 	}
+	return PenetrationDepth >= MaxPenetration;
 }
 
 bool FNOrganGraphBuilderTask::DoesWorldCollide(const FNAssemblyGraphCellNode* CellNode) const

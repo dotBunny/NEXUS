@@ -37,24 +37,21 @@
 #define N_PICKER_CIRCLE_VLOG(HasMinimumDimensions)
 #endif // ENABLE_VISUAL_LOG
 
-namespace
+// Single source of truth for circle point generation. Random/Tracked/Next differ only in how a uniform
+// float in [0,1) is drawn, so that is the one parameter: RandUnit() -> float.
+template <typename FRandUnit>
+static void GenerateCirclePoints(TArray<FVector>& OutLocations, const FNCirclePickerParams& Params, FRandUnit&& RandUnit)
 {
-	// Single source of truth for circle point generation. Random/Tracked/Next differ only in how a uniform
-	// float in [0,1) is drawn, so that is the one parameter: RandUnit() -> float.
-	template <typename FRandUnit>
-	void GenerateCirclePoints(TArray<FVector>& OutLocations, const FNCirclePickerParams& Params, FRandUnit&& RandUnit)
+	N_PICKER_CIRCLE_PREFIX
+	FNPickerProjection::Emit(OutLocations, CachedWorld, Params, [&]() -> FVector
 	{
-		N_PICKER_CIRCLE_PREFIX
-		FNPickerProjection::Emit(OutLocations, CachedWorld, Params, [&]() -> FVector
-		{
-			const float PointTheta = RandUnit() * 2.0f * PI;
-			// Inverse-CDF transform: uniform u in [0,1] maps to area-weighted radius across the annulus.
-			const float PointRadius = FMath::Sqrt(RandUnit() * (MaxRadiusSq - MinRadiusSq) + MinRadiusSq);
-			const FVector Local((PointRadius * FMath::Cos(PointTheta)), (PointRadius * FMath::Sin(PointTheta)), 0.f);
-			return Params.Origin + (bSimpleMode ? Local : Params.Rotation.RotateVector(Local));
-		});
-		N_PICKER_CIRCLE_VLOG(Params.MinimumRadius > 0.f)
-	}
+		const float PointTheta = RandUnit() * 2.0f * PI;
+		// Inverse-CDF transform: uniform u in [0,1] maps to area-weighted radius across the annulus.
+		const float PointRadius = FMath::Sqrt(RandUnit() * (MaxRadiusSq - MinRadiusSq) + MinRadiusSq);
+		const FVector Local((PointRadius * FMath::Cos(PointTheta)), (PointRadius * FMath::Sin(PointTheta)), 0.f);
+		return Params.Origin + (bSimpleMode ? Local : Params.Rotation.RotateVector(Local));
+	});
+	N_PICKER_CIRCLE_VLOG(Params.MinimumRadius > 0.f)
 }
 
 void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerParams& Params)

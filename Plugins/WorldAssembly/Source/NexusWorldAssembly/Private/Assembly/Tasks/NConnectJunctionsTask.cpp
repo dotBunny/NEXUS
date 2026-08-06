@@ -9,25 +9,22 @@
 #include "Assembly/NJunctionConnectorSolver.h"
 #include "Types/NRawMeshUtils.h"
 
-namespace
-{
-	/**
-	 * Ceiling the straightening retries escalate toward, matching the ClampMax on the Tangent Scale setting.
-	 * @note Kept in step with that clamp deliberately: retries that pushed past it would produce routes a designer
-	 *       could not author by hand, and could not reproduce by raising the setting.
-	 */
-	constexpr float MaximumTangentScale = 2.f;
+/**
+ * Ceiling the straightening retries escalate toward, matching the ClampMax on the Tangent Scale setting.
+ * @note Kept in step with that clamp deliberately: retries that pushed past it would produce routes a designer
+ *       could not author by hand, and could not reproduce by raising the setting.
+ */
+static constexpr float MaximumTangentScale = 2.f;
 
-	/**
-	 * World-space slack allowed between two socket corners still considered the same point, in centimetres.
-	 *
-	 * Deliberately not a setting. A genuine coincidence comes out of the builder's own quaternion placement, so the
-	 * only gap between the two sockets is accumulated floating-point error along a chain of compositions — orders of
-	 * magnitude under this. There is nothing to tune: a larger value would only start mating sockets that are
-	 * visibly offset, leaving a seam no geometry closes.
-	 */
-	constexpr float InverseCoincidenceTolerance = 1.f;
-}
+/**
+ * World-space slack allowed between two socket corners still considered the same point, in centimetres.
+ *
+ * Deliberately not a setting. A genuine coincidence comes out of the builder's own quaternion placement, so the
+ * only gap between the two sockets is accumulated floating-point error along a chain of compositions — orders of
+ * magnitude under this. There is nothing to tune: a larger value would only start mating sockets that are
+ * visibly offset, leaving a seam no geometry closes.
+ */
+static constexpr float InverseCoincidenceTolerance = 1.f;
 
 FNConnectJunctionsTask::FNConnectJunctionsTask(const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr,
 	const TSharedPtr<FNAssemblyTaskGraphContext>& TaskGraphContextPtr, const FVector2D& SocketUnitSize

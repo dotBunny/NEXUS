@@ -5,6 +5,7 @@
 
 #include "InteractiveToolManager.h"
 #include "NWorldAssemblyEditorColors.h"
+#include "NWorldAssemblyEditorMinimal.h"
 #include "SceneManagement.h"
 #include "ToolContextInterfaces.h"
 #include "BaseBehaviors/SingleClickBehavior.h"
@@ -104,7 +105,7 @@ void UNCellHullVertexTool::Render(IToolsContextRenderAPI* RenderAPI)
 
 		PDI->DrawPoint(Vertices[i],
 			bIsSelected ? FLinearColor::White : HullColor,
-			bIsSelected ? SelectedVertexPointSize : VertexPointSize,
+			bIsSelected ? NEXUS::WorldAssembly::EdModeMetrics::ActiveHandleSize : NEXUS::WorldAssembly::EdModeMetrics::HandleSize,
 			SDPG_Foreground);
 	}
 }

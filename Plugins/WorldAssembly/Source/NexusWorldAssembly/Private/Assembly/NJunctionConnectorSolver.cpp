@@ -6,33 +6,30 @@
 #include "NWorldAssemblyUtils.h"
 #include "Types/NRawMeshUtils.h"
 
-namespace
+/** Samples taken when estimating a curve's length before choosing its real sample count. */
+static constexpr int32 LengthEstimateSampleCount = 32;
+
+/** Squared-length floor below which a direction is treated as degenerate rather than normalized. */
+static constexpr double DegenerateLengthSquared = UE_DOUBLE_SMALL_NUMBER;
+
+/**
+ * Sign pattern of each socket corner along the width axis, in the corner order
+ * FNWorldAssemblyUtils::GetJunctionWorldCornerPoints emits (top-left, bottom-left, bottom-right, top-right).
+ */
+static constexpr double CornerWidthSign[4] = { -1.0, -1.0, 1.0, 1.0 };
+
+/** Sign pattern of each socket corner along the height axis, in the same corner order. */
+static constexpr double CornerHeightSign[4] = { 1.0, -1.0, -1.0, 1.0 };
+
+/** @return Vector normalized, or Fallback when it is too short to have a meaningful direction. */
+static FVector SafeDirection(const FVector& Vector, const FVector& Fallback)
 {
-	/** Samples taken when estimating a curve's length before choosing its real sample count. */
-	constexpr int32 LengthEstimateSampleCount = 32;
-
-	/** Squared-length floor below which a direction is treated as degenerate rather than normalized. */
-	constexpr double DegenerateLengthSquared = UE_DOUBLE_SMALL_NUMBER;
-
-	/**
-	 * Sign pattern of each socket corner along the width axis, in the corner order
-	 * FNWorldAssemblyUtils::GetJunctionWorldCornerPoints emits (top-left, bottom-left, bottom-right, top-right).
-	 */
-	constexpr double CornerWidthSign[4] = { -1.0, -1.0, 1.0, 1.0 };
-
-	/** Sign pattern of each socket corner along the height axis, in the same corner order. */
-	constexpr double CornerHeightSign[4] = { 1.0, -1.0, -1.0, 1.0 };
-
-	/** @return Vector normalized, or Fallback when it is too short to have a meaningful direction. */
-	FVector SafeDirection(const FVector& Vector, const FVector& Fallback)
+	const double LengthSquared = Vector.SizeSquared();
+	if (LengthSquared <= DegenerateLengthSquared)
 	{
-		const double LengthSquared = Vector.SizeSquared();
-		if (LengthSquared <= DegenerateLengthSquared)
-		{
-			return Fallback;
-		}
-		return Vector * (1.0 / FMath::Sqrt(LengthSquared));
+		return Fallback;
 	}
+	return Vector * (1.0 / FMath::Sqrt(LengthSquared));
 }
 
 FVector FNJunctionConnectorSolver::EvaluateCurve(const TArray<FVector>& ControlPoints, const TArray<FVector>& Tangents, const float Alpha)

@@ -23,8 +23,4 @@ public:
 	//~FComponentVisualizer
 	virtual void DrawVisualization(const UActorComponent* Component, const FSceneView* View, FPrimitiveDrawInterface* PDI) override;
 	//End FComponentVisualizer
-
-private:
-	/** Pixel size used when rendering the overlay's vertex points. */
-	const float PointSize = 12.0f;
 };

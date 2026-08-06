@@ -10,12 +10,9 @@
 #include "Assembly/Contexts/NAssemblyOperationContext.h"
 #include "Organ/NOrganComponent.h"
 
-namespace
-{
-	// 180 degrees about Up, written directly as a quaternion to skip the per-call axis-angle sincos.
-	// FQuat(FVector::UpVector, PI) evaluates to (Up * sin(PI/2), cos(PI/2)) == (0, 0, 1, 0) exactly.
-	const FQuat YawFlipQuat(0.0, 0.0, 1.0, 0.0);
-}
+// 180 degrees about Up, written directly as a quaternion to skip the per-call axis-angle sincos.
+// FQuat(FVector::UpVector, PI) evaluates to (Up * sin(PI/2), cos(PI/2)) == (0, 0, 1, 0) exactly.
+static const FQuat YawFlipQuat(0.0, 0.0, 1.0, 0.0);
 
 FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganContext, const uint64 TaskSeed, FString TaskName)
 	: Seed(TaskSeed), Name(TaskName)

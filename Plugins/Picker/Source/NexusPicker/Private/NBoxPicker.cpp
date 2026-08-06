@@ -54,51 +54,48 @@
 #define N_PICKER_BOX_VLOG(HasMinimumBox)
 #endif // ENABLE_VISUAL_LOG
 
-namespace
+// Single source of truth for box point generation. Random/Tracked/Next differ only in how a float in
+// [Min,Max] is drawn, so that is the one parameter: Rand(Min, Max) -> float.
+template <typename FRandFloat>
+static void GenerateBoxPoints(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params, FRandFloat&& Rand)
 {
-	// Single source of truth for box point generation. Random/Tracked/Next differ only in how a float in
-	// [Min,Max] is drawn, so that is the one parameter: Rand(Min, Max) -> float.
-	template <typename FRandFloat>
-	void GenerateBoxPoints(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params, FRandFloat&& Rand)
+	N_PICKER_BOX_PREFIX
+
+	// Shell mode: select a sub-box weighted by volume. Built once, queried per point.
+	TArray<FBox> ValidBoxes;
+	TArray<double> CumulativeVolumes;
+	double TotalVolume = 0.0;
+	if (!bSimpleMode)
 	{
-		N_PICKER_BOX_PREFIX
-
-		// Shell mode: select a sub-box weighted by volume. Built once, queried per point.
-		TArray<FBox> ValidBoxes;
-		TArray<double> CumulativeVolumes;
-		double TotalVolume = 0.0;
-		if (!bSimpleMode)
+		ValidBoxes = Params.GetValidBoxes();
+		CumulativeVolumes.Reserve(ValidBoxes.Num());
+		for (const FBox& CumulativeBox : ValidBoxes)
 		{
-			ValidBoxes = Params.GetValidBoxes();
-			CumulativeVolumes.Reserve(ValidBoxes.Num());
-			for (const FBox& CumulativeBox : ValidBoxes)
-			{
-				TotalVolume += CumulativeBox.GetVolume();
-				CumulativeVolumes.Add(TotalVolume);
-			}
-			N_PICKER_BOX_VLOG_BOXES(ValidBoxes)
+			TotalVolume += CumulativeBox.GetVolume();
+			CumulativeVolumes.Add(TotalVolume);
 		}
-
-		FNPickerProjection::Emit(OutLocations, CachedWorld, Params, [&]() -> FVector
-		{
-			if (bSimpleMode)
-			{
-				return Params.Origin + FVector(
-					Rand(Params.MaximumBox.Min.X, Params.MaximumBox.Max.X),
-					Rand(Params.MaximumBox.Min.Y, Params.MaximumBox.Max.Y),
-					Rand(Params.MaximumBox.Min.Z, Params.MaximumBox.Max.Z));
-			}
-			const double VolumePick = Rand(0.f, 1.f) * TotalVolume;
-			const int32 ChosenIndex = FMath::Min(Algo::LowerBound(CumulativeVolumes, VolumePick), ValidBoxes.Num() - 1);
-			const FBox ChosenBox = ValidBoxes[ChosenIndex];
-			return Params.Origin + FVector(
-				Rand(ChosenBox.Min.X, ChosenBox.Max.X),
-				Rand(ChosenBox.Min.Y, ChosenBox.Max.Y),
-				Rand(ChosenBox.Min.Z, ChosenBox.Max.Z));
-		});
-
-		N_PICKER_BOX_VLOG(!bSimpleMode)
+		N_PICKER_BOX_VLOG_BOXES(ValidBoxes)
 	}
+
+	FNPickerProjection::Emit(OutLocations, CachedWorld, Params, [&]() -> FVector
+	{
+		if (bSimpleMode)
+		{
+			return Params.Origin + FVector(
+				Rand(Params.MaximumBox.Min.X, Params.MaximumBox.Max.X),
+				Rand(Params.MaximumBox.Min.Y, Params.MaximumBox.Max.Y),
+				Rand(Params.MaximumBox.Min.Z, Params.MaximumBox.Max.Z));
+		}
+		const double VolumePick = Rand(0.f, 1.f) * TotalVolume;
+		const int32 ChosenIndex = FMath::Min(Algo::LowerBound(CumulativeVolumes, VolumePick), ValidBoxes.Num() - 1);
+		const FBox ChosenBox = ValidBoxes[ChosenIndex];
+		return Params.Origin + FVector(
+			Rand(ChosenBox.Min.X, ChosenBox.Max.X),
+			Rand(ChosenBox.Min.Y, ChosenBox.Max.Y),
+			Rand(ChosenBox.Min.Z, ChosenBox.Max.Z));
+	});
+
+	N_PICKER_BOX_VLOG(!bSimpleMode)
 }
 
 void FNBoxPicker::Random(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params)

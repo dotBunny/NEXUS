@@ -18,25 +18,22 @@
 #include "Widgets/Input/SComboBox.h"
 #include "Widgets/Text/STextBlock.h"
 
-namespace
+/** Sentinel combo index representing the project-wide default junction filler (UNWorldAssemblySettings), not a Fillers entry. */
+static constexpr int32 DefaultFillerIndex = INDEX_NONE;
+
+/** Humanizes a generated-class name for display: drops the Blueprint "_C" suffix, then NameToDisplayString. */
+static FText MakeFillerDisplayText(const FString& InRawClassName)
 {
-	/** Sentinel combo index representing the project-wide default junction filler (UNWorldAssemblySettings), not a Fillers entry. */
-	constexpr int32 DefaultFillerIndex = INDEX_NONE;
+	FString ClassName = InRawClassName;
+	ClassName.RemoveFromEnd(TEXT("_C"));
+	return FText::FromString(FName::NameToDisplayString(ClassName, false));
+}
 
-	/** Humanizes a generated-class name for display: drops the Blueprint "_C" suffix, then NameToDisplayString. */
-	FText MakeFillerDisplayText(const FString& InRawClassName)
-	{
-		FString ClassName = InRawClassName;
-		ClassName.RemoveFromEnd(TEXT("_C"));
-		return FText::FromString(FName::NameToDisplayString(ClassName, false));
-	}
-
-	/** @return The configured project-wide default junction filler class (loading it on demand), or null when unset. */
-	UClass* ResolveDefaultFillerClass()
-	{
-		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
-		return Settings != nullptr ? Settings->AssemblySpawningDefaultJunctionFiller.LoadSynchronous() : nullptr;
-	}
+/** @return The configured project-wide default junction filler class (loading it on demand), or null when unset. */
+static UClass* ResolveDefaultFillerClass()
+{
+	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
+	return Settings != nullptr ? Settings->AssemblySpawningDefaultJunctionFiller.LoadSynchronous() : nullptr;
 }
 
 TSharedRef<IDetailCustomization> FNCellJunctionComponentCustomization::MakeInstance()

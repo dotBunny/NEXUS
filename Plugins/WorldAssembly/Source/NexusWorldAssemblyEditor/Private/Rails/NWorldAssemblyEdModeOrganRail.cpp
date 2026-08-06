@@ -21,39 +21,36 @@
 
 #define LOCTEXT_NAMESPACE "NexusWorldAssemblyEditor"
 
-namespace
+/**
+ * @return The organ component in the current editor selection, or nullptr when none is selected.
+ * @note Two selections have to be consulted, unlike a junction's. Picking from the organ list selects the
+ *       component, but an organ lives on an ANOrganVolume — so selecting one in the outliner or the viewport
+ *       selects the actor instead, and only the actor.
+ */
+static UNOrganComponent* GetSelectedOrgan()
 {
-	/**
-	 * @return The organ component in the current editor selection, or nullptr when none is selected.
-	 * @note Two selections have to be consulted, unlike a junction's. Picking from the organ list selects the
-	 *       component, but an organ lives on an ANOrganVolume — so selecting one in the outliner or the viewport
-	 *       selects the actor instead, and only the actor.
-	 */
-	UNOrganComponent* GetSelectedOrgan()
+	if (USelection* SelectedComponents = GEditor->GetSelectedComponents())
 	{
-		if (USelection* SelectedComponents = GEditor->GetSelectedComponents())
+		for (FSelectionIterator It(*SelectedComponents); It; ++It)
 		{
-			for (FSelectionIterator It(*SelectedComponents); It; ++It)
+			if (UNOrganComponent* Organ = Cast<UNOrganComponent>(*It))
 			{
-				if (UNOrganComponent* Organ = Cast<UNOrganComponent>(*It))
-				{
-					return Organ;
-				}
+				return Organ;
 			}
 		}
-
-		if (USelection* SelectedActors = GEditor->GetSelectedActors())
-		{
-			for (FSelectionIterator It(*SelectedActors); It; ++It)
-			{
-				if (const ANOrganVolume* Volume = Cast<ANOrganVolume>(*It))
-				{
-					return Volume->GetOrganComponent();
-				}
-			}
-		}
-		return nullptr;
 	}
+
+	if (USelection* SelectedActors = GEditor->GetSelectedActors())
+	{
+		for (FSelectionIterator It(*SelectedActors); It; ++It)
+		{
+			if (const ANOrganVolume* Volume = Cast<ANOrganVolume>(*It))
+			{
+				return Volume->GetOrganComponent();
+			}
+		}
+	}
+	return nullptr;
 }
 
 TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeOrganRail::GetCategoryCommand() const
