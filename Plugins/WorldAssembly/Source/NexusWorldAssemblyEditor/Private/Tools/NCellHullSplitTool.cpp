@@ -123,6 +123,11 @@ void UNCellHullSplitTool::SplitHoveredEdge()
 
 	const FScopedTransaction Transaction(LOCTEXT("NCellHullSplitTool_SplitEdge", "Split Hull Edge"));
 
+	// Ahead of the flag write below, not left to the one inside SplitHullEdge. Modify snapshots the component as it
+	// is at the moment it is called, and records that snapshot only once per transaction — so writing the flag first
+	// meant every split was captured with it already false, and no amount of undo ever put it back.
+	RootComponent->Modify();
+
 	// The cached vertices are world-space; the hull is stored in the cell root's local space.
 	const FTransform OffsetTransform(RootComponent->GetOffsetRotator(), RootComponent->GetOffsetLocation());
 	const FVector LocalPosition = OffsetTransform.InverseTransformPosition(HoveredEdge.SplitPosition);
