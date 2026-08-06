@@ -248,7 +248,15 @@ void FNWorldAssemblyEdModeToolkit::RegisterPalettes()
 	const FNWorldAssemblyEditorCommands& Commands = FNWorldAssemblyEditorCommands::Get();
 
 	ToolkitSections = MakeShared<FToolkitSections>();
-	ToolkitSections->DetailsView = ModeDetailsView;
+
+	// ModeDetailsView is deliberately not handed over. It shows the mode's settings object and nothing else — tool
+	// properties go to FModeToolkit's separate DetailsView — and that object only exists when UEdMode::SettingsClass
+	// is set, which this mode does not do. So it renders nothing, while being the one widget in the panel that fails
+	// SWidget::SupportsInvalidationRecursive (SDetailsView does not opt in), which costs the whole panel its caching.
+	//
+	// Put this back the moment UNWorldAssemblyEdMode gains a SettingsClass:
+	//     ToolkitSections->DetailsView = ModeDetailsView;
+	// UpdateContentForCategory already handles it being unset, so that one line is the whole change.
 
 	// The rail buttons resolve their actions against the toolkit's own command list, so fold in the per-area lists the
 	// commands were already mapped into. This is also what scopes them to the mode: the Organ bindings used to be
