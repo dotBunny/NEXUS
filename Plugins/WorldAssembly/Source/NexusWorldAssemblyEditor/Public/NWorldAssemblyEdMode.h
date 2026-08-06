@@ -4,8 +4,8 @@
 #pragma once
 
 #include "EditorModeManager.h"
+#include "NWorldAssemblyEditorColors.h"
 #include "NWorldAssemblyEditorModule.h"
-#include "CanvasItems/NMultiLineTextBoxCanvasItem.h"
 #include "Cell/NCellActor.h"
 #include "Developer/NDebugActor.h"
 #include "Tools/LegacyEdModeWidgetHelpers.h"
@@ -34,21 +34,6 @@ enum class ENWorldAssemblyEdModeRenderMode
 	/** Draw nothing: neither overlays nor HUD messages are rendered. */
 	None,
 };
-
-// still not used #00FFFF
-namespace NEXUS::WorldAssembly::DefaultColors
-{
-	static constexpr FLinearColor BoneValid = FLinearColor(0.061246f,1.f,1.f, 1.f); // #46FFFFFF
-	static constexpr FLinearColor BoneInvalid = FLinearColor(0.254152f,0.012983f,1.f, 1.f); // #8A1EFFFF
-
-	static constexpr FLinearColor JunctionValid = FLinearColor(0.010330f,1.f,0.391573f, 1.f); // #1AFFA8FF
-	static constexpr FLinearColor JunctionInvalid = FLinearColor(1.f,0.097587f,1.f, 1.f); // #FF58FFFF
-	static constexpr FLinearColor JunctionUnfilled = FLinearColor(1.f,1.f,1.f, 1.f); // #FFFFFFFF
-	static constexpr FLinearColor JunctionConnectorCorners = FLinearColor(0.947307f,0.745404f,0.964686f, 1.f); // #A06600FF
-
-	static constexpr FLinearColor CellHull = FLinearColor(0.f,0.630757f,1.f, 1.f); // #00D0FFFF
-	static constexpr FLinearColor CellBounds = FLinearColor(0.434154f,0.006995f,0.001821f, 1.f); // #B01406FF
-}
 
 /**
  * Custom editor mode for World Assembly cell/organ authoring.
@@ -90,60 +75,53 @@ public:
 		Points = 2
 	};
 
-	/** @return Cached axis-aligned bounds for the focused cell. */
-	static FBox GetCachedBounds() { return CachedBounds; }
+	/**
+	 * @return The active World Assembly edit mode, or nullptr when it is not the active level-editor mode.
+	 * @note This is the seam that lets the mode hold its state on the instance while the editor UI keeps calling
+	 *       through static accessors. Everything below that reads or writes mode state resolves through here and
+	 *       degrades to a sensible default when the mode is not up, because the visibility and CanExecute predicates
+	 *       driving the toolbar are evaluated whether or not it is.
+	 */
+	static UNWorldAssemblyEdMode* Get();
 
-	/** @return Cached bounds overlay color. */
-	static const FLinearColor& GetCachedCellBoundsColor() { return CachedCellBoundsColor; }
+	/** @return Cached axis-aligned bounds for the focused cell, or an empty box when the mode is not active. */
+	static FBox GetCachedBounds();
 
-	/** @return Cached hull overlay color. */
-	static const FLinearColor& GetCachedCellHullColor() { return CachedCellHullColor; }
+	/** @return Cached bounds overlay vertex positions, or an empty array when the mode is not active. */
+	static const TArray<FVector>& GetCachedBoundsVertices();
 
-	static const FLinearColor& GetCachedJunctionInvalidColor() { return CachedJunctionInvalidColor; }
+	/** @return Cached voxel overlay data, or empty data when the mode is not active. */
+	static const FNCellVoxelData& GetCachedVoxelData();
 
-	static const FLinearColor& GetCachedJunctionValidColor() { return CachedJunctionValidColor; }
+	/** @return Cached hull overlay vertex positions, or an empty array when the mode is not active. */
+	static const TArray<FVector>& GetCachedHullVertices();
 
-	static const FLinearColor& GetCachedJunctionUnfilledColor() { return CachedJunctionUnfilledColor; }
+	/** @return Cached hull overlay edge indices, or an empty array when the mode is not active. */
+	static const TArray<FIntVector2>& GetCachedHullEdges();
 
-	/** @return Cached color for the curves of a junction connector's route. */
-	static const FLinearColor& GetCachedJunctionConnectorCornersColor() { return CachedJunctionConnectorCornersColor; }
+	/** @return The cell actor the mode is currently focused on, or nullptr if none, stale, or the mode is not active. */
+	static ANCellActor* GetCellActor();
 
-	static const FLinearColor& GetCachedBoneValidColor() { return CachedBoneValidColor; }
+	/** @return The currently active cell-edit sub-mode, or Bounds when the mode is not active. */
+	static ENCellEdMode GetCellEdMode();
 
-	static const FLinearColor& GetCachedBoneInvalidColor() { return CachedBoneInvalidColor; }
-
-	/** @return Cached bounds overlay vertex positions. */
-	static const TArray<FVector>& GetCachedBoundsVertices() { return CachedBoundsVertices; }
-
-	/** @return Cached voxel overlay data. */
-	static const FNCellVoxelData& GetCachedVoxelData() { return CachedVoxelData; }
-
-	/** @return Cached hull overlay vertex positions. */
-	static const TArray<FVector>& GetCachedHullVertices() { return CachedHullVertices; }
-
-	/** @return Cached hull overlay vertex positions. */
-	static const TArray<FIntVector2>& GetCachedHullEdges() { return CachedHullEdges; }
-
-	/** @return The cell actor this mode is currently focused on, or nullptr if none or stale. */
-	static ANCellActor* GetCellActor() { return CellActor.Get(); }
-
-	/** @return The currently active cell-edit sub-mode. */
-	static ENCellEdMode GetCellEdMode() { return CellEdMode; }
+	/** Set the active cell-edit sub-mode. No-op when the mode is not active. */
+	static void SetCellEdMode(ENCellEdMode InCellEdMode);
 
 	/** Force the edit mode back to a safe state if the current one becomes invalid. */
 	static void ProtectCellEdMode();
 
-	/** @return The currently active voxel visualization style. */
-	static ENCellVoxelMode GetCellVoxelMode() { return CellVoxelMode; }
+	/** @return The currently active voxel visualization style, or None when the mode is not active. */
+	static ENCellVoxelMode GetCellVoxelMode();
 
-	/** Set the voxel visualization style. */
-	static void SetCellVoxelMode(const ENCellVoxelMode InCellVoxelMode) { CellVoxelMode = InCellVoxelMode; }
+	/** Set the voxel visualization style. No-op when the mode is not active. */
+	static void SetCellVoxelMode(ENCellVoxelMode InCellVoxelMode);
 
 	/** @return true if a cell actor is currently focused. */
-	static bool HasCellActor() { return CellActor.IsValid(); }
+	static bool HasCellActor() { return GetCellActor() != nullptr; }
 
 	/** @return true if no cell actor is currently focused. */
-	static bool HasNoCellActor() { return !CellActor.IsValid(); }
+	static bool HasNoCellActor() { return GetCellActor() == nullptr; }
 
 	/** @return true if this editor mode is currently the active level-editor mode. */
 	static bool IsActive() { return GLevelEditorModeTools().IsModeActive(Identifier); }
@@ -151,24 +129,20 @@ public:
 	/** @return true if this editor mode is not the active level-editor mode. */
 	static bool IsNotActive() { return !GLevelEditorModeTools().IsModeActive(Identifier); }
 
-	/** Set the active cell-edit sub-mode. */
-	static void SetCellEdMode(const ENCellEdMode InCellEdMode)
-	{
-		if (CellEdMode == InCellEdMode) return;
-
-		FNWorldAssemblyEditorModule& Module = FNWorldAssemblyEditorModule::Get();
-		Module.RootComponentVisualizer->ClearSelection();
-
-		CellEdMode = InCellEdMode;
-	}
-
 	/** @return true when a world-collision visualizer actor is currently alive for the focused world. */
-	static bool HasCollisionVisualizer() { return CollisionVisualizer != nullptr; }
+	static bool HasCollisionVisualizer();
 
-	static void OnActorDeleted(AActor* Actor);
+	/** Set the active render mode used to draw World Assembly debug geometry. No-op when the mode is not active. */
+	static void SetRenderMode(ENWorldAssemblyEdModeRenderMode InRenderMode);
 
-	/** Set the active render mode used to draw World Assembly debug geometry in the edit mode. */
-	static void SetRenderMode(const ENWorldAssemblyEdModeRenderMode Mode) { RenderMode = Mode; }
+	/**
+	 * @return Every warning currently applying to the focused cell, one per line, or empty text when there is nothing
+	 *         to report (or no active mode).
+	 * @remark Consumed by FNWorldAssemblyEdModeToolkit's warning area. This replaced the viewport HUD text the mode
+	 *         used to draw over the canvas — the panel is a better home for it, and it no longer competes with the
+	 *         scene or has to be suppressed for screenshots.
+	 */
+	static FText GetWarningText();
 
 	/**
 	 * Builds — or refreshes in place — the world-collision visualizer: a single merged ANDebugActor whose mesh is the
@@ -185,8 +159,9 @@ public:
 	 */
 	static TObjectPtr<ANDebugActor> CreateCollisionVisualizer(UWorld* World);
 	/**
-	 * Destroys the cached world-collision visualizer actor if one exists. No-op when none is alive. Called automatically
-	 * from CreateCollisionVisualizer (refresh) and during Exit() so the visualizer doesn't outlive the editor mode.
+	 * Destroys the cached world-collision visualizer actor if one exists. No-op when none is alive, or when the mode is
+	 * not active. Called automatically from CreateCollisionVisualizer (refresh) and during Exit() so the visualizer
+	 * doesn't outlive the editor mode.
 	 */
 	static void DestroyCollisionVisualizer();
 
@@ -215,9 +190,25 @@ public:
 	//~UBaseLegacyWidgetEdMode
 	virtual void Enter() override;
 	virtual void Exit() override;
-	virtual void Tick(FEditorViewportClient* ViewportClient, float DeltaTime) override;
+
+	/**
+	 * @note UEdMode's own per-frame hook, rather than the ILegacyEdModeViewportInterface Tick this used to override.
+	 *       Both are driven from FEditorModeTools::Tick; this one is not part of the legacy interaction surface, and
+	 *       the work here never needed the FEditorViewportClient that Tick handed it.
+	 */
+	virtual void ModeTick(float DeltaTime) override;
+
 	virtual void Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI) override;
-	virtual void DrawHUD(FEditorViewportClient* ViewportClient, FViewport* Viewport, const FSceneView* View, FCanvas* Canvas) override;
+
+	/**
+	 * @return true when the key press was consumed here.
+	 * @note Only handles Escape, to end the running tool. The mode's tools edit live and commit as they go, so there
+	 *       is nothing to accept or discard on the way out — leaving is the whole gesture, and Escape is where every
+	 *       other editor mode puts it.
+	 * @remark Reached despite RequiresLegacyViewportInteractions() being false: FEditorModeTools::InputKey offers the
+	 *         key to every mode implementing ILegacyEdModeViewportInterface before anything else, ungated.
+	 */
+	virtual bool InputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event) override;
 
 	/**
 	 * @return Always false: this mode draws, it does not interact.
@@ -237,85 +228,105 @@ public:
 	virtual bool RequiresLegacyViewportInteractions() const override { return false; }
 
 	/**
-	 * @return Always false, for now.
-	 * @note UEdMode supports a mode panel and a secondary mode toolbar through FModeToolkit, and this mode's UI is a
-	 *       natural fit for both. None of that is built yet, though — the UI still lives in the level editor toolbar
-	 *       (FNWorldAssemblyEditorToolMenu), gated on IsActive(). Opting in before there is a toolkit to show would
-	 *       only open an empty panel, so this stays false until that work lands.
+	 * @return Always true: the mode's UI lives in FNWorldAssemblyEdModeToolkit's panel.
+	 * @note Turning this on is what makes the editor host the toolkit and open the Mode Toolbox panel for it — see
+	 *       FModeToolkit::InvokeUI, which invokes that tab unconditionally.
 	 */
-	virtual bool UsesToolkits() const override { return false; }
+	virtual bool UsesToolkits() const override { return true; }
 	//End UBaseLegacyWidgetEdMode
 
-	static void CacheUserSettings();
+protected:
+	//~UEdMode
+	virtual void CreateToolkit() override;
+
+	/** Register the mode's interactive tools. Called from Enter(), after the tools context exists. */
+	virtual void BindCommands() override;
+	//End UEdMode
 
 private:
+	/**
+	 * Registers a tool whose palette button toggles rather than restarts.
+	 *
+	 * @param UICommand Command the palette button is built from.
+	 * @param ToolIdentifier Unique identifier the tool is registered under.
+	 * @param Builder Builder that constructs the tool.
+	 * @note UEdMode::RegisterTool maps the command straight to StartTool, so clicking an already-running tool's button
+	 *       restarts it — while the button renders as lit, because its checked state is bound to IsToolActive. This
+	 *       re-maps the action afterwards so the lit button ends the tool, which is what a toggle appearance promises.
+	 */
+	void RegisterToggleableTool(const TSharedPtr<FUICommandInfo>& UICommand, const FString& ToolIdentifier, UInteractiveToolBuilder* Builder);
+
+private:
+	/** Instance half of CreateCollisionVisualizer; see that overload for the contract. */
+	TObjectPtr<ANDebugActor> RefreshCollisionVisualizer(UWorld* World);
+
+	/** Instance half of DestroyCollisionVisualizer; see that overload for the contract. */
+	void TearDownCollisionVisualizer();
+
 	/** Subscribe to the editor world-change delegates that drive live visualizer refreshes. Called when one is spawned. */
-	static void BindWorldChangeDelegates();
+	void BindWorldChangeDelegates();
 
 	/** Unsubscribe from the editor world-change delegates. Called when the visualizer is destroyed or the mode exits. */
-	static void UnbindWorldChangeDelegates();
+	void UnbindWorldChangeDelegates();
 
-	/** Flag the cached visualizer for a rebuild on the next Tick. Bursts of changes coalesce into a single rebuild. */
-	static void MarkCollisionVisualizerDirty() { bCollisionVisualizerDirty = true; }
+	/** Flag the cached visualizer for a rebuild on the next ModeTick. Bursts of changes coalesce into a single rebuild. */
+	void MarkCollisionVisualizerDirty() { bCollisionVisualizerDirty = true; }
 
 	/**
 	 * @return true when a change to Actor could alter the cached visualizer — i.e. Actor currently passes the collision
 	 *         filter, or it was part of the source set the live visualizer was last built from (so a delete / collision
 	 *         toggle / ignore-tag still forces it to drop out). Always false while no visualizer is alive.
 	 */
-	static bool ShouldRebuildForActor(const AActor* Actor);
+	bool ShouldRebuildForActor(const AActor* Actor) const;
 
 	/** @return The actor affected by a change delegate payload — the object itself, or its owner when it is a component. */
 	static AActor* ResolveAffectedActor(UObject* Object);
 
+	/** Delegate: an actor was removed from the level — drop it from our state, or flag a refresh when it sourced one. */
+	void OnActorDeleted(AActor* Actor);
+
 	/** Delegate: a relevant actor was added to the level — flag a refresh. */
-	static void OnLevelActorAdded(AActor* Actor);
+	void OnLevelActorAdded(AActor* Actor);
 
 	/** Delegate: a transform gizmo drag ended on Object — flag a refresh when it is relevant. */
-	static void OnObjectMoved(UObject& Object);
+	void OnObjectMoved(UObject& Object);
 
 	/** Delegate: a finalized (non-interactive) property edit landed on Object — flag a refresh when it is relevant. */
-	static void OnObjectPropertyChanged(UObject* Object, FPropertyChangedEvent& PropertyChangedEvent);
+	void OnObjectPropertyChanged(UObject* Object, FPropertyChangedEvent& PropertyChangedEvent);
 
 	/** Delegate: an undo/redo transaction completed — geometry can't be cheaply diffed, so always flag a refresh. */
-	static void OnUndoRedo();
+	void OnUndoRedo();
 
+	TArray<FVector> CachedHullVertices;
+	TArray<FIntVector2> CachedHullEdges;
 
+	FBox CachedBounds = FBox(ForceInit);
+	FNCellVoxelData CachedVoxelData;
+	TArray<FVector> CachedBoundsVertices;
+	TWeakObjectPtr<ANCellActor> CellActor;
+	ENCellEdMode CellEdMode = ENCellEdMode::Bounds;
+	ENCellVoxelMode CellVoxelMode = ENCellVoxelMode::None;
+	ENWorldAssemblyEdModeRenderMode RenderMode = ENWorldAssemblyEdModeRenderMode::All;
 
-	/** Pixel spacing between stacked HUD messages. */
-	const int32 MessageSpacing = 20;
-
-	static TArray<FVector> CachedHullVertices;
-	static TArray<FIntVector2> CachedHullEdges;
-
-	static FLinearColor CachedCellHullColor;
-	static FLinearColor CachedCellBoundsColor;
-	static FLinearColor CachedJunctionUnfilledColor;
-	static FLinearColor CachedJunctionInvalidColor;
-	static FLinearColor CachedJunctionValidColor;
-	static FLinearColor CachedJunctionConnectorCornersColor;
-	static FLinearColor CachedBoneValidColor;
-	static FLinearColor CachedBoneInvalidColor;
-
-	static FBox CachedBounds;
-	static FNCellVoxelData CachedVoxelData;
-	static TArray<FVector> CachedBoundsVertices;
-	static TWeakObjectPtr<ANCellActor> CellActor;
-	static ENCellEdMode CellEdMode;
-	static ENCellVoxelMode CellVoxelMode;
-	static TObjectPtr<ANDebugActor> CollisionVisualizer;
-	static ENWorldAssemblyEdModeRenderMode RenderMode;
+	/**
+	 * The live world-collision visualizer, or nullptr when none is spawned.
+	 * @note A real UPROPERTY now that this is instance state, which is what roots it. As a static TObjectPtr it could
+	 *       not be one — statics are invisible to the property system — so the actor was reachable only through its
+	 *       world's actor list.
+	 */
+	UPROPERTY()
+	TObjectPtr<ANDebugActor> CollisionVisualizer;
 
 	/** Actors that sourced the geometry of the live visualizer; lets change delegates test relevance in O(1). */
-	static TSet<FObjectKey> CollisionSourceActors;
+	TSet<FObjectKey> CollisionSourceActors;
 
-	/** Set by the world-change delegates when the visualizer needs rebuilding; consumed (and cleared) in Tick. */
-	static bool bCollisionVisualizerDirty;
+	/** Set by the world-change delegates when the visualizer needs rebuilding; consumed (and cleared) in ModeTick. */
+	bool bCollisionVisualizerDirty = false;
 
-	static FDelegateHandle OnLevelActorAddedHandle;
-	static FDelegateHandle OnObjectMovedHandle;
-	static FDelegateHandle OnObjectPropertyChangedHandle;
-	static FDelegateHandle OnUndoRedoHandle;
+	FDelegateHandle OnLevelActorAddedHandle;
+	FDelegateHandle OnObjectMovedHandle;
+	FDelegateHandle OnObjectPropertyChangedHandle;
+	FDelegateHandle OnUndoRedoHandle;
 
 	/**
 	 * Editor-side operation used to preview organ generation.
@@ -348,6 +359,4 @@ private:
 	uint32 PreviousSelectedOrganHash = 0;
 
 	FDelegateHandle OnLevelActorDeletedHandle;
-
-	FNMultiLineTextBoxCanvasItem CanvasMessageBox = FNMultiLineTextBoxCanvasItem();
 };

@@ -16,8 +16,6 @@ public:
 
 	/** Name of the global tool-menu section World Assembly entries are added to. */
 	static const FName MenuSectionGlobal;
-	/** Name of the World Assembly-specific tool-menu section. */
-	static const FName MenuSection;
 
 	/** Register all World Assembly entries with the global tool-menu system. */
 	static void AddMenuEntries();
@@ -25,26 +23,8 @@ public:
 	/** Remove every entry previously registered by AddMenuEntries. */
 	static void RemoveMenuEntries();
 
-	/** @return true if the cell-edit-mode action should be visible given the current context. */
-	static bool ShowCellEditMode();
-
-	/** @return true if the draw-voxels action should be visible given the current context. */
-	static bool ShowDrawVoxels();
-
-	/** @return true if the cell-actor dropdown should be visible given the current context. */
-	static bool ShowCellDropdown();
-
-	/** @return true if the cell-junction dropdown should be visible given the current context. */
-	static bool ShowCellJunctionDropdown();
-
 	/** @return true if the organ dropdown should be visible given the current context. */
 	static bool ShowOrganDropdown();
-
-	/**
-	 * Toggles the world-collision visualizer for the currently-edited world. Spawns a fresh visualizer via
-	 * UNWorldAssemblyEdMode::CreateCollisionVisualizer when none is alive, otherwise destroys the existing one.
-	 */
-	static void CollisionVisualizerToggle();
 
 	/**
 	 * Adds or removes the cell-ignore tag on the current actor selection. The direction is decided by
@@ -70,12 +50,6 @@ public:
 
 	/** @return Toggle state for the world-collision-ignore action: 0 to add the tag, 1 to remove it, or -1 when it should be disabled. */
 	static int32 TagSelectedActors_WorldIgnore_Mode();
-
-
-	/** Splits the currently-selected hull edge on the active cell. */
-	static void Hull_SplitEdge();
-	/** @return true if the hull split-edge action should be shown (an editable hull edge is selected). */
-	static bool Hull_SplitEdge_CanShow();
 
 	static bool HasValidQuickAssemblyOrgan();
 	static TSharedRef<SWidget> CreateQuickAssemblyComboBox();

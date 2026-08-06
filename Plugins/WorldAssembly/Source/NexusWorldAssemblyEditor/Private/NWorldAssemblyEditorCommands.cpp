@@ -18,12 +18,16 @@
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyRegistry.h"
+#include "InteractiveToolManager.h"
+#include "Tools/NCellHullTool.h"
 #include "NWorldAssemblyUtils.h"
 #include "NUIEditorStyle.h"
 #include "NWorldAssemblyEditorToolMenu.h"
 #include "Selection.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Assembly/NAssemblyOperation.h"
+#include "EditorViewportClient.h"
+#include "Organ/NOrganVolume.h"
 #include "Subsystems/EditorActorSubsystem.h"
 #include "Types/NRawMeshFactory.h"
 
@@ -39,28 +43,28 @@ void FNWorldAssemblyEditorCommands::RegisterCommands()
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellCalculateAll,
 		"NWorldAssembly.NCell.CalculateAll",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CalculateAll", "Calculate All"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CalculateAll", "All"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CalculateAll_Tooltip", "Calculate all data related to the cell."),
 		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellCalculateBounds,
 		"NWorldAssembly.NCell.CalculateBounds",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CalculateBounds", "Calculate Bounds"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CalculateBounds", "Bounds"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CalculateBounds_Tooltip", "Calculate bounds for the cell."),
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.CalculateBounds"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellCalculateHull,
 		"NWorldAssembly.NCell.CalculateHull",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CalculateHull", "Calculate Hull"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CalculateHull", "Hull"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CalculateHull_Tooltip", "Calculate convex hull for the cell."),
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.CalculateHull"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellCalculateVoxelData,
 		"NWorldAssembly.NCell.CalculateVoxelData",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CalculateVoxelData", "Calculate Voxel Data"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CalculateVoxelData", "Voxel"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CalculateVoxelData_Tooltip", "Calculate voxel data for the cell."),
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.CalculateVoxelData"),
 		EUserInterfaceActionType::Button, FInputChord());
@@ -121,25 +125,83 @@ void FNWorldAssemblyEditorCommands::RegisterCommands()
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.RemoveNCellActor"),
 		EUserInterfaceActionType::Button, FInputChord());
 
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellAddActor,
+		"NWorldAssembly.NCell.AddActor",
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_AddActor", "Add Actor"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_AddActor_Tooltip", "Create the singleton-like actor which will facilitate creating a NCell from the level it is placed in."),
+		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.AddNCellActor"),
+		EUserInterfaceActionType::Button, FInputChord());
+
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellSelectActor,
+		"NWorldAssembly.NCell.SelectActor",
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_SelectActor", "Select Actor"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_SelectActor_Tooltip", "Select the NCellActor in the level."),
+		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.SelectNCellActor.Selected"),
+		EUserInterfaceActionType::Button, FInputChord());
+
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellToggleDrawVoxelData,
+		"NWorldAssembly.NCell.ToggleDrawVoxelData",
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_DrawVoxelData", "Draw Voxel Data"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_DrawVoxelData_Tooltip", "Toggle drawing calculated voxel data for the NCell."),
+		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.Voxel.Points"),
+		EUserInterfaceActionType::ToggleButton, FInputChord());
+
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellHullSplitEdge,
+		"NWorldAssembly.NCell.HullSplitEdge",
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_HullSplitEdge", "Split Hull Edge"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_HullSplitEdge_Tooltip", "Splits the hull edge and retriangulates the Hull."),
+		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.Hull.SplitEdge"),
+		EUserInterfaceActionType::Button, FInputChord());
+
+	// Cell-scoped despite acting on the actor selection: the tag it toggles only means anything to a cell's
+	// bounds/hull/voxel calculations, which is why it sits with the Cell actions rather than the world ones.
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellTagIgnore,
+		"NWorldAssembly.NCell.TagIgnore",
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_TagIgnore", "Ignore (Cell)"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_TagIgnore_Tooltip", "Toggles the necessary tag to have the selected actors ignored when calculating the bounds/hull/etc for a Cell."),
+		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.CellIgnore_NotIgnored"),
+		EUserInterfaceActionType::Button, FInputChord());
+
 	// Create NCell Command List
 	CommandList_Cell = MakeShared<FUICommandList>();
 
 	// Map NCell Actions
+	CommandList_Cell->MapAction(Get().CommandInfo_CellAddActor,
+		FExecuteAction::CreateStatic(&CellAddActor),
+		FCanExecuteAction::CreateStatic(&CellAddActor_CanExecute));
+
+	CommandList_Cell->MapAction(Get().CommandInfo_CellSelectActor,
+		FExecuteAction::CreateStatic(&CellSelectActor),
+		FCanExecuteAction::CreateStatic(&CellSelectActor_CanExecute));
+
+	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleDrawVoxelData,
+		FExecuteAction::CreateStatic(&CellActorToggleDrawVoxelData),
+		FCanExecuteAction::CreateStatic(&CanEditCell),
+		FIsActionChecked::CreateStatic(&CellActorToggleDrawVoxelData_IsActionChecked));
+
+	CommandList_Cell->MapAction(Get().CommandInfo_CellHullSplitEdge,
+		FExecuteAction::CreateStatic(&CellHullSplitEdge),
+		FCanExecuteAction::CreateStatic(&CellHullSplitEdge_CanExecute));
+
+	CommandList_Cell->MapAction(Get().CommandInfo_CellTagIgnore,
+		FExecuteAction::CreateStatic(&CellTagIgnore),
+		FCanExecuteAction::CreateStatic(&CellTagIgnore_CanExecute));
+
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCaptureThumbnail,
 		FExecuteAction::CreateStatic(&CellCaptureThumbnail),
 		FCanExecuteAction::CreateStatic(&CellCaptureThumbnail_CanExecute));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCalculateAll,
 		FExecuteAction::CreateStatic(&CellCalculateAll),
-		FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld));
+		FCanExecuteAction::CreateStatic(&CanEditCell));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCalculateBounds,
 		FExecuteAction::CreateStatic(&CellCalculateBounds),
-		FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld));
+		FCanExecuteAction::CreateStatic(&CanEditCell));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCalculateHull,
 	FExecuteAction::CreateStatic(&CellCalculateHull),
-	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld));
+	FCanExecuteAction::CreateStatic(&CanEditCell));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCalculateVoxelData,
 FExecuteAction::CreateStatic(&CellCalculateVoxelData),
@@ -147,45 +209,71 @@ FExecuteAction::CreateStatic(&CellCalculateVoxelData),
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleBoundsCalculateOnSave,
 FExecuteAction::CreateStatic(&CellToggleBoundsCalculateOnSave),
-	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld),
+	FCanExecuteAction::CreateStatic(&CanEditCell),
 	FIsActionChecked::CreateStatic(&CellToggleBoundsCalculateOnSave_IsActionChecked));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleHullCalculateOnSave,
 FExecuteAction::CreateStatic(&CellToggleHullCalculateOnSave),
-	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld),
+	FCanExecuteAction::CreateStatic(&CanEditCell),
 	FIsActionChecked::CreateStatic(&CellToggleHullCalculateOnSave_IsActionChecked));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleHullAllowNonConvex,
 FExecuteAction::CreateStatic(&CellToggleHullAllowNonConvex),
-	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld),
+	FCanExecuteAction::CreateStatic(&CanEditCell),
 	FIsActionChecked::CreateStatic(&CellToggleHullAllowNonConvex_IsActionChecked));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleVoxelCalculateOnSave,
 FExecuteAction::CreateStatic(&CellToggleVoxelCalculateOnSave),
-	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld),
+	FCanExecuteAction::CreateStatic(&CanEditCell),
 	FIsActionChecked::CreateStatic(&CellToggleVoxelCalculateOnSave_IsActionChecked));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleVoxelData,
 FExecuteAction::CreateStatic(&CellToggleVoxelData),
-	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld),
+	FCanExecuteAction::CreateStatic(&CanEditCell),
 	FIsActionChecked::CreateStatic(&CellToggleVoxelData_IsActionChecked));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellResetCell,
 	FExecuteAction::CreateStatic(&CellResetCell),
-	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld));
+	FCanExecuteAction::CreateStatic(&CanEditCell));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellSaveCell,
 	FExecuteAction::CreateStatic(&CellSaveCell),
-	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld));
+	FCanExecuteAction::CreateStatic(&CanEditCell));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellRemoveActor,
 	FExecuteAction::CreateStatic(&CellRemoveActor),
-	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld));
+	FCanExecuteAction::CreateStatic(&CanEditCell));
+
+	// Build World Command Info
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_WorldToggleCollisionVisualizer,
+		"NWorldAssembly.World.ToggleCollisionVisualizer",
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_ToggleCollisionVisualizer", "Collision Visualizer"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_ToggleCollisionVisualizer_Tooltip", "Creates and destroys a temporary/transient visualizer of the worlds collision geometry used during assembly."),
+		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.CreateCollisionVisualizer"),
+		EUserInterfaceActionType::ToggleButton, FInputChord());
+
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_WorldTagCollisionIgnore,
+		"NWorldAssembly.World.TagCollisionIgnore",
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_TagCollisionIgnore", "Ignore (World Collision)"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_TagCollisionIgnore_Tooltip", "Toggles the necessary tag to have the selected actors ignored in the world collision system when placing Cells during assembly."),
+		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.WorldCollisionIgnore_NotIgnored"),
+		EUserInterfaceActionType::Button, FInputChord());
+
+	CommandList_World = MakeShared<FUICommandList>();
+
+	CommandList_World->MapAction(Get().CommandInfo_WorldToggleCollisionVisualizer,
+		FExecuteAction::CreateStatic(&WorldToggleCollisionVisualizer),
+		FCanExecuteAction::CreateStatic(&FNEditorUtils::IsNotPlayInEditor),
+		FIsActionChecked::CreateStatic(&WorldToggleCollisionVisualizer_IsActionChecked));
+
+	CommandList_World->MapAction(Get().CommandInfo_WorldTagCollisionIgnore,
+		FExecuteAction::CreateStatic(&WorldTagCollisionIgnore),
+		FCanExecuteAction::CreateStatic(&WorldTagCollisionIgnore_CanExecute));
 
 	// Build NCellJunction Command Info
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellJunctionAddComponent,
 		"NWorldAssembly.NCellJunction.AddComponent",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_AddComponent", "Add Component"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_AddComponent", "Add"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_AddComponent_Tooltip", "Add a NCellJunction component to current actor."),
 		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
 		EUserInterfaceActionType::Button, FInputChord());
@@ -200,7 +288,7 @@ FExecuteAction::CreateStatic(&CellToggleVoxelData),
 	// Collect Components
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellJunctionCollectComponents,
 		"NWorldAssembly.NCellJunction.CollectComponents",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_CollectComponents", "Collect Components"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_CollectComponents", "Collect"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_CollectComponents_Tooltip", "Collects all Junctions and move them to the selected Actor, maintaining their world transforms."),
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.Junction.CollectJunctionComponents"),
 		EUserInterfaceActionType::Button, FInputChord());
@@ -214,10 +302,16 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 
 	CommandList_CellJunction->MapAction(Get().CommandInfo_CellJunctionCollectComponents,
 FExecuteAction::CreateStatic(&CellJunctionCollectComponents),
-	FCanExecuteAction::CreateStatic(&FNEditorUtils::HasActorSelected));
-
+	FCanExecuteAction::CreateStatic(&CanEditCellJunction));
 
 	// Organ
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganAddVolume,
+	"NWorldAssembly.NOrganComponent.AddVolume",
+	NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NOrganComponent_AddVolume", "Add Organ"),
+	NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NOrganComponent_AddVolume_Tooltip", "Place a new Organ Volume in the current level, which bounds where an assembly operation may generate."),
+	FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "ClassIcon.NOrganVolume"),
+	EUserInterfaceActionType::Button, FInputChord());
+
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganGenerateProxies,
 	"NWorldAssembly.NOrganComponent.GenerateProxies",
 	NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NOrganComponent_GenerateProxies", "Generate Proxies"),
@@ -297,18 +391,17 @@ FExecuteAction::CreateStatic(&CellJunctionCollectComponents),
 		FCanExecuteAction(),
 		FIsActionChecked::CreateStatic(&QuickAssemblyToggleAutoAssembly_IsActionChecked));
 
-	// Map every Organ command from the single source of truth so this list and UnregisterGlobalActions
-	// stay in lockstep — add or remove a command in GetGlobalOrganActions() and both sides pick it up.
 	CommandList_Organ = MakeShared<FUICommandList>();
-	for (const FNCommandInfoAction& Action : GetGlobalOrganActions())
+	for (const FNCommandInfoAction& Action : GetOrganActions())
 	{
 		CommandList_Organ->MapAction(Action.CommandInfo, Action.Execute, Action.CanExecute);
 	}
 }
 
-TArray<FNWorldAssemblyEditorCommands::FNCommandInfoAction> FNWorldAssemblyEditorCommands::GetGlobalOrganActions() const
+TArray<FNWorldAssemblyEditorCommands::FNCommandInfoAction> FNWorldAssemblyEditorCommands::GetOrganActions() const
 {
 	return {
+		{ CommandInfo_OrganAddVolume,               FExecuteAction::CreateStatic(&OrganAddVolume),            FCanExecuteAction::CreateStatic(&FNEditorUtils::IsNotPlayInEditor) },
 		{ CommandInfo_OrganGenerateProxies,         FExecuteAction::CreateStatic(&OrganGenerateProxies),      FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::CanGenerateSelectedOrgan) },
 		{ CommandInfo_OrganGenerateAllProxies,      FExecuteAction::CreateStatic(&OrganGenerateAllProxies),   FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::CanGenerateAllOrgans) },
 		{ CommandInfo_OrganClearProxies,            FExecuteAction::CreateStatic(&OrganClearGenerated),       FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::HasSelectedGeneratedCellProxies) },
@@ -318,22 +411,6 @@ TArray<FNWorldAssemblyEditorCommands::FNCommandInfoAction> FNWorldAssemblyEditor
 		{ CommandInfo_OrganUnloadLevelInstances,    FExecuteAction::CreateStatic(&OrganUnloadProxyLevels),    FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::HasSelectedGeneratedCellProxies) },
 		{ CommandInfo_OrganUnloadAllLevelInstances, FExecuteAction::CreateStatic(&OrganUnloadAllProxyLevels), FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::HasGeneratedCellProxies) },
 	};
-}
-
-void FNWorldAssemblyEditorCommands::RegisterGlobalActions(const TSharedRef<FUICommandList>& GlobalActions) const
-{
-	GlobalActions->Append(CommandList_Organ.ToSharedRef());
-}
-
-void FNWorldAssemblyEditorCommands::UnregisterGlobalActions(const TSharedRef<FUICommandList>& GlobalActions) const
-{
-	// Append (in RegisterGlobalActions) copies CommandList_Organ's bindings into GlobalActions, so each one has
-	// to be unmapped by hand to detach the module statics it binds to. Both the mapping and this unmapping iterate
-	// GetGlobalOrganActions(), so adding or removing an Organ command updates both sides, and they can't drift apart.
-	for (const FNCommandInfoAction& Action : GetGlobalOrganActions())
-	{
-		GlobalActions->UnmapAction(Action.CommandInfo);
-	}
 }
 
 void FNWorldAssemblyEditorCommands::WorldAssemblyEdMode()
@@ -388,6 +465,83 @@ void FNWorldAssemblyEditorCommands::CellActorToggleDrawVoxelData()
 	}
 }
 
+bool FNWorldAssemblyEditorCommands::CellActorToggleDrawVoxelData_IsActionChecked()
+{
+	return UNWorldAssemblyEdMode::GetCellVoxelMode() != UNWorldAssemblyEdMode::ENCellVoxelMode::None;
+}
+
+namespace
+{
+	/**
+	 * @return The running hull tool, or nullptr when it is not the active tool.
+	 * @note Edge selection belongs to the tool now rather than to the component visualizer, so the split command has
+	 *       to go through whichever tool instance currently holds it.
+	 */
+	UNCellHullTool* GetActiveHullTool()
+	{
+		const UNWorldAssemblyEdMode* Mode = UNWorldAssemblyEdMode::Get();
+		if (Mode == nullptr) return nullptr;
+
+		UInteractiveToolManager* ToolManager = Mode->GetToolManager();
+		if (ToolManager == nullptr) return nullptr;
+
+		return Cast<UNCellHullTool>(ToolManager->GetActiveTool(EToolSide::Mouse));
+	}
+}
+
+void FNWorldAssemblyEditorCommands::CellHullSplitEdge()
+{
+	if (UNCellHullTool* HullTool = GetActiveHullTool())
+	{
+		HullTool->SplitSelectedEdge();
+	}
+}
+
+bool FNWorldAssemblyEditorCommands::CellHullSplitEdge_CanExecute()
+{
+	const UNCellHullTool* HullTool = GetActiveHullTool();
+	return HullTool != nullptr && HullTool->HasEdgeSelected();
+}
+
+void FNWorldAssemblyEditorCommands::WorldToggleCollisionVisualizer()
+{
+	if (UNWorldAssemblyEdMode::HasCollisionVisualizer())
+	{
+		UNWorldAssemblyEdMode::DestroyCollisionVisualizer();
+		return;
+	}
+
+	if (const TObjectPtr<ANDebugActor> NewVisualizer = UNWorldAssemblyEdMode::CreateCollisionVisualizer(FNEditorUtils::GetCurrentWorld()))
+	{
+		GEditor->SelectActor(NewVisualizer, true, false, false);
+	}
+}
+
+bool FNWorldAssemblyEditorCommands::WorldToggleCollisionVisualizer_IsActionChecked()
+{
+	return UNWorldAssemblyEdMode::HasCollisionVisualizer();
+}
+
+void FNWorldAssemblyEditorCommands::CellTagIgnore()
+{
+	FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore();
+}
+
+bool FNWorldAssemblyEditorCommands::CellTagIgnore_CanExecute()
+{
+	return FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore_CanShow();
+}
+
+void FNWorldAssemblyEditorCommands::WorldTagCollisionIgnore()
+{
+	FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldCollisionIgnore();
+}
+
+bool FNWorldAssemblyEditorCommands::WorldTagCollisionIgnore_CanExecute()
+{
+	return FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldCollisionIgnore_CanShow();
+}
+
 void FNWorldAssemblyEditorCommands::CellAddActor()
 {
 	UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
@@ -433,10 +587,61 @@ void FNWorldAssemblyEditorCommands::CellAddActor()
 	FNWorldAssemblyEditorUtils::SaveCell(CurrentWorld, SpawnedActor);
 }
 
-bool FNWorldAssemblyEditorCommands::CellAddActor_CanShow()
+bool FNWorldAssemblyEditorCommands::CanEditCell()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
-	return UNWorldAssemblyEdMode::IsActive() && !UNWorldAssemblyEdMode::HasCellActor() && !FNWorldAssemblyEditorUtils::IsOrganComponentPresentInCurrentWorld();
+	return FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld();
+}
+
+bool FNWorldAssemblyEditorCommands::CanEditCellJunction()
+{
+	if (FNEditorUtils::IsPlayInEditor()) return false;
+
+	// A junction is a component of a cell, so there has to be one — the old junction dropdown was hidden outright
+	// without it, and these commands would otherwise attach junctions to a level that is not a cell at all.
+	return UNWorldAssemblyEdMode::HasCellActor() && FNEditorUtils::HasActorsSelected();
+}
+
+bool FNWorldAssemblyEditorCommands::CellAddActor_CanExecute()
+{
+	if (FNEditorUtils::IsPlayInEditor()) return false;
+
+	// One cell per level, and never in a level that assembles them: a cell is a building block an operation places,
+	// while a level holding organs is the world those blocks are placed into. Making a level both is not a thing the
+	// assembly pipeline can act on, so the button greys out rather than letting it be authored.
+	return !UNWorldAssemblyEdMode::HasCellActor() && !FNWorldAssemblyEditorUtils::IsOrganComponentPresentInCurrentWorld();
+}
+
+void FNWorldAssemblyEditorCommands::OrganAddVolume()
+{
+	UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld == nullptr) return;
+
+	// No unsaved-world guard, unlike CellAddActor: a cell writes a side-car asset keyed on its level's package path,
+	// so it needs one that exists. An organ volume is just an actor in the level and has nothing to write.
+	const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCommands_OrganAddVolume", "Add Organ Volume"));
+
+	ANOrganVolume* SpawnedVolume = CurrentWorld->SpawnActor<ANOrganVolume>(
+		ANOrganVolume::StaticClass(), FTransform::Identity, FActorSpawnParameters());
+	if (SpawnedVolume == nullptr)
+	{
+		UE_LOG(LogNexusWorldAssemblyEditor, Warning, TEXT("Failed to spawn the ANOrganVolume in the current world."));
+		return;
+	}
+
+	// Dropped in front of the viewport rather than at the origin: a volume is placed to bound a region the user is
+	// looking at, and one spawned at the world origin is easy to miss entirely in a large level.
+	if (const FEditorViewportClient* ViewportClient = GEditor->GetActiveViewport() != nullptr
+		? static_cast<FEditorViewportClient*>(GEditor->GetActiveViewport()->GetClient())
+		: nullptr)
+	{
+		constexpr double SpawnDistance = 500.0;
+		SpawnedVolume->SetActorLocation(ViewportClient->GetViewLocation()
+			+ ViewportClient->GetViewRotation().Vector() * SpawnDistance);
+	}
+
+	GEditor->SelectNone(false, true);
+	GEditor->SelectActor(SpawnedVolume, true, true, true);
 }
 
 void FNWorldAssemblyEditorCommands::OrganGenerateProxies()
@@ -507,6 +712,7 @@ void FNWorldAssemblyEditorCommands::CellSelectActor()
 
 bool FNWorldAssemblyEditorCommands::CellSelectActor_CanExecute()
 {
+	if (FNEditorUtils::IsPlayInEditor()) return false;
 	return UNWorldAssemblyEdMode::HasCellActor() && GEditor->CanSelectActor(UNWorldAssemblyEdMode::GetCellActor(), false);
 }
 
@@ -553,6 +759,8 @@ void FNWorldAssemblyEditorCommands::CellCalculateVoxelData()
 
 bool FNWorldAssemblyEditorCommands::CellCalculateVoxelData_CanExecute()
 {
+	if (FNEditorUtils::IsPlayInEditor()) return false;
+
 	const ANCellActor* CellActor = FNWorldAssemblyEditorUtils::GetCellActorFromCurrentWorld();
 	if (CellActor == nullptr) return false;
 	return CellActor->GetCellRoot()->Details.VoxelSettings.bUseVoxelData;
@@ -980,6 +1188,8 @@ void FNWorldAssemblyEditorCommands::CellCaptureThumbnail()
 
 bool FNWorldAssemblyEditorCommands::CellCaptureThumbnail_CanExecute()
 {
+	if (FNEditorUtils::IsPlayInEditor()) return false;
+
 	const UWorld* World = FNEditorUtils::GetCurrentWorld();
 	return World != nullptr && !FNEditorUtils::IsUnsavedWorld(World);
 }

@@ -23,8 +23,11 @@
 #include "Cell/NCellRootComponent.h"
 #include "Organ/NOrganComponent.h"
 #include "Visualizers/NCellRootComponentVisualizer.h"
+#include "NWorldAssemblyEditorColors.h"
 #include "NWorldAssemblyEditorCommands.h"
 #include "NWorldAssemblyEditorToolMenu.h"
+#include "NWorldAssemblyEdModePaletteCommands.h"
+#include "NWorldAssemblyEdModeToolCommands.h"
 #include "NWorldAssemblyEditorUndo.h"
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldCollisionCache.h"
@@ -114,6 +117,14 @@ void FNWorldAssemblyEditorModule::ShutdownModule()
 	{
 		FNWorldAssemblyEditorCommands::Unregister();
 	}
+	if (FNWorldAssemblyEdModePaletteCommands::IsRegistered())
+	{
+		FNWorldAssemblyEdModePaletteCommands::Unregister();
+	}
+	if (FNWorldAssemblyEdModeToolCommands::IsRegistered())
+	{
+		FNWorldAssemblyEdModeToolCommands::Unregister();
+	}
 
 	FNWorldAssemblyEditorStyle::Shutdown();
 
@@ -151,6 +162,8 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 	if (FSlateApplication::IsInitialized())
 	{
 		FNWorldAssemblyEditorCommands::Register();
+		FNWorldAssemblyEdModePaletteCommands::Register();
+		FNWorldAssemblyEdModeToolCommands::Register();
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(&N_TOOLS_MENU_ENTRY_EUW_METHOD_REGISTER(EUW_NWorldAssemblySystem)));
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNWorldAssemblyEditorToolMenu::AddMenuEntries));
 	}
@@ -236,8 +249,9 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 	FNPropertySections::AddSceneComponentCategory("Assembly Operation");
 
 
-	// Cache stuff
-	UNWorldAssemblyEdMode::CacheUserSettings();
+	// Seed the debug-draw palette. Runs before any edit mode has been entered, which is why the cache is owned by
+	// FNWorldAssemblyEditorColors rather than the mode: the visualizers that draw outside the mode need it populated.
+	FNWorldAssemblyEditorColors::Refresh();
 }
 
 IMPLEMENT_MODULE(FNWorldAssemblyEditorModule, NexusWorldAssemblyEditor)

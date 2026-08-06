@@ -29,11 +29,13 @@ namespace UnrealBuildTool.Rules
 					"CoreUObject",
 					"DeveloperSettings",
 					"EditorFramework",
+					"EditorInteractiveToolsFramework",
 					"EditorScriptingUtilities",
 					"EditorSubsystem",
 					"Engine",
 					"GameplayTags",
 					"InputCore",
+					"InteractiveToolsFramework",
 					"LevelEditor",
 					"PCG",
 					"Projects",
@@ -41,7 +43,9 @@ namespace UnrealBuildTool.Rules
 					"SlateCore",
 					"ToolMenus",
 					"UMG",
-					"UMGEditor"
+					"UMGEditor",
+					// Supplies FToolkitBuilder/FToolkitSections, which build the edit mode's toolkit panel.
+					"WidgetRegistration"
 				]
 			);
 			

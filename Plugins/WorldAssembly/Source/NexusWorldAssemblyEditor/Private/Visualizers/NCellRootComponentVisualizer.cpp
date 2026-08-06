@@ -4,10 +4,9 @@
 #include "Visualizers/NCellRootComponentVisualizer.h"
 
 #include "Cell/NCellRootComponent.h"
+#include "NWorldAssemblyEditorColors.h"
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblySettings.h"
-#include "ComponentVisProxies/NEdgeComponentVisProxy.h"
-#include "ComponentVisProxies/NIndexComponentVisProxy.h"
 
 void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Component, const FSceneView* View, FPrimitiveDrawInterface* PDI)
 {
@@ -29,55 +28,36 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 	// We need to draw the base wireframes
 	if (!UNWorldAssemblyEdMode::IsActive())
 	{
-		CellRootComponent->DrawDebugPDI(PDI, static_cast<uint8>(UNWorldAssemblyEdMode::GetCellVoxelMode()), UNWorldAssemblyEdMode::GetCachedCellBoundsColor(), UNWorldAssemblyEdMode::GetCachedCellHullColor());
+		CellRootComponent->DrawDebugPDI(PDI, static_cast<uint8>(UNWorldAssemblyEdMode::GetCellVoxelMode()),
+			FNWorldAssemblyEditorColors::GetCellBounds(), FNWorldAssemblyEditorColors::GetCellHull());
 		return;
 	}
 
+	// The overlays below are the points and lines the interactive tools act on, so they follow whichever cell-edit
+	// sub-mode is active. No hit proxies any more: picking moved to the tools' own input behaviours when the edit mode
+	// gained them, and leaving proxies here would put a second, competing click path over the same geometry.
 	if (UNWorldAssemblyEdMode::GetCellEdMode() == UNWorldAssemblyEdMode::ENCellEdMode::Bounds)
 	{
 		const FBox Bounds = UNWorldAssemblyEdMode::GetCachedBounds();
-		const TArray<FVector>& BoundsVertices = UNWorldAssemblyEdMode::GetCachedBoundsVertices();
 
-		// Draw Min Max
-		PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, 0));
-		PDI->DrawPoint(Bounds.Min, UNWorldAssemblyEdMode::GetCachedCellBoundsColor(), PointSize, SDPG_World);
-		PDI->SetHitProxy(nullptr);
-		PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, 1));
-		PDI->DrawPoint(Bounds.Max, UNWorldAssemblyEdMode::GetCachedCellBoundsColor(), PointSize, SDPG_World);
-		PDI->SetHitProxy(nullptr);
-
+		PDI->DrawPoint(Bounds.Min, FNWorldAssemblyEditorColors::GetCellBounds(), PointSize, SDPG_World);
+		PDI->DrawPoint(Bounds.Max, FNWorldAssemblyEditorColors::GetCellBounds(), PointSize, SDPG_World);
 	}
 	else if (UNWorldAssemblyEdMode::GetCellEdMode() == UNWorldAssemblyEdMode::ENCellEdMode::Hull)
 	{
 		const TArray<FVector>& WorldVertices = UNWorldAssemblyEdMode::GetCachedHullVertices();
-
-		const int32 VertCount = WorldVertices.Num();
-		for (int32 i = 0; i < VertCount; i++)
+		for (const FVector& WorldVertex : WorldVertices)
 		{
-			// TODO: Selection color?
-			PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, i));
-			PDI->DrawPoint(WorldVertices[i], UNWorldAssemblyEdMode::GetCachedCellHullColor(), PointSize, SDPG_World);
-			PDI->SetHitProxy(nullptr);
+			PDI->DrawPoint(WorldVertex, FNWorldAssemblyEditorColors::GetCellHull(), PointSize, SDPG_World);
 		}
 
-		const TArray<FIntVector2>& WorldEdges = UNWorldAssemblyEdMode::GetCachedHullEdges();
-		// TODO: if selected color?
-		const int32 EdgeCount = WorldEdges.Num();
-		for (int32 i = 0; i < EdgeCount; i++)
+		for (const TArray<FIntVector2>& WorldEdges = UNWorldAssemblyEdMode::GetCachedHullEdges();
+			const FIntVector2& WorldEdge : WorldEdges)
 		{
-			PDI->SetHitProxy(new HNEdgeComponentVisProxy(Component, WorldEdges[i].X, WorldEdges[i].Y));
+			if (!WorldVertices.IsValidIndex(WorldEdge.X) || !WorldVertices.IsValidIndex(WorldEdge.Y)) continue;
 
-			if (EdgeStartIndex == WorldEdges[i].X && EdgeEndIndex == WorldEdges[i].Y)
-			{
-				PDI->DrawLine(WorldVertices[WorldEdges[i].X], WorldVertices[WorldEdges[i].Y], FLinearColor::White, 2.f, SDPG_World);
-
-			}
-			else
-			{
-				PDI->DrawLine(WorldVertices[WorldEdges[i].X], WorldVertices[WorldEdges[i].Y], UNWorldAssemblyEdMode::GetCachedCellHullColor(), 2.f, SDPG_World);
-
-			}
-			PDI->SetHitProxy(nullptr);
+			PDI->DrawLine(WorldVertices[WorldEdge.X], WorldVertices[WorldEdge.Y],
+				FNWorldAssemblyEditorColors::GetCellHull(), 2.f, SDPG_World);
 		}
 	}
 	else if (UNWorldAssemblyEdMode::GetCellEdMode() == UNWorldAssemblyEdMode::ENCellEdMode::Voxel)
@@ -106,264 +86,8 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 			// TODO: #ROTATE-VOXELS Rotation needs to actually rotated to the nearest grid???
 			FVector VoxelCenter = BaseOffset + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
 
-			if (N_FLAGS_HAS(CachedData.GetData(i), static_cast<uint8>(ENCellVoxel::Occupied)))
-			{
-				PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, i));
-				PDI->DrawPoint(VoxelCenter, FColor::Blue, PointSize, SDPG_Foreground);
-				PDI->SetHitProxy(nullptr);
-			}
-			else
-			{
-				PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, i));
-				PDI->DrawPoint(VoxelCenter, FColor::Green, PointSize, SDPG_Foreground);
-				PDI->SetHitProxy(nullptr);
-			}
+			const bool bOccupied = N_FLAGS_HAS(CachedData.GetData(i), static_cast<uint8>(ENCellVoxel::Occupied));
+			PDI->DrawPoint(VoxelCenter, bOccupied ? FColor::Blue : FColor::Green, PointSize, SDPG_Foreground);
 		}
-	}
-
-}
-
-bool FNCellRootComponentVisualizer::VisProxyHandleClick(FEditorViewportClient* InViewportClient, HComponentVisProxy* VisProxy, const FViewportClick& Click)
-{
-	if (Click.GetKey() == EKeys::LeftMouseButton && VisProxy && VisProxy->Component.IsValid())
-	{
-		const auto IndexComponent = const_cast<UNCellRootComponent*>(Cast<UNCellRootComponent>(VisProxy->Component.Get()));
-
-		if (VisProxy->IsA(HNIndexComponentVisProxy::StaticGetType()))
-		{
-			const HNIndexComponentVisProxy* IndexProxy = static_cast<HNIndexComponentVisProxy*>(VisProxy);
-			using enum UNWorldAssemblyEdMode::ENCellEdMode;
-			if (UNWorldAssemblyEdMode::GetCellEdMode() == Bounds)
-			{
-				return EditBoundsVertex(IndexComponent, IndexProxy->Index);
-			}
-			if (UNWorldAssemblyEdMode::GetCellEdMode() == Hull)
-			{
-				return EditHullVertex(IndexComponent, IndexProxy->Index);
-			}
-			if (UNWorldAssemblyEdMode::GetCellEdMode() == Voxel)
-			{
-				return ToggleVoxelPoint(IndexComponent, IndexProxy->Index);
-			}
-			return false;
-		}
-		if (VisProxy->IsA(HNEdgeComponentVisProxy::StaticGetType()))
-		{
-			const HNEdgeComponentVisProxy* EdgeProxy = static_cast<HNEdgeComponentVisProxy*>(VisProxy);
-			using enum UNWorldAssemblyEdMode::ENCellEdMode;
-			if (UNWorldAssemblyEdMode::GetCellEdMode() == Hull)
-			{
-				return EditHullEdge(IndexComponent,EdgeProxy->StartIndex,EdgeProxy->EndIndex);
-			}
-		}
-	}
-	return false;
-}
-
-bool FNCellRootComponentVisualizer::EditHullEdge(UNCellRootComponent* Component, int32 IndexA, int32 IndexB)
-{
-	CurrentEditMode = ENCellEditMode::HullEdge;
-	RootComponent = Component;
-	ClearSelection();
-	EdgeStartIndex = IndexA;
-	EdgeEndIndex = IndexB;
-
-	GLevelEditorModeTools().SetWidgetMode(UE::Widget::WM_None);
-	return true;
-}
-
-bool FNCellRootComponentVisualizer::EditHullVertex(UNCellRootComponent* Component, int32 Index)
-{
-
-	CurrentEditMode = ENCellEditMode::HullVertex;
-	RootComponent = Component;
-	ClearSelection();
-	VertexIndex = Index;
-
-	GLevelEditorModeTools().SetWidgetMode(UE::Widget::WM_Translate);
-	return true;
-}
-
-bool FNCellRootComponentVisualizer::EditBoundsVertex(UNCellRootComponent* Component, int32 Index)
-{
-	CurrentEditMode = ENCellEditMode::BoundsVertex;
-	RootComponent = Component;
-	ClearSelection();
-	VertexIndex = Index;
-
-	GLevelEditorModeTools().SetWidgetMode(UE::Widget::WM_Translate);
-	return true;
-}
-
-bool FNCellRootComponentVisualizer::ToggleVoxelPoint(UNCellRootComponent* Component, const int32 Index)
-{
-	uint8 Data = Component->Details.VoxelData.GetData(Index);
-
-	// Handle Occupied
-	if (N_FLAGS_HAS(Data, static_cast<uint8>(ENCellVoxel::Occupied)))
-	{
-		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNCellRootComponentVisualizer_Voxel_Empty", "Set Voxel Empty"));
-		Component->Modify();
-		N_FLAGS_REMOVE(Data, static_cast<uint8>(ENCellVoxel::Occupied));
-		N_FLAGS_ADD(Data, static_cast<uint8>(ENCellVoxel::Empty));
-		Component->Details.VoxelData.SetData(Index, Data);
-		Component->Details.VoxelSettings.bCalculateOnSave = false;
-		if (ANCellActor* CellActor = Component->GetNCellActor())
-		{
-			CellActor->SetActorDirty();
-		}
-		return true;
-	}
-
-	// Handle Empty
-	if (N_FLAGS_HAS(Data, static_cast<uint8>(ENCellVoxel::Empty)))
-	{
-		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNCellRootComponentVisualizer_Voxel_Occupied", "Set Voxel Occupied"));
-		Component->Modify();
-		N_FLAGS_REMOVE(Data, static_cast<uint8>(ENCellVoxel::Empty));
-		N_FLAGS_ADD(Data, static_cast<uint8>(ENCellVoxel::Occupied));
-		Component->Details.VoxelData.SetData(Index, Data);
-		Component->Details.VoxelSettings.bCalculateOnSave = false;
-		if (ANCellActor* CellActor = Component->GetNCellActor())
-		{
-			CellActor->SetActorDirty();
-		}
-		return true;
-	}
-
-	return true;
-}
-
-void FNCellRootComponentVisualizer::EndEditing()
-{
-	// Should validate that the new positions are convex if hull?
-	CurrentEditMode = ENCellEditMode::None;
-	RootComponent = nullptr;
-	VertexIndex = -1;
-	FComponentVisualizer::EndEditing();
-}
-
-bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* ViewportClient, FViewport* Viewport, FVector& DeltaTranslate, FRotator& DeltaRotate, FVector& DeltaScale)
-{
-	if (RootComponent == nullptr) return false;
-
-	if (CurrentEditMode == ENCellEditMode::HullVertex)
-	{
-		// A hull recompute (Calculate Hull, undo/redo) can shrink the vertex array beneath the captured index; end the edit rather than writing out of bounds.
-		if (!RootComponent->Details.Hull.Vertices.IsValidIndex(VertexIndex))
-		{
-			EndEditing();
-			return false;
-		}
-
-		const FScopedTransaction HullVertexTransaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNCellRootComponentVisualizer_AdjustHullVertex", "Adjust Hull Vertex"));
-
-		RootComponent->Modify();
-		RootComponent->Details.HullSettings.bCalculateOnSave = false;
-		RootComponent->Details.Hull.bIsChaosGenerated = false;
-
-		// Moved through SetVertex rather than by assigning into Vertices: a direct write leaves the convexity flags
-		// and the face-plane cache describing the pre-drag hull, so the next penetration query measures against
-		// surfaces that have already moved.
-		//
-		// Neither branch calls Validate() explicitly. SetVertex marks the derived state dirty, so the convexity
-		// gate below re-evaluates on read and any later reader of the restored hull does the same. An eager
-		// Validate here would only duplicate that: CheckConvex is O(vertices * faces) and runs on every mouse-move
-		// frame of a drag, so on a dense hull each redundant call is a measurable slice of the frame.
-		const FVector PreviousPosition = RootComponent->Details.Hull.Vertices[VertexIndex];
-		RootComponent->Details.Hull.SetVertex(VertexIndex, PreviousPosition + DeltaTranslate);
-
-		// Ahead of the gate: CheckConvex scales its planarity tolerances by the mesh extent, so it wants Bounds
-		// describing the geometry it is about to judge.
-		RootComponent->Details.Hull.CalculateCenterAndBounds();
-
-		// If we're not allowing convex move it back. Restoring the vertex through SetVertex is what makes the
-		// discarded verdict safe: previously the reverted hull kept the non-convex result computed for the position
-		// being thrown away, latching a convex hull as non-convex until the next CalculateHull or reload and
-		// quietly pushing every later query onto the slower non-convex path.
-		if (!RootComponent->Details.HullSettings.bAllowNonConvex && !RootComponent->Details.Hull.IsConvex())
-		{
-			RootComponent->Details.Hull.SetVertex(VertexIndex, PreviousPosition);
-			RootComponent->Details.Hull.CalculateCenterAndBounds();
-		}
-
-		if (ANCellActor* CellActor = RootComponent->GetNCellActor())
-		{
-			CellActor->SetActorDirty();
-		}
-		return true;
-	}
-
-	if (CurrentEditMode == ENCellEditMode::BoundsVertex)
-	{
-		const FScopedTransaction HullVertexTransaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNCellRootComponentVisualizer_AdjustBoundsVertex", "Adjust Bounds Vertex"));
-
-		RootComponent->Modify();
-		RootComponent->Details.BoundsSettings.bCalculateOnSave = false;
-		if (VertexIndex == 0)
-		{
-			RootComponent->Details.Bounds.Min += DeltaTranslate;
-		}
-		else
-		{
-			RootComponent->Details.Bounds.Max += DeltaTranslate;
-		}
-		if (ANCellActor* CellActor = RootComponent->GetNCellActor())
-		{
-			CellActor->SetActorDirty();
-		}
-		return true;
-	}
-
-	return false;
-}
-
-bool FNCellRootComponentVisualizer::HandleInputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event)
-{
-	if (CurrentEditMode == ENCellEditMode::None) return false;
-
-	if (Key == EKeys::Escape && Event == EInputEvent::IE_Pressed)
-	{
-		EndEditing();
-		return true;
-	}
-
-	return false;
-}
-
-bool FNCellRootComponentVisualizer::GetWidgetLocation(const FEditorViewportClient* ViewportClient, FVector& OutLocation) const
-{
-	switch (CurrentEditMode)
-	{
-	case ENCellEditMode::None:
-		return false;
-	case ENCellEditMode::HullVertex:
-	{
-		// The cached hull is rebuilt every tick; a recompute (Calculate Hull, undo/redo) can shrink it beneath a captured index.
-		const TArray<FVector>& Vertices = UNWorldAssemblyEdMode::GetCachedHullVertices();
-		if (!Vertices.IsValidIndex(VertexIndex)) return false;
-		OutLocation = Vertices[VertexIndex];
-		return true;
-	}
-	case ENCellEditMode::HullEdge:
-	{
-		const TArray<FVector>& Vertices = UNWorldAssemblyEdMode::GetCachedHullVertices();
-		if (!Vertices.IsValidIndex(EdgeStartIndex) || !Vertices.IsValidIndex(EdgeEndIndex)) return false;
-		OutLocation = (Vertices[EdgeStartIndex] + Vertices[EdgeEndIndex]) * 0.5f;
-		return true;
-	}
-	case ENCellEditMode::BoundsVertex:
-		if (VertexIndex == -1) return false;
-		if (VertexIndex == 0)
-		{
-			OutLocation = UNWorldAssemblyEdMode::GetCachedBounds().Min;
-		}
-		else
-		{
-			OutLocation = UNWorldAssemblyEdMode::GetCachedBounds().Max;
-		}
-		return true;
-	default:
-		return false;
 	}
 }
