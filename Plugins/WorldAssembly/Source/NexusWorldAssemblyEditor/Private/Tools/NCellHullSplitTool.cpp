@@ -12,6 +12,91 @@
 
 #define LOCTEXT_NAMESPACE "NexusWorldAssemblyEditor"
 
+namespace
+{
+	/**
+	 * Collect the edges of every hull face turned toward a viewer.
+	 *
+	 * @param Hull The cell's hull, read for its loops — the world positions come from WorldVertices instead.
+	 * @param WorldVertices The mode's cached hull vertices, parallel to the hull's own vertex indices.
+	 * @param ViewOrigin Where the viewer is; for a pick this is the ray's origin.
+	 * @return Undirected (min,max) keys of the edges on at least one front-facing face, matching the form
+	 *         FNRawMesh::GetEdgeIndices produces. Empty when the hull has no usable faces.
+	 * @note Normals are computed here from WorldVertices rather than read from the hull's cached face planes: those
+	 *       are per-triangle in the hull's own space, and the cell root's offset would have to be undone to compare
+	 *       them against a world-space viewer. Newell's method, so an n-gon loop works as well as a triangle.
+	 */
+	TSet<FIntVector2> GatherFrontFacingEdgeKeys(const FNRawMesh& Hull, const TArray<FVector>& WorldVertices, const FVector& ViewOrigin)
+	{
+		TSet<FIntVector2> Keys;
+
+		// The hull's own Center is in local space; this is the same quantity in the space the vertices arrive in, and
+		// it is what orients the normals below outward without trusting the loops to share a winding.
+		FVector Centroid = FVector::ZeroVector;
+		for (const FVector& Vertex : WorldVertices)
+		{
+			Centroid += Vertex;
+		}
+		if (!WorldVertices.IsEmpty())
+		{
+			Centroid /= WorldVertices.Num();
+		}
+
+		for (const FNRawMeshLoop& Loop : Hull.Loops)
+		{
+			const int32 Count = Loop.Indices.Num();
+			if (Count < 3) continue;
+
+			FVector Normal = FVector::ZeroVector;
+			FVector LoopCenter = FVector::ZeroVector;
+			bool bIndicesValid = true;
+
+			for (int32 i = 0; i < Count; i++)
+			{
+				if (!WorldVertices.IsValidIndex(Loop.Indices[i]) || !WorldVertices.IsValidIndex(Loop.Indices[(i + 1) % Count]))
+				{
+					bIndicesValid = false;
+					break;
+				}
+
+				const FVector& A = WorldVertices[Loop.Indices[i]];
+				const FVector& B = WorldVertices[Loop.Indices[(i + 1) % Count]];
+
+				Normal.X += (A.Y - B.Y) * (A.Z + B.Z);
+				Normal.Y += (A.Z - B.Z) * (A.X + B.X);
+				Normal.Z += (A.X - B.X) * (A.Y + B.Y);
+
+				LoopCenter += A;
+			}
+
+			if (!bIndicesValid) continue;
+
+			Normal = Normal.GetSafeNormal();
+			if (Normal.IsNearlyZero()) continue;
+
+			LoopCenter /= Count;
+
+			// Point the normal away from the hull rather than relying on winding order, which SplitEdge's
+			// fan-triangulation is under no obligation to keep consistent with the rest of the mesh.
+			if (Normal.Dot(LoopCenter - Centroid) < 0.0)
+			{
+				Normal = -Normal;
+			}
+
+			if (Normal.Dot(ViewOrigin - LoopCenter) <= 0.0) continue;
+
+			for (int32 i = 0; i < Count; i++)
+			{
+				const int32 V0 = Loop.Indices[i];
+				const int32 V1 = Loop.Indices[(i + 1) % Count];
+				Keys.Add(FIntVector2(FMath::Min(V0, V1), FMath::Max(V0, V1)));
+			}
+		}
+
+		return Keys;
+	}
+}
+
 UInteractiveTool* UNCellHullSplitToolBuilder::BuildTool(const FToolBuilderState& SceneState) const
 {
 	return NewObject<UNCellHullSplitTool>(SceneState.ToolManager);
@@ -142,16 +227,27 @@ void UNCellHullSplitTool::SplitHoveredEdge()
 	HoveredEdge = FNEdgeHit();
 }
 
-UNCellHullSplitTool::FNEdgeHit UNCellHullSplitTool::FindEdgeUnderRay(const FRay& Ray)
+UNCellHullSplitTool::FNEdgeHit UNCellHullSplitTool::FindEdgeUnderRay(const FRay& Ray) const
 {
 	const TArray<FVector>& Vertices = UNWorldAssemblyEdMode::GetCachedHullVertices();
 	const TArray<FIntVector2>& Edges = UNWorldAssemblyEdMode::GetCachedHullEdges();
+
+	const UNCellRootComponent* RootComponent = GetCellRoot();
+
+	// Empty covers both "no cell" and a hull with no usable faces, and is read below as "cull nothing" — a tool that
+	// silently stops picking anything is worse than one that occasionally offers an edge facing away.
+	const TSet<FIntVector2> FrontFacingEdges = RootComponent != nullptr
+		? GatherFrontFacingEdgeKeys(RootComponent->Details.Hull, Vertices, Ray.Origin)
+		: TSet<FIntVector2>();
 
 	FNEdgeHit Best;
 
 	for (int32 i = 0; i < Edges.Num(); i++)
 	{
 		if (!Vertices.IsValidIndex(Edges[i].X) || !Vertices.IsValidIndex(Edges[i].Y)) continue;
+
+		// GetEdgeIndices already normalizes each entry to (min,max), the same key the gather above builds.
+		if (!FrontFacingEdges.IsEmpty() && !FrontFacingEdges.Contains(Edges[i])) continue;
 
 		// Sampled along the segment rather than solved analytically, matching the pick UNCellHullVertexTool used: an
 		// exact segment-ray closest approach is more arithmetic than deciding *which* edge needs, and hull edges are
