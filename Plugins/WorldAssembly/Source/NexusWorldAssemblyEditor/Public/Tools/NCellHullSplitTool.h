@@ -83,8 +83,13 @@ private:
 	/**
 	 * @param Ray Click ray in world space.
 	 * @return The hull edge nearest the ray within the pick threshold, and the point on it to split at.
+	 * @note Only considers edges on a face turned toward the ray's origin. Without that the test is pure ray-to-point
+	 *       distance, and the far side of the hull competes on equal footing with the near side — so aiming at open
+	 *       space inside the silhouette picks whatever edge happens to project there, which is usually behind.
+	 * @remark Back-face culling, not true occlusion: it does not account for level geometry in front of the hull, and
+	 *         on a non-convex hull a facing edge can still be hidden behind another part of the same hull.
 	 */
-	static FNEdgeHit FindEdgeUnderRay(const FRay& Ray);
+	FNEdgeHit FindEdgeUnderRay(const FRay& Ray) const;
 
 	/**
 	 * @param Ray Ray to measure against.
