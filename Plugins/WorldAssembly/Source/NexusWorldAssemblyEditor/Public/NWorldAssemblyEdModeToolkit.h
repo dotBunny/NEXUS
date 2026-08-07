@@ -72,8 +72,9 @@ private:
  * Toolkit for UNWorldAssemblyEdMode, hosting the mode's UI in the level editor's Mode Toolbox panel.
  *
  * Built on FToolkitBuilder (the surface PCG and Modeling Tools use) rather than the stock FModeToolkit palette
- * switcher: a vertical rail of category buttons down the left edge — Cell, Junction, World, Organ — each swapping the
+ * switcher: a vertical rail of category buttons down the left edge — World, Cell, Junction, Organ — each swapping the
  * palette shown beside it, over a warning area, the active tool's header, and its property details.
+ * @note The rail order is set by the Rails.Add sequence in RegisterPalettes, which is the one place to change it.
  *
  * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */

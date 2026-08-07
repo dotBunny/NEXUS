@@ -46,6 +46,8 @@ enum class ENWorldAssemblyEdModeRenderMode
  * the legacy FEdMode. That base implements ILegacyEdModeWidgetInterface and ILegacyEdModeViewportInterface, which is
  * what keeps Render, DrawHUD and Tick available: UEdMode itself has none of the three, and every pixel this mode
  * puts on screen goes through them.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 UCLASS()
 class UNWorldAssemblyEdMode final : public UBaseLegacyWidgetEdMode
