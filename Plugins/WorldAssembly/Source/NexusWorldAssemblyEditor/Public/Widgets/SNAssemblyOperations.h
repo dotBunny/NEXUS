@@ -93,6 +93,15 @@ private:
 	/** @return One operation's block: its heading row, combined progress bar, message, and channel bars. */
 	TSharedRef<SWidget> CreateOperationBlock(UNAssemblyOperation* Operation) const;
 
+	/**
+	 * @return The idle block: the nothing-running line, and beneath it what the last finished run produced.
+	 * @note Every part reads the subsystem through a binding rather than capturing a summary by value. The rebuild
+	 *       that puts this block on screen is driven by the registry's unregister broadcast, which is not ordered
+	 *       against the owner's finish callback that records the summary — bindings make that ordering moot, and let
+	 *       a run that finishes while this block is already up fill it in without a further rebuild.
+	 */
+	static TSharedRef<SWidget> CreateIdleBlock();
+
 	/** @return One status channel's bar, reading its state out of ChannelStates every frame. */
 	TSharedRef<SWidget> CreateChannelBar(int32 Ticket, int32 ChannelId) const;
 
