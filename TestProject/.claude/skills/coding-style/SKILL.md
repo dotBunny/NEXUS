@@ -17,13 +17,27 @@ Every `.h` also adds `#pragma once` immediately after the copyright.
 
 ## Formatting
 
-Conventions are declared in `Plugins/.editorconfig` (applies to everything under `Plugins/`). This is editor config, not a gate: IDEs that honor it apply it as you type / on Reformat, but there is no clang-format, pre-commit hook, or CI check, so existing files may not conform. Match the convention by hand — don't assume a tool will fix it.
+Conventions are declared in `Plugins/.editorconfig` (applies to everything under `Plugins/`). This is editor config, not a gate — no clang-format, pre-commit hook, or CI check enforces it, so existing files may not conform and nothing will fix yours. Match it by hand.
 
 Key rules (see `.editorconfig` for the full set):
 - Tabs, width 4; max line length 150
-- Trailing whitespace trimmed (`trim_trailing_whitespace = true`) — but only by editors that honor EditorConfig; nothing gates it
+- Trailing whitespace trimmed
 - Inline brace style — no brace-on-new-line for namespaces, types, or functions
 - Pointer/reference alignment: left (`int* Ptr`, not `int *Ptr`)
+
+## Static Analysis (SonarQube)
+
+Unlike `.editorconfig` this **is** a gate — SonarCloud scores the repo and the `README.md` badges come off it. C++ runs the stock Sonar way profile, so any `cpp:` rule can fire. Highest-value rules to write to first time:
+
+- **Brace every conditional/loop body when a statement follows it** (`cpp:S2681`). The same-line form trips it too: `if (!ensure(X)) return;` followed by more code at the same indent is a violation.
+- Assignments out of conditions (`S1121`); no shadowing (`S1117`); no nested ternaries (`S3358`); merge lone nested `if`s (`S1066`).
+- `TArray` over C-style arrays (`S5945`); `constexpr`/namespace constants over `#define` (`S5028`); no `protected` members (`S3656`); `const` on unmodified pointer/ref params (`S995`).
+- Members initialised in-class or in the initialiser list (`S3230`); no unused locals, params, or assignments (`S1481`, `S1172`, `S1854`).
+- No commented-out code, no stray `TODO` (`S125`, `S1135`) — file an issue instead.
+
+Sonar's naming rules are not active, so they never override the UE conventions below.
+
+Full rule set, the four rules NEXUS deliberately trades away, and the `#SONARQUBE-DISABLE-CPP_S<id>` suppression-marker convention: **`sonarqube.md`** in this skill directory. For what is flagged right now, use the `sonar-issues` skill.
 
 ## Naming Conventions
 
@@ -53,13 +67,7 @@ The macro is `NEXUS<UPPERCASEPLUGINNAME>_API`.
 ## Includes & Forward Declarations
 
 - Include the module's `Nexus<Name>Minimal.h` rather than the full module header.
-- Prefer forward declarations in headers over includes where only a pointer/reference is needed:
-
-```cpp
-class UNActorPoolObject;
-class UNActorPoolSet;
-class UNActorPoolSpawnerComponent;
-```
+- Prefer a forward declaration (`class UNActorPoolObject;`) in headers over an include where only a pointer/reference is needed.
 
 ## Namespaces
 
@@ -105,7 +113,7 @@ UFUNCTION(BlueprintCallable, DisplayName="Get Actor", Category = "NEXUS|Actor Po
 
 ## Blueprint Event Hooks (`K2_` prefix)
 
-`BlueprintImplementableEvent` / `BlueprintNativeEvent` functions **declared as `UCLASS` members** — where C++ calls *into* Blueprint — take a `K2_` prefix on the C++ symbol plus a `DisplayName` that drops it:
+`BlueprintImplementableEvent` / `BlueprintNativeEvent` functions **declared as `UCLASS` members** — where C++ calls *into* Blueprint — take a `K2_` prefix plus a `DisplayName` that drops it, keeping the Blueprint-facing symbol from colliding with the native function or delegate for the same concept (mirrors Epic's `K2_DestroyActor`):
 
 ```cpp
 /** Blueprint hook fired once the pool has handed this actor out. */
@@ -113,24 +121,11 @@ UFUNCTION(BlueprintImplementableEvent, Category = "NEXUS|Actor Pools", DisplayNa
 void K2_OnSpawnedFromPool();
 ```
 
-`K2_` ("Kismet 2", Epic's internal name for Blueprint) carries no compiler meaning. It keeps the Blueprint-facing symbol from colliding with, or reading ambiguously against, the native function or delegate covering the same concept, and marks "Blueprint-only hook" as distinct from a C++ override seam. Mirrors Epic's own `K2_DestroyActor` / `K2_SetActorLocation`.
-
-- **Event hooks only.** `BlueprintCallable` / `BlueprintPure` functions stay unprefixed (`GetActor`, `IsRegistered`).
-- **Always pair with `DisplayName`.** Without it the node label reads "K2 On Spawned From Pool" — UE's auto-prettifier does not strip the prefix. This is the only reason the `DisplayName` is mandatory here; for an unprefixed symbol it would just restate what auto-prettification already produces.
-- **`Receive*` is an accepted equivalent for actor lifecycle hooks.** Epic's `AActor` uses it (`ReceiveBeginPlay`, `ReceiveTick`, `ReceiveActorBeginOverlap`), and it does the same job as `K2_`: `ReceivePrepareTest` disambiguates against native `PrepareTest()` just as `K2_PrepareTest` would. Pair it with a prefix-dropping `meta=(DisplayName="...")` on the same terms. Do not mix the two conventions inside one type — `ANSamplesDisplayActor` (`Samples/Shared/`) is the established `Receive*` type and stays that way. Prefer `K2_` for new code unless the hook mirrors an `AActor` lifecycle event.
-- **`UINTERFACE` events are exempt** — they stay unprefixed. UHT generates `Execute_<Name>` and `<Name>_Implementation` for interface events, so `IFoo::Execute_Name(...)` already qualifies the symbol and cannot collide with a native member. Prefixing would push `K2_` into every call site (`Execute_K2_Name`) and into the `_Implementation` override that framework consumers write. NEXUS's existing interface events (`INCellJunctionFiller`, `INCellJunctionBeginPlay`, `INCellInitialized`, `INListViewEntry`) follow this exemption.
-- **Renaming an existing event breaks Blueprints that implement it** — Blueprint binds by `UFunction` name, so the node silently orphans. Before applying the prefix retroactively, check for bindings in both content roots:
-
-  ```bash
-  grep -rla "<OldName>" Samples/ TestProject/Content/ --include="*.uasset" --include="*.umap"
-  ```
-
-  If anything hits, add a redirect under `[CoreRedirects]` in `TestProject/Config/DefaultEngine.ini` and note the rename in `CHANGELOG.md`:
-
-  ```ini
-  [CoreRedirects]
-  +FunctionRedirects=(OldName="/Script/Nexus<Plugin>.N<Class>.<OldName>",NewName="/Script/Nexus<Plugin>.N<Class>.K2_<OldName>")
-  ```
+- **Event hooks only.** `BlueprintCallable` / `BlueprintPure` stay unprefixed (`GetActor`, `IsRegistered`).
+- **`DisplayName` is mandatory** — UE's auto-prettifier does not strip the prefix, so the node would read "K2 On Spawned From Pool".
+- **`Receive*` is the accepted equivalent for `AActor` lifecycle hooks** (Epic uses `ReceiveBeginPlay`, `ReceiveTick`), on the same `DisplayName` terms. Don't mix both in one type — `ANSamplesDisplayActor` (`Samples/Shared/`) is the established `Receive*` type. Prefer `K2_` for new code unless the hook mirrors an `AActor` lifecycle event.
+- **`UINTERFACE` events are exempt** and stay unprefixed — UHT's generated `Execute_<Name>` / `<Name>_Implementation` already qualify the symbol, and prefixing would push `K2_` into every call site and consumer override. `INCellJunctionFiller`, `INCellInitialized`, `INListViewEntry` follow this.
+- **Renaming an existing event orphans Blueprint nodes** (Blueprint binds by `UFunction` name). Before renaming, `grep -rla "<OldName>" Samples/ TestProject/Content/ --include="*.uasset" --include="*.umap"`; if anything hits, add a `+FunctionRedirects=` entry under `[CoreRedirects]` in `TestProject/Config/DefaultEngine.ini` and note it in `CHANGELOG.md`.
 
 ## Editor-Only Members
 
