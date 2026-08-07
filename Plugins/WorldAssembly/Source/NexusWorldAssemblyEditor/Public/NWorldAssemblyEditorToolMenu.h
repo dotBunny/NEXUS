@@ -4,11 +4,12 @@
 #pragma once
 #include "Organ/NOrganComponent.h"
 
-class UNAssemblyOperation;
-
 /**
  * Registers every World Assembly entry on the editor's tool menus — cell/organ/junction dropdowns,
  * toolbar buttons, and the editor-utility-window launcher.
+ *
+ * @note Menu construction only. The commands these entries fire, and the Quick Assembly state the widgets below
+ *       read, live on the per-category command classes — this depends on those, never the other way round.
  */
 class FNWorldAssemblyEditorToolMenu
 {
@@ -27,60 +28,12 @@ public:
 	static bool ShowOrganDropdown();
 
 	/**
-	 * Adds or removes the cell-ignore tag on the current actor selection. The direction is decided by
-	 * GetIgnoreSelectedActorsToggleMode: if no actor in the selection is tagged the tag is added to all,
-	 * otherwise the tag is removed from all.
+	 * @return The toolbar's organ picker, showing the Quick Assembly target and its progress bar.
+	 * @note Opens an empty menu while FNWorldAssemblyEditorQuickAssemblyCommands::IsActive, which is the visible half
+	 *       of the selection lock; SetSelectedOrgan enforces it regardless.
 	 */
-	static void TagSelectedActors_CellIgnore();
-
-	/** @return true if the cell-ignore tagging action should be shown for the current selection. */
-	static bool TagSelectedActors_CellIgnore_CanShow();
-
-	/**
-	 * @return Toggle state for the ignore-selected-actors action: 0 to add the tag, 1 to remove it, or -1
-	 * when the action should be disabled (empty selection or a mixed-tag selection where the intent is ambiguous).
-	 */
-	static int32 TagSelectedActors_CellIgnore_Mode();
-
-	/** Adds or removes the world-collision-ignore tag on the current actor selection (direction decided by TagSelectedActors_WorldIgnore_Mode). */
-	static void TagSelectedActors_WorldCollisionIgnore();
-
-	/** @return true if the world-collision-ignore tagging action should be shown for the current selection. */
-	static bool TagSelectedActors_WorldCollisionIgnore_CanShow();
-
-	/** @return Toggle state for the world-collision-ignore action: 0 to add the tag, 1 to remove it, or -1 when it should be disabled. */
-	static int32 TagSelectedActors_WorldIgnore_Mode();
-
-	static bool HasValidQuickAssemblyOrgan();
 	static TSharedRef<SWidget> CreateQuickAssemblyComboBox();
 
 	/** @return A numeric-entry widget bound to UNWorldAssemblyEditorUserSettings::QuickAssemblyAutoAssemblyTimer (seconds), for the Quick Assembly options dropdown. */
 	static TSharedRef<SWidget> CreateQuickAssemblyAutoAssemblyTimerWidget();
-
-	static void SetSelectedQuickAssemblyOption(UNOrganComponent* OrganComponent);
-	static UNOrganComponent* GetQuickAssemblyOrganComponent();
-
-	/** Sets the Quick Assembly progress bar fill (clamped 0..1) and makes it visible. Call from the assembly operation. */
-	static void SetQuickAssemblyProgress(float InProgress);
-	/** Hides the Quick Assembly progress bar (e.g. when the operation finishes or is cancelled). */
-	static void ClearQuickAssemblyProgress();
-	static void SetQuickAssemblyOperationTicket(int32 Ticket) { QuickAssemblyOperationTicket = Ticket; }
-	static int32 GetQuickAssemblyOperationTicket() { return QuickAssemblyOperationTicket; }
-
-	/** @return The tracked Quick Assembly operation resolved from QuickAssemblyOperationTicket, or nullptr if none/stale. */
-	static UNAssemblyOperation* GetTrackedQuickAssemblyOperation();
-	/** @return true if the tracked Quick Assembly operation exists and is still running (drives the Start/Cancel toggle). */
-	static bool IsQuickAssemblyOperationRunning();
-
-	/**
-	 * @return true while a Quick Assembly loop is active — the tracked operation is running, or an auto-assembly
-	 * loop is waiting between runs. Drives the Start/Cancel toggle, the cancel icon, and the organ-selection lock.
-	 */
-	static bool IsQuickAssemblyActive();
-
-private:
-	static TWeakObjectPtr<UNOrganComponent> QuickAssemblyOrganComponent;
-	static int32 QuickAssemblyOperationTicket;
-	/** Current Quick Assembly progress (0..1). Unset when no operation is in flight, which hides the bar. */
-	static TOptional<float> QuickAssemblyProgress;
 };

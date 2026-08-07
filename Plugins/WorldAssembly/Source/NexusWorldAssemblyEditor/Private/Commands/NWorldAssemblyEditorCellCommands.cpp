@@ -8,8 +8,8 @@
 #include "NUIEditorStyle.h"
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyEditorStyle.h"
-#include "NWorldAssemblyEditorToolMenu.h"
 #include "NWorldAssemblyEditorUtils.h"
+#include "NWorldAssemblyMinimal.h"
 #include "NWorldAssemblyUtils.h"
 #include "Cell/NCellActor.h"
 #include "Cell/NCellRootDetails.h"
@@ -17,6 +17,7 @@
 #include "Framework/Commands/UICommandInfo.h"
 #include "Framework/Commands/UICommandList.h"
 #include "Operations/NWorldAssemblyEditorCellOperations.h"
+#include "Operations/NWorldAssemblyEditorTagOperations.h"
 #include "Styling/AppStyle.h"
 
 FNWorldAssemblyEditorCellCommands& FNWorldAssemblyEditorCellCommands::Get()
@@ -281,12 +282,21 @@ void FNWorldAssemblyEditorCellCommands::SaveCell()
 
 void FNWorldAssemblyEditorCellCommands::TagIgnore()
 {
-	FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore();
+	FNWorldAssemblyEditorTagOperations::ToggleTagOnSelection(
+		NEXUS::WorldAssembly::ActorTags::CellIgnore,
+		NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCellCommands_TagIgnore_Add", "Add CellIgnore Tags"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCellCommands_TagIgnore_Remove", "Remove CellIgnore Tags"));
 }
 
 bool FNWorldAssemblyEditorCellCommands::TagIgnore_CanExecute()
 {
-	return FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore_CanShow();
+	// Tagging writes to the actors and opens a transaction, so it is authoring work like the rest of the cell
+	// commands — not something to run against a play world.
+	if (FNEditorUtils::IsPlayInEditor()) return false;
+
+	return UNWorldAssemblyEdMode::HasCellActor()
+		&& FNEditorUtils::HasActorsSelected()
+		&& !FNWorldAssemblyEditorUtils::IsCellActorSelected();
 }
 
 bool FNWorldAssemblyEditorCellCommands::CaptureThumbnail_CanExecute()

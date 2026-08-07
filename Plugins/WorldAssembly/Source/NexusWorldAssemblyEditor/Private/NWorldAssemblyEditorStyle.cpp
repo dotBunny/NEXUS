@@ -4,8 +4,7 @@
 #include "NWorldAssemblyEditorStyle.h"
 
 #include "NEditorUtils.h"
-#include "NWorldAssemblyEditorToolMenu.h"
-#include "NWorldAssemblyEdMode.h"
+#include "Commands/NWorldAssemblyEditorQuickAssemblyCommands.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Brushes/SlateImageBrush.h"
 #include "Styling/AppStyle.h"
@@ -14,92 +13,14 @@
 
 N_EDITOR_STYLE(FNWorldAssemblyEditorStyle)
 
-FSlateIcon FNWorldAssemblyEditorStyle::CellActorEditHullModeIcon()
-{
-	if (UNWorldAssemblyEdMode::GetCellEdMode() == UNWorldAssemblyEdMode::ENCellEdMode::Hull)
-	{
-		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.Hull.Selected");
-	}
-	return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.Hull");
-}
-
-FSlateIcon FNWorldAssemblyEditorStyle::CellActorEditBoundsModeIcon()
-{
-	if (UNWorldAssemblyEdMode::GetCellEdMode() == UNWorldAssemblyEdMode::ENCellEdMode::Bounds)
-	{
-		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.Bounds.Selected");
-	}
-	return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.Bounds");
-}
-
-FSlateIcon FNWorldAssemblyEditorStyle::CellActorEditVoxelModeIcon()
-{
-	if (UNWorldAssemblyEdMode::GetCellEdMode() == UNWorldAssemblyEdMode::ENCellEdMode::Voxel)
-	{
-		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.Voxel.Points.Selected");
-	}
-	return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.Voxel.Points");
-}
-
-FSlateIcon FNWorldAssemblyEditorStyle::CellActorToggleDrawVoxelDataIcon()
-{
-	switch (UNWorldAssemblyEdMode::GetCellVoxelMode())
-	{
-	case UNWorldAssemblyEdMode::ENCellVoxelMode::Grid:
-		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.Voxel.Grid.Selected");
-	case UNWorldAssemblyEdMode::ENCellVoxelMode::Points:
-		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.Voxel.Points.Selected");
-	default:
-		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.Voxel.Grid");
-	}
-}
-
-FSlateIcon FNWorldAssemblyEditorStyle::CollisionVisualizerToggleIcon()
-{
-	if (UNWorldAssemblyEdMode::HasCollisionVisualizer())
-	{
-		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.HasCollisionVisualizer");
-	}
-	return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.CreateCollisionVisualizer");
-}
-
-FSlateIcon FNWorldAssemblyEditorStyle::CellIgnoreIcon()
-{
-	const int32 Mode = FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore_Mode();
-	switch (Mode)
-	{
-	case 0:
-		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.CellIgnore_NotIgnored");
-	case 1:
-		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.CellIgnore_Ignored");
-	default:
-		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.CellIgnore_Unknown");
-	}
-
-}
-
 FSlateIcon FNWorldAssemblyEditorStyle::QuickAssemblyOperationIcon()
 {
 	// Show the cancel icon for the whole loop — both while an operation runs and during the wait between auto-runs.
-	if (FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive())
+	if (FNWorldAssemblyEditorQuickAssemblyCommands::IsActive())
 	{
 		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.CancelQuickAssemblyOperation");
 	}
 	return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.QuickAssemblyOperation");
-}
-
-FSlateIcon FNWorldAssemblyEditorStyle::WorldCollisionIgnoreIcon()
-{
-	const int32 Mode = FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldIgnore_Mode();
-	switch (Mode)
-	{
-	case 0:
-		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.WorldCollisionIgnore_NotIgnored");
-	case 1:
-		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.WorldCollisionIgnore_Ignored");
-	default:
-		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.WorldCollisionIgnore_Unknown");
-	}
 }
 
 TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()

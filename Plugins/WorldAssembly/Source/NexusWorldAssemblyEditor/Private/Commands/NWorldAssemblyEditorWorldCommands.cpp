@@ -7,10 +7,11 @@
 #include "NEditorUtils.h"
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyEditorStyle.h"
-#include "NWorldAssemblyEditorToolMenu.h"
+#include "NWorldAssemblyMinimal.h"
 #include "Developer/NDebugActor.h"
 #include "Framework/Commands/UICommandInfo.h"
 #include "Framework/Commands/UICommandList.h"
+#include "Operations/NWorldAssemblyEditorTagOperations.h"
 
 FNWorldAssemblyEditorWorldCommands& FNWorldAssemblyEditorWorldCommands::Get()
 {
@@ -69,10 +70,17 @@ bool FNWorldAssemblyEditorWorldCommands::ToggleCollisionVisualizer_IsActionCheck
 
 void FNWorldAssemblyEditorWorldCommands::TagCollisionIgnore()
 {
-	FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldCollisionIgnore();
+	FNWorldAssemblyEditorTagOperations::ToggleTagOnSelection(
+		NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore,
+		NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorWorldCommands_TagCollisionIgnore_Add", "Add WorldCollisionIgnore Tags"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorWorldCommands_TagCollisionIgnore_Remove", "Remove WorldCollisionIgnore Tags"));
 }
 
 bool FNWorldAssemblyEditorWorldCommands::TagCollisionIgnore_CanExecute()
 {
-	return FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldCollisionIgnore_CanShow();
+	if (FNEditorUtils::IsPlayInEditor()) return false;
+
+	// Offered only in a level that is not itself a cell: world collision is what an assembly operation places cells
+	// against, so tagging it out is a decision about the destination level, not about a cell's own geometry.
+	return UNWorldAssemblyEdMode::IsActive() && !UNWorldAssemblyEdMode::HasCellActor() && FNEditorUtils::HasActorsSelected();
 }

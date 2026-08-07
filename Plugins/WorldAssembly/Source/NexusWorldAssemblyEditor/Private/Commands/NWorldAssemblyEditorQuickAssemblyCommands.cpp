@@ -5,13 +5,22 @@
 
 #include "NEditorUtils.h"
 #include "NWorldAssemblyEditorSubsystem.h"
-#include "NWorldAssemblyEditorToolMenu.h"
 #include "NWorldAssemblyEditorUserSettings.h"
 #include "NWorldAssemblyRegistry.h"
 #include "Assembly/NAssemblyOperation.h"
 #include "Framework/Commands/UICommandInfo.h"
 #include "Framework/Commands/UICommandList.h"
+#include "NEditorUtils.h"
 #include "Organ/NOrganComponent.h"
+
+/** The organ Quick Assembly targets. Weak, so a deleted organ falls back to the level's first rather than dangling. */
+static TWeakObjectPtr<UNOrganComponent> SelectedOrgan = nullptr;
+
+/** Ticket of the operation this category started, or -1 when nothing is tracked. */
+static int32 TrackedOperationTicket = -1;
+
+/** Toolbar progress fill (0..1). Unset when no operation is in flight, which hides the bar. */
+static TOptional<float> ToolbarProgress;
 
 FNWorldAssemblyEditorQuickAssemblyCommands& FNWorldAssemblyEditorQuickAssemblyCommands::Get()
 {
@@ -52,7 +61,7 @@ void FNWorldAssemblyEditorQuickAssemblyCommands::ButtonClicked()
 {
 	// "Active" spans both a running operation and the wait between auto-assembly runs, so a click during the
 	// inter-run gap cancels the loop rather than kicking off a second, overlapping operation.
-	if (FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive())
+	if (IsActive())
 	{
 		Cancel();
 	}
@@ -66,13 +75,13 @@ bool FNWorldAssemblyEditorQuickAssemblyCommands::Button_CanExecute()
 {
 	// While the loop is active (operation running or waiting between auto-runs) the button must stay enabled so the
 	// user can cancel it; otherwise fall back to the start preconditions (which require that no operation is running).
-	if (FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive()) return true;
+	if (IsActive()) return true;
 	return Start_CanExecute();
 }
 
 void FNWorldAssemblyEditorQuickAssemblyCommands::Start()
 {
-	UNOrganComponent* Component = FNWorldAssemblyEditorToolMenu::GetQuickAssemblyOrganComponent();
+	UNOrganComponent* Component = GetSelectedOrgan();
 	if (Component == nullptr) return;
 
 	UNWorldAssemblyEditorSubsystem* Subsystem = UNWorldAssemblyEditorSubsystem::Get();
@@ -84,12 +93,12 @@ void FNWorldAssemblyEditorQuickAssemblyCommands::Start()
 	EditorSettings.bCreateLevelInstances = UserSettings->bQuickAssemblyLoadLevelInstances;
 
 	UNAssemblyOperation* Operation = UNAssemblyOperation::CreateInstance(Component, EditorSettings);
-	FNWorldAssemblyEditorToolMenu::SetQuickAssemblyOperationTicket(Operation->GetTicket());
+	SetOperationTicket(Operation->GetTicket());
 
 	// Drive the toolbar progress bar from the operation's combined task + sub-channel progress, so it keeps
 	// moving during long-running tasks. The delegate lives on the operation, so it auto-detaches when the
 	// operation is destroyed - no manual unbind needed.
-	FNWorldAssemblyEditorToolMenu::SetQuickAssemblyProgress(0.0f); // Show an empty bar immediately.
+	SetProgress(0.0f); // Show an empty bar immediately.
 	Operation->OnPercentageChanged.AddDynamic(Subsystem, &UNWorldAssemblyEditorSubsystem::OnQuickAssemblyProgressChanged);
 
 	Subsystem->StartOperation(Operation);
@@ -106,7 +115,7 @@ void FNWorldAssemblyEditorQuickAssemblyCommands::Start()
 
 bool FNWorldAssemblyEditorQuickAssemblyCommands::Start_CanExecute()
 {
-	return	FNWorldAssemblyEditorToolMenu::HasValidQuickAssemblyOrgan() &&
+	return	HasValidOrgan() &&
 			FNEditorUtils::IsNotPlayInEditor() &&
 			!FNWorldAssemblyRegistry::HasOperations();
 }
@@ -118,7 +127,7 @@ void FNWorldAssemblyEditorQuickAssemblyCommands::Cancel()
 	// cancel is a deliberate user stop, so surface the accumulated pass/warn/fail summary for any completed runs.
 	UNWorldAssemblyEditorSubsystem::Get()->StopAutoAssemblyLoop(/*bEmitSummary*/ true);
 
-	if (UNAssemblyOperation* Operation = FNWorldAssemblyEditorToolMenu::GetTrackedQuickAssemblyOperation();
+	if (UNAssemblyOperation* Operation = GetTrackedOperation();
 		Operation != nullptr && Operation->IsRunning())
 	{
 		// Synchronous: cancels the task graph and tears the operation down, which routes through the subsystem's
@@ -149,4 +158,90 @@ void FNWorldAssemblyEditorQuickAssemblyCommands::ToggleAutoAssembly()
 bool FNWorldAssemblyEditorQuickAssemblyCommands::ToggleAutoAssembly_IsActionChecked()
 {
 	return UNWorldAssemblyEditorUserSettings::Get()->bQuickAssemblyAutoAssembly;
+}
+
+UNOrganComponent* FNWorldAssemblyEditorQuickAssemblyCommands::GetSelectedOrgan()
+{
+	// Nothing selected (or the prior selection went stale): default to the first Organ in the level, if any.
+	if (!SelectedOrgan.IsValid())
+	{
+		TArray<UNOrganComponent*> OrganComponents = FNWorldAssemblyRegistry::GetOrganComponentsFromLevel(FNEditorUtils::GetCurrentLevel());
+		if (OrganComponents.Num() > 0)
+		{
+			SetSelectedOrgan(OrganComponents[0]);
+		}
+	}
+
+	if (!SelectedOrgan.IsValid()) return nullptr;
+	return SelectedOrgan.Get();
+}
+
+void FNWorldAssemblyEditorQuickAssemblyCommands::SetSelectedOrgan(UNOrganComponent* OrganComponent)
+{
+	// Authoritative lock: don't let the Quick Assembly target change while a loop it kicked off is active
+	// (operation running or waiting between auto-runs).
+	if (IsActive()) return;
+	SelectedOrgan = OrganComponent;
+}
+
+bool FNWorldAssemblyEditorQuickAssemblyCommands::HasValidOrgan()
+{
+	// Route through the getter so the same first-option fallback applies everywhere.
+	return GetSelectedOrgan() != nullptr;
+}
+
+void FNWorldAssemblyEditorQuickAssemblyCommands::SetProgress(const float InProgress)
+{
+	ToolbarProgress = FMath::Clamp(InProgress, 0.0f, 1.0f);
+}
+
+void FNWorldAssemblyEditorQuickAssemblyCommands::ClearProgress()
+{
+	ToolbarProgress.Reset();
+}
+
+TOptional<float> FNWorldAssemblyEditorQuickAssemblyCommands::GetProgress()
+{
+	return ToolbarProgress;
+}
+
+void FNWorldAssemblyEditorQuickAssemblyCommands::SetOperationTicket(const int32 Ticket)
+{
+	TrackedOperationTicket = Ticket;
+}
+
+int32 FNWorldAssemblyEditorQuickAssemblyCommands::GetOperationTicket()
+{
+	return TrackedOperationTicket;
+}
+
+UNAssemblyOperation* FNWorldAssemblyEditorQuickAssemblyCommands::GetTrackedOperation()
+{
+	// A negative ticket means we are not tracking an operation (the subsystem resets it on finish/destroy).
+	if (TrackedOperationTicket < 0) return nullptr;
+
+	for (UNAssemblyOperation* Operation : FNWorldAssemblyRegistry::GetOperations())
+	{
+		if (Operation != nullptr && Operation->GetTicket() == TrackedOperationTicket)
+		{
+			return Operation;
+		}
+	}
+	return nullptr;
+}
+
+bool FNWorldAssemblyEditorQuickAssemblyCommands::IsOperationRunning()
+{
+	const UNAssemblyOperation* Operation = GetTrackedOperation();
+	return Operation != nullptr && Operation->IsRunning();
+}
+
+bool FNWorldAssemblyEditorQuickAssemblyCommands::IsActive()
+{
+	if (IsOperationRunning()) return true;
+
+	// The loop also counts as "active" while it waits between auto-assembly runs, so the button stays in its
+	// cancel state (and the organ selection stays locked) across the inter-run gap.
+	const UNWorldAssemblyEditorSubsystem* Subsystem = UNWorldAssemblyEditorSubsystem::Get();
+	return Subsystem != nullptr && Subsystem->IsAutoAssemblyLoopActive();
 }

@@ -33,9 +33,6 @@
 #include "Macros/NEditorToolsMacros.h"
 
 const FName FNWorldAssemblyEditorToolMenu::MenuSectionGlobal = FName("NEXUS_WorldAssemblyGlobal");
-TWeakObjectPtr<UNOrganComponent> FNWorldAssemblyEditorToolMenu::QuickAssemblyOrganComponent = nullptr;
-int32 FNWorldAssemblyEditorToolMenu::QuickAssemblyOperationTicket = -1;
-TOptional<float> FNWorldAssemblyEditorToolMenu::QuickAssemblyProgress;
 
 void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 {
@@ -87,7 +84,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		NexusGlobalSection.AddEntry(QuickAssemblyComboBox);
 
 		// Toggles between starting a Quick Assembly operation and cancelling the one it started. The icon, label and
-		// tooltip all key off FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive() so they stay in sync across both
+		// tooltip all key off FNWorldAssemblyEditorQuickAssemblyCommands::IsActive() so they stay in sync across both
 		// a running operation and the wait between auto-assembly runs.
 		FToolMenuEntry QuickAssemblyButton = FToolMenuEntry::InitToolBarButton(
 					"NWorldAssemblyEdMode_QuickAssemblyButton",
@@ -99,13 +96,13 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 						FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorToolMenu::ShowOrganDropdown)),
 						TAttribute<FText>::CreateLambda([]()
 						{
-							return FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive()
+							return FNWorldAssemblyEditorQuickAssemblyCommands::IsActive()
 								? NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_CancelQuickAssemblyButton", "Cancel World Assembly Operation")
 								: NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_QuickAssemblyButton", "Start World Assembly Operation");
 						}),
 						TAttribute<FText>::CreateLambda([]()
 						{
-							return FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive()
+							return FNWorldAssemblyEditorQuickAssemblyCommands::IsActive()
 								? NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_CancelQuickAssemblyButton_Tooltip", "Cancels the running World Assembly Operation for the selected Organ.")
 								: NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_QuickAssemblyButton_Tooltip", "Starts a World Assembly Operation for the selected Organ, creating the NCellLevelInstances and loading their content.");
 						}),
@@ -219,156 +216,6 @@ bool FNWorldAssemblyEditorToolMenu::ShowOrganDropdown()
 	return FNWorldAssemblyRegistry::HasOrganComponents();
 }
 
-void FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore()
-{
-
-	if (TagSelectedActors_CellIgnore_Mode() == 0)
-	{
-		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorToolMenu_TagSelectedActors_CellIgnore_Add", "Add CellIgnore Tags"));
-
-		// ADD
-		USelection* AddSelection = GEditor->GetSelectedActors();
-		for (FSelectionIterator It(*AddSelection); It; ++It)
-		{
-			AActor* Actor = Cast<AActor>(*It);
-			Actor->Modify(true);
-			Actor->Tags.Add(NEXUS::WorldAssembly::ActorTags::CellIgnore);
-		}
-	}
-	else
-	{
-		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorToolMenu_TagSelectedActors_CellIgnore_Remove", "Remove CellIgnore Tags"));
-
-		// REMOVE
-		USelection* RemoveSelection = GEditor->GetSelectedActors();
-		for (FSelectionIterator It(*RemoveSelection); It; ++It)
-		{
-			AActor* Actor = Cast<AActor>(*It);
-			Actor->Modify(true);
-			Actor->Tags.RemoveSwap(NEXUS::WorldAssembly::ActorTags::CellIgnore);
-		}
-	}
-}
-
-bool FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore_CanShow()
-{
-	// Tagging writes to the actors and opens a transaction, so it is authoring work like the rest of the cell
-	// commands — not something to run against a play world.
-	if (FNEditorUtils::IsPlayInEditor()) return false;
-
-	return UNWorldAssemblyEdMode::HasCellActor()
-		&& FNEditorUtils::HasActorsSelected()
-		&& !FNWorldAssemblyEditorUtils::IsCellActorSelected();
-}
-
-int32 FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore_Mode()
-{
-	USelection* Selection = GEditor->GetSelectedActors();
-	if (Selection == nullptr || Selection->Num() == 0)
-	{
-		return -1; // Disabled
-	}
-
-	int32 ActorCount = 0;
-	int32 TaggedActorCount = 0;
-
-	for (FSelectionIterator It(*Selection); It; ++It)
-	{
-		const AActor* Actor = Cast<AActor>(*It);
-		ActorCount++;
-
-		if (Actor->ActorHasTag(NEXUS::WorldAssembly::ActorTags::CellIgnore))
-		{
-			TaggedActorCount++;
-		}
-	}
-
-	if (TaggedActorCount > 0)
-	{
-		if (ActorCount == TaggedActorCount)
-		{
-			return 1; // Remove
-		}
-		return -1; // Unknown
-	}
-	return 0; // Add
-}
-
-void FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldCollisionIgnore()
-{
-	if (TagSelectedActors_WorldIgnore_Mode() == 0)
-	{
-		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorToolMenu_TagSelectedActors_WorldCollisionIgnore_Add", "Add WorldCollisionIgnore Tags"));
-		// ADD
-		USelection* AddSelection = GEditor->GetSelectedActors();
-		for (FSelectionIterator It(*AddSelection); It; ++It)
-		{
-			AActor* Actor = Cast<AActor>(*It);
-			Actor->Modify(true);
-			Actor->Tags.Add(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
-		}
-	}
-	else
-	{
-		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorToolMenu_TagSelectedActors_WorldCollisionIgnore_Remove", "Remove WorldCollisionIgnore Tags"));
-
-		// REMOVE
-		USelection* RemoveSelection = GEditor->GetSelectedActors();
-		for (FSelectionIterator It(*RemoveSelection); It; ++It)
-		{
-			AActor* Actor = Cast<AActor>(*It);
-			Actor->Modify(true);
-			Actor->Tags.RemoveSwap(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
-		}
-	}
-}
-
-bool FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldCollisionIgnore_CanShow()
-{
-	if (FNEditorUtils::IsPlayInEditor()) return false;
-
-	return UNWorldAssemblyEdMode::IsActive() && !UNWorldAssemblyEdMode::HasCellActor() && FNEditorUtils::HasActorsSelected();
-}
-
-int32 FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldIgnore_Mode()
-{
-	USelection* Selection = GEditor->GetSelectedActors();
-	if (Selection == nullptr || Selection->Num() == 0)
-	{
-		return -1; // Disabled
-	}
-
-	int32 ActorCount = 0;
-	int32 TaggedActorCount = 0;
-
-	for (FSelectionIterator It(*Selection); It; ++It)
-	{
-		const AActor* Actor = Cast<AActor>(*It);
-		ActorCount++;
-
-		if (Actor->ActorHasTag(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore))
-		{
-			TaggedActorCount++;
-		}
-	}
-
-	if (TaggedActorCount > 0)
-	{
-		if (ActorCount == TaggedActorCount)
-		{
-			return 1; // Remove
-		}
-		return -1; // Unknown
-	}
-	return 0; // Add
-}
-
-bool FNWorldAssemblyEditorToolMenu::HasValidQuickAssemblyOrgan()
-{
-	// Route through the getter so the same first-option fallback applies everywhere.
-	return GetQuickAssemblyOrganComponent() != nullptr;
-}
-
 TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
 {
 	return SNew(SBox)
@@ -382,7 +229,7 @@ TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
 		{
 			// Lock the selection while the Quick Assembly loop is active (operation running or waiting between
 			// auto-runs): open an empty menu so the target Organ can't be changed mid-loop. Keeps the button lit.
-			if (IsQuickAssemblyActive()) return SNullWidget::NullWidget;
+			if (FNWorldAssemblyEditorQuickAssemblyCommands::IsActive()) return SNullWidget::NullWidget;
 
 			// This builds the menu that drops down when you click the button
 			FMenuBuilder MenuBuilder(true, nullptr);
@@ -396,7 +243,7 @@ TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
 					FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "SelectOrganForQuickAssembly", "Select {0} for Quick Assembly"), OrganName),
 					FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.NOrganComponent"),
 					FUIAction(FExecuteAction::CreateLambda([OrganComponent]() {
-						SetSelectedQuickAssemblyOption(OrganComponent);
+						FNWorldAssemblyEditorQuickAssemblyCommands::SetSelectedOrgan(OrganComponent);
 					}))
 				);
 			}
@@ -413,10 +260,10 @@ TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
 				.VAlign(VAlign_Fill)
 				[
 					SNew(SProgressBar)
-					.Percent_Lambda([]() { return QuickAssemblyProgress; })
+					.Percent_Lambda([]() { return FNWorldAssemblyEditorQuickAssemblyCommands::GetProgress(); })
 					.Visibility_Lambda([]()
 					{
-						return QuickAssemblyProgress.IsSet() ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
+						return FNWorldAssemblyEditorQuickAssemblyCommands::GetProgress().IsSet() ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
 					})
 				]
 
@@ -438,7 +285,7 @@ TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
 						.Image_Lambda([]() -> const FSlateBrush*
 						{
 							// While the loop is active, swap the Organ icon for a padlock to signal the selection is locked.
-							if (IsQuickAssemblyActive())
+							if (FNWorldAssemblyEditorQuickAssemblyCommands::IsActive())
 							{
 								return FSlateIcon(FNEditorStyle::GetStyleSetName(), "Lock.Desaturated").GetIcon();
 							}
@@ -446,7 +293,7 @@ TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
 						})
 						.Visibility_Lambda([]()
 						{
-							return GetQuickAssemblyOrganComponent() != nullptr ? EVisibility::Visible : EVisibility::Collapsed;
+							return FNWorldAssemblyEditorQuickAssemblyCommands::GetSelectedOrgan() != nullptr ? EVisibility::Visible : EVisibility::Collapsed;
 						})
 					]
 
@@ -458,7 +305,7 @@ TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
 						SNew(STextBlock)
 						.Text_Lambda([]()
 						{
-							if (const UNOrganComponent* Organ = GetQuickAssemblyOrganComponent())
+							if (const UNOrganComponent* Organ = FNWorldAssemblyEditorQuickAssemblyCommands::GetSelectedOrgan())
 							{
 								return FText::FromString(Organ->GetDebugLabel());
 							}
@@ -503,69 +350,4 @@ TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyAutoAssemb
 				Settings->SaveConfig();
 			})
 		];
-}
-
-void FNWorldAssemblyEditorToolMenu::SetSelectedQuickAssemblyOption(UNOrganComponent* OrganComponent)
-{
-	// Authoritative lock: don't let the Quick Assembly target change while a loop it kicked off is active
-	// (operation running or waiting between auto-runs).
-	if (IsQuickAssemblyActive()) return;
-	QuickAssemblyOrganComponent = OrganComponent;
-}
-
-void FNWorldAssemblyEditorToolMenu::SetQuickAssemblyProgress(float InProgress)
-{
-	QuickAssemblyProgress = FMath::Clamp(InProgress, 0.0f, 1.0f);
-}
-
-void FNWorldAssemblyEditorToolMenu::ClearQuickAssemblyProgress()
-{
-	QuickAssemblyProgress.Reset();
-}
-
-UNOrganComponent* FNWorldAssemblyEditorToolMenu::GetQuickAssemblyOrganComponent()
-{
-	// Nothing selected (or the prior selection went stale): default to the first Organ in the level, if any.
-	if (!QuickAssemblyOrganComponent.IsValid())
-	{
-		TArray<UNOrganComponent*> OrganComponents = FNWorldAssemblyRegistry::GetOrganComponentsFromLevel(FNEditorUtils::GetCurrentLevel());
-		if (OrganComponents.Num() > 0)
-		{
-			SetSelectedQuickAssemblyOption(OrganComponents[0]);
-		}
-	}
-
-	if (!QuickAssemblyOrganComponent.IsValid()) return nullptr;
-	return QuickAssemblyOrganComponent.Get();
-}
-
-UNAssemblyOperation* FNWorldAssemblyEditorToolMenu::GetTrackedQuickAssemblyOperation()
-{
-	// A negative ticket means we are not tracking an operation (the subsystem resets it on finish/destroy).
-	if (QuickAssemblyOperationTicket < 0) return nullptr;
-
-	for (UNAssemblyOperation* Operation : FNWorldAssemblyRegistry::GetOperations())
-	{
-		if (Operation != nullptr && Operation->GetTicket() == QuickAssemblyOperationTicket)
-		{
-			return Operation;
-		}
-	}
-	return nullptr;
-}
-
-bool FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning()
-{
-	const UNAssemblyOperation* Operation = GetTrackedQuickAssemblyOperation();
-	return Operation != nullptr && Operation->IsRunning();
-}
-
-bool FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive()
-{
-	if (IsQuickAssemblyOperationRunning()) return true;
-
-	// The loop also counts as "active" while it waits between auto-assembly runs, so the button stays in its
-	// cancel state (and the organ selection stays locked) across the inter-run gap.
-	const UNWorldAssemblyEditorSubsystem* Subsystem = UNWorldAssemblyEditorSubsystem::Get();
-	return Subsystem != nullptr && Subsystem->IsAutoAssemblyLoopActive();
 }
