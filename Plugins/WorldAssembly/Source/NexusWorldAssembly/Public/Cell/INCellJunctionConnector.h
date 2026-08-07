@@ -8,6 +8,7 @@
 #include "NCellJunctionConnection.h"
 #include "INCellJunctionConnector.generated.h"
 
+/** Reflection marker for the INCellJunctionConnector interface; INCellJunctionConnector carries the contract implementors provide. */
 UINTERFACE()
 class NEXUSWORLDASSEMBLY_API UNCellJunctionConnector : public UInterface
 {

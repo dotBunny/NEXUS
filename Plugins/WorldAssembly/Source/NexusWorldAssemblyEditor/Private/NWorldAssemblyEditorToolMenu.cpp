@@ -92,7 +92,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorQuickAssemblyCommands::ButtonClicked),
 						FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorQuickAssemblyCommands::Button_CanExecute),
 						FIsActionChecked(),
-						// Hide the button when the Quick Assembly section is hidden (no Organ components, or disabled in settings).
+						// Hide the button when the Quick Assembly section is hidden, i.e. the world has no Organ components.
 						FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorToolMenu::ShowOrganDropdown)),
 						TAttribute<FText>::CreateLambda([]()
 						{

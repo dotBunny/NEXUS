@@ -31,6 +31,7 @@ namespace NEXUS::WorldAssembly::DefaultColors
  *
  * @note Refresh() must be called whenever the source settings change; UNWorldAssemblyEditorUserSettings does this
  *       from its post-edit hooks, and the edit mode repeats it on Enter().
+ * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/user-settings/">World Assembly User Settings</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyEditorColors
 {
