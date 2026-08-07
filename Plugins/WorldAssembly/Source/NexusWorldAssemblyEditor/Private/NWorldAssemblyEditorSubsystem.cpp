@@ -13,6 +13,7 @@
 #include "Commands/NWorldAssemblyEditorQuickAssemblyCommands.h"
 #include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEditorUserSettings.h"
+#include "NWorldAssemblyMinimal.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "Organ/NOrganComponent.h"
 #include "Widgets/Notifications/SNotificationList.h"
@@ -99,6 +100,24 @@ void UNWorldAssemblyEditorSubsystem::OnQuickAssemblyProgressChanged(float Progre
 
 void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Operation, TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContext)
 {
+	// Recorded first, ahead of every early-out below, so a loop run — which deliberately skips its own toast — still
+	// leaves its numbers on the Operations panel. The edit mode's preview operation is excluded: it finishes
+	// constantly and is not a run the user asked for, the same reason the panel never lists it.
+	if (Operation->GetFName() != NEXUS::WorldAssembly::Operations::EditorMode)
+	{
+		const FNAssemblyOperationResult& RunResult = Operation->GetResult();
+
+		FNAssemblyRunSummary Summary;
+		Summary.Ticket = Operation->GetTicket();
+		Summary.bSuccess = RunResult.bSuccess;
+		Summary.bWarning = RunResult.bWarning;
+		Summary.Title = RunResult.Title;
+		Summary.Message = RunResult.Message;
+		Summary.ReportFilePath = TaskGraphContext->ReportFilePath;
+
+		LastRunSummary = MoveTemp(Summary);
+	}
+
 	// A run belongs to an auto-assembly loop when it is the tracked quick-assembly operation and the loop is engaged.
 	// Loop runs are folded into the summary instead of toasting one-per-run; standalone runs keep their own toast.
 	const bool bIsQuickAssemblyOp = Operation->GetTicket() == FNWorldAssemblyEditorQuickAssemblyCommands::GetOperationTicket();
@@ -194,6 +213,22 @@ void UNWorldAssemblyEditorSubsystem::OnOperationDestroyed(UNAssemblyOperation* O
 	{
 		FNWorldAssemblyEditorQuickAssemblyCommands::ClearProgress();
 		FNWorldAssemblyEditorQuickAssemblyCommands::SetOperationTicket(-1);
+	}
+
+	// This fires on both paths — UNAssemblyOperation::TearDownOperation is reached from Cancel and from the end of a
+	// normal finish alike — so the ticket is what separates them. A finish broadcasts OnOperationFinished first, which
+	// leaves this ticket's summary behind; reaching here without one means the run was stopped before it produced a
+	// result. Replacing the summary rather than clearing it keeps the panel from silently reporting the numbers of
+	// some earlier run as though they were the outcome of the one just cancelled.
+	if (Operation->GetFName() != NEXUS::WorldAssembly::Operations::EditorMode
+		&& (!LastRunSummary.IsSet() || LastRunSummary->Ticket != Operation->GetTicket()))
+	{
+		FNAssemblyRunSummary Summary;
+		Summary.Ticket = Operation->GetTicket();
+		Summary.bCancelled = true;
+		Summary.Title = NSLOCTEXT("NexusWorldAssemblyEditor", "AssemblyRun_Cancelled", "Assembly Cancelled");
+
+		LastRunSummary = MoveTemp(Summary);
 	}
 
 	KnownOperations.Remove(Operation);

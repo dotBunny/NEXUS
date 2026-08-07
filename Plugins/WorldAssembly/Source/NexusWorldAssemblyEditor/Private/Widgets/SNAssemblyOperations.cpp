@@ -3,13 +3,16 @@
 
 #include "Widgets/SNAssemblyOperations.h"
 
+#include "NWorldAssemblyEditorSubsystem.h"
 #include "NWorldAssemblyRegistry.h"
 #include "Assembly/NAssemblyOperation.h"
 #include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
+#include "Misc/Paths.h"
 #include "Styling/AppStyle.h"
 #include "Styling/CoreStyle.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Input/SButton.h"
+#include "Widgets/Input/SHyperlink.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Notifications/SProgressBar.h"
 #include "Widgets/SBoxPanel.h"
@@ -21,6 +24,33 @@
 static FSlateFontInfo GetDetailFont()
 {
 	return FCoreStyle::GetDefaultFontStyle("Regular", 8);
+}
+
+/**
+ * @return The text style the report link draws in: the panel's detail font, keeping the link's own coloring.
+ * @note SHyperlink takes a whole FTextBlockStyle rather than a font, so matching the lines around it means deriving
+ *       one. Built once and shared, since FAppStyle's copy is fixed at editor-style load and cannot change under us.
+ */
+static const FTextBlockStyle& GetReportLinkTextStyle()
+{
+	static const FTextBlockStyle Style = FTextBlockStyle(FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText"))
+		.SetFont(GetDetailFont());
+	return Style;
+}
+
+/**
+ * @return The last finished run's summary, or nullptr while none has finished since the editor opened.
+ * @note Resolved per binding rather than cached, so the idle block reflects a run that finishes while it is already
+ *       on screen. The subsystem outlives this widget, but the TOptional it hands back does not survive being
+ *       overwritten — never hold the returned pointer past the binding that asked for it.
+ */
+static const FNAssemblyRunSummary* FindLastRunSummary()
+{
+	const UNWorldAssemblyEditorSubsystem* Subsystem = UNWorldAssemblyEditorSubsystem::Get();
+	if (Subsystem == nullptr) return nullptr;
+
+	const TOptional<FNAssemblyRunSummary>& Summary = Subsystem->GetLastRunSummary();
+	return Summary.IsSet() ? &Summary.GetValue() : nullptr;
 }
 
 /**
@@ -134,15 +164,144 @@ void SNAssemblyOperations::Rebuild()
 
 	if (ShownCount > 0) return;
 
-	// The idle state says so rather than collapsing: a section that empties itself leaves the panel jumping by its
-	// height every time an operation finishes, and nothing to tell you the section is watching.
 	OperationsBox->AddSlot()
+		.AutoHeight()
+		[
+			CreateIdleBlock()
+		];
+}
+
+TSharedRef<SWidget> SNAssemblyOperations::CreateIdleBlock()
+{
+	// Visibility for anything that only makes sense once a run has finished.
+	auto SummaryVisibility = []()
+	{
+		return FindLastRunSummary() != nullptr ? EVisibility::Visible : EVisibility::Collapsed;
+	};
+
+	return SNew(SVerticalBox)
+
+		// The idle state says so rather than collapsing: a section that empties itself leaves the panel jumping by its
+		// height every time an operation finishes, and nothing to tell you the section is watching.
+		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
 			SNew(STextBlock)
 			.Text(LOCTEXT("Operations_None", "No operations running."))
 			.Font(GetDetailFont())
 			.ColorAndOpacity(FStyleColors::White25)
+		]
+
+		// Result title, with the same icon vocabulary the completion toast uses so the two read as one report. The
+		// cells/duration counts the result also carries are deliberately not shown: the message below already states
+		// them in prose, and printing both puts the same two numbers on screen twice.
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(0.0f, 10.0f, 0.0f, 0.0f)
+		[
+			SNew(SHorizontalBox)
+			.Visibility_Lambda(SummaryVisibility)
+
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.VAlign(VAlign_Center)
+			.Padding(0.0f, 0.0f, 4.0f, 0.0f)
+			[
+				SNew(SBox)
+				.WidthOverride(12.0f)
+				.HeightOverride(12.0f)
+				[
+					SNew(SImage)
+					.Image_Lambda([]() -> const FSlateBrush*
+					{
+						const FNAssemblyRunSummary* Summary = FindLastRunSummary();
+						if (Summary == nullptr) return nullptr;
+
+						// The plain X the cancel affordance above uses, rather than the error icon: a run the user
+						// stopped is not a failed one, and reusing the glyph they clicked names the cause.
+						if (Summary->bCancelled) return FAppStyle::GetBrush("Icons.X");
+
+						if (Summary->bWarning) return FAppStyle::GetBrush("Icons.WarningWithColor");
+						return Summary->bSuccess
+							? FAppStyle::GetBrush("Icons.SuccessWithColor")
+							: FAppStyle::GetBrush("Icons.ErrorWithColor");
+					})
+					// Left untinted: the WithColor brushes above carry their own, and tinting would flatten all three
+					// to one color. Icons.X is already drawn in the foreground color.
+				]
+			]
+
+			+ SHorizontalBox::Slot()
+			.FillWidth(1.0f)
+			.VAlign(VAlign_Center)
+			[
+				SNew(STextBlock)
+				.Text_Lambda([]()
+				{
+					const FNAssemblyRunSummary* Summary = FindLastRunSummary();
+					return Summary != nullptr ? Summary->Title : FText::GetEmpty();
+				})
+				.Font(GetDetailFont())
+				.OverflowPolicy(ETextOverflowPolicy::Ellipsis)
+			]
+		]
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(16.0f, 1.0f, 0.0f, 0.0f)
+		[
+			SNew(STextBlock)
+			.Text_Lambda([]()
+			{
+				const FNAssemblyRunSummary* Summary = FindLastRunSummary();
+				return Summary != nullptr ? Summary->Message : FText::GetEmpty();
+			})
+			.Visibility_Lambda([]()
+			{
+				const FNAssemblyRunSummary* Summary = FindLastRunSummary();
+				return Summary != nullptr && !Summary->Message.IsEmpty() ? EVisibility::Visible : EVisibility::Collapsed;
+			})
+			.Font(GetDetailFont())
+			.ColorAndOpacity(FStyleColors::White25)
+			// Wrapped rather than ellipsized: this is the one line here carrying detail the numbers above do not,
+			// and the panel is narrow enough that a single line of it would be cut to nothing useful.
+			.AutoWrapText(true)
+		]
+
+		// Opens the report the run wrote, the same file the completion toast links.
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		// Left rather than the slot default of Fill: SHyperlink draws its underline across its whole allotted width,
+		// so a filled slot underlines the empty space past the filename as well as the filename.
+		.HAlign(HAlign_Left)
+		.Padding(16.0f, 2.0f, 0.0f, 0.0f)
+		[
+			SNew(SHyperlink)
+			.Style(FAppStyle::Get(), "HoverOnlyHyperlink")
+			.TextStyle(&GetReportLinkTextStyle())
+			.Text_Lambda([]()
+			{
+				const FNAssemblyRunSummary* Summary = FindLastRunSummary();
+				return Summary != nullptr
+					? FText::FromString(FPaths::GetCleanFilename(Summary->ReportFilePath))
+					: FText::GetEmpty();
+			})
+			.ToolTipText(LOCTEXT("Operations_LastRunReport_Tooltip", "Open the report this run wrote."))
+			.Visibility_Lambda([]()
+			{
+				const FNAssemblyRunSummary* Summary = FindLastRunSummary();
+				return Summary != nullptr && !Summary->ReportFilePath.IsEmpty()
+					? EVisibility::Visible
+					: EVisibility::Collapsed;
+			})
+			.OnNavigate_Lambda([]()
+			{
+				const FNAssemblyRunSummary* Summary = FindLastRunSummary();
+				if (Summary == nullptr || Summary->ReportFilePath.IsEmpty()) return;
+
+				FPlatformProcess::LaunchFileInDefaultExternalApplication(
+					*FPaths::ConvertRelativePathToFull(Summary->ReportFilePath));
+			})
 		];
 }
 

@@ -15,6 +15,41 @@ class ANCellProxy;
 class UNAssemblyOperation;
 
 /**
+ * What the Operations panel reports about an assembly run once it has finished.
+ *
+ * A copy of the parts of FNAssemblyOperationResult worth showing after the fact, plus the report the run wrote.
+ * Copied rather than held by reference: the operation is torn down moments after it finishes, taking its result and
+ * its task-graph context with it, and the panel outlives both.
+ */
+struct FNAssemblyRunSummary
+{
+	/** Ticket of the run this summarizes, used to tell a finished run's teardown from a cancellation. */
+	int32 Ticket = INDEX_NONE;
+
+	/** true if the run was cancelled before finishing, in which case it carries a title and nothing else. */
+	bool bCancelled = false;
+
+	/** true if the run completed successfully. */
+	bool bSuccess = false;
+
+	/** true if the run completed but produced one or more warnings. */
+	bool bWarning = false;
+
+	/** Short result title, the same one the completion toast leads with. */
+	FText Title;
+
+	/**
+	 * Detailed result message.
+	 * @note Carries the cell count and duration in prose, which is why neither is copied out separately — the panel
+	 *       shows this line rather than restating the same two numbers above it.
+	 */
+	FText Message;
+
+	/** Absolute path to the report the run wrote, or empty when it wrote none. */
+	FString ReportFilePath;
+};
+
+/**
  * Editor-side counterpart to UNWorldAssemblySubsystem: hosts World Assembly operations run from the editor UI.
  *
  * Drives operation ticking, tracks spawned cell proxies so they survive editor GC, and cleans
@@ -98,6 +133,14 @@ class NEXUSWORLDASSEMBLYEDITOR_API UNWorldAssemblyEditorSubsystem : public UEdit
 
 	/** @return true if at least one operation is currently tracked by this subsystem. */
 	bool HasKnownOperation() const { return !KnownOperations.IsEmpty(); }
+
+	/**
+	 * @return The most recent assembly run, or unset when none has been started since the editor opened.
+	 * @note Covers cancellations as well as completions — a cancelled run replaces whatever came before it with a
+	 *       summary carrying only bCancelled and a title, so the panel never reports stale numbers as if they were
+	 *       the outcome of the run the user just stopped.
+	 */
+	const TOptional<FNAssemblyRunSummary>& GetLastRunSummary() const { return LastRunSummary; }
 
 	/** @return true if there are cell proxies currently alive from a generation pass. */
 	bool HasGeneratedCellProxies() const { return !KnownProxies.IsEmpty(); }
@@ -224,6 +267,13 @@ private:
 	 *       pointer, so there is nothing here for reflection to keep alive.
 	 */
 	TMap<int32, FNGeneratedConnections> ConnectionMap;
+
+	/**
+	 * The last finished run's summary, for the Operations panel to report while it sits idle.
+	 * @note Not a UPROPERTY: everything in FNAssemblyRunSummary is plain text and numbers, so there is nothing here
+	 *       for reflection to keep alive.
+	 */
+	TOptional<FNAssemblyRunSummary> LastRunSummary;
 
 	/** Frame number of the last Tick — guards against re-entrant ticking from multiple callers. */
 	uint32 LastFrameNumberWeTicked = INDEX_NONE;
