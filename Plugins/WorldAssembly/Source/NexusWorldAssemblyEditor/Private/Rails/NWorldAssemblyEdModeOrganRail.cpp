@@ -5,11 +5,12 @@
 
 #include "Editor.h"
 #include "NEditorUtils.h"
-#include "NWorldAssemblyEditorCommands.h"
 #include "NWorldAssemblyEditorStyle.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyEdModePaletteCommands.h"
 #include "NWorldAssemblyRegistry.h"
+#include "Commands/NWorldAssemblyEditorOrganCommands.h"
+#include "Operations/NWorldAssemblyEditorOrganOperations.h"
 #include "Organ/NOrganComponent.h"
 #include "Organ/NOrganVolume.h"
 #include "Selection.h"
@@ -80,7 +81,7 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeOrganRail::CreateHeader() const
 					FText::Format(LOCTEXT("OrganPicker_Select", "Select {0}"), OrganName),
 					FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.NOrganComponent"),
 					FUIAction(
-						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::OrganSelectComponent, Organ),
+						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorOrganOperations::SelectComponent, Organ),
 						FCanExecuteAction(),
 						FIsActionChecked::CreateLambda([Organ]() { return GetSelectedOrgan() == Organ; })),
 					NAME_None,
@@ -111,7 +112,7 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeOrganRail::CreateHeader() const
 
 TSharedPtr<SWidget> FNWorldAssemblyEdModeOrganRail::CreateContent() const
 {
-	const FNWorldAssemblyEditorCommands& Commands = FNWorldAssemblyEditorCommands::Get();
+	const FNWorldAssemblyEditorOrganCommands& OrganCommands = FNWorldAssemblyEditorOrganCommands::Get();
 
 	return SNew(SVerticalBox)
 
@@ -121,10 +122,10 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeOrganRail::CreateContent() const
 			CreateTitledCommandGrid(
 				LOCTEXT("OrganHeader_SelectedOrgan", "Selected Organ"),
 				{
-					Commands.CommandInfo_OrganGenerateProxies,
-					Commands.CommandInfo_OrganClearProxies,
-					Commands.CommandInfo_OrganCreateLevelInstances,
-					Commands.CommandInfo_OrganUnloadLevelInstances,
+					OrganCommands.CommandInfo_GenerateProxies,
+					OrganCommands.CommandInfo_ClearProxies,
+					OrganCommands.CommandInfo_CreateLevelInstances,
+					OrganCommands.CommandInfo_UnloadLevelInstances,
 				})
 		]
 
@@ -134,10 +135,10 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeOrganRail::CreateContent() const
 			CreateTitledCommandList(
 				LOCTEXT("OrganHeader_World", "World"),
 				{
-					Commands.CommandInfo_OrganGenerateAllProxies,
-					Commands.CommandInfo_OrganClearAllProxies,
-					Commands.CommandInfo_OrganCreateAllLevelInstances,
-					Commands.CommandInfo_OrganUnloadAllLevelInstances,
+					OrganCommands.CommandInfo_GenerateAllProxies,
+					OrganCommands.CommandInfo_ClearAllProxies,
+					OrganCommands.CommandInfo_CreateAllLevelInstances,
+					OrganCommands.CommandInfo_UnloadAllLevelInstances,
 				})
 		]
 

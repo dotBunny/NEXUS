@@ -3,9 +3,12 @@
 
 #include "NWorldAssemblyEdModeToolkit.h"
 
-#include "NWorldAssemblyEditorCommands.h"
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyEdModePaletteCommands.h"
+#include "Commands/NWorldAssemblyEditorCellCommands.h"
+#include "Commands/NWorldAssemblyEditorJunctionCommands.h"
+#include "Commands/NWorldAssemblyEditorOrganCommands.h"
+#include "Commands/NWorldAssemblyEditorWorldCommands.h"
 #include "Rails/NWorldAssemblyEdModeCellRail.h"
 #include "Rails/NWorldAssemblyEdModeJunctionRail.h"
 #include "Rails/NWorldAssemblyEdModeOrganRail.h"
@@ -245,8 +248,6 @@ TSharedRef<SWidget> FNWorldAssemblyEdModeToolkit::CreateCategoryContent() const
 
 void FNWorldAssemblyEdModeToolkit::RegisterPalettes()
 {
-	const FNWorldAssemblyEditorCommands& Commands = FNWorldAssemblyEditorCommands::Get();
-
 	ToolkitSections = MakeShared<FToolkitSections>();
 
 	// ModeDetailsView is deliberately not handed over. It shows the mode's settings object and nothing else — tool
@@ -262,10 +263,10 @@ void FNWorldAssemblyEdModeToolkit::RegisterPalettes()
 	// commands were already mapped into. This is also what scopes them to the mode: the Organ bindings used to be
 	// appended to the level editor's global action list, so their chords fired whether or not the mode was open.
 	const TSharedRef<FUICommandList> ToolkitCommandList = GetToolkitCommands();
-	ToolkitCommandList->Append(Commands.CommandList_Cell.ToSharedRef());
-	ToolkitCommandList->Append(Commands.CommandList_CellJunction.ToSharedRef());
-	ToolkitCommandList->Append(Commands.CommandList_World.ToSharedRef());
-	ToolkitCommandList->Append(Commands.CommandList_Organ.ToSharedRef());
+	ToolkitCommandList->Append(FNWorldAssemblyEditorCellCommands::Get().CommandList.ToSharedRef());
+	ToolkitCommandList->Append(FNWorldAssemblyEditorJunctionCommands::Get().CommandList.ToSharedRef());
+	ToolkitCommandList->Append(FNWorldAssemblyEditorWorldCommands::Get().CommandList.ToSharedRef());
+	ToolkitCommandList->Append(FNWorldAssemblyEditorOrganCommands::Get().CommandList.ToSharedRef());
 
 	// Order here is the order of the buttons on the rail.
 	Rails.Add(MakeShared<FNWorldAssemblyEdModeWorldRail>(ToolkitCommandList));

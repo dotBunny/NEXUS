@@ -6,13 +6,14 @@
 #include "Cell/NCellJunctionComponent.h"
 #include "Editor.h"
 #include "NEditorUtils.h"
-#include "NWorldAssemblyEditorCommands.h"
 #include "NWorldAssemblyEditorStyle.h"
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyEdModePaletteCommands.h"
 #include "NWorldAssemblyEdModeToolCommands.h"
 #include "NWorldAssemblyRegistry.h"
 #include "Selection.h"
+#include "Commands/NWorldAssemblyEditorJunctionCommands.h"
+#include "Operations/NWorldAssemblyEditorJunctionOperations.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Widgets/Input/SComboButton.h"
 #include "Widgets/SBoxPanel.h"
@@ -63,7 +64,7 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeJunctionRail::CreateHeader() const
 					FText::Format(LOCTEXT("JunctionPicker_Select", "Select {0}"), JunctionName),
 					FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.SelectNCellJunctionComponent"),
 					FUIAction(
-						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::CellJunctionSelectComponent, Junction),
+						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorJunctionOperations::SelectComponent, Junction),
 						FCanExecuteAction(),
 						FIsActionChecked::CreateLambda([Junction]() { return GetSelectedJunction() == Junction; })),
 					NAME_None,
@@ -97,7 +98,7 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeJunctionRail::CreateHeader() const
 
 TSharedPtr<SWidget> FNWorldAssemblyEdModeJunctionRail::CreateContent() const
 {
-	const FNWorldAssemblyEditorCommands& Commands = FNWorldAssemblyEditorCommands::Get();
+	const FNWorldAssemblyEditorJunctionCommands& Junction = FNWorldAssemblyEditorJunctionCommands::Get();
 	const FNWorldAssemblyEdModeToolCommands& ToolCommands = FNWorldAssemblyEdModeToolCommands::Get();
 
 	return SNew(SVerticalBox)
@@ -115,7 +116,7 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeJunctionRail::CreateContent() const
 		[
 			CreateTitledCommandGrid(
 				LOCTEXT("JunctionHeader_Component", "Component"),
-				{ Commands.CommandInfo_CellJunctionAddComponent, Commands.CommandInfo_CellJunctionCollectComponents })
+				{ Junction.CommandInfo_AddComponent, Junction.CommandInfo_CollectComponents })
 		];
 }
 

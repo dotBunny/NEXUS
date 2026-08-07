@@ -9,7 +9,7 @@
  * The category commands driving the World Assembly edit mode's toolkit rail.
  *
  * One command per category button down the left edge of the mode panel; activating one swaps the palette shown
- * beside it. Kept separate from FNWorldAssemblyEditorCommands, which holds the actions the palettes are filled with —
+ * beside it. Kept separate from the per-category command classes that hold the actions the palettes are filled with —
  * FToolkitBuilder wants the category and its contents supplied as two distinct lists.
  *
  * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>

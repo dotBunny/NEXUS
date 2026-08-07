@@ -27,7 +27,7 @@ class NEXUSWORLDASSEMBLY_API ANCellActor : public AActor
 	friend class UAssetValidator_World;
 	friend class UAssetDefinition_NCell;
 	friend class FNWorldAssemblyEditorUtils;
-	friend class FNWorldAssemblyEditorCommands;
+	friend class FNWorldAssemblyEditorCellOperations;
 	friend class FNWorldAssemblyEditorUndo;
 	friend class FDebugRenderSceneProxy;
 	friend class UNCellDebugDrawComponent;

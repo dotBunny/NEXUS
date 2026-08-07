@@ -10,7 +10,7 @@
 #include "Editor.h"
 #include "TimerManager.h"
 #include "NWorldAssemblyContextCache.h"
-#include "NWorldAssemblyEditorCommands.h"
+#include "Commands/NWorldAssemblyEditorQuickAssemblyCommands.h"
 #include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEditorToolMenu.h"
 #include "NWorldAssemblyEditorUserSettings.h"
@@ -482,13 +482,13 @@ void UNWorldAssemblyEditorSubsystem::OnAutoAssemblyTimerElapsed()
 
 	// A new run can't start right now (no valid organ, in PIE, or another operation is in flight). This is an
 	// environment-driven stop, not a user one, so drop the tally silently and keep the button off "cancel".
-	if (!FNWorldAssemblyEditorCommands::StartQuickAssembly_CanExecute())
+	if (!FNWorldAssemblyEditorQuickAssemblyCommands::Start_CanExecute())
 	{
 		StopAutoAssemblyLoop(/*bEmitSummary*/ false);
 		return;
 	}
 
-	FNWorldAssemblyEditorCommands::StartQuickAssembly();
+	FNWorldAssemblyEditorQuickAssemblyCommands::Start();
 }
 
 void UNWorldAssemblyEditorSubsystem::UpdateAutoAssemblyCountdownBar()
