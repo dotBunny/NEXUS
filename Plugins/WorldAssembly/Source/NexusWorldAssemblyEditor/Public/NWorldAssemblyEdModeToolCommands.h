@@ -8,9 +8,9 @@
 /**
  * The commands that start the World Assembly edit mode's interactive tools.
  *
- * Separate from FNWorldAssemblyEditorCommands (one-shot actions) and FNWorldAssemblyEdModePaletteCommands (the rail
- * categories) because these are handed to UEdMode::RegisterTool, which maps each one to the start/stop of a tool
- * rather than to a delegate of its own.
+ * Separate from the per-category command classes (one-shot actions) and FNWorldAssemblyEdModePaletteCommands (the
+ * rail categories) because these are handed to UEdMode::RegisterTool, which maps each one to the start/stop of a
+ * tool rather than to a delegate of its own.
  *
  * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */

@@ -23,6 +23,7 @@
 #include "NEditorStyle.h"
 #include "NEditorUtils.h"
 #include "NWorldAssemblyEditorCommands.h"
+#include "Commands/NWorldAssemblyEditorQuickAssemblyCommands.h"
 #include "NWorldAssemblyEditorModule.h"
 #include "NWorldAssemblyEditorSubsystem.h"
 #include "NWorldAssemblyEditorUserSettings.h"
@@ -91,8 +92,8 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		FToolMenuEntry QuickAssemblyButton = FToolMenuEntry::InitToolBarButton(
 					"NWorldAssemblyEdMode_QuickAssemblyButton",
 					FUIAction(
-						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::QuickAssemblyButtonClicked),
-						FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::QuickAssemblyButton_CanExecute),
+						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorQuickAssemblyCommands::ButtonClicked),
+						FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorQuickAssemblyCommands::Button_CanExecute),
 						FIsActionChecked(),
 						// Hide the button when the Quick Assembly section is hidden (no Organ components, or disabled in settings).
 						FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorToolMenu::ShowOrganDropdown)),
@@ -125,15 +126,17 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 				FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorToolMenu::ShowOrganDropdown)),
 				FOnGetContent::CreateLambda([]()
 				{
-					FMenuBuilder MenuBuilder(true, FNWorldAssemblyEditorCommands::Get().CommandList_QuickAssembly);
+					const FNWorldAssemblyEditorQuickAssemblyCommands& QuickAssembly = FNWorldAssemblyEditorQuickAssemblyCommands::Get();
+
+					FMenuBuilder MenuBuilder(true, QuickAssembly.CommandList);
 					MenuBuilder.SetSearchable(false); // Life's too short to search this menu.
 
 					MenuBuilder.BeginSection("NWorldAssemblyEdMode_QuickAssemblyOptions_CellBehavior", NSLOCTEXT("NexusWorldAssemblyEditor", "QuickAssemblyOptions_CellProxy", "Cell Proxy"));
-					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_QuickAssemblyToggleLoadInstances);
+					MenuBuilder.AddMenuEntry(QuickAssembly.CommandInfo_ToggleLoadInstances);
 					MenuBuilder.EndSection();
 
 					MenuBuilder.BeginSection("NWorldAssemblyEdMode_QuickAssemblyOptions_AutoAssembly", NSLOCTEXT("NexusWorldAssemblyEditor", "QuickAssemblyOptions_AutoAssembly", "Auto Assembly"));
-					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_QuickAssemblyToggleAutoAssembly);
+					MenuBuilder.AddMenuEntry(QuickAssembly.CommandInfo_ToggleAutoAssembly);
 					MenuBuilder.AddWidget(CreateQuickAssemblyAutoAssemblyTimerWidget(),
 						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_QuickAssembly_AutoAssemblyTimer", "Gap Timer"));
 					MenuBuilder.EndSection();

@@ -3,10 +3,10 @@
 
 #include "Rails/NWorldAssemblyEdModeCellRail.h"
 
-#include "NWorldAssemblyEditorCommands.h"
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyEdModePaletteCommands.h"
 #include "NWorldAssemblyEdModeToolCommands.h"
+#include "Commands/NWorldAssemblyEditorCellCommands.h"
 #include "Widgets/SBoxPanel.h"
 
 #define LOCTEXT_NAMESPACE "NexusWorldAssemblyEditor"
@@ -23,7 +23,7 @@ TAttribute<bool> FNWorldAssemblyEdModeCellRail::GetEnabled() const
 
 TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 {
-	const FNWorldAssemblyEditorCommands& Commands = FNWorldAssemblyEditorCommands::Get();
+	const FNWorldAssemblyEditorCellCommands& Cell = FNWorldAssemblyEditorCellCommands::Get();
 	const FNWorldAssemblyEdModeToolCommands& ToolCommands = FNWorldAssemblyEdModeToolCommands::Get();
 
 	return SNew(SVerticalBox)
@@ -48,10 +48,10 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 			CreateTitledCommandGrid(
 				LOCTEXT("CellHeader_Calculate", "Calculate"),
 				{
-					Commands.CommandInfo_CellCalculateAll,
-					Commands.CommandInfo_CellCalculateBounds,
-					Commands.CommandInfo_CellCalculateHull,
-					//Commands.CommandInfo_CellCalculateVoxelData,
+					Cell.CommandInfo_CalculateAll,
+					Cell.CommandInfo_CalculateBounds,
+					Cell.CommandInfo_CalculateHull,
+					//Cell.CommandInfo_CalculateVoxelData,
 				})
 		]
 
@@ -61,7 +61,7 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 			CreateTitledCommandList(
 				LOCTEXT("CellHeader_Tagging", "Tagging"),
 				{
-					Commands.CommandInfo_CellTagIgnore
+					Cell.CommandInfo_TagIgnore
 				})
 		]
 
@@ -71,9 +71,9 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 			CreateTitledCommandList(
 				LOCTEXT("CellHeader_Actions", "Actions"),
 				{
-					Commands.CommandInfo_CellSelectActor,
-					//Commands.CommandInfo_CellToggleDrawVoxelData,
-					Commands.CommandInfo_CellCaptureThumbnail
+					Cell.CommandInfo_SelectActor,
+					//Cell.CommandInfo_ToggleDrawVoxelData,
+					Cell.CommandInfo_CaptureThumbnail
 				})
 		]
 
@@ -83,11 +83,11 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 			CreateTitledCheckList(
 				LOCTEXT("CellHeader_QuickOptions", "Quick Options"),
 				{
-					Commands.CommandInfo_CellToggleBoundsCalculateOnSave,
-					Commands.CommandInfo_CellToggleHullCalculateOnSave,
-					Commands.CommandInfo_CellToggleHullAllowNonConvex,
-					//Commands.CommandInfo_CellToggleVoxelCalculateOnSave,
-					//Commands.CommandInfo_CellToggleVoxelData,
+					Cell.CommandInfo_ToggleBoundsCalculateOnSave,
+					Cell.CommandInfo_ToggleHullCalculateOnSave,
+					Cell.CommandInfo_ToggleHullAllowNonConvex,
+					//Cell.CommandInfo_ToggleVoxelCalculateOnSave,
+					//Cell.CommandInfo_ToggleVoxelData,
 				})
 		]
 
@@ -97,9 +97,9 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 			CreateTitledCommandGrid(
 				LOCTEXT("CellHeader_CellData", "Cell Data"),
 				{
-					Commands.CommandInfo_CellSaveCell,
-					Commands.CommandInfo_CellResetCell,
-					Commands.CommandInfo_CellRemoveActor
+					Cell.CommandInfo_SaveCell,
+					Cell.CommandInfo_ResetCell,
+					Cell.CommandInfo_RemoveActor
 				})
 		];
 }
