@@ -360,6 +360,11 @@ void UNWorldAssemblyEditorSubsystem::OnMapLoad(const FString& String, FCanLoadMa
 	// A map change invalidates the loop's target organs; disengage it before clearing proxies.
 	StopAutoAssemblyLoop();
 	ClearAllProxies();
+
+	// The summary describes organs and cells in the map being left, and the proxies it counted have just been
+	// destroyed above — carrying it into the next map would report someone else's run as this one's last.
+	// Dropped on map change only, not on PIE: a PIE round-trip returns to the same map, where it still holds.
+	LastRunSummary.Reset();
 }
 
 void UNWorldAssemblyEditorSubsystem::BeginAutoAssemblyLoop()
