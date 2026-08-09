@@ -13,16 +13,16 @@ struct FNStatusChannelUpdate;
 /**
  * Declares this widget as invalidation-aware, which SCompoundWidget is not by default.
  *
- * FCategoryDrivenContentBuilderBase wraps the whole mode panel in an SInvalidationPanel with dynamic invalidation on,
- * and such a panel only caches when every descendant opts in. The claim holds here: this widget declares no
- * SlateAttributes of its own and overrides neither OnPaint nor Tick, its per-frame bindings all sit on stock widgets
- * whose registered attributes invalidate correctly, and Rebuild mutates its column through TPanelChildren, which
- * invalidates on both the clear and the re-add. Anything added here that paints or caches state directly has to
- * re-earn it.
+ * An SInvalidationPanel with dynamic invalidation on only caches when every descendant opts in. The claim holds here:
+ * this widget declares no SlateAttributes of its own and overrides neither OnPaint nor Tick, its per-frame bindings all
+ * sit on stock widgets whose registered attributes invalidate correctly, and Rebuild mutates its column through
+ * TPanelChildren, which invalidates on both the clear and the re-add.
  *
- * @note Load-bearing. The mode panel's other non-opting-in widget was FToolkitSections' details view, which
- *       FNWorldAssemblyEdModeToolkit no longer registers — so this widget is now the only thing standing between that
- *       panel and a cached one. Anything added here that paints or caches state directly has to re-earn the claim.
+ * @note Currently unexercised. It was load-bearing while the mode lived in the Mode Toolbox, because
+ *       FCategoryDrivenContentBuilderBase wrapped that panel in such an invalidation panel; SNWorldAssemblyRail, which
+ *       hosts this widget now, does not. Kept because the claim is still true and costs nothing, and because it is the
+ *       prerequisite for ever wrapping the rail in one. Anything added here that paints or caches state directly has
+ *       to re-earn it.
  */
 template <>
 struct TWidgetTypeTraits<class SNAssemblyOperations>

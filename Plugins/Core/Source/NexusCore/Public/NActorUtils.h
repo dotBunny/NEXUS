@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
 
+class UPrimitiveComponent;
+
 /**
  * Filter criteria consumed by FNActorUtils::GetWorldActors when collecting actors from a UWorld.
  */
@@ -85,4 +87,97 @@ public:
 	 *       bIncludePlayerStarts is set, bypassing every other filter — identical to GetWorldActors.
 	 */
 	static bool PassesFilter(const AActor* Actor, const FNWorldActorFilterSettings& Settings);
+
+	/**
+	 * @param ClassName Unprefixed UClass name of a primitive component.
+	 * @return true when the name is one this framework treats as carrying terrain geometry.
+	 * @remark The string form exists so the matching can be tested without the plugins that define these types, and
+	 *         so an engine upgrade that renames one of them fails a test rather than silently classifying a level's
+	 *         entire floor as ordinary geometry. Epic has renamed this family once already (MegaMesh to
+	 *         MeshPartition), which is precisely the event this guards.
+	 */
+	static bool IsTerrainPrimitiveClassName(const FString& ClassName);
+
+	/**
+	 * @param ClassName Unprefixed UClass name of an actor.
+	 * @return true when the name is a terrain section — a built piece of terrain geometry.
+	 * @note Matched exactly. The interactive section is deliberately not one: it is a working copy of whatever is
+	 *       being sculpted, duplicating geometry a preview section already describes.
+	 */
+	static bool IsTerrainSectionClassName(const FString& ClassName);
+
+	/**
+	 * @param ClassName Unprefixed UClass name of an actor.
+	 * @return true when the name is terrain authoring apparatus rather than terrain.
+	 */
+	static bool IsTerrainAuthoringClassName(const FString& ClassName);
+
+	/**
+	 * @param ClassName Unprefixed UClass name of a component.
+	 * @return true when the name belongs to the landscape family.
+	 */
+	static bool IsLandscapeClassName(const FString& ClassName);
+
+	/**
+	 * Identify a primitive that carries terrain geometry — a landscape component, or a Mesh Partition section's
+	 * collision component.
+	 * @param Primitive Primitive component to inspect.
+	 * @return true when the component belongs to one of the recognized terrain representations.
+	 * @note Matched on class name so NexusCore takes no dependency on the Landscape module, nor on MeshPartition,
+	 *       which is an experimental engine plugin that may not be enabled at all.
+	 */
+	static bool IsTerrainPrimitive(const UPrimitiveComponent* Primitive);
+
+	/**
+	 * Identify an actor that carries terrain geometry, by inspecting the primitives it owns.
+	 * @param Actor Candidate actor under inspection. A null actor returns false.
+	 * @return true when any primitive the actor owns satisfies IsTerrainPrimitive.
+	 * @remark Exists so bounds and hull generation can admit terrain that their ordinary filters would drop. Mesh
+	 *         Partition represents an authored terrain in the editor as transient APreviewSection actors, and a
+	 *         blanket transient skip would silently omit a cell's entire floor.
+	 */
+	static bool IsTerrainActor(const AActor* Actor);
+
+	/**
+	 * Identify an actor that describes how a terrain is built rather than being terrain itself — a Mesh Partition
+	 * definition, or one of the modifiers that sculpt it.
+	 * @param Actor Candidate actor under inspection. A null actor returns false.
+	 * @return true when the actor is terrain authoring apparatus.
+	 * @remark These must never contribute to a bounds or hull calculation at any setting. A modifier's bounds are its
+	 *         region of influence, which reaches far past the surface it produces — measured against a real level, a
+	 *         single modifier's box was larger than every piece of geometry in it put together.
+	 */
+	static bool IsTerrainAuthoringActor(const AActor* Actor);
+
+	/**
+	 * Identify an actor whose terrain is a landscape.
+	 * @param Actor Candidate actor under inspection. A null actor returns false.
+	 * @return true when the actor owns a landscape primitive.
+	 * @remark Worth separating from IsTerrainActor because landscape geometry cannot be extracted the way every other
+	 *         terrain can: its collision is a Chaos heightfield reached through no UBodySetup, so there is nothing for
+	 *         FNRawMeshFactory to read and it skips landscape primitives outright. Callers that need the surface have
+	 *         to sample it instead.
+	 */
+	static bool IsLandscapeActor(const AActor* Actor);
+
+	/**
+	 * Test whether a primitive is reporting real geometry rather than the engine's placeholder bounds.
+	 * @param Primitive Primitive component to inspect.
+	 * @return false when the component's bounds are the near-zero box the engine substitutes for empty geometry.
+	 * @note Mesh Partition components return a deliberately tiny box — not an invalid one — while a section has no
+	 *       geometry to describe, either because its build has not finished or because it covers nothing. Both
+	 *       UMeshPartitionCollisionComponent::CalcBounds and UPreviewMeshComponent::CalcBounds do this, each
+	 *       explaining that an empty box would spam other engine systems.
+	 */
+	static bool HasBuiltGeometry(const UPrimitiveComponent* Primitive);
+
+	/**
+	 * Union of an actor's registered primitive bounds, skipping any primitive still reporting placeholder bounds.
+	 * @param Actor Actor whose primitives should be measured. A null actor returns an invalid box.
+	 * @param bIncludeNonColliding When true, primitives with collision disabled also contribute.
+	 * @return The combined bounds, or an invalid box when nothing qualified.
+	 * @remark Differs from AActor::GetComponentsBoundingBox only in dropping placeholder bounds, which that treats
+	 *         as a valid point and folds in — pulling the result out to wherever the empty component happens to sit.
+	 */
+	static FBox GetBuiltComponentsBoundingBox(const AActor* Actor, bool bIncludeNonColliding);
 };

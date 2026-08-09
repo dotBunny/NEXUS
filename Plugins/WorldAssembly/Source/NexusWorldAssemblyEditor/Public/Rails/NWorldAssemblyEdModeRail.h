@@ -13,9 +13,9 @@ class SWidget;
  * One category on the World Assembly edit mode's toolkit rail.
  *
  * A rail owns everything specific to its category: the command its rail button is built from, whether that button is
- * shown at all, the picker naming what it acts on, and the buttons beneath. FNWorldAssemblyEdModeToolkit owns the
- * shared frame — registering each rail with the builder, gating content on the active category, and the warning
- * footer — so a rail never has to know the builder exists.
+ * shown at all, the picker naming what it acts on, and the buttons beneath. SNWorldAssemblyRail owns the shared frame
+ * — laying the buttons out, switching content on the active category, the active-tool row and the warning footer — so
+ * a rail never has to know how it is being presented.
  *
  * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
@@ -33,29 +33,25 @@ public:
 	virtual TSharedPtr<FUICommandInfo> GetCategoryCommand() const = 0;
 
 	/**
-	 * @return Commands for the category's flat palette toolbar.
-	 * @note Empty for a rail that builds its own content instead. FToolPalette renders one flat toolbar with no notion
-	 *       of a titled group, so a rail wanting sections returns nothing here and supplies CreateContent instead.
+	 * @return Predicate deciding whether this category appears on the rail at all, or unset to always show it.
+	 * @note Asks "is this category relevant to the level", not "can the user act right now" — a distinction that
+	 *       matters because the answer drives visibility. Cell and Junction key off the level containing a cell
+	 *       actor, not off one being focused: focus comes and goes with every selection change, and a button hiding
+	 *       on that would vanish constantly and shuffle the ones below it under the cursor. Whether the commands
+	 *       inside the category can run is each command's own business, and they already grey themselves out.
+	 * @remark Polled on a timer by SNWorldAssemblyRail rather than read per-frame, so it may walk the level — Cell's
+	 *         and Junction's do exactly that.
 	 */
-	virtual TArray<TSharedPtr<FUICommandInfo>> GetPaletteCommands() const { return {}; }
-
-	/**
-	 * @return Predicate deciding whether this category's rail button is enabled, or unset to always enable it.
-	 * @note Greys the button out rather than hiding it, so the rail keeps a stable shape and a category that is
-	 *       unavailable still says so — a button that vanishes leaves nothing to explain why.
-	 * @remark Evaluated every frame, so keep it cheap.
-	 */
-	virtual TAttribute<bool> GetEnabled() const { return TAttribute<bool>(); }
+	virtual TAttribute<bool> GetAvailable() const { return TAttribute<bool>(); }
 
 	/**
 	 * @return A widget naming what this category acts on, shown above the content, or null for none.
-	 * @note Where the pickers live. They cannot be palette buttons: FToolkitBuilder rebinds every button's
-	 *       OnGetMenuContent to its own context menu and dereferences the button's FUICommandInfo, so a palette entry
-	 *       has to be a fixed command rather than a dynamic list.
+	 * @note Where the pickers live. They are combo boxes over a list the level decides, so they cannot be built from a
+	 *       fixed FUICommandInfo the way every button below them is.
 	 */
 	virtual TSharedPtr<SWidget> CreateHeader() const { return nullptr; }
 
-	/** @return This category's own content, or null when GetPaletteCommands carries it instead. */
+	/** @return This category's own content — its titled groups of buttons — or null for a category with none. */
 	virtual TSharedPtr<SWidget> CreateContent() const { return nullptr; }
 
 protected:
@@ -77,8 +73,8 @@ protected:
 	 * @param Title Heading shown above the buttons.
 	 * @param Commands Commands to lay out, resolved against the toolkit command list.
 	 * @return A titled two-column toolbar widget, on the same recessed backing as CreateTitledCommandPalette's.
-	 * @note What FToolkitBuilder itself renders a palette as, reproduced here so a rail can head and split one. It is a
-	 *       different widget from CreateTitledCommandPalette's, not a wider setting on it: this is the plugin's
+	 * @note What the engine's own toolkit builder renders a palette as, reproduced here so a rail can head and split
+	 *       one. It is a different widget from CreateTitledCommandPalette's, not a wider setting on it: this is the plugin's
 	 *       WorldAssemblyEd.TitledCommandGrid style — SlimPaletteToolBar, recessed — on FSlimHorizontalUniformToolBarBuilder,
 	 *       whose SUniformWrapPanel fills its width across the style's two columns. The other builder's panel is
 	 *       left-aligned over fixed 48-unit cells, so it fits as many icon tiles per row as the panel is wide and the

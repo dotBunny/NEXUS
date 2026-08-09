@@ -43,6 +43,33 @@ struct NEXUSWORLDASSEMBLY_API FNCellHullGenerationSettings
 	UPROPERTY(EditAnywhere)
 	bool bIncludeEditorOnly = false;
 
+	/**
+	 * When true, terrain contributes to the hull.
+	 * @note Terrain needs its own opt-in because the editor represents a Mesh Partition terrain as transient actors,
+	 *       which the hull's actor filter skips. Without this a cell whose floor is a terrain gets a hull with no
+	 *       floor in it, and the assembly penetration tests that consume the hull let other cells sink through it.
+	 * @remark ActorIgnoreTags cannot exclude a Mesh Partition terrain — its actors are regenerated on every build, so
+	 *         a tag placed on one does not survive. This flag is the only control over it.
+	 */
+	UPROPERTY(EditAnywhere)
+	bool bIncludeTerrain = true;
+
+	/**
+	 * Grid size, in world units, that terrain vertices are thinned onto before the hull is built. 0 keeps every one.
+	 *
+	 * Reads as how much slack the envelope is allowed rather than how detailed it is: a convex hull is decided by its
+	 * extreme points alone, so thinning barely moves the resulting shape — it shifts each supporting plane outward by
+	 * at most about this distance. At the default, the hull sits within a metre of the one every vertex would give.
+	 * @note Only terrain is thinned. Authored geometry arrives as a handful of collision primitives, but a terrain
+	 *       section hands over its entire surface — four sections measured at 251,001 vertices each, a million points
+	 *       into a convex build that is superlinear in them.
+	 * @note Applies to generation only, and assumes the convex build that follows it. A hull hand-edited into a
+	 *       concave shape afterwards is unaffected; but were generation itself ever made concave, snapping outward
+	 *       would push a concave surface into the void it is meant to bound and would have to change with it.
+	 */
+	UPROPERTY(EditAnywhere, meta=(ClampMin="0", Units="cm"))
+	float TerrainSimplificationGridSize = 100.f;
+
 	/** Algorithm used to build the convex hull. */
 	UPROPERTY(VisibleAnywhere)
 	ENullBuildMethod BuildMethod = ENullBuildMethod::Original;
@@ -78,6 +105,8 @@ struct NEXUSWORLDASSEMBLY_API FNCellHullGenerationSettings
 		&& bAllowNonConvex == Other.bAllowNonConvex
 		&& bIncludeNonColliding == Other.bIncludeNonColliding
 		&& bIncludeEditorOnly == Other.bIncludeEditorOnly && BuildMethod == Other.BuildMethod
+		&& bIncludeTerrain == Other.bIncludeTerrain
+		&& TerrainSimplificationGridSize == Other.TerrainSimplificationGridSize
 		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);
 	}
 };

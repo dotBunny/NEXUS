@@ -7,6 +7,7 @@
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "Commands/NWorldAssemblyEditorCellCommands.h"
+#include "Commands/NWorldAssemblyEditorCellDataCommands.h"
 #include "Commands/NWorldAssemblyEditorJunctionCommands.h"
 #include "Commands/NWorldAssemblyEditorOrganCommands.h"
 #include "Commands/NWorldAssemblyEditorQuickAssemblyCommands.h"
@@ -18,6 +19,7 @@ void FNWorldAssemblyEditorCommands::RegisterCommands()
 
 	FNWorldAssemblyEditorWorldCommands::Register(Context);
 	FNWorldAssemblyEditorCellCommands::Register(Context);
+	FNWorldAssemblyEditorCellDataCommands::Register(Context);
 	FNWorldAssemblyEditorJunctionCommands::Register(Context);
 	FNWorldAssemblyEditorOrganCommands::Register(Context);
 	FNWorldAssemblyEditorQuickAssemblyCommands::Register(Context);

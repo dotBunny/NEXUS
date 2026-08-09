@@ -40,15 +40,20 @@ public:
 	 */
 	static bool CanEditCell();
 
-	/** @return true if a cell actor can be added: the level has none already, and holds no organs. */
-	static bool AddActor_CanExecute();
-
 	/** Select the cell actor that owns the current cell-editor context. */
 	static void SelectActor();
 	/** @return true if a cell-actor selection target is available. */
 	static bool SelectActor_CanExecute();
 	/** @return true if the select-actor entry should be shown in the current context. */
 	static bool SelectActor_CanShow();
+
+	/**
+	 * @return true if cell data can be recalculated right now.
+	 * @note CanEditCell plus a settled terrain. Recalculating while a terrain build is still landing sections bakes
+	 *       data describing a half-built world, so the commands go unavailable until it finishes rather than
+	 *       producing a result that quietly disagrees with the one the same button gives a moment later.
+	 */
+	static bool Calculate_CanExecute();
 
 	/** @return true if voxel recalculation is possible (e.g. bounds exist). */
 	static bool CalculateVoxelData_CanExecute();
@@ -97,19 +102,15 @@ public:
 	/** Every cell command, mapped to its action. Appended to the toolkit's list so the rails can resolve against it. */
 	TSharedPtr<FUICommandList> CommandList;
 
-	TSharedPtr<FUICommandInfo> CommandInfo_AddActor;
+
 	TSharedPtr<FUICommandInfo> CommandInfo_SelectActor;
-	TSharedPtr<FUICommandInfo> CommandInfo_RemoveActor;
 	TSharedPtr<FUICommandInfo> CommandInfo_TagIgnore;
-	TSharedPtr<FUICommandInfo> CommandInfo_CaptureThumbnail;
 
 	TSharedPtr<FUICommandInfo> CommandInfo_CalculateAll;
 	TSharedPtr<FUICommandInfo> CommandInfo_CalculateBounds;
 	TSharedPtr<FUICommandInfo> CommandInfo_CalculateHull;
 	TSharedPtr<FUICommandInfo> CommandInfo_CalculateVoxelData;
 
-	TSharedPtr<FUICommandInfo> CommandInfo_ResetCell;
-	TSharedPtr<FUICommandInfo> CommandInfo_SaveCell;
 
 	TSharedPtr<FUICommandInfo> CommandInfo_ToggleDrawVoxelData;
 	TSharedPtr<FUICommandInfo> CommandInfo_ToggleBoundsCalculateOnSave;

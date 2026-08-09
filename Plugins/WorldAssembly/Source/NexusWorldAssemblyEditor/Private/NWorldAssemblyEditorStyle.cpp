@@ -7,8 +7,11 @@
 #include "Commands/NWorldAssemblyEditorQuickAssemblyCommands.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Brushes/SlateImageBrush.h"
+#include "Brushes/SlateNoResource.h"
+#include "Brushes/SlateRoundedBoxBrush.h"
 #include "Styling/AppStyle.h"
 #include "Styling/SlateStyle.h"
+#include "Styling/SlateTypes.h"
 #include "Styling/ToolBarStyle.h"
 
 N_EDITOR_STYLE(FNWorldAssemblyEditorStyle)
@@ -75,6 +78,13 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 	// back to the 128x128 brush above and sized itself to it.
 	Style.Set("Icon.WorldAssembly.Small", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Icon_WorldAssembly"), Icon16x16));
 
+	// Rail Icons
+	Style.Set("Rail.World.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rail_World"), Icon20x20));
+	Style.Set("Rail.Cell.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rail_Cell"), Icon20x20));
+	Style.Set("Rail.CellData.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rail_CellData"), Icon20x20));
+	Style.Set("Rail.Junction.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rail_Junction"), Icon20x20));
+	Style.Set("Rail.Organ.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rail_Organ"), Icon20x20));
+
 	Style.Set("Command.WorldAssemblyEd.NCellLevelInstance", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NCellLevelInstance"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.NCellProxy", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NCellProxy"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.NOrganComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NOrganComponent"), Icon16x16));
@@ -126,8 +136,23 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 	// renders a palette with; only the recessed backing is ours, so these groups sit in the same dark well as the
 	// icon-tile groups beside them instead of the lighter panel fill an unheaded full-panel palette wants. The column
 	// count is the only difference between the two.
+	// Rounded to sit inside the rounded box the panel itself is drawn on. A tighter radius than the 6 the two overlays
+	// use, because a group nested inside a rounded container reads wrong at the same radius as its container — the
+	// inner curve has to be the smaller one.
+	const FSlateRoundedBoxBrush TitledGroupBackground(FStyleColors::Recessed, 4.0f);
+
+	// The escape hatch behind CreateTitledContent, and through it CreateTitledCheckList. Those draw their own border
+	// rather than getting one from a toolbar style, so they need the brush rather than the style below.
+	Style.Set("WorldAssemblyEd.TitledGroupBackground", new FSlateRoundedBoxBrush(TitledGroupBackground));
+
+	// The icon-tile groups behind CreateTitledCommandPalette. Stock PaletteToolBar in everything but its backing, which
+	// is squared off and so would corner-clash with the grid and list groups above and below it.
+	FToolBarStyle TitledPaletteStyle = FAppStyle::Get().GetWidgetStyle<FToolBarStyle>("PaletteToolBar");
+	TitledPaletteStyle.SetBackground(TitledGroupBackground);
+	Style.Set("WorldAssemblyEd.TitledCommandPalette", TitledPaletteStyle);
+
 	FToolBarStyle TitledCommandStyle = FAppStyle::Get().GetWidgetStyle<FToolBarStyle>("SlimPaletteToolBar");
-	TitledCommandStyle.SetBackground(FSlateColorBrush(FStyleColors::Recessed));
+	TitledCommandStyle.SetBackground(TitledGroupBackground);
 	// Asymmetric because the buttons are: SlimPaletteToolBar pads each one 4 on its left and top and nothing on its
 	// right and bottom, so the two sides only read as an even 8-unit inset once this makes up the difference.
 	TitledCommandStyle.SetBackgroundPadding(FMargin(4.0f, 4.0f, 8.0f, 8.0f));
@@ -137,6 +162,63 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 
 	TitledCommandStyle.SetNumColumns(1);
 	Style.Set("WorldAssemblyEd.TitledCommandList", TitledCommandStyle);
+
+	// The two boxes the edit mode floats over the viewport. A matched pair: the pinned category strip takes the
+	// lighter fill and the panel it drives takes the darker one, which is the same relationship Mesh Terrain's
+	// SubmodePaletteLighterBrush and SubmodePaletteDarkerBrush have. Rounded rather than the square ToolPanel.GroupBorder
+	// they used to sit on, so they read as things floating over the scene rather than panels docked to nothing.
+	Style.Set("WorldAssemblyEd.RailBackground",
+		new FSlateRoundedBoxBrush(FStyleColors::Dropdown, 6.0f, FColor(85, 85, 85), 1.0f));
+	Style.Set("WorldAssemblyEd.PanelBackground",
+		new FSlateRoundedBoxBrush(FStyleColors::Panel, 6.0f, FColor(85, 85, 85), 1.0f));
+
+	// The category strip's buttons. Icon-only comes from the engine's own no-label variant; what this changes is that
+	// the toolbar stops painting a background of its own.
+	FToolBarStyle CategoryToolBarStyle = FAppStyle::Get().GetWidgetStyle<FToolBarStyle>("CategoryDrivenContentBuilderToolbarWithoutLabels");
+
+	// Both cleared so the border behind the toolbar is the only thing drawing a background. Left alone, this style
+	// inherits SlimToolBar's flat square FStyleColors::Panel fill, which paints a second color inside the rounded
+	// backing above and squares its corners off — Slate does not clip a child to the rounding of the brush behind it.
+	// The border's own padding supplies the inset the cleared BackgroundPadding used to.
+	CategoryToolBarStyle.SetBackground(FSlateNoResource());
+	CategoryToolBarStyle.SetBackgroundPadding(FMargin(0.0f));
+
+	// Sized to Mesh Terrain's palette rather than the engine default, which is built for a rail wide enough to carry
+	// labels under its icons. With the labels gone, that default leaves the highlight far larger than the icon inside
+	// it: 8 units of icon padding on every side, and room reserved out to 36 across.
+	//
+	// The arithmetic is worth keeping straight, because these three have to agree — 20-unit icon plus 4 on each side
+	// gives a 28-square button, which is what MaxWidth then has to allow through or the highlight is clipped narrower
+	// than it is tall.
+	CategoryToolBarStyle.SetIconPadding(FMargin(4.0f));
+	CategoryToolBarStyle.SetButtonContentMaxWidth(28.0f);
+
+	// Spacing around each button, and the middle term of the three that decide the strip's gutter: 7 from the border,
+	// 2 here, and 4 of IconPadding, putting every icon 13 off the rounded edge on all four sides.
+	//
+	// Uniform, unlike the engine default, which pads vertically and not at all across — that left the icons sitting
+	// 9 from the top and 4 from the sides, so the column read as a cramped ribbon. Worth measuring against the icon
+	// rather than the highlight when tuning this, since the highlight sits 4 further out on every side and the two
+	// give answers that differ by more than the numbers here do.
+	//
+	// Doubles up between neighbors, which with IconPadding is what puts 12 between one icon and the next.
+	CategoryToolBarStyle.SetButtonPadding(FMargin(2.0f));
+
+	// Not read on this path — see the rail icon brushes above — but left agreeing with them so the style is not
+	// quietly claiming a size it does not produce.
+	CategoryToolBarStyle.SetIconSize(FVector2D(20.0f, 20.0f));
+
+	// Retuned for the lighter fill the strip now sits on. The inherited states assume a dark panel, so the unchecked
+	// hover reads as muddy against Dropdown. These are the same four overrides Mesh Terrain applies to get a toggle
+	// button onto its light palette; the checked states are already right and stay as they are.
+	FCheckBoxStyle CategoryToggleButton = CategoryToolBarStyle.ToggleButton;
+	CategoryToggleButton.SetUncheckedHoveredImage(FSlateRoundedBoxBrush(FStyleColors::Hover, 4.0f));
+	CategoryToggleButton.SetUncheckedPressedImage(FSlateRoundedBoxBrush(FStyleColors::DropdownOutline, 4.0f));
+	CategoryToggleButton.SetHoveredForegroundColor(FStyleColors::ForegroundHover);
+	CategoryToggleButton.SetPressedForegroundColor(FStyleColors::ForegroundHover);
+	CategoryToolBarStyle.SetToggleButtonStyle(CategoryToggleButton);
+
+	Style.Set("WorldAssemblyEd.CategoryToolBar", CategoryToolBarStyle);
 
 	return StyleRef;
 }

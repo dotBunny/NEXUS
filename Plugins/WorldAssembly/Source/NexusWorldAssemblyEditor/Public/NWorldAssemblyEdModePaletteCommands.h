@@ -8,9 +8,9 @@
 /**
  * The category commands driving the World Assembly edit mode's toolkit rail.
  *
- * One command per category button down the left edge of the mode panel; activating one swaps the palette shown
- * beside it. Kept separate from the per-category command classes that hold the actions the palettes are filled with —
- * FToolkitBuilder wants the category and its contents supplied as two distinct lists.
+ * One command per category button down the left edge of the rail SNWorldAssemblyRail floats over the viewport;
+ * activating one swaps the content shown beside it. Kept separate from the per-category command classes that hold the
+ * actions that content is filled with, so a category and its contents stay independently addressable.
  *
  * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
@@ -32,6 +32,9 @@ public:
 
 	/** Cell authoring: the bounds, hull and voxel tools plus the per-cell actions. */
 	TSharedPtr<FUICommandInfo> LoadCellPalette;
+
+	/** Cell authoring: the bounds, hull and voxel tools plus the per-cell actions. */
+	TSharedPtr<FUICommandInfo> LoadCellDataPalette;
 
 	/** Junction authoring: the placement tool plus the per-junction actions. */
 	TSharedPtr<FUICommandInfo> LoadJunctionPalette;

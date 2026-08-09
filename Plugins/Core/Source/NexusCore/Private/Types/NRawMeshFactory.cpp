@@ -79,7 +79,15 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 
 					if (!bUseComplexAsSimple)
 					{
-						AppendChaosAggregateGeometry(Body->AggGeom, InstanceWorld,OutMeshes, OutTransforms);
+						const int32 MeshCountBeforeAggregate = OutMeshes.Num();
+						AppendChaosAggregateGeometry(Body->AggGeom, InstanceWorld, OutMeshes, OutTransforms);
+
+						// No simple collision to read — fall through to the complex tri mesh. See the matching
+						// fallback on the non-instanced path below for why this is measured rather than asked.
+						if (OutMeshes.Num() == MeshCountBeforeAggregate)
+						{
+							FromChaosBodySetup(Body, InstanceWorld, OutMeshes, OutTransforms);
+						}
 					}
 					else if (bUseRenderData)
 					{
@@ -139,7 +147,20 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 				Body->CreatePhysicsMeshes();
 			}
 
-			AppendChaosAggregateGeometry(Body->AggGeom, CompToWorld,OutMeshes, OutTransforms);
+			const int32 MeshCountBeforeAggregate = OutMeshes.Num();
+			AppendChaosAggregateGeometry(Body->AggGeom, CompToWorld, OutMeshes, OutTransforms);
+
+			// Emitting nothing means the body has no simple collision to read. That is the ordinary shape of a
+			// sculpted or imported mesh left at the project's default trace flag: it collides perfectly well, but
+			// only through its complex tri mesh. Without this the actor contributes silently nothing — no warning,
+			// no geometry — which is the hardest kind of gap to notice in a hull.
+			//
+			// Measured by what was emitted rather than by asking whether AggGeom is empty, because that also covers
+			// a body holding only element types this factory does not read (tapered capsules, level sets).
+			if (OutMeshes.Num() == MeshCountBeforeAggregate)
+			{
+				FromChaosBodySetup(Body, CompToWorld, OutMeshes, OutTransforms);
+			}
 		}
 	}
 }

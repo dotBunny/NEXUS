@@ -10,6 +10,32 @@
 class ALevelInstance;
 
 /**
+ * Filter criteria consumed by FNLevelUtils::DetermineLevelBounds when deciding which of a level's actors contribute.
+ */
+struct NEXUSCORE_API FNLevelBoundsFilter
+{
+	/** Any actor carrying one of these tags is ignored. */
+	TArray<FName> ActorIgnoreTags;
+
+	/** When true, editor-only actors contribute to the bounds. */
+	bool bIncludeEditorOnly = false;
+
+	/** When true, actors without collision also contribute to the bounds. */
+	bool bIncludeNonColliding = false;
+
+	/** When true, transient actors also contribute to the bounds. */
+	bool bIncludeTransientActors = false;
+
+	/**
+	 * When true, actors carrying terrain geometry contribute even though they are transient.
+	 * @note Narrower than bIncludeTransientActors, which admits every transient actor. Mesh Partition represents an
+	 *       authored terrain in the editor as transient APreviewSection actors, so without this a level whose floor
+	 *       is a terrain produces bounds that omit it entirely.
+	 */
+	bool bIncludeTerrain = false;
+};
+
+/**
  * A collection of native utility methods for working with levels and level instances.
  *
  * These helpers are only accessible from C++ code and are not exposed to Blueprints.
@@ -49,12 +75,10 @@ public:
 	 * Calculates an axis-aligned bounding box that encompasses all relevant actors in a level.
 	 * @param InLevel The level whose contents should be considered.
 	 * @param OutBounds The calculated bounds; reset on entry and grown by each included actor.
-	 * @param OutIgnoredActors Populated with the actors that were skipped during the calculation.
-	 * @param ActorIgnoreTags Any actor carrying one of these tags is ignored.
-	 * @param bIncludeEditorOnly If true, editor-only actors contribute to the bounds.
-	 * @param bIncludeNonColliding If true, non-colliding actors also contribute to the bounds.
-	 * @param bIncludeTransientActors If true, transient actors also contribute to the bounds.
+	 * @param OutIgnoredActors Populated with the actors that were skipped during the calculation. Prefill it to
+	 *        exclude actors the caller has already ruled out.
+	 * @param Filter Criteria deciding which actors contribute (see FNLevelBoundsFilter).
 	 */
 	static void DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray<const AActor*>& OutIgnoredActors,
-		const TArray<FName>& ActorIgnoreTags, bool bIncludeEditorOnly = false, bool bIncludeNonColliding = false, bool bIncludeTransientActors = false);
+		const FNLevelBoundsFilter& Filter);
 };

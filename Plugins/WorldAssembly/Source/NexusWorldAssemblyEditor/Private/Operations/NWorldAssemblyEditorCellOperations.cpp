@@ -127,17 +127,25 @@ void FNWorldAssemblyEditorCellOperations::CalculateAll()
 
 void FNWorldAssemblyEditorCellOperations::CalculateBounds()
 {
-	const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCellOperations_CalculateBounds", "Calculate Cell Bounds"));
 	ANCellActor* CellActor = FNWorldAssemblyEditorUtils::GetCellActorFromCurrentWorld();
 	if (!ensure(CellActor != nullptr)) return;
+
+	// Ahead of the transaction: waiting pumps editor ticks, and a Mesh Partition tick spawns and destroys section
+	// actors — work that has no business being recorded into the user's undo step for calculating bounds.
+	FNWorldAssemblyEditorUtils::WaitForTerrainToSettle(CellActor->GetLevel());
+
+	const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCellOperations_CalculateBounds", "Calculate Cell Bounds"));
 	CellActor->CalculateBounds();
 }
 
 void FNWorldAssemblyEditorCellOperations::CalculateHull()
 {
-	const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCellOperations_CalculateHull", "Calculate Cell Hull"));
 	ANCellActor* CellActor = FNWorldAssemblyEditorUtils::GetCellActorFromCurrentWorld();
 	if (!ensure(CellActor != nullptr)) return;
+
+	FNWorldAssemblyEditorUtils::WaitForTerrainToSettle(CellActor->GetLevel());
+
+	const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCellOperations_CalculateHull", "Calculate Cell Hull"));
 	CellActor->CalculateHull();
 
 	UNWorldAssemblyEdMode::ProtectCellEdMode();
@@ -145,9 +153,12 @@ void FNWorldAssemblyEditorCellOperations::CalculateHull()
 
 void FNWorldAssemblyEditorCellOperations::CalculateVoxelData()
 {
-	const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCellOperations_CalculateVoxel", "Calculate Voxel Data"));
 	ANCellActor* CellActor = FNWorldAssemblyEditorUtils::GetCellActorFromCurrentWorld();
 	if (!ensure(CellActor != nullptr)) return;
+
+	FNWorldAssemblyEditorUtils::WaitForTerrainToSettle(CellActor->GetLevel());
+
+	const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCellOperations_CalculateVoxel", "Calculate Voxel Data"));
 	CellActor->CalculateVoxelData();
 }
 

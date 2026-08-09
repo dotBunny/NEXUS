@@ -29,6 +29,8 @@ public:
 	 *   supplied ContainingBounds are processed. Passing an empty array skips the overlap test entirely.
 	 * - Aggregate-geometry path covers FKConvexElem, FKBoxElem, FKSphereElem and FKSphylElem (capsule).
 	 * - Complex-as-simple falls back to the source static-mesh render data (route 1) or Chaos TriMeshGeometries (route 2).
+	 * - A body that emits no simple geometry falls back to its complex tri mesh, so a mesh whose only collision is
+	 *   the complex one — the default for a sculpted or imported asset — is not silently skipped.
 	 * - UInstancedStaticMeshComponent emits one FNRawMesh entry per instance.
 	 * - Landscape-based primitives are skipped.
 	 * @param Actors Candidate actors to process. Pre-filter at the call site (e.g. via FNActorUtils::GetWorldActors).

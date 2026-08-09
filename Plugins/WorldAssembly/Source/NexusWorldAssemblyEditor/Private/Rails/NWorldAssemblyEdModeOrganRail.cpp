@@ -59,8 +59,10 @@ TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeOrganRail::GetCategoryCommand() 
 	return FNWorldAssemblyEdModePaletteCommands::Get().LoadOrganPalette;
 }
 
-TAttribute<bool> FNWorldAssemblyEdModeOrganRail::GetEnabled() const
+TAttribute<bool> FNWorldAssemblyEdModeOrganRail::GetAvailable() const
 {
+	// Stated explicitly rather than left to the base's always-available default, which would keep the category on the
+	// rail in a level with no organs.
 	return TAttribute<bool>::CreateStatic(&FNWorldAssemblyEditorUtils::IsOrganComponentPresentInCurrentWorld);
 }
 

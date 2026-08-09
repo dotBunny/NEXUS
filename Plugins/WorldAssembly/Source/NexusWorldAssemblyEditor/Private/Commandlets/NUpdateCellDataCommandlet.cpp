@@ -81,7 +81,17 @@ int32 UNUpdateCellDataCommandlet::Execute(bool bShouldErrorOnChanges, bool bShou
 
 			if (FEditorFileUtils::LoadMap(WorldPath))
 			{
-				FNWorldAssemblyEditorUtils::SaveCell(FNEditorUtils::GetCurrentWorld());
+				UWorld* LoadedWorld = FNEditorUtils::GetCurrentWorld();
+
+				// A freshly loaded cell whose floor is a terrain has not built it yet, and recalculating against a
+				// terrain that is still arriving is what produces cell data that disagrees with what the editor
+				// computes for the same cell. Nothing else in a commandlet run pumps that build, so wait for it here.
+				if (LoadedWorld != nullptr)
+				{
+					FNWorldAssemblyEditorUtils::WaitForTerrainToSettle(LoadedWorld->PersistentLevel);
+				}
+
+				FNWorldAssemblyEditorUtils::SaveCell(LoadedWorld);
 				if (Cell->GetVersion() != PreviousVersion)
 				{
 					FString FullPath = FNEditorUtils::GetAssetPathOnDisk(Cell);

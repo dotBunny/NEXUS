@@ -42,6 +42,18 @@ struct FNWorldAssemblyWorldCollisionSettings
 	/** When true, player start positions are captured so generated content avoids them. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Include Player Starts", meta=(ToolTip="Player start positions should be considered to be avoided."))
 	bool bIncludePlayerStarts = true;
+
+	/**
+	 * Spacing between samples when reconstructing a landscape's surface as world collision, in world units. 0 leaves
+	 * landscape out of world collision entirely.
+	 * @note Landscape needs sampling where every other terrain is read directly: its collision is a Chaos heightfield
+	 *       behind no UBodySetup, so the geometry gather emits nothing for it and an assembly would happily route
+	 *       cells straight through the ground. Smaller reproduces the ground more closely and costs one downward
+	 *       trace per sample.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Landscape Sample Spacing",
+		meta=(ToolTip="How far apart to sample a landscape when reconstructing it as world collision. 0 excludes landscape from world collision.", ClampMin="0", Units="cm"))
+	float LandscapeSampleSpacing = 100.f;
 };
 
 

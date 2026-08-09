@@ -72,6 +72,7 @@
 	const FVector2D Icon64x64(64.0f, 64.0f); \
 	const FVector2D Icon32x32(32.0f, 32.0f); \
 	const FVector2D Icon16x16(16.0f, 16.0f);
+	const FVector2D Icon20x20(20.0f, 20.0f);
 
 /**
  * Builds an FSlateImageBrush from a PNG located under `<BaseDirectory>/Resources/<RelativePath>.png`.

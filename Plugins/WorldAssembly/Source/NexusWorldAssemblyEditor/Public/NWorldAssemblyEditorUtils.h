@@ -110,6 +110,28 @@ public:
 	static bool IsOrganVolumeSelected();
 
 	/**
+	 * Summarize a level's terrain geometry so a build still landing sections can be told from a finished one.
+	 * @param InLevel Level to summarize. A null level, or one with no terrain, returns 0.
+	 * @return A hash that changes whenever the terrain geometry does.
+	 * @note Quantized to whole units, so float jitter in an otherwise settled bound does not read as movement.
+	 */
+	static uint32 ComputeTerrainFingerprint(const ULevel* InLevel);
+
+	/**
+	 * Block until the level's terrain geometry stops changing, pumping the systems a terrain build depends on.
+	 *
+	 * @param InLevel Level whose terrain to wait on. A null level returns true immediately.
+	 * @param TimeoutSeconds Give up after this long and report failure rather than blocking the editor forever.
+	 * @return true when the terrain settled; false on timeout.
+	 * @remark **Must not be called from inside a save.** It ticks editor objects, and a Mesh Partition tick spawns and
+	 *         destroys section actors — which during UEditorEngine::SavePackage would mutate the world mid-write. Call
+	 *         it where a save or a calculation is *initiated*, ahead of the engine's save machinery.
+	 * @note Does not pump Slate or a full engine tick, so the editor stays visually frozen for the duration; the slow
+	 *       task it opens is what tells the user why.
+	 */
+	static bool WaitForTerrainToSettle(const ULevel* InLevel, double TimeoutSeconds = 30.0);
+
+	/**
 	 * Refreshes the cell side-car asset from CellActor (via UpdateCell), marks the package dirty, and writes it to disk.
 	 *
 	 * Resolves or creates the UNCell package via UAssetDefinition_NCell::GetOrCreatePackage, then commits the result with
