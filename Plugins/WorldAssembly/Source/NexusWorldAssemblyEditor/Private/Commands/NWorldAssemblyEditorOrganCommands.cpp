@@ -6,6 +6,7 @@
 #include "NEditorUtils.h"
 #include "NWorldAssemblyEditorStyle.h"
 #include "NWorldAssemblyEditorUtils.h"
+#include "NWorldAssemblyRegistry.h"
 #include "Framework/Commands/UICommandInfo.h"
 #include "Framework/Commands/UICommandList.h"
 #include "Operations/NWorldAssemblyEditorOrganOperations.h"

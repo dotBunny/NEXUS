@@ -21,7 +21,7 @@ public:
 	virtual TSharedPtr<FUICommandInfo> GetCategoryCommand() const override;
 
 	/** @return A predicate requiring an organ in the level; Add Organ lives on the World rail to bring this back. */
-	virtual TAttribute<bool> GetEnabled() const override;
+	virtual TAttribute<bool> GetAvailable() const override;
 
 	/** @return A combo box naming the selected organ, and listing the level's others to switch to. */
 	virtual TSharedPtr<SWidget> CreateHeader() const override;

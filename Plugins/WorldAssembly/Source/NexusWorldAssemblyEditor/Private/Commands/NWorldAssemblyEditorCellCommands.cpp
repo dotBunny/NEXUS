@@ -30,13 +30,6 @@ void FNWorldAssemblyEditorCellCommands::Register(const TSharedRef<FBindingContex
 {
 	FNWorldAssemblyEditorCellCommands& Commands = Get();
 
-	FUICommandInfo::MakeCommandInfo(Context, Commands.CommandInfo_CaptureThumbnail,
-		"NWorldAssembly.NCell.CaptureThumbnails",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CaptureThumbnails", "Capture Thumbnails"),
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CaptureThumbnails_Tooltip", "Captures the active viewport (minus widgets) as the thumbnails for the level containing the NCell, and the NCell data asset."),
-		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
-		EUserInterfaceActionType::Button, FInputChord());
-
 	FUICommandInfo::MakeCommandInfo(Context, Commands.CommandInfo_CalculateAll,
 		"NWorldAssembly.NCell.CalculateAll",
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_CalculateAll", "All"),
@@ -100,33 +93,7 @@ void FNWorldAssemblyEditorCellCommands::Register(const TSharedRef<FBindingContex
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.Voxel.Grid.Selected"),
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 
-	FUICommandInfo::MakeCommandInfo(Context, Commands.CommandInfo_ResetCell,
-		"NWorldAssembly.NCell.ResetCell",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ResetCell", "Reset"),
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ResetCell_Tooltip", "Reset the cell data."),
-		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
-		EUserInterfaceActionType::Button, FInputChord());
 
-	FUICommandInfo::MakeCommandInfo(Context, Commands.CommandInfo_SaveCell,
-		"NWorldAssembly.NCell.SaveCell",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_SaveCell", "Force Save"),
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_SaveCell_Tooltip", "Forcibly write out the Cells data to the sidecar file."),
-		FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Save"),
-		EUserInterfaceActionType::Button, FInputChord());
-
-	FUICommandInfo::MakeCommandInfo(Context, Commands.CommandInfo_RemoveActor,
-		"NWorldAssembly.NCell.RemoveActor",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_RemoveActor", "Remove Actor"),
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_RemoveActor_Tooltip", "Removes the cell actor, no longer making this a cell."),
-		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.RemoveNCellActor"),
-		EUserInterfaceActionType::Button, FInputChord());
-
-	FUICommandInfo::MakeCommandInfo(Context, Commands.CommandInfo_AddActor,
-		"NWorldAssembly.NCell.AddActor",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_AddActor", "Add Cell Actor"),
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_AddActor_Tooltip", "Create the singleton-like actor which will facilitate creating a NCell from the level it is placed in."),
-		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.AddNCellActor"),
-		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(Context, Commands.CommandInfo_SelectActor,
 		"NWorldAssembly.NCell.SelectActor",
@@ -153,9 +120,7 @@ void FNWorldAssemblyEditorCellCommands::Register(const TSharedRef<FBindingContex
 
 	Commands.CommandList = MakeShared<FUICommandList>();
 
-	Commands.CommandList->MapAction(Commands.CommandInfo_AddActor,
-		FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCellOperations::AddActor),
-		FCanExecuteAction::CreateStatic(&AddActor_CanExecute));
+
 
 	Commands.CommandList->MapAction(Commands.CommandInfo_SelectActor,
 		FExecuteAction::CreateStatic(&SelectActor),
@@ -170,21 +135,17 @@ void FNWorldAssemblyEditorCellCommands::Register(const TSharedRef<FBindingContex
 		FExecuteAction::CreateStatic(&TagIgnore),
 		FCanExecuteAction::CreateStatic(&TagIgnore_CanExecute));
 
-	Commands.CommandList->MapAction(Commands.CommandInfo_CaptureThumbnail,
-		FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCellOperations::CaptureThumbnail),
-		FCanExecuteAction::CreateStatic(&CaptureThumbnail_CanExecute));
-
 	Commands.CommandList->MapAction(Commands.CommandInfo_CalculateAll,
 		FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCellOperations::CalculateAll),
-		FCanExecuteAction::CreateStatic(&CanEditCell));
+		FCanExecuteAction::CreateStatic(&Calculate_CanExecute));
 
 	Commands.CommandList->MapAction(Commands.CommandInfo_CalculateBounds,
 		FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCellOperations::CalculateBounds),
-		FCanExecuteAction::CreateStatic(&CanEditCell));
+		FCanExecuteAction::CreateStatic(&Calculate_CanExecute));
 
 	Commands.CommandList->MapAction(Commands.CommandInfo_CalculateHull,
 		FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCellOperations::CalculateHull),
-		FCanExecuteAction::CreateStatic(&CanEditCell));
+		FCanExecuteAction::CreateStatic(&Calculate_CanExecute));
 
 	Commands.CommandList->MapAction(Commands.CommandInfo_CalculateVoxelData,
 		FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCellOperations::CalculateVoxelData),
@@ -214,34 +175,12 @@ void FNWorldAssemblyEditorCellCommands::Register(const TSharedRef<FBindingContex
 		FExecuteAction::CreateStatic(&ToggleVoxelData),
 		FCanExecuteAction::CreateStatic(&CanEditCell),
 		FIsActionChecked::CreateStatic(&ToggleVoxelData_IsActionChecked));
-
-	Commands.CommandList->MapAction(Commands.CommandInfo_ResetCell,
-		FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCellOperations::ResetCell),
-		FCanExecuteAction::CreateStatic(&CanEditCell));
-
-	Commands.CommandList->MapAction(Commands.CommandInfo_SaveCell,
-		FExecuteAction::CreateStatic(&SaveCell),
-		FCanExecuteAction::CreateStatic(&CanEditCell));
-
-	Commands.CommandList->MapAction(Commands.CommandInfo_RemoveActor,
-		FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCellOperations::RemoveActor),
-		FCanExecuteAction::CreateStatic(&CanEditCell));
 }
 
 bool FNWorldAssemblyEditorCellCommands::CanEditCell()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
 	return FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld();
-}
-
-bool FNWorldAssemblyEditorCellCommands::AddActor_CanExecute()
-{
-	if (FNEditorUtils::IsPlayInEditor()) return false;
-
-	// One cell per level, and never in a level that assembles them: a cell is a building block an operation places,
-	// while a level holding organs is the world those blocks are placed into. Making a level both is not a thing the
-	// assembly pipeline can act on, so the button greys out rather than letting it be authored.
-	return !UNWorldAssemblyEdMode::HasCellActor() && !FNWorldAssemblyEditorUtils::IsOrganComponentPresentInCurrentWorld();
 }
 
 void FNWorldAssemblyEditorCellCommands::SelectActor()
@@ -265,9 +204,14 @@ bool FNWorldAssemblyEditorCellCommands::SelectActor_CanShow()
 	return UNWorldAssemblyEdMode::IsActive() && UNWorldAssemblyEdMode::HasCellActor() && !FNWorldAssemblyEditorUtils::IsCellActorSelected();
 }
 
+bool FNWorldAssemblyEditorCellCommands::Calculate_CanExecute()
+{
+	return CanEditCell() && UNWorldAssemblyEdMode::IsTerrainSettled();
+}
+
 bool FNWorldAssemblyEditorCellCommands::CalculateVoxelData_CanExecute()
 {
-	if (FNEditorUtils::IsPlayInEditor()) return false;
+	if (!Calculate_CanExecute()) return false;
 
 	const ANCellActor* CellActor = FNWorldAssemblyEditorUtils::GetCellActorFromCurrentWorld();
 	if (CellActor == nullptr) return false;
@@ -277,7 +221,16 @@ bool FNWorldAssemblyEditorCellCommands::CalculateVoxelData_CanExecute()
 void FNWorldAssemblyEditorCellCommands::SaveCell()
 {
 	UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
-	FNWorldAssemblyEditorUtils::SaveCell(CurrentWorld, FNWorldAssemblyUtils::GetCellActorFromWorld(CurrentWorld, true), true);
+	ANCellActor* CellActor = FNWorldAssemblyUtils::GetCellActorFromWorld(CurrentWorld, true);
+
+	// Here rather than inside SaveCell: this is the last point before the engine's save machinery takes over, and the
+	// wait must not run once it has — see WaitForTerrainToSettle's remark.
+	if (CellActor != nullptr)
+	{
+		FNWorldAssemblyEditorUtils::WaitForTerrainToSettle(CellActor->GetLevel());
+	}
+
+	FNWorldAssemblyEditorUtils::SaveCell(CurrentWorld, CellActor, true);
 }
 
 void FNWorldAssemblyEditorCellCommands::TagIgnore()

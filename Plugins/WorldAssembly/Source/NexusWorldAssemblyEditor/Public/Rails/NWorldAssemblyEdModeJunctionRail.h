@@ -19,7 +19,7 @@ public:
 	virtual TSharedPtr<FUICommandInfo> GetCategoryCommand() const override;
 
 	/** @return A predicate requiring a cell actor; a junction is a component of one, so nothing here works without it. */
-	virtual TAttribute<bool> GetEnabled() const override;
+	virtual TAttribute<bool> GetAvailable() const override;
 
 	/** @return A combo box naming the selected junction, and listing the level's others to switch to. */
 	virtual TSharedPtr<SWidget> CreateHeader() const override;

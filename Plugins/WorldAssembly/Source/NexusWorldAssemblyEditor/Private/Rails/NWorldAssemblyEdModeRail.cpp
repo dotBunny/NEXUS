@@ -99,7 +99,7 @@ static TSharedRef<SWidget> CreateTitledUniformToolBar(const TSharedRef<FUIComman
 TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateTitledCommandPalette(const FText& Title, const TArray<TSharedPtr<FUICommandInfo>>& Commands) const
 {
 	FUniformToolBarBuilder ToolBarBuilder(CommandList, FMultiBoxCustomization::None);
-	ToolBarBuilder.SetStyle(&FAppStyle::Get(), "PaletteToolBar");
+	ToolBarBuilder.SetStyle(&FNWorldAssemblyEditorStyle::Get(), "WorldAssemblyEd.TitledCommandPalette");
 
 	for (const TSharedPtr<FUICommandInfo>& Command : Commands)
 	{
@@ -178,7 +178,7 @@ TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateTitledContent(const FText& 
 		.Padding(4.0f, 0.0f, 4.0f, 6.0f)
 		[
 			SNew(SBorder)
-			.BorderImage(FAppStyle::Get().GetBrush("Brushes.Recessed"))
+			.BorderImage(FNWorldAssemblyEditorStyle::Get().GetBrush("WorldAssemblyEd.TitledGroupBackground"))
 			// Matches what the toolbar styles carry as their BackgroundPadding, so content lands the same distance
 			// inside its backing as a button does inside its.
 			.Padding(FMargin(8.0f))

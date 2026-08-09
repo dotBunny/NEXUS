@@ -46,7 +46,7 @@ public:
 	/**
 	 * Actor filter for world-collision gathering.
 	 * @param Actor Candidate actor under inspection.
-	 * @return false to exclude organ volumes (they are inputs, not obstacles); true otherwise.
+	 * @return false to exclude organ volumes (they are inputs, not obstacles) and terrain authoring apparatus; true otherwise.
 	 */
 	static bool IsWorldCollisionSource(const AActor* Actor)
 	{
@@ -58,6 +58,13 @@ public:
 
 		// Nor should any of our debug actors
 		if (Actor->IsA<ANDebugActor>()) return false;
+
+		// Terrain authoring apparatus describes how a terrain is built rather than being something to place cells
+		// against — a modifier's bounds are its region of influence, not a surface. The cell bounds and hull
+		// calculations reject these for the same reason, and the world view has to agree with them: this predicate
+		// is what the editor's collision visualizer and penetration cache gather through, so a phantom obstacle here
+		// would be drawn as world collision and avoided during assembly.
+		if (FNActorUtils::IsTerrainAuthoringActor(Actor)) return false;
 
 		return true;
 	}

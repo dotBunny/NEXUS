@@ -3,8 +3,10 @@
 
 #include "NWorldAssemblyUtils.h"
 
+#include "NActorUtils.h"
 #include "NArrayUtils.h"
 #include "NLevelUtils.h"
+#include "NWorldAssemblyMinimal.h"
 #include "NWorldAssemblyRegistry.h"
 #include "NWorldAssemblySettings.h"
 #include "Organ/NOrganVolume.h"
@@ -13,6 +15,79 @@
 #include "Organ/NOrganComponent.h"
 #include "Misc/ScopedSlowTask.h"
 #include "Types/NRawMeshFactory.h"
+
+namespace NEXUS::WorldAssembly
+{
+	/**
+	 * Spacing used when sampling a landscape whose cell has terrain thinning switched off.
+	 *
+	 * Landscape has no un-sampled form to fall back on — sampling is how its geometry is obtained at all — so a
+	 * zero grid size, which for mesh terrain means "keep every vertex", has no equivalent here and needs a value.
+	 */
+	inline constexpr double DefaultLandscapeSampleSpacing = 100.0;
+}
+
+void FNWorldAssemblyUtils::GridReducePoints(const TArray<FVector>& Points, const FVector& Center, const double GridSize,
+	TSet<FIntVector>& SeenCells, TArray<FVector>& OutPoints)
+{
+	// Terrain topology plays no part here: a cave's inner surface and the far side of a spherical terrain are interior
+	// points to a convex hull either way, so they are discarded by the builder whether or not they are thinned first.
+	if (GridSize <= 0.0)
+	{
+		OutPoints.Append(Points);
+		return;
+	}
+
+	for (const FVector& Point : Points)
+	{
+		const FIntVector Cell(
+			FMath::FloorToInt32(Point.X / GridSize),
+			FMath::FloorToInt32(Point.Y / GridSize),
+			FMath::FloorToInt32(Point.Z / GridSize));
+
+		bool bAlreadySeen = false;
+		SeenCells.Add(Cell, &bAlreadySeen);
+		if (bAlreadySeen) continue;
+
+		// Away from the center on each axis independently.
+		OutPoints.Add(FVector(
+			Point.X >= Center.X ? FMath::CeilToDouble(Point.X / GridSize) * GridSize : FMath::FloorToDouble(Point.X / GridSize) * GridSize,
+			Point.Y >= Center.Y ? FMath::CeilToDouble(Point.Y / GridSize) * GridSize : FMath::FloorToDouble(Point.Y / GridSize) * GridSize,
+			Point.Z >= Center.Z ? FMath::CeilToDouble(Point.Z / GridSize) * GridSize : FMath::FloorToDouble(Point.Z / GridSize) * GridSize));
+	}
+}
+
+/**
+ * Append a mesh's world-space vertices to a hull point cloud, thinned onto a grid.
+ * @param Mesh Source mesh, in its own local space.
+ * @param ToWorld Transform placing the mesh in the world.
+ * @param GridSize Edge length of a cell, in world units.
+ * @param SeenCells Cells already represented; shared across meshes so section seams do not each contribute a copy.
+ * @param OutVertices Destination point cloud.
+ */
+static void AppendGridReducedVertices(const FNRawMesh& Mesh, const FTransform& ToWorld, const double GridSize,
+	TSet<FIntVector>& SeenCells, TArray<Chaos::FConvex::FVec3Type>& OutVertices)
+{
+	TArray<FVector> WorldPoints;
+	WorldPoints.Reserve(Mesh.Vertices.Num());
+	FBox WorldBounds(ForceInit);
+	for (const FVector& Vertex : Mesh.Vertices)
+	{
+		const FVector World = ToWorld.TransformPosition(Vertex);
+		WorldPoints.Add(World);
+		WorldBounds += World;
+	}
+	if (!WorldBounds.IsValid) return;
+
+	TArray<FVector> Reduced;
+	FNWorldAssemblyUtils::GridReducePoints(WorldPoints, WorldBounds.GetCenter(), GridSize, SeenCells, Reduced);
+
+	OutVertices.Reserve(OutVertices.Num() + Reduced.Num());
+	for (const FVector& Point : Reduced)
+	{
+		OutVertices.Add(Chaos::FConvex::FVec3Type(Point));
+	}
+}
 
 FBox FNWorldAssemblyUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCellBoundsGenerationSettings& Settings)
 {
@@ -38,7 +113,13 @@ FBox FNWorldAssemblyUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCell
 		CellActor->AppendAuthorTimeActors(IgnoredActors);
 	}
 
-	FNLevelUtils::DetermineLevelBounds(InLevel, LevelBounds, IgnoredActors, Settings.ActorIgnoreTags, Settings.bIncludeEditorOnly, Settings.bIncludeNonColliding);
+	FNLevelBoundsFilter Filter;
+	Filter.ActorIgnoreTags = Settings.ActorIgnoreTags;
+	Filter.bIncludeEditorOnly = Settings.bIncludeEditorOnly;
+	Filter.bIncludeNonColliding = Settings.bIncludeNonColliding;
+	Filter.bIncludeTerrain = Settings.bIncludeTerrain;
+
+	FNLevelUtils::DetermineLevelBounds(InLevel, LevelBounds, IgnoredActors, Filter);
 
 	return LevelBounds;
 }
@@ -68,8 +149,13 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 	FScopedSlowTask ActorTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusWorldAssembly", "Task_CalculateConvexHull_Actor", "Calculate Convex Hull - Actors"));
 	ActorTask.MakeDialog(false);
 
+	// Terrain is kept apart from here on: it is the only contributor whose geometry needs thinning before the hull
+	// builder sees it, and separating the two collections is what lets the thinning apply to just that half.
 	TArray<AActor*> HullActors;
+	TArray<AActor*> TerrainActors;
+	TArray<AActor*> LandscapeActors;
 	HullActors.Reserve(NumActors);
+	int32 TerrainActorCount = 0;
 	for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
 	{
 		ActorTask.EnterProgressFrame(1);
@@ -79,8 +165,17 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 		// Check Editor Only
 		if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly) continue;
 
-		// Don't bother with transient actors
-		if (Actor->HasAnyFlags(RF_Transient)) continue;
+		// Terrain authoring apparatus is never geometry, at any setting — see FNActorUtils::IsTerrainAuthoringActor.
+		if (FNActorUtils::IsTerrainAuthoringActor(Actor)) continue;
+
+		// Terrain answers to its own setting rather than to the filters below — see FNCellHullGenerationSettings.
+		const bool bIsTerrain = FNActorUtils::IsTerrainActor(Actor);
+		if (bIsTerrain && !Settings.bIncludeTerrain) continue;
+
+		// Don't bother with transient actors, terrain excepted: Mesh Partition represents an authored terrain in the
+		// editor as transient actors spawned into the persistent level, so the blanket skip would leave the hull
+		// without the floor the cell stands on.
+		if (Actor->HasAnyFlags(RF_Transient) && !bIsTerrain) continue;
 
 		// Ignore Tags
 		if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
@@ -88,6 +183,22 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 		// Author Time Only
 		if (CellActor != nullptr && CellActor->IsAuthorTimeActor(Actor)) continue;
 
+		if (bIsTerrain)
+		{
+			TerrainActorCount++;
+
+			// Landscape is separated again because it is the one terrain with no geometry to extract — it has to be
+			// sampled off the physics scene instead. See FNWorldAssemblyUtils::SampleLandscapeSurface.
+			if (FNActorUtils::IsLandscapeActor(Actor))
+			{
+				LandscapeActors.Add(Actor);
+			}
+			else
+			{
+				TerrainActors.Add(Actor);
+			}
+			continue;
+		}
 		HullActors.Add(Actor);
 	}
 
@@ -97,10 +208,22 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 	TArray<FTransform> CollisionTransforms;
 	FNRawMeshFactory::FromActorsInBounds(HullActors, {}, CollisionMeshes, CollisionTransforms);
 
+	TArray<FNRawMesh> TerrainMeshes;
+	TArray<FTransform> TerrainTransforms;
+	FNRawMeshFactory::FromActorsInBounds(TerrainActors, {}, TerrainMeshes, TerrainTransforms);
+
 	int32 CollisionVertexCount = 0;
+	int32 CollisionTriangleCount = 0;
 	for (const FNRawMesh& CollisionMesh : CollisionMeshes)
 	{
 		CollisionVertexCount += CollisionMesh.Vertices.Num();
+		CollisionTriangleCount += CollisionMesh.Loops.Num();
+	}
+
+	int32 TerrainVertexCount = 0;
+	for (const FNRawMesh& TerrainMesh : TerrainMeshes)
+	{
+		TerrainVertexCount += TerrainMesh.Vertices.Num();
 	}
 
 	Vertices.Reserve(CollisionVertexCount + (Settings.bIncludeNonColliding ? HullActors.Num() * 8 : 0));
@@ -112,6 +235,55 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 			Vertices.Add(Chaos::FConvex::FVec3Type(ToWorld.TransformPosition(Vertex)));
 		}
 	}
+
+	// STEP 2A - Fold the terrain in, thinned onto a grid unless the setting turns that off. Authored geometry above
+	// is taken whole; only terrain arrives dense enough for the reduction to be worth its own pass.
+	const int32 VerticesBeforeTerrain = Vertices.Num();
+	TSet<FIntVector> SeenCells;
+	for (int32 MeshIndex = 0; MeshIndex < TerrainMeshes.Num(); ++MeshIndex)
+	{
+		const FTransform& ToWorld = TerrainTransforms[MeshIndex];
+		if (Settings.TerrainSimplificationGridSize > 0.f)
+		{
+			AppendGridReducedVertices(TerrainMeshes[MeshIndex], ToWorld, Settings.TerrainSimplificationGridSize, SeenCells, Vertices);
+		}
+		else
+		{
+			for (const FVector& Vertex : TerrainMeshes[MeshIndex].Vertices)
+			{
+				Vertices.Add(Chaos::FConvex::FVec3Type(ToWorld.TransformPosition(Vertex)));
+			}
+		}
+	}
+
+	const int32 VerticesAfterTerrain = Vertices.Num();
+
+	// STEP 2B - Landscape, which has no geometry to extract and is sampled off the physics scene instead. The samples
+	// are already grid spaced, so they need no further thinning.
+	const double LandscapeSampleSpacing = Settings.TerrainSimplificationGridSize > 0.f
+		? Settings.TerrainSimplificationGridSize
+		: NEXUS::WorldAssembly::DefaultLandscapeSampleSpacing;
+
+	int32 LandscapeVertexCount = 0;
+	for (const AActor* LandscapeActor : LandscapeActors)
+	{
+		FNRawMesh LandscapeMesh;
+		if (!SampleLandscapeSurface(LandscapeActor, LandscapeSampleSpacing, LandscapeMesh)) continue;
+
+		LandscapeVertexCount += LandscapeMesh.Vertices.Num();
+		for (const FVector& Vertex : LandscapeMesh.Vertices)
+		{
+			Vertices.Add(Chaos::FConvex::FVec3Type(Vertex));
+		}
+	}
+
+	// Census of what the hull builder is about to be handed, and of how much the terrain thinning saved it. The first
+	// thing to look at when a hull calculation goes slow, or when a hull fails to appear at all.
+	UE_LOG(LogNexusWorldAssembly, Log,
+		TEXT("CalculateConvexHull source geometry: %d actors (%d terrain), %d meshes, %d vertices, %d triangles; terrain %d vertices thinned to %d; %d landscape samples."),
+		HullActors.Num() + TerrainActors.Num() + LandscapeActors.Num(), TerrainActorCount,
+		CollisionMeshes.Num() + TerrainMeshes.Num(), CollisionVertexCount + TerrainVertexCount, CollisionTriangleCount,
+		TerrainVertexCount, VerticesAfterTerrain - VerticesBeforeTerrain, LandscapeVertexCount);
 
 	// STEP 3 - Non-colliding actors yield no collision geometry, so (when requested) fall back to their
 	// bounding-box corners. A registered primitive with a BodySetup is the same gate FNRawMeshFactory uses
@@ -204,6 +376,102 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 	return Mesh;
 }
 
+bool FNWorldAssemblyUtils::SampleLandscapeSurface(const AActor* LandscapeActor, const double GridSize, FNRawMesh& OutMesh)
+{
+	if (!IsValid(LandscapeActor) || GridSize <= 0.0) return false;
+
+	const UWorld* World = LandscapeActor->GetWorld();
+	if (World == nullptr) return false;
+
+	const FBox Bounds = LandscapeActor->GetComponentsBoundingBox(true);
+	if (!Bounds.IsValid) return false;
+
+	const FVector Size = Bounds.GetSize();
+	const int32 CountX = FMath::Max(1, FMath::CeilToInt32(Size.X / GridSize)) + 1;
+	const int32 CountY = FMath::Max(1, FMath::CeilToInt32(Size.Y / GridSize)) + 1;
+
+	// Clear of the surface at both ends so a trace can neither start inside the landscape nor stop short of a dip.
+	constexpr double Margin = 100.0;
+	const double TraceTop = Bounds.Max.Z + Margin;
+	const double TraceBottom = Bounds.Min.Z - Margin;
+
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(NSampleLandscapeSurface), true);
+
+	// Multi rather than single: the first blocking hit down a column is whatever sits on the landscape, and taking
+	// that would sample the props instead of the ground under them.
+	TArray<FHitResult> Hits;
+	TArray<FVector> Samples;
+	TArray<bool> SampleValid;
+	Samples.SetNum(CountX * CountY);
+	SampleValid.SetNum(CountX * CountY);
+
+	for (int32 IndexX = 0; IndexX < CountX; IndexX++)
+	{
+		for (int32 IndexY = 0; IndexY < CountY; IndexY++)
+		{
+			const double X = FMath::Min(Bounds.Min.X + IndexX * GridSize, Bounds.Max.X);
+			const double Y = FMath::Min(Bounds.Min.Y + IndexY * GridSize, Bounds.Max.Y);
+			const int32 SampleIndex = IndexX * CountY + IndexY;
+
+			Hits.Reset();
+			SampleValid[SampleIndex] = false;
+
+			if (!World->LineTraceMultiByChannel(Hits, FVector(X, Y, TraceTop), FVector(X, Y, TraceBottom), ECC_WorldStatic, Params))
+			{
+				continue;
+			}
+
+			for (const FHitResult& Hit : Hits)
+			{
+				if (Hit.GetActor() != LandscapeActor) continue;
+
+				Samples[SampleIndex] = Hit.ImpactPoint;
+				SampleValid[SampleIndex] = true;
+				break;
+			}
+		}
+	}
+
+	// Emit a quad only where all four of its corners found the surface, so a hole in the landscape leaves a hole here
+	// rather than a triangle stretched across it.
+	OutMesh = FNRawMesh();
+	TMap<int32, int32> SampleToVertex;
+	auto AddVertex = [&OutMesh, &SampleToVertex, &Samples](const int32 SampleIndex)
+	{
+		if (const int32* Existing = SampleToVertex.Find(SampleIndex)) return *Existing;
+
+		const int32 NewIndex = OutMesh.Vertices.Add(Samples[SampleIndex]);
+		SampleToVertex.Add(SampleIndex, NewIndex);
+		return NewIndex;
+	};
+
+	for (int32 IndexX = 0; IndexX < CountX - 1; IndexX++)
+	{
+		for (int32 IndexY = 0; IndexY < CountY - 1; IndexY++)
+		{
+			const int32 A = IndexX * CountY + IndexY;
+			const int32 B = (IndexX + 1) * CountY + IndexY;
+			const int32 C = (IndexX + 1) * CountY + (IndexY + 1);
+			const int32 D = IndexX * CountY + (IndexY + 1);
+			if (!SampleValid[A] || !SampleValid[B] || !SampleValid[C] || !SampleValid[D]) continue;
+
+			const int32 VertexA = AddVertex(A);
+			const int32 VertexB = AddVertex(B);
+			const int32 VertexC = AddVertex(C);
+			const int32 VertexD = AddVertex(D);
+
+			OutMesh.Loops.Add(FNRawMeshLoop(VertexA, VertexB, VertexC));
+			OutMesh.Loops.Add(FNRawMeshLoop(VertexA, VertexC, VertexD));
+		}
+	}
+
+	if (OutMesh.Loops.IsEmpty()) return false;
+
+	OutMesh.CalculateCenterAndBounds();
+	OutMesh.Validate();
+	return true;
+}
+
 FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const FNCellVoxelGenerationSettings& Settings)
 {
 	// TODO: We probably could use the voxel data to actually generate the overall bounds to avoid the double parse of the actors in the level
@@ -235,8 +503,16 @@ FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const 
 	const FVector HalfUnitSize = UnitSize * 0.5f;
 
 	// STEP 1 - Specific Bounds / Ignore Actors
+	// The ignored-actor list this fills is handed to the sweep below, so one filter settles both the grid extents and
+	// what the sweep is allowed to hit.
+	FNLevelBoundsFilter Filter;
+	Filter.ActorIgnoreTags = Settings.ActorIgnoreTags;
+	Filter.bIncludeEditorOnly = Settings.bIncludeEditorOnly;
+	Filter.bIncludeNonColliding = Settings.bIncludeNonColliding;
+	Filter.bIncludeTerrain = Settings.bIncludeTerrain;
+
 	FBox Bounds(ForceInit);
-	FNLevelUtils::DetermineLevelBounds(InLevel, Bounds, IgnoredActors, Settings.ActorIgnoreTags, Settings.bIncludeEditorOnly, Settings.bIncludeNonColliding);
+	FNLevelUtils::DetermineLevelBounds(InLevel, Bounds, IgnoredActors, Filter);
 
 	ReturnData.Origin = Bounds.Min;
 

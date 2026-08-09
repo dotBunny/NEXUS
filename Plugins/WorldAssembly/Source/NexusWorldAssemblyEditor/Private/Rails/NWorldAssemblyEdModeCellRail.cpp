@@ -3,6 +3,7 @@
 
 #include "Rails/NWorldAssemblyEdModeCellRail.h"
 
+#include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyEdModePaletteCommands.h"
 #include "NWorldAssemblyEdModeToolCommands.h"
@@ -16,9 +17,12 @@ TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellRail::GetCategoryCommand() c
 	return FNWorldAssemblyEdModePaletteCommands::Get().LoadCellPalette;
 }
 
-TAttribute<bool> FNWorldAssemblyEdModeCellRail::GetEnabled() const
+TAttribute<bool> FNWorldAssemblyEdModeCellRail::GetAvailable() const
 {
-	return TAttribute<bool>::CreateLambda(&UNWorldAssemblyEdMode::HasCellActor);
+	// Level contents rather than the focused actor. The category is worth showing whenever the level has a cell to
+	// author, whether or not one is selected this instant; the buttons inside it are what go dead when nothing is
+	// focused.
+	return TAttribute<bool>::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld);
 }
 
 TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
@@ -73,7 +77,6 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 				{
 					Cell.CommandInfo_SelectActor,
 					//Cell.CommandInfo_ToggleDrawVoxelData,
-					Cell.CommandInfo_CaptureThumbnail
 				})
 		]
 
@@ -88,18 +91,6 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 					Cell.CommandInfo_ToggleHullAllowNonConvex,
 					//Cell.CommandInfo_ToggleVoxelCalculateOnSave,
 					//Cell.CommandInfo_ToggleVoxelData,
-				})
-		]
-
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			CreateTitledCommandGrid(
-				LOCTEXT("CellHeader_CellData", "Cell Data"),
-				{
-					Cell.CommandInfo_SaveCell,
-					Cell.CommandInfo_ResetCell,
-					Cell.CommandInfo_RemoveActor
 				})
 		];
 }

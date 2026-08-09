@@ -3,9 +3,13 @@
 
 #include "NWorldAssemblyEditorUtils.h"
 
+#include "AssetCompilingManager.h"
 #include "AssetDefinitions/AssetDefinition_NCell.h"
 #include "EditorAssetLibrary.h"
 #include "EngineUtils.h"
+#include "NActorUtils.h"
+#include "TickableEditorObject.h"
+#include "Containers/Ticker.h"
 #include "Cell/NCell.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NEditorUtils.h"
@@ -255,6 +259,80 @@ void FNWorldAssemblyEditorUtils::EnsureCellInitializedCallbackActors(const UWorl
 	}
 }
 
+uint32 FNWorldAssemblyEditorUtils::ComputeTerrainFingerprint(const ULevel* InLevel)
+{
+	if (InLevel == nullptr) return 0;
+
+	uint32 Hash = 0;
+	for (const AActor* Actor : InLevel->Actors)
+	{
+		if (!FNActorUtils::IsTerrainActor(Actor)) continue;
+
+		// A terrain actor whose components all still report placeholder bounds yields an invalid box. Folding in a
+		// marker rather than skipping is what makes the later transition to real geometry register as a change.
+		if (const FBox Box = FNActorUtils::GetBuiltComponentsBoundingBox(Actor, false); Box.IsValid)
+		{
+			Hash = HashCombine(Hash, GetTypeHash(FIntVector(Box.Min)));
+			Hash = HashCombine(Hash, GetTypeHash(FIntVector(Box.Max)));
+		}
+		else
+		{
+			Hash = HashCombine(Hash, 1u);
+		}
+	}
+	return Hash;
+}
+
+bool FNWorldAssemblyEditorUtils::WaitForTerrainToSettle(const ULevel* InLevel, const double TimeoutSeconds)
+{
+	if (InLevel == nullptr) return true;
+
+	FScopedSlowTask WaitTask(0, NSLOCTEXT("NexusWorldAssemblyEditor", "Task_WaitForTerrain", "Waiting for terrain to finish building ..."));
+	WaitTask.MakeDialog(false);
+
+	const double StartTime = FPlatformTime::Seconds();
+	uint32 Fingerprint = ComputeTerrainFingerprint(InLevel);
+	double LastChangeTime = StartTime;
+
+	// Settle is inferred from the geometry holding still rather than queried, for the same reason the ed mode infers
+	// it: no engine-side barrier covers the whole Mesh Partition pipeline, and a direct "is anything unbuilt" test
+	// never clears for a section that legitimately covers nothing.
+	while (true)
+	{
+		const double Now = FPlatformTime::Seconds();
+
+		if (const uint32 Current = ComputeTerrainFingerprint(InLevel); Current != Fingerprint)
+		{
+			Fingerprint = Current;
+			LastChangeTime = Now;
+		}
+		else if (Now - LastChangeTime >= NEXUS::WorldAssembly::TerrainSettling::TerrainSettleSeconds)
+		{
+			return true;
+		}
+
+		if (Now - StartTime >= TimeoutSeconds)
+		{
+			UE_LOG(LogNexusWorldAssemblyEditor, Warning,
+				TEXT("Gave up waiting for the terrain in '%s' to finish building after %.0f seconds. Anything calculated from it now may describe a partially built terrain."),
+				*InLevel->GetOutermost()->GetName(), TimeoutSeconds);
+			return false;
+		}
+
+		// Advance what a terrain build actually depends on, and no more. FTickableEditorObject carries
+		// UMeshPartitionEditorSubsystem, which is what promotes finished build tasks into section actors; the asset
+		// compiler builds the section static meshes; the core ticker drives the deferred work behind both. Deliberately
+		// not a full engine or Slate tick — see the remark on this function's declaration.
+		constexpr float PumpDelta = 1.0f / 60.0f;
+		FTickableEditorObject::TickObjects(PumpDelta);
+		FAssetCompilingManager::Get().ProcessAsyncTasks();
+		FTSTicker::GetCoreTicker().Tick(PumpDelta);
+
+		// Yield rather than spin; the work being waited on is largely on other threads.
+		FPlatformProcess::Sleep(0.001f);
+	}
+}
+
 bool FNWorldAssemblyEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 {
 	bool bUpdatedCellData = false;
@@ -271,17 +349,32 @@ bool FNWorldAssemblyEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor
 		CellActor->SetActorLabel(CellActorName);
 	}
 
+	// Last-resort guard, not the main defense. Every path that can wait already has by the time it reaches here —
+	// the Calculate commands, Force Save and the commandlet all call WaitForTerrainToSettle first. What is left is a
+	// world save started from outside this module (Ctrl+S), which reaches UpdateCell through
+	// UAssetDefinition_NCell::OnPreSaveWorldWithContext, already inside UEditorEngine::SavePackage — where waiting
+	// would mean ticking the editor mid-save. So this one case declines to recalculate rather than baking a snapshot
+	// of a half-built terrain: a save is silent, what it writes is what ships, and leaving the previous values means
+	// an out-of-date cell, which the side-car diff already reports.
+	const bool bTerrainSettled = UNWorldAssemblyEdMode::IsTerrainSettled();
+	if (!bTerrainSettled)
+	{
+		UE_LOG(LogNexusWorldAssemblyEditor, Warning,
+			TEXT("Skipping save-time recalculation for '%s': its terrain is still building. Existing cell data has been left alone; use Calculate once the terrain settles, which waits for it."),
+			*CellActor->GetActorLabel());
+	}
+
 	// STEP 2 - Calculate Bounds
 	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusWorldAssemblyEditor", "Task_UpdateCell_Step2", "Cell Bounds ..."));
 	// Update Our Cell Overall Data (in the level, not copied at this point)
-	if (CellActor->CellRoot->Details.BoundsSettings.bCalculateOnSave)
+	if (bTerrainSettled && CellActor->CellRoot->Details.BoundsSettings.bCalculateOnSave)
 	{
 		CellActor->CalculateBounds();
 	}
 
 	// STEP 3 - Calculate Hull
 	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusWorldAssemblyEditor", "Task_UpdateCell_Step3", "Cell Hull ..."));
-	if (CellActor->CellRoot->Details.HullSettings.bCalculateOnSave)
+	if (bTerrainSettled && CellActor->CellRoot->Details.HullSettings.bCalculateOnSave)
 	{
 		CellActor->CalculateHull();
 		UNWorldAssemblyEdMode::ProtectCellEdMode();
@@ -289,7 +382,7 @@ bool FNWorldAssemblyEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor
 
 	// STEP 4 - Calculate Voxel Data
 	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusWorldAssemblyEditor", "Task_UpdateCell_Step4", "Cell Voxel ..."));
-	if (CellActor->CellRoot->Details.VoxelSettings.bCalculateOnSave)
+	if (bTerrainSettled && CellActor->CellRoot->Details.VoxelSettings.bCalculateOnSave)
 	{
 		CellActor->CalculateVoxelData();
 	}

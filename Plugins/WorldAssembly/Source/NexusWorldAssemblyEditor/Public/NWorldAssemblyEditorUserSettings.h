@@ -7,6 +7,7 @@
 #include "NWorldAssemblyEditorColors.h"
 #include "Engine/DeveloperSettings.h"
 #include "Macros/NEditorSettingsMacros.h"
+#include "Overlay/DragBoxPosition.h"
 #include "NWorldAssemblyEditorUserSettings.generated.h"
 
 /**
@@ -74,6 +75,19 @@ public:
 	/** Continuously re-trigger Assembly Operations for the target organ on a timer until canceled. */
 	UPROPERTY(EditAnywhere, config,  Category="Quick Assembly", DisplayName="Auto Assembly", meta=(Tooltip="Continuously trigger Assembly Operations for the target organ on a timer, until cancelled."))
 	bool bQuickAssemblyAutoAssembly = false;
+
+	/**
+	 * Where the edit mode's category panel sits in the viewport, remembered between sessions.
+	 * @note Config but not EditAnywhere: this is layout state the user sets by dragging the panel, not a preference,
+	 *       so it persists without cluttering the settings panel with coordinates.
+	 * @note Only the panel is stored. The category strip beside it is pinned, so it has no position to remember.
+	 */
+	UPROPERTY(Config)
+	FToolWidget_DragBoxPosition EdModePanelPosition = FToolWidget_DragBoxPosition(FVector2f(116.0f, 16.0f), HAlign_Left, VAlign_Top);
+
+	/** Width the edit mode's category panel was last resized to, or 0 for its default. See EdModePanelPosition. */
+	UPROPERTY(Config)
+	float EdModePanelWidth = 0.0f;
 
 	/** Seconds to wait after a run completes before the next Auto Assembly is triggered (only used when bQuickAssemblyAutoAssembly is enabled). */
 	UPROPERTY(EditAnywhere, config,  Category="Quick Assembly", DisplayName="Auto Assembly Timer",

@@ -7,6 +7,7 @@
 #include "Editor.h"
 #include "NEditorUtils.h"
 #include "NWorldAssemblyEditorStyle.h"
+#include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyEdModePaletteCommands.h"
 #include "NWorldAssemblyEdModeToolCommands.h"
@@ -42,9 +43,11 @@ TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeJunctionRail::GetCategoryCommand
 	return FNWorldAssemblyEdModePaletteCommands::Get().LoadJunctionPalette;
 }
 
-TAttribute<bool> FNWorldAssemblyEdModeJunctionRail::GetEnabled() const
+TAttribute<bool> FNWorldAssemblyEdModeJunctionRail::GetAvailable() const
 {
-	return TAttribute<bool>::CreateLambda(&UNWorldAssemblyEdMode::HasCellActor);
+	// Junctions hang off cells, so the category is relevant exactly when the level has a cell to hang them off —
+	// the same test the Cell category uses, and level contents rather than the focused actor for the same reason.
+	return TAttribute<bool>::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld);
 }
 
 TSharedPtr<SWidget> FNWorldAssemblyEdModeJunctionRail::CreateHeader() const

@@ -5,6 +5,7 @@
 
 #include "NWorldAssemblyEdModePaletteCommands.h"
 #include "Commands/NWorldAssemblyEditorCellCommands.h"
+#include "Commands/NWorldAssemblyEditorCellDataCommands.h"
 #include "Commands/NWorldAssemblyEditorOrganCommands.h"
 #include "Commands/NWorldAssemblyEditorWorldCommands.h"
 #include "Widgets/SBoxPanel.h"
@@ -23,7 +24,7 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeWorldRail::CreateContent() const
 	// The Create group is the one place a rail reaches outside its own category: adding a cell actor or an organ
 	// volume is what turns an empty level into one the Cell or Organ rail has anything to act on, so both entry
 	// points sit here rather than behind the category they unlock.
-	const FNWorldAssemblyEditorCellCommands& Cell = FNWorldAssemblyEditorCellCommands::Get();
+	const FNWorldAssemblyEditorCellDataCommands& Cell = FNWorldAssemblyEditorCellDataCommands::Get();
 	const FNWorldAssemblyEditorOrganCommands& Organ = FNWorldAssemblyEditorOrganCommands::Get();
 
 	return SNew(SVerticalBox)

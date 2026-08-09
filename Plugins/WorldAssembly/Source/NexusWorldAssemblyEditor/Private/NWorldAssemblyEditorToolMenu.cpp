@@ -48,7 +48,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		// also the only time the palette that hosts them is on screen.
 
 		// Everything that survives here is reachable without entering the edit mode: the button that enters it, and
-		// the Quick Assembly cluster. The rest moved to the toolkit panel's rail palettes.
+		// the Quick Assembly cluster. The rest moved to the edit mode's viewport rail.
 		FToolMenuSection& NexusGlobalSection = Menu->AddSection(MenuSectionGlobal);
 		NexusGlobalSection.Visibility =  TAttribute<EVisibility>::CreateLambda([]()
 		{

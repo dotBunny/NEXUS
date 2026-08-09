@@ -97,6 +97,10 @@
 		{
 			"Name": "SlateInspectorToolset",
 			"Enabled": true
+		},
+		{
+			"Name": "MeshTerrainMode",
+			"Enabled": true
 		}
 	],
 	"AdditionalPluginDirectories": [

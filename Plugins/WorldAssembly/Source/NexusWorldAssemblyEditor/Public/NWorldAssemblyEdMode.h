@@ -132,6 +132,16 @@ public:
 	/** @return true if no cell actor is currently focused. */
 	static bool HasNoCellActor() { return GetCellActor() == nullptr; }
 
+	/**
+	 * @return true when the focused cell's terrain geometry has stopped changing, and data calculated from it will
+	 *         describe the finished terrain rather than a partially built one. Always true where there is no terrain.
+	 * @note Inferred from the geometry holding still, not queried from the terrain system. Mesh Partition lands its
+	 *       sections across several frames and exposes no barrier covering the whole pipeline; inferring also means
+	 *       this always eventually reports true, which a direct "is anything unbuilt" test would not — a section
+	 *       legitimately covering nothing never reports geometry and would hold the gate shut forever.
+	 */
+	static bool IsTerrainSettled();
+
 	/** @return true if this editor mode is currently the active level-editor mode. */
 	static bool IsActive() { return GLevelEditorModeTools().IsModeActive(Identifier); }
 
@@ -237,9 +247,10 @@ public:
 	virtual bool RequiresLegacyViewportInteractions() const override { return false; }
 
 	/**
-	 * @return Always true: the mode's UI lives in FNWorldAssemblyEdModeToolkit's panel.
-	 * @note Turning this on is what makes the editor host the toolkit and open the Mode Toolbox panel for it — see
-	 *       FModeToolkit::InvokeUI, which invokes that tab unconditionally.
+	 * @return Always true: the mode's UI is built and owned by FNWorldAssemblyEdModeToolkit.
+	 * @note Turning this on is what makes the editor host the toolkit at all. It no longer implies a Mode Toolbox
+	 *       panel — the toolkit floats its rail over the viewport and overrides RequestModeUITabs to leave the tab
+	 *       spawner unbound, which is what stops FModeToolkit::InvokeUI from opening one.
 	 */
 	virtual bool UsesToolkits() const override { return true; }
 	//End UBaseLegacyWidgetEdMode
@@ -313,6 +324,16 @@ private:
 	FNCellVoxelData CachedVoxelData;
 	TArray<FVector> CachedBoundsVertices;
 	TWeakObjectPtr<ANCellActor> CellActor;
+
+	/** Summary of the focused cell level's terrain geometry as of the last tick; a change means a build is landing. */
+	uint32 TerrainFingerprint = 0;
+
+	/** When the fingerprint last changed, in seconds. */
+	double TerrainChangedTime = 0.0;
+
+	/** Cleared while the terrain fingerprint is moving; set once it has held still long enough. */
+	bool bTerrainSettled = true;
+
 	ENCellEdMode CellEdMode = ENCellEdMode::Bounds;
 	ENCellVoxelMode CellVoxelMode = ENCellVoxelMode::None;
 	ENWorldAssemblyEdModeRenderMode RenderMode = ENWorldAssemblyEdModeRenderMode::All;

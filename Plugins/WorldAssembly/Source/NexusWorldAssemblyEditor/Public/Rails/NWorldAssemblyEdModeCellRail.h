@@ -23,10 +23,10 @@ public:
 	/**
 	 * @return A predicate requiring a cell actor in the level.
 	 * @note Every tool here refuses to build without one (UNCellToolBuilderBase::CanBuildTool) and every action needs
-	 *       one to act on. Add Actor deliberately lives on the World rail, which is never disabled, so the cell that
-	 *       re-enables this category is still reachable while it is greyed out.
+	 *       one to act on. Add Actor deliberately lives on the World rail, which is never hidden, so the cell that
+	 *       brings this category back is still reachable while it is gone.
 	 */
-	virtual TAttribute<bool> GetEnabled() const override;
+	virtual TAttribute<bool> GetAvailable() const override;
 
 	virtual TSharedPtr<SWidget> CreateContent() const override;
 	//End FNWorldAssemblyEdModeRail

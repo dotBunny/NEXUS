@@ -15,6 +15,9 @@ namespace UnrealBuildTool.Rules
 					"Core",
 					"DataValidation",
 					"RHI",
+					// Supplies FToolWidget_DragBoxPosition, persisted on UNWorldAssemblyEditorUserSettings, and
+					// UE::ToolWidgets::SDraggableBoxOverlay, which floats the edit mode's rail over the viewport.
+					"ToolWidgets",
 					"UnrealEd"
 				]
 			);
@@ -45,9 +48,7 @@ namespace UnrealBuildTool.Rules
 					"SlateCore",
 					"ToolMenus",
 					"UMG",
-					"UMGEditor",
-					// Supplies FToolkitBuilder/FToolkitSections, which build the edit mode's toolkit panel.
-					"WidgetRegistration"
+					"UMGEditor"
 				]
 			);
 			

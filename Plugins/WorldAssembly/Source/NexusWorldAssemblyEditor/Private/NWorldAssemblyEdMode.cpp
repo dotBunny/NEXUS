@@ -12,6 +12,7 @@
 #include "Cell/NCellRootComponent.h"
 #include "NEditorUtils.h"
 #include "NWorldAssemblyDebugDraw.h"
+#include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEditorSettings.h"
 #include "NWorldAssemblyEditorStyle.h"
 #include "NWorldAssemblyEditorSubsystem.h"
@@ -43,6 +44,7 @@ static const TArray<FVector> EmptyVertices;
 static const TArray<FIntVector2> EmptyEdges;
 static const FNCellVoxelData EmptyVoxelData;
 
+
 UNWorldAssemblyEdMode* UNWorldAssemblyEdMode::Get()
 {
 	return Cast<UNWorldAssemblyEdMode>(GLevelEditorModeTools().GetActiveScriptableMode(Identifier));
@@ -52,6 +54,14 @@ FBox UNWorldAssemblyEdMode::GetCachedBounds()
 {
 	const UNWorldAssemblyEdMode* Mode = Get();
 	return Mode != nullptr ? Mode->CachedBounds : FBox(ForceInit);
+}
+
+bool UNWorldAssemblyEdMode::IsTerrainSettled()
+{
+	// No mode means nothing is tracking the terrain, so nothing is known to be mid-build. Reporting settled keeps
+	// callers outside the mode — the save path most of all — working exactly as they did before terrain was admitted.
+	const UNWorldAssemblyEdMode* Mode = Get();
+	return Mode == nullptr || Mode->bTerrainSettled;
 }
 
 const TArray<FVector>& UNWorldAssemblyEdMode::GetCachedBoundsVertices()
@@ -400,9 +410,9 @@ UNWorldAssemblyEdMode::UNWorldAssemblyEdMode()
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Icon.WorldAssembly"),
 		true);
 
-	// Names the multibox the toolkit's palettes are built into, which is what lets the editor persist per-user
+	// Names the multibox the mode's toolbars are built into, which is what lets the editor persist per-user
 	// customization of them. Not a constructor argument — FEditorModeInfo leaves it default and expects the mode to
-	// fill it in — but FToolkitBuilderArgs requires one, so it is set here alongside the rest of the registration data.
+	// fill it in — so it is set here alongside the rest of the registration data.
 	Info.ToolbarCustomizationName = TEXT("NWorldAssemblyEdModeToolbar");
 }
 
@@ -638,6 +648,22 @@ void UNWorldAssemblyEdMode::ModeTick(float DeltaTime)
 			bAllowNonConvexHull = RootComponent->Details.HullSettings.bAllowNonConvex;
 			bAutoVoxelDisabled = (!RootComponent->Details.VoxelSettings.bCalculateOnSave && RootComponent->Details.VoxelSettings.bUseVoxelData);
 		}
+	}
+
+	// Terrain settling. A Mesh Partition build lands its sections over several frames, and cell data calculated
+	// part-way through describes geometry that is still arriving — which is why a calculation run straight after a
+	// terrain edit disagrees with the same calculation after a reload. There is no engine-side barrier covering the
+	// whole pipeline to wait on, so a finished build is inferred from the geometry holding still.
+	const ULevel* TerrainLevel = CellActor.IsValid() ? CellActor->GetLevel() : nullptr;
+	if (const uint32 Fingerprint = FNWorldAssemblyEditorUtils::ComputeTerrainFingerprint(TerrainLevel); Fingerprint != TerrainFingerprint)
+	{
+		TerrainFingerprint = Fingerprint;
+		TerrainChangedTime = FPlatformTime::Seconds();
+		bTerrainSettled = false;
+	}
+	else if (!bTerrainSettled && (FPlatformTime::Seconds() - TerrainChangedTime) >= NEXUS::WorldAssembly::TerrainSettling::TerrainSettleSeconds)
+	{
+		bTerrainSettled = true;
 	}
 
 	Super::ModeTick(DeltaTime);

@@ -31,6 +31,15 @@ struct NEXUSWORLDASSEMBLY_API FNCellVoxelGenerationSettings
 	UPROPERTY(EditAnywhere)
 	bool bIncludeEditorOnly = false;
 
+	/**
+	 * When true, terrain contributes to voxel occupancy.
+	 * @note Governs both halves of the calculation at once: whether terrain grows the voxel grid's extents, and
+	 *       whether the occupancy sweep can hit it. Excluded terrain joins the ignored-actor list the sweep is
+	 *       issued with, so it cannot register as occupied even though the physics world would otherwise report it.
+	 */
+	UPROPERTY(EditAnywhere)
+	bool bIncludeTerrain = true;
+
 	/** Actors carrying any of these tags are excluded from the voxel calculation. */
 	UPROPERTY(EditAnywhere)
 	TArray<FName> ActorIgnoreTags = { NEXUS::WorldAssembly::ActorTags::CellIgnore, NEXUS::WorldAssembly::ActorTags::CellVoxelIgnore };
@@ -46,6 +55,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellVoxelGenerationSettings
 		&& bCalculateOnSave == Other.bCalculateOnSave
 		&& bIncludeNonColliding == Other.bIncludeNonColliding
 		&& bIncludeEditorOnly == Other.bIncludeEditorOnly
+		&& bIncludeTerrain == Other.bIncludeTerrain
 		&& CollisionChannel == Other.CollisionChannel
 		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);
 	}
