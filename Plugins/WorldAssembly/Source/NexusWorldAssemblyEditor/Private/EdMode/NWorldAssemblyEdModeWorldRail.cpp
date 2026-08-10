@@ -65,7 +65,7 @@ void FNWorldAssemblyEdModeWorldRail::RegisterCommands(const TSharedRef<FBindingC
 	CategoryCommandList = FNWorldAssemblyEditorCommands::MakeCommandList({
 		{ CommandInfo_ToggleCollisionVisualizer, FExecuteAction::CreateStatic(&ToggleCollisionVisualizer),      FCanExecuteAction::CreateStatic(&FNEditorUtils::IsNotPlayInEditor), FIsActionChecked::CreateStatic(&ToggleCollisionVisualizer_IsActionChecked) },
 		{ CommandInfo_AddCellActor,              FExecuteAction::CreateStatic(&FOperations::AddActor),          FCanExecuteAction::CreateStatic(&AddCellActor_CanExecute) },
-		{ CommandInfo_AddOrganVolume,            FExecuteAction::CreateStatic(&FOrganOperations::AddVolume),    FCanExecuteAction::CreateStatic(&FNEditorUtils::IsNotPlayInEditor) },
+		{ CommandInfo_AddOrganVolume,            FExecuteAction::CreateStatic(&FOrganOperations::AddVolume),    FCanExecuteAction::CreateStatic(&AddOrganVolume_CanExecute) },
 		{ CommandInfo_TagCollisionIgnore,        FExecuteAction::CreateStatic(&TagCollisionIgnore),             FCanExecuteAction::CreateStatic(&TagCollisionIgnore_CanExecute) },
 	});
 }
@@ -102,6 +102,20 @@ bool FNWorldAssemblyEdModeWorldRail::AddCellActor_CanExecute()
 	// while a level holding organs is the world those blocks are placed into. Making a level both is not a thing the
 	// assembly pipeline can act on, so the button greys out rather than letting it be authored.
 	return !UNWorldAssemblyEdMode::HasCellActor() && !FNWorldAssemblyEditorUtils::IsOrganComponentPresentInCurrentWorld();
+}
+
+bool FNWorldAssemblyEdModeWorldRail::AddOrganVolume_CanExecute()
+{
+	if (FNEditorUtils::IsPlayInEditor()) return false;
+
+	// The other half of AddCellActor_CanExecute's rule, which until now only refused from one side: a cell is a
+	// building block an operation places, and a level holding organs is the world those blocks are placed into. That
+	// makes the two mutually exclusive, so a level already authored as a cell refuses organs the same way a level
+	// holding organs refuses a cell.
+	//
+	// No count of the level's organs, unlike the cell test — a level is meant to hold as many organ volumes as the
+	// user wants, and only the cell is a singleton.
+	return !UNWorldAssemblyEdMode::HasCellActor();
 }
 
 void FNWorldAssemblyEdModeWorldRail::TagCollisionIgnore()
