@@ -10,7 +10,7 @@
 #include "Editor.h"
 #include "TimerManager.h"
 #include "NWorldAssemblyContextCache.h"
-#include "Commands/NWorldAssemblyEditorQuickAssemblyCommands.h"
+#include "NWorldAssemblyEditorQuickAssembly.h"
 #include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEditorUserSettings.h"
 #include "NWorldAssemblyMinimal.h"
@@ -95,7 +95,7 @@ void UNWorldAssemblyEditorSubsystem::StartOperation(UNAssemblyOperation* Operati
 
 void UNWorldAssemblyEditorSubsystem::OnQuickAssemblyProgressChanged(float Progress)
 {
-	FNWorldAssemblyEditorQuickAssemblyCommands::SetProgress(Progress);
+	FNWorldAssemblyEditorQuickAssembly::SetProgress(Progress);
 }
 
 void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Operation, TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContext)
@@ -120,7 +120,7 @@ void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Op
 
 	// A run belongs to an auto-assembly loop when it is the tracked quick-assembly operation and the loop is engaged.
 	// Loop runs are folded into the summary instead of toasting one-per-run; standalone runs keep their own toast.
-	const bool bIsQuickAssemblyOp = Operation->GetTicket() == FNWorldAssemblyEditorQuickAssemblyCommands::GetOperationTicket();
+	const bool bIsQuickAssemblyOp = Operation->GetTicket() == FNWorldAssemblyEditorQuickAssembly::GetOperationTicket();
 	const bool bWasAutoLoopRun = bIsQuickAssemblyOp && bAutoAssemblyLoopActive;
 	if (bWasAutoLoopRun)
 	{
@@ -132,7 +132,7 @@ void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Op
 	// through OnOperationDestroyed instead and must never re-arm the loop.
 	if (bIsQuickAssemblyOp)
 	{
-		FNWorldAssemblyEditorQuickAssemblyCommands::SetOperationTicket(-1);
+		FNWorldAssemblyEditorQuickAssembly::SetOperationTicket(-1);
 
 		// Re-arm the inter-run timer when an auto-assembly loop is engaged and still enabled. Re-reading the live
 		// setting here is what makes toggling Auto Assembly off mid-loop stop it gracefully after the current run.
@@ -140,11 +140,11 @@ void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Op
 		{
 			ScheduleNextAutoAssembly();
 			// Keep the bar visible and reset it to 0 so the countdown to the next run reads from empty.
-			FNWorldAssemblyEditorQuickAssemblyCommands::SetProgress(0.0f);
+			FNWorldAssemblyEditorQuickAssembly::SetProgress(0.0f);
 		}
 		else
 		{
-			FNWorldAssemblyEditorQuickAssemblyCommands::ClearProgress();
+			FNWorldAssemblyEditorQuickAssembly::ClearProgress();
 			// Reaching here with the loop still active means Auto Assembly was toggled off mid-loop - a deliberate
 			// user stop, so surface the accumulated summary. A standalone run (loop never active) emits nothing.
 			StopAutoAssemblyLoop(/*bEmitSummary*/ bAutoAssemblyLoopActive);
@@ -209,10 +209,10 @@ void UNWorldAssemblyEditorSubsystem::OnOperationDestroyed(UNAssemblyOperation* O
 {
 	// Cancelled/torn down before finishing - make sure the progress bar does not linger and the toolbar button
 	// reverts to its "start" state by dropping the tracked ticket.
-	if (Operation->GetTicket() == FNWorldAssemblyEditorQuickAssemblyCommands::GetOperationTicket())
+	if (Operation->GetTicket() == FNWorldAssemblyEditorQuickAssembly::GetOperationTicket())
 	{
-		FNWorldAssemblyEditorQuickAssemblyCommands::ClearProgress();
-		FNWorldAssemblyEditorQuickAssemblyCommands::SetOperationTicket(-1);
+		FNWorldAssemblyEditorQuickAssembly::ClearProgress();
+		FNWorldAssemblyEditorQuickAssembly::SetOperationTicket(-1);
 	}
 
 	// This fires on both paths — UNAssemblyOperation::TearDownOperation is reached from Cancel and from the end of a
@@ -391,9 +391,9 @@ void UNWorldAssemblyEditorSubsystem::StopAutoAssemblyLoop(bool bEmitSummary)
 
 	// If we were waiting between runs (no live operation owns the bar), the countdown bar is ours to hide. When an
 	// operation is still running the cancel path tears it down through OnOperationDestroyed instead.
-	if (bWasActive && !FNWorldAssemblyEditorQuickAssemblyCommands::IsOperationRunning())
+	if (bWasActive && !FNWorldAssemblyEditorQuickAssembly::IsOperationRunning())
 	{
-		FNWorldAssemblyEditorQuickAssemblyCommands::ClearProgress();
+		FNWorldAssemblyEditorQuickAssembly::ClearProgress();
 	}
 
 	// On a deliberate user stop, surface the accumulated pass/warn/fail summary before discarding it. Environment-driven
@@ -521,13 +521,13 @@ void UNWorldAssemblyEditorSubsystem::OnAutoAssemblyTimerElapsed()
 
 	// A new run can't start right now (no valid organ, in PIE, or another operation is in flight). This is an
 	// environment-driven stop, not a user one, so drop the tally silently and keep the button off "cancel".
-	if (!FNWorldAssemblyEditorQuickAssemblyCommands::Start_CanExecute())
+	if (!FNWorldAssemblyEditorQuickAssembly::Start_CanExecute())
 	{
 		StopAutoAssemblyLoop(/*bEmitSummary*/ false);
 		return;
 	}
 
-	FNWorldAssemblyEditorQuickAssemblyCommands::Start();
+	FNWorldAssemblyEditorQuickAssembly::Start();
 }
 
 void UNWorldAssemblyEditorSubsystem::UpdateAutoAssemblyCountdownBar()
@@ -543,6 +543,6 @@ void UNWorldAssemblyEditorSubsystem::UpdateAutoAssemblyCountdownBar()
 	if (Rate > 0.0f)
 	{
 		const float Remaining = TimerManager.GetTimerRemaining(AutoAssemblyTimerHandle);
-		FNWorldAssemblyEditorQuickAssemblyCommands::SetProgress(1.0f - (Remaining / Rate));
+		FNWorldAssemblyEditorQuickAssembly::SetProgress(1.0f - (Remaining / Rate));
 	}
 }

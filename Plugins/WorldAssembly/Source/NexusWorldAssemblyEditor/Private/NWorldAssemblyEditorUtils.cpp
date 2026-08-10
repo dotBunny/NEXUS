@@ -12,7 +12,7 @@
 #include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEditorSettings.h"
 #include "NWorldAssemblyEditorSubsystem.h"
-#include "NWorldAssemblyEdMode.h"
+#include "EdMode/NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyRegistry.h"
 #include "NWorldAssemblyUtils.h"
 #include "NWorldCollisionCache.h"
@@ -168,6 +168,12 @@ ENWorldAssemblySelectionFlags FNWorldAssemblyEditorUtils::GetSelectionFlags()
 		}
 	}
 	return static_cast<ENWorldAssemblySelectionFlags>(Flags);
+}
+
+bool FNWorldAssemblyEditorUtils::CanEditCell()
+{
+	if (FNEditorUtils::IsPlayInEditor()) return false;
+	return IsCellActorPresentInCurrentWorld();
 }
 
 bool FNWorldAssemblyEditorUtils::HasGeneratedCellProxies()

@@ -3,11 +3,9 @@
 
 #include "Widgets/SNWorldAssemblyRailPanel.h"
 
-#include "NWorldAssemblyEdMode.h"
+#include "EdMode/NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyEditorStyle.h"
 #include "Styling/AppStyle.h"
-#include "Widgets/Images/SImage.h"
-#include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SScrollBox.h"
@@ -18,7 +16,6 @@
 void SNWorldAssemblyRailPanel::Construct(const FArguments& InArgs)
 {
 	State = InArgs._State;
-	ActiveToolName = InArgs._ActiveToolName;
 
 	// Clamped so an empty selection lands on a real slot rather than leaving the switcher with none. The strip only
 	// reports INDEX_NONE when no category at all is available, which the World category makes impossible in practice.
@@ -46,13 +43,7 @@ void SNWorldAssemblyRailPanel::Construct(const FArguments& InArgs)
 			ContentSwitcher.ToSharedRef()
 		]
 
-		// Outside the scroll box each category's content is wrapped in, so neither can be scrolled out of reach.
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			CreateActiveToolRow()
-		]
-
+		// Outside the scroll box each category's content is wrapped in, so it cannot be scrolled out of reach.
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
@@ -63,84 +54,14 @@ void SNWorldAssemblyRailPanel::Construct(const FArguments& InArgs)
 
 TSharedRef<SWidget> SNWorldAssemblyRailPanel::CreateCategoryContent(const TSharedRef<FNWorldAssemblyEdModeRail>& Rail)
 {
-	const TSharedRef<SVerticalBox> Content = SNew(SVerticalBox);
-
-	if (const TSharedPtr<SWidget> Header = Rail->CreateHeader(); Header.IsValid())
-	{
-		Content->AddSlot()
-			.AutoHeight()
-			.HAlign(HAlign_Fill)
-			.Padding(4.0f, 4.0f, 4.0f, 2.0f)
-			[
-				Header.ToSharedRef()
-			];
-	}
-
-	if (const TSharedPtr<SWidget> RailContent = Rail->CreateContent(); RailContent.IsValid())
-	{
-		Content->AddSlot()
-			.AutoHeight()
-			.HAlign(HAlign_Fill)
-			[
-				RailContent.ToSharedRef()
-			];
-	}
+	// Straight into the scroll box. A rail's content is already a column of groups, so stacking it inside a box of our
+	// own only added a layout pass — the pickers that used to need a slot above it are part of that column now.
+	const TSharedPtr<SWidget> RailContent = Rail->CreateContent();
 
 	return SNew(SScrollBox)
 		+ SScrollBox::Slot()
 		[
-			Content
-		];
-}
-
-TSharedRef<SWidget> SNWorldAssemblyRailPanel::CreateActiveToolRow() const
-{
-	const TAttribute<FText> ToolName = ActiveToolName;
-
-	return SNew(SBox)
-		.Padding(FMargin(6.0f, 4.0f, 6.0f, 2.0f))
-		.Visibility_Lambda([ToolName]()
-		{
-			return ToolName.Get(FText::GetEmpty()).IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible;
-		})
-		[
-			SNew(SBorder)
-			// The same well the titled groups sit in, rounded to match them — a square box among rounded ones reads
-			// as an oversight rather than a distinction.
-			.BorderImage(FNWorldAssemblyEditorStyle::Get().GetBrush("WorldAssemblyEd.TitledGroupBackground"))
-			.Padding(FMargin(.0f, 4.0f))
-			[
-				SNew(SHorizontalBox)
-
-				+ SHorizontalBox::Slot()
-				.FillWidth(1.0f)
-				.VAlign(VAlign_Center)
-				[
-					SNew(STextBlock)
-					.Font(FCoreStyle::GetDefaultFontStyle("Bold", 9))
-					.ColorAndOpacity(FStyleColors::AccentBlue)
-					.Text_Lambda([ToolName]() { return ToolName.Get(FText::GetEmpty()); })
-				]
-
-				+ SHorizontalBox::Slot()
-				.AutoWidth()
-				.VAlign(VAlign_Center)
-				[
-					SNew(SButton)
-					.ButtonStyle(&FAppStyle::Get().GetWidgetStyle<FButtonStyle>("SimpleButton"))
-					.ToolTipText(NSLOCTEXT("NexusWorldAssemblyEditor", "StopTool_ToolTip", "Stop the running tool."))
-					.OnClicked_Lambda([]()
-					{
-						UNWorldAssemblyEdMode::EndActiveTool();
-						return FReply::Handled();
-					})
-					[
-						SNew(SImage)
-						.Image(FAppStyle::Get().GetBrush("Icons.X"))
-						.ColorAndOpacity(FSlateColor::UseForeground())
-					]
-				]
-			]
+			RailContent.IsValid() ? RailContent.ToSharedRef() : SNullWidget::NullWidget
 		];
 }
 
