@@ -22,6 +22,7 @@
 - Candidate junction pairs are now gated on how the two openings are oriented, not just how far apart they are — by the time the connector pass runs nothing is being rotated, so what is left to judge is the world-space relationship between two fixed openings. `FNWorldAssemblyUtils::AreJunctionsWithinConnectionAngles` requires all three of `Maximum Facing Angle` (how far from directly facing each other the sockets may be), `Maximum Approach Angle` (how far off its own facing a junction's partner may sit, tested at both ends) and `Maximum Elevation Difference` (how far the two differ in how steeply they face up or down). Evaluated before any routing, so the pass gets cheaper rather than more expensive. Reported as `Rejected (Angle)`.
 - `Maximum Elevation Difference` (default 45°) separates the case a facing angle alone cannot: a ceiling hatch joined to a wall door and a right-angle corridor bend are both exactly 90° of facing, but differ by the full 90° and by nothing in elevation. This is why `Maximum Facing Angle` and `Maximum Approach Angle` both default to a loose 180° — the elevation limit does the work, and 90° of approach then means only that a partner must sit in front of the opening rather than behind it.
 - `Connection Constraints` on a junction (`FNCellJunctionConnectionConstraints`) optionally replaces the operation's three angle limits with its own, for any pairing that junction takes part in. Both ends are consulted and the stricter wins, mirroring the dual veto the placement gate already uses — so an override can only narrow what a junction accepts, and exempting a pairing takes an override on both ends. Distinct from the `Rotation Constraints` beside it, which govern how the owning *cell* may be rotated when the generator places it.
+- The Organ and Junction pickers report `Multiple Selected` when the level selection covers more than one, and every selected entry is marked in the dropdown. Entries are checks rather than radio buttons, since a column of filled radios says the opposite of what a radio means. Picking one still replaces the selection — the mark reports what is selected, not what a click will do.
 
 ### Changed
 
@@ -29,10 +30,11 @@
 - Hot paths now route through junction connectors: an accepted pairing wires the node-level graph edge as well as the junction link, so `FNAssemblyGraph::FlagHotPath` treats a connector as the traversable route it is. Because a pairing can span two organs, a layout that previously produced two independent hot paths may now see them merge.
 - `FNCreateSpawnsTask` resolves every graph's hot path before generating any link details, rather than interleaving the two per graph. A connector link can reach a cell in another graph, and the previous ordering baked in that neighbor's hot-path flags before they had been computed.
 - Junction pairs whose sockets open *away* from each other are now rejected outright by the orientation gate, before a route is ever built. The fold check caught these downstream only while the two sockets sat close enough to force a tight turn; given enough distance the same pairing curves gently enough to clear every shape limit.
-- The edit mode's mated-junction drawing elects a drawer with `>=` rather than `>`. Node identifiers restart per assembly graph, so a `Connect Coincidences` mating spanning two graphs could hold the same one at both ends and the strict comparison elected neither, leaving a visible hole. A tie now draws twice, which on two identical co-located rectangles is indistinguishable from drawing once.
-- The three existing `Junction Default Connection` project settings moved into the new `Junction Connectors` struct under `Assembly|Junction Connecting`, alongside `Junction Default Connector`. Their `DefaultNexusGame.ini` keys change as a result; they shipped with defaults only, so nothing authored is lost.
 
-### Removed
+### Fixed
+
+- Add Organ Volume is disabled in a level that already holds a cell actor. Add Cell Actor had always refused a level holding organs, but the rule only ever applied from one side, so the mutually exclusive pair could still be reached by adding the organ second.
+- The Cell and Cell Data categories each defined an unused duplicate of the other's helpers — `SaveCell`, `CaptureThumbnail_CanExecute` and `SelectActor_CanShow` on Cell, `TagIgnore` and `TagIgnore_CanExecute` on Cell Data. Each pair had one live copy and one that nothing called.
 
 ## [0.3.2] - 2026-07-30
 
