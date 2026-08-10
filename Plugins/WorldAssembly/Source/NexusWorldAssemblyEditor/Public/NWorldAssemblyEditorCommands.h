@@ -42,7 +42,7 @@ public:
 	 * @param Actions Every command the category owns, paired with the delegates it binds to.
 	 * @return A fresh list with all of them mapped, for the toolkit to fold into its own.
 	 * @note Here rather than on FNWorldAssemblyEdModeRail because not every category has a rail —
-	 *       FNWorldAssemblyEditorQuickAssemblyCommands is driven from the tool menu and the subsystem, and registers
+	 *       FNWorldAssemblyEditorQuickAssembly is driven from the tool menu and the subsystem, and registers
 	 *       through this same context.
 	 */
 	static TSharedRef<FUICommandList> MakeCommandList(const TArray<FNCommandAction>& Actions);

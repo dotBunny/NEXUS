@@ -11,7 +11,7 @@ class FBindingContext;
  * The Cell category: the tools and calculations that author the focused cell.
  *
  * Owns the declaration, binding and gating for everything that acts on the focused cell. The work itself lives in
- * FNWorldAssemblyEditorCellOperations, so this stays a description of what the UI offers rather than of what the cell
+ * FNWorldAssemblyEditorCellUtils, so this stays a description of what the UI offers rather than of what the cell
  * does. Commands are declared against the module's shared binding context by FNWorldAssemblyEditorCommands, which is
  * the only TCommands in the module — every category registers into it so they share one Keyboard Shortcuts section.
  *
