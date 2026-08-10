@@ -99,6 +99,26 @@ N_TEST_MEDIUM(FNActorUtilsTests_TerrainClassification_Landscape,
 		FNActorUtils::IsLandscapeClassName(TEXT("StaticMeshComponent")));
 }
 
+N_TEST_MEDIUM(FNActorUtilsTests_TerrainClassification_MeshTerrain,
+	"NEXUS::UnitTests::NCore::FNActorUtils::TerrainClassification::MeshTerrain",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	CHECK_MESSAGE(TEXT("A Mesh Partition collision component is mesh terrain."),
+		FNActorUtils::IsMeshTerrainPrimitiveClassName(TEXT("MeshPartitionCollisionComponent")));
+
+	// The mirror of the landscape test above: the two representations answer to separate generation flags, so a
+	// predicate that admitted both would make one of those flags unable to exclude anything.
+	CHECK_FALSE_MESSAGE(TEXT("A landscape component is not mesh terrain."),
+		FNActorUtils::IsMeshTerrainPrimitiveClassName(TEXT("LandscapeHeightfieldCollisionComponent")));
+	CHECK_FALSE_MESSAGE(TEXT("An ordinary static mesh component is not mesh terrain."),
+		FNActorUtils::IsMeshTerrainPrimitiveClassName(TEXT("StaticMeshComponent")));
+
+	// Both halves have to keep agreeing with the whole, since IsTerrainActor is now composed of them.
+	CHECK_MESSAGE(TEXT("Either representation is a terrain primitive."),
+		FNActorUtils::IsTerrainPrimitiveClassName(TEXT("MeshPartitionCollisionComponent"))
+		&& FNActorUtils::IsTerrainPrimitiveClassName(TEXT("LandscapeHeightfieldCollisionComponent")));
+}
+
 N_TEST_MEDIUM(FNActorUtilsTests_TerrainClassification_NullActors,
 	"NEXUS::UnitTests::NCore::FNActorUtils::TerrainClassification::NullActors",
 	N_TEST_CONTEXT_ANYWHERE)
@@ -107,6 +127,7 @@ N_TEST_MEDIUM(FNActorUtilsTests_TerrainClassification_NullActors,
 	CHECK_FALSE_MESSAGE(TEXT("A null actor is not terrain."), FNActorUtils::IsTerrainActor(nullptr));
 	CHECK_FALSE_MESSAGE(TEXT("A null actor is not authoring apparatus."), FNActorUtils::IsTerrainAuthoringActor(nullptr));
 	CHECK_FALSE_MESSAGE(TEXT("A null actor is not landscape."), FNActorUtils::IsLandscapeActor(nullptr));
+	CHECK_FALSE_MESSAGE(TEXT("A null actor is not mesh terrain."), FNActorUtils::IsMeshTerrainActor(nullptr));
 	CHECK_FALSE_MESSAGE(TEXT("A null primitive is not a terrain primitive."), FNActorUtils::IsTerrainPrimitive(nullptr));
 	CHECK_FALSE_MESSAGE(TEXT("A null primitive has no built geometry."), FNActorUtils::HasBuiltGeometry(nullptr));
 
