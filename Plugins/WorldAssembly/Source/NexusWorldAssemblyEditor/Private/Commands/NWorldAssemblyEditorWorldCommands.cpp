@@ -25,7 +25,7 @@ void FNWorldAssemblyEditorWorldCommands::Register(const TSharedRef<FBindingConte
 
 	FUICommandInfo::MakeCommandInfo(Context, Commands.CommandInfo_ToggleCollisionVisualizer,
 		"NWorldAssembly.World.ToggleCollisionVisualizer",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_ToggleCollisionVisualizer", "Collision"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_ToggleCollisionVisualizer", "Collision Visualizer"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_ToggleCollisionVisualizer_Tooltip", "Creates and destroys a temporary/transient visualizer of the worlds collision geometry used during assembly."),
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.CreateCollisionVisualizer"),
 		EUserInterfaceActionType::ToggleButton, FInputChord());

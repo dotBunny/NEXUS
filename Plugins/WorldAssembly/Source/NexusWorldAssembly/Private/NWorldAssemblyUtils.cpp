@@ -27,36 +27,6 @@ namespace NEXUS::WorldAssembly
 	inline constexpr double DefaultLandscapeSampleSpacing = 100.0;
 }
 
-void FNWorldAssemblyUtils::GridReducePoints(const TArray<FVector>& Points, const FVector& Center, const double GridSize,
-	TSet<FIntVector>& SeenCells, TArray<FVector>& OutPoints)
-{
-	// Terrain topology plays no part here: a cave's inner surface and the far side of a spherical terrain are interior
-	// points to a convex hull either way, so they are discarded by the builder whether or not they are thinned first.
-	if (GridSize <= 0.0)
-	{
-		OutPoints.Append(Points);
-		return;
-	}
-
-	for (const FVector& Point : Points)
-	{
-		const FIntVector Cell(
-			FMath::FloorToInt32(Point.X / GridSize),
-			FMath::FloorToInt32(Point.Y / GridSize),
-			FMath::FloorToInt32(Point.Z / GridSize));
-
-		bool bAlreadySeen = false;
-		SeenCells.Add(Cell, &bAlreadySeen);
-		if (bAlreadySeen) continue;
-
-		// Away from the center on each axis independently.
-		OutPoints.Add(FVector(
-			Point.X >= Center.X ? FMath::CeilToDouble(Point.X / GridSize) * GridSize : FMath::FloorToDouble(Point.X / GridSize) * GridSize,
-			Point.Y >= Center.Y ? FMath::CeilToDouble(Point.Y / GridSize) * GridSize : FMath::FloorToDouble(Point.Y / GridSize) * GridSize,
-			Point.Z >= Center.Z ? FMath::CeilToDouble(Point.Z / GridSize) * GridSize : FMath::FloorToDouble(Point.Z / GridSize) * GridSize));
-	}
-}
-
 /**
  * Append a mesh's world-space vertices to a hull point cloud, thinned onto a grid.
  * @param Mesh Source mesh, in its own local space.
@@ -80,7 +50,7 @@ static void AppendGridReducedVertices(const FNRawMesh& Mesh, const FTransform& T
 	if (!WorldBounds.IsValid) return;
 
 	TArray<FVector> Reduced;
-	FNWorldAssemblyUtils::GridReducePoints(WorldPoints, WorldBounds.GetCenter(), GridSize, SeenCells, Reduced);
+	FNVectorUtils::GridReducePoints(WorldPoints, WorldBounds.GetCenter(), GridSize, SeenCells, Reduced);
 
 	OutVertices.Reserve(OutVertices.Num() + Reduced.Num());
 	for (const FVector& Point : Reduced)
@@ -188,7 +158,7 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 			TerrainActorCount++;
 
 			// Landscape is separated again because it is the one terrain with no geometry to extract — it has to be
-			// sampled off the physics scene instead. See FNWorldAssemblyUtils::SampleLandscapeSurface.
+			// sampled off the physics scene instead. See FNRawMeshFactory::FromLandscape.
 			if (FNActorUtils::IsLandscapeActor(Actor))
 			{
 				LandscapeActors.Add(Actor);
@@ -268,7 +238,7 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 	for (const AActor* LandscapeActor : LandscapeActors)
 	{
 		FNRawMesh LandscapeMesh;
-		if (!SampleLandscapeSurface(LandscapeActor, LandscapeSampleSpacing, LandscapeMesh)) continue;
+		if (!FNRawMeshFactory::FromLandscape(LandscapeActor, LandscapeSampleSpacing, LandscapeMesh)) continue;
 
 		LandscapeVertexCount += LandscapeMesh.Vertices.Num();
 		for (const FVector& Vertex : LandscapeMesh.Vertices)
@@ -374,102 +344,6 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 	Mesh.bHasNonTris = false;
 
 	return Mesh;
-}
-
-bool FNWorldAssemblyUtils::SampleLandscapeSurface(const AActor* LandscapeActor, const double GridSize, FNRawMesh& OutMesh)
-{
-	if (!IsValid(LandscapeActor) || GridSize <= 0.0) return false;
-
-	const UWorld* World = LandscapeActor->GetWorld();
-	if (World == nullptr) return false;
-
-	const FBox Bounds = LandscapeActor->GetComponentsBoundingBox(true);
-	if (!Bounds.IsValid) return false;
-
-	const FVector Size = Bounds.GetSize();
-	const int32 CountX = FMath::Max(1, FMath::CeilToInt32(Size.X / GridSize)) + 1;
-	const int32 CountY = FMath::Max(1, FMath::CeilToInt32(Size.Y / GridSize)) + 1;
-
-	// Clear of the surface at both ends so a trace can neither start inside the landscape nor stop short of a dip.
-	constexpr double Margin = 100.0;
-	const double TraceTop = Bounds.Max.Z + Margin;
-	const double TraceBottom = Bounds.Min.Z - Margin;
-
-	FCollisionQueryParams Params(SCENE_QUERY_STAT(NSampleLandscapeSurface), true);
-
-	// Multi rather than single: the first blocking hit down a column is whatever sits on the landscape, and taking
-	// that would sample the props instead of the ground under them.
-	TArray<FHitResult> Hits;
-	TArray<FVector> Samples;
-	TArray<bool> SampleValid;
-	Samples.SetNum(CountX * CountY);
-	SampleValid.SetNum(CountX * CountY);
-
-	for (int32 IndexX = 0; IndexX < CountX; IndexX++)
-	{
-		for (int32 IndexY = 0; IndexY < CountY; IndexY++)
-		{
-			const double X = FMath::Min(Bounds.Min.X + IndexX * GridSize, Bounds.Max.X);
-			const double Y = FMath::Min(Bounds.Min.Y + IndexY * GridSize, Bounds.Max.Y);
-			const int32 SampleIndex = IndexX * CountY + IndexY;
-
-			Hits.Reset();
-			SampleValid[SampleIndex] = false;
-
-			if (!World->LineTraceMultiByChannel(Hits, FVector(X, Y, TraceTop), FVector(X, Y, TraceBottom), ECC_WorldStatic, Params))
-			{
-				continue;
-			}
-
-			for (const FHitResult& Hit : Hits)
-			{
-				if (Hit.GetActor() != LandscapeActor) continue;
-
-				Samples[SampleIndex] = Hit.ImpactPoint;
-				SampleValid[SampleIndex] = true;
-				break;
-			}
-		}
-	}
-
-	// Emit a quad only where all four of its corners found the surface, so a hole in the landscape leaves a hole here
-	// rather than a triangle stretched across it.
-	OutMesh = FNRawMesh();
-	TMap<int32, int32> SampleToVertex;
-	auto AddVertex = [&OutMesh, &SampleToVertex, &Samples](const int32 SampleIndex)
-	{
-		if (const int32* Existing = SampleToVertex.Find(SampleIndex)) return *Existing;
-
-		const int32 NewIndex = OutMesh.Vertices.Add(Samples[SampleIndex]);
-		SampleToVertex.Add(SampleIndex, NewIndex);
-		return NewIndex;
-	};
-
-	for (int32 IndexX = 0; IndexX < CountX - 1; IndexX++)
-	{
-		for (int32 IndexY = 0; IndexY < CountY - 1; IndexY++)
-		{
-			const int32 A = IndexX * CountY + IndexY;
-			const int32 B = (IndexX + 1) * CountY + IndexY;
-			const int32 C = (IndexX + 1) * CountY + (IndexY + 1);
-			const int32 D = IndexX * CountY + (IndexY + 1);
-			if (!SampleValid[A] || !SampleValid[B] || !SampleValid[C] || !SampleValid[D]) continue;
-
-			const int32 VertexA = AddVertex(A);
-			const int32 VertexB = AddVertex(B);
-			const int32 VertexC = AddVertex(C);
-			const int32 VertexD = AddVertex(D);
-
-			OutMesh.Loops.Add(FNRawMeshLoop(VertexA, VertexB, VertexC));
-			OutMesh.Loops.Add(FNRawMeshLoop(VertexA, VertexC, VertexD));
-		}
-	}
-
-	if (OutMesh.Loops.IsEmpty()) return false;
-
-	OutMesh.CalculateCenterAndBounds();
-	OutMesh.Validate();
-	return true;
 }
 
 FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const FNCellVoxelGenerationSettings& Settings)

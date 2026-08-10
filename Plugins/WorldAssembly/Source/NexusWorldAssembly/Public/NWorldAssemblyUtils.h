@@ -29,43 +29,6 @@ public:
 	/** @return Packed voxel occupancy data for the level. */
 	static FNCellVoxelData CalculateVoxelData(ULevel* InLevel, const FNCellVoxelGenerationSettings& Settings);
 
-	/**
-	 * Thin a point cloud onto a grid, keeping at most one point per cell and snapping each away from a center.
-	 *
-	 * Written for terrain, which hands the hull builder its entire surface — measured at a million points across four
-	 * sections, into a build that is superlinear in them. A convex hull is decided by its extreme points alone, so
-	 * nearly all of that is discarded anyway; this discards it first.
-	 * @param Points Source points, in world space.
-	 * @param Center Point to snap away from — the source geometry's own center.
-	 * @param GridSize Edge length of a cell, in world units. Values at or below zero return the points unchanged.
-	 * @param SeenCells Cells already represented; carried across calls so several meshes thin against one grid.
-	 * @param OutPoints Destination, appended to.
-	 * @note Snapping away from Center puts each kept point at or beyond the ones it replaces along each outward axis,
-	 *       so the error is bounded by roughly GridSize and biased outward. That bias is not a containment proof, and
-	 *       it assumes the convex build this feeds — coordinate-wise domination does not imply membership of an
-	 *       arbitrary hull.
-	 */
-	static void GridReducePoints(const TArray<FVector>& Points, const FVector& Center, double GridSize,
-		TSet<FIntVector>& SeenCells, TArray<FVector>& OutPoints);
-
-	/**
-	 * Sample a landscape's surface into a triangulated grid mesh, by tracing down onto it.
-	 *
-	 * Landscape is the one terrain FNRawMeshFactory cannot read: its collision is a Chaos heightfield behind no
-	 * UBodySetup, so the factory skips landscape primitives outright and anything built from it — a cell hull, the
-	 * world collision an assembly places cells against — sees a hole where the ground is. Sampling reconstructs a
-	 * usable surface without taking a Landscape module dependency, and suits the shape, since a heightfield is
-	 * single valued in Z and a downward trace per grid point therefore misses nothing.
-	 * @param LandscapeActor Landscape to sample. Its own bounds set the sampled area.
-	 * @param GridSize Spacing between samples, in world units. Values at or below zero sample nothing.
-	 * @param OutMesh Destination, in world space — the caller pairs it with an identity transform.
-	 * @return true when at least one triangle was produced.
-	 * @note Traces the live physics scene, so this is game-thread only and yields nothing where none is initialised.
-	 * @note Approximate by construction: the surface is reproduced to within GridSize, and a sample that hits
-	 *       nothing (a hole in the landscape) drops the quads around it rather than guessing at them.
-	 */
-	static bool SampleLandscapeSurface(const AActor* LandscapeActor, double GridSize, FNRawMesh& OutMesh);
-
 	/** @return Count of ANCellActor instances in Level. */
 	static int32 GetCellActorCountFromLevel(const ULevel* Level);
 

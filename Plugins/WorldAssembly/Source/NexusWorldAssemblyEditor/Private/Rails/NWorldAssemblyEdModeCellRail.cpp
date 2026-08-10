@@ -35,8 +35,10 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
+			// Unheaded: the tiles are the first thing in the Cell category and carry their own labels, so a "Tools"
+			// heading over them only repeats what they already say.
 			CreateTitledCommandPalette(
-				LOCTEXT("CellHeader_Tools", "Tools"),
+				FText::GetEmpty(),
 				{
 					ToolCommands.BeginCellBoundsTool,
 					ToolCommands.BeginCellHullVertexTool,

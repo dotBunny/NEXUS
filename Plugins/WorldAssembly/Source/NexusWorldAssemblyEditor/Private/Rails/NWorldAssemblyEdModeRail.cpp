@@ -4,6 +4,8 @@
 #include "Rails/NWorldAssemblyEdModeRail.h"
 
 #include "NWorldAssemblyEditorStyle.h"
+#include "Fonts/FontMeasure.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Framework/Commands/UICommandInfo.h"
 #include "Framework/Commands/UICommandList.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
@@ -12,29 +14,46 @@
 #include "Widgets/Input/SCheckBox.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/Layout/SBox.h"
+#include "Widgets/Layout/SWrapBox.h"
 #include "Widgets/SBoxPanel.h"
+#include "Widgets/SNCommandTile.h"
 #include "Widgets/Text/STextBlock.h"
 
+/** Gap left between one palette tile and the next, across and down. */
+static constexpr float PaletteTileSpacing = 4.0f;
+
+/** Width every palette tile is laid out at, and so the width its label has to wrap into. */
+static constexpr float PaletteTileWidth = 64.0f;
+
 /**
- * Mark a widget and every descendant as needing a fresh prepass.
+ * Work out how many lines of label a group of commands needs.
  *
- * @param Widget Root of the subtree to dirty.
- * @note Recursive because a cached desired size is per-widget and Slate's fast path skips any widget whose own
- *       prepass flag is clear — so dirtying only the root leaves the child that actually holds the stale size
- *       untouched. SScaleBox marks its child rather than itself for the same reason; this walks the subtree because
- *       the widget that needs it here is buried inside a multibox we get no handle to.
+ * @param Style Palette style supplying the label font and its padding.
+ * @param Commands The group's commands.
+ * @return One, or two if any of the labels is too wide for a tile to hold on a single line.
+ * @note So a group is only ever as tall as its own labels make it. Tiles have to agree on a height or the group stops
+ *       reading as a grid, but that agreement is the group's to reach — a rail of one-word labels should not be paying
+ *       for the wrapped label in some other rail.
+ * @note Two is the ceiling on what is reserved, not on what is shown: a label needing a third line still gets it and
+ *       takes its own tile's height with it. Reserving for that case would cost every other group a line to spare one
+ *       tile from standing taller than its neighbors.
  */
-static void MarkPrepassDirtyRecursive(const TSharedRef<SWidget>& Widget)
+static int32 MeasurePaletteLabelLines(const FToolBarStyle& Style, const TArray<TSharedPtr<FUICommandInfo>>& Commands)
 {
-	Widget->MarkPrepassAsDirty();
+	const TSharedRef<FSlateFontMeasure> FontMeasure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+	const float LabelWidth = PaletteTileWidth - Style.LabelPadding.GetTotalSpaceAlong<Orient_Horizontal>();
 
-	FChildren* Children = Widget->GetAllChildren();
-	if (Children == nullptr) return;
-
-	for (int32 Index = 0; Index < Children->Num(); Index++)
+	for (const TSharedPtr<FUICommandInfo>& Command : Commands)
 	{
-		MarkPrepassDirtyRecursive(Children->GetChildAt(Index));
+		if (!Command.IsValid()) continue;
+
+		if (FontMeasure->Measure(Command->GetLabel().ToString(), Style.LabelStyle.Font).X > LabelWidth)
+		{
+			return 2;
+		}
 	}
+
+	return 1;
 }
 
 /** @return The heading every titled group is topped with, so the four of them stay identical. */
@@ -44,6 +63,44 @@ static TSharedRef<SWidget> CreateGroupHeading(const FText& Title)
 		.Text(Title)
 		.Font(FAppStyle::Get().GetFontStyle("EditorModesPanel.CategoryFontStyle"))
 		.ColorAndOpacity(FStyleColors::White25);
+}
+
+/**
+ * Stack a group's content under its heading, or on its own where it has none.
+ *
+ * @param Title Heading shown above the content, or empty for a group that goes without one.
+ * @param Content The group's content, backed and inset by whatever built it.
+ * @return The assembled group.
+ * @note An empty title drops the heading rather than drawing a blank one, for a group whose content already says what
+ *       a heading would. The inset the heading carried moves to the content, so an untitled group still stands off the
+ *       one above it rather than sitting flush against it.
+ */
+static TSharedRef<SWidget> CreateGroup(const FText& Title, const TSharedRef<SWidget>& Content)
+{
+	const TSharedRef<SVerticalBox> Group = SNew(SVerticalBox);
+	const bool bHasHeading = !Title.IsEmpty();
+
+	if (bHasHeading)
+	{
+		Group->AddSlot()
+			.AutoHeight()
+			.Padding(8.0f, 10.0f, 8.0f, 2.0f)
+			[
+				CreateGroupHeading(Title)
+			];
+	}
+
+	// The outer inset every kind of group shares, so their backings line up down the panel. What separates content from
+	// that backing is the backing's own padding, not this.
+	Group->AddSlot()
+		.AutoHeight()
+		.HAlign(HAlign_Fill)
+		.Padding(4.0f, bHasHeading ? 0.0f : 10.0f, 4.0f, 6.0f)
+		[
+			Content
+		];
+
+	return Group;
 }
 
 /**
@@ -76,79 +133,42 @@ static TSharedRef<SWidget> CreateTitledUniformToolBar(const TSharedRef<FUIComman
 		ToolBarBuilder.AddToolBarButton(ButtonArgs);
 	}
 
-	return SNew(SVerticalBox)
-
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		.Padding(8.0f, 10.0f, 8.0f, 2.0f)
-		[
-			CreateGroupHeading(Title)
-		]
-
-		// Same outer inset the palette groups use, so every kind of group lines its backing up down the panel. What
-		// separates the buttons from that backing is the style's own BackgroundPadding, not this.
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		.HAlign(HAlign_Fill)
-		.Padding(4.0f, 0.0f, 4.0f, 6.0f)
-		[
-			ToolBarBuilder.MakeWidget()
-		];
+	return CreateGroup(Title, ToolBarBuilder.MakeWidget());
 }
 
 TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateTitledCommandPalette(const FText& Title, const TArray<TSharedPtr<FUICommandInfo>>& Commands) const
 {
-	FUniformToolBarBuilder ToolBarBuilder(CommandList, FMultiBoxCustomization::None);
-	ToolBarBuilder.SetStyle(&FNWorldAssemblyEditorStyle::Get(), "WorldAssemblyEd.TitledCommandPalette");
+	const FToolBarStyle& TileStyle = FNWorldAssemblyEditorStyle::Get().GetWidgetStyle<FToolBarStyle>("WorldAssemblyEd.TitledCommandPalette");
+
+	// UseAllottedSize because the tiles are a fixed size and the panel they wrap into is not: the user drags it between
+	// 260 and 520 wide. SWrapBox re-reads its allotted width every tick and invalidates its own layout when it changes,
+	// so the column count follows the panel with nothing to prompt it — which is the whole reason the tiles are not in
+	// a multibox. SUniformWrapPanel, what a toolbar would have put them in, guesses a square when it has no geometry to
+	// go on and keeps the blank row that guess reserves until something else forces a relayout.
+	const TSharedRef<SWrapBox> Tiles = SNew(SWrapBox)
+		.UseAllottedSize(true)
+		.InnerSlotPadding(FVector2D(PaletteTileSpacing, PaletteTileSpacing));
+
+	const int32 LabelLines = MeasurePaletteLabelLines(TileStyle, Commands);
 
 	for (const TSharedPtr<FUICommandInfo>& Command : Commands)
 	{
-		ToolBarBuilder.AddToolBarButton(Command);
+		if (!Command.IsValid()) continue;
+
+		Tiles->AddSlot()
+			[
+				SNew(SNCommandTile)
+				.Command(Command)
+				.CommandList(CommandList)
+				.Style(&TileStyle)
+				.TileWidth(PaletteTileWidth)
+				.ReservedLabelLines(LabelLines)
+			];
 	}
 
-	const TSharedRef<SWidget> ToolBar = ToolBarBuilder.MakeWidget();
-
-	// One deferred relayout, because SUniformWrapPanel decides its row count from last frame's geometry. The first
-	// time this group is laid out it has none, so ComputeDesiredSize falls back to guessing a square — ceil(sqrt(N))
-	// columns — which for three or more buttons reserves a row the panel does not need once it knows how wide it
-	// really is. The blank row then survives, because nothing recomputes a cached desired size on its own; that is
-	// why only resizing the panel clears it, and why it never comes back afterwards.
-	//
-	// Active timers run from Paint, so this fires on the first frame the group is actually visible rather than while
-	// its category is still collapsed — which is exactly when the geometry it needs has just become available.
-	//
-	// Grid and list groups are immune: their style carries NumColumnsOverride, so the guess is never reached.
-	TWeakPtr<SWidget> WeakToolBar = ToolBar;
-	ToolBar->RegisterActiveTimer(0.0f, FWidgetActiveTimerDelegate::CreateLambda(
-		[WeakToolBar](double, float)
-		{
-			const TSharedPtr<SWidget> PinnedToolBar = WeakToolBar.Pin();
-			if (!PinnedToolBar.IsValid()) return EActiveTimerReturnType::Stop;
-
-			// Nothing useful to recompute against yet — wait for a frame that has real geometry.
-			if (PinnedToolBar->GetTickSpaceGeometry().GetLocalSize().IsZero()) return EActiveTimerReturnType::Continue;
-
-			MarkPrepassDirtyRecursive(PinnedToolBar.ToSharedRef());
-			PinnedToolBar->Invalidate(EInvalidateWidgetReason::Layout);
-
-			return EActiveTimerReturnType::Stop;
-		}));
-
-	return SNew(SVerticalBox)
-
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		.Padding(8.0f, 10.0f, 8.0f, 2.0f)
-		[
-			CreateGroupHeading(Title)
-		]
-
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		.Padding(4.0f, 0.0f, 4.0f, 6.0f)
-		[
-			ToolBar
-		];
+	// Through CreateTitledContent rather than drawing its own backing: with the tiles out of a toolbar there is no
+	// style painting one for this group, and the recessed well the other groups sit in is what keeps it a peer of them.
+	return CreateTitledContent(Title, Tiles);
 }
 
 TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateTitledCommandGrid(const FText& Title, const TArray<TSharedPtr<FUICommandInfo>>& Commands) const
@@ -163,29 +183,15 @@ TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateTitledCommandList(const FTe
 
 TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateTitledContent(const FText& Title, const TSharedRef<SWidget>& Content) const
 {
-	return SNew(SVerticalBox)
-
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		.Padding(8.0f, 10.0f, 8.0f, 2.0f)
+	return CreateGroup(Title,
+		SNew(SBorder)
+		.BorderImage(FNWorldAssemblyEditorStyle::Get().GetBrush("WorldAssemblyEd.TitledGroupBackground"))
+		// Matches what the toolbar styles carry as their BackgroundPadding, so content lands the same distance inside
+		// its backing as a button does inside its.
+		.Padding(FMargin(8.0f))
 		[
-			CreateGroupHeading(Title)
-		]
-
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		.HAlign(HAlign_Fill)
-		.Padding(4.0f, 0.0f, 4.0f, 6.0f)
-		[
-			SNew(SBorder)
-			.BorderImage(FNWorldAssemblyEditorStyle::Get().GetBrush("WorldAssemblyEd.TitledGroupBackground"))
-			// Matches what the toolbar styles carry as their BackgroundPadding, so content lands the same distance
-			// inside its backing as a button does inside its.
-			.Padding(FMargin(8.0f))
-			[
-				Content
-			]
-		];
+			Content
+		]);
 }
 
 TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateTitledCheckList(const FText& Title, const TArray<TSharedPtr<FUICommandInfo>>& Commands) const

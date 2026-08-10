@@ -8,6 +8,7 @@
 #include "FileHelpers.h"
 #include "ImageUtils.h"
 #include "LevelEditorViewport.h"
+#include "NTerrainUtils.h"
 #include "ObjectTools.h"
 #include "ScopedTransaction.h"
 #include "AssetDefinitions/AssetDefinition_NCell.h"
@@ -132,7 +133,7 @@ void FNWorldAssemblyEditorCellOperations::CalculateBounds()
 
 	// Ahead of the transaction: waiting pumps editor ticks, and a Mesh Partition tick spawns and destroys section
 	// actors — work that has no business being recorded into the user's undo step for calculating bounds.
-	FNWorldAssemblyEditorUtils::WaitForTerrainToSettle(CellActor->GetLevel());
+	FNTerrainUtils::WaitForSettle(CellActor->GetLevel());
 
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCellOperations_CalculateBounds", "Calculate Cell Bounds"));
 	CellActor->CalculateBounds();
@@ -143,7 +144,7 @@ void FNWorldAssemblyEditorCellOperations::CalculateHull()
 	ANCellActor* CellActor = FNWorldAssemblyEditorUtils::GetCellActorFromCurrentWorld();
 	if (!ensure(CellActor != nullptr)) return;
 
-	FNWorldAssemblyEditorUtils::WaitForTerrainToSettle(CellActor->GetLevel());
+	FNTerrainUtils::WaitForSettle(CellActor->GetLevel());
 
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCellOperations_CalculateHull", "Calculate Cell Hull"));
 	CellActor->CalculateHull();
@@ -156,7 +157,7 @@ void FNWorldAssemblyEditorCellOperations::CalculateVoxelData()
 	ANCellActor* CellActor = FNWorldAssemblyEditorUtils::GetCellActorFromCurrentWorld();
 	if (!ensure(CellActor != nullptr)) return;
 
-	FNWorldAssemblyEditorUtils::WaitForTerrainToSettle(CellActor->GetLevel());
+	FNTerrainUtils::WaitForSettle(CellActor->GetLevel());
 
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCellOperations_CalculateVoxel", "Calculate Voxel Data"));
 	CellActor->CalculateVoxelData();

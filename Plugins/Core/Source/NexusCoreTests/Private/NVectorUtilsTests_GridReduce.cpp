@@ -3,22 +3,23 @@
 
 #if WITH_TESTS
 
-#include "NWorldAssemblyUtils.h"
+#include "Math/NVectorUtils.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
 /**
- * Grid thinning of terrain vertices ahead of the convex build.
+ * Grid thinning of a point cloud ahead of a convex build.
  *
  * The property worth pinning is not the count reduction — that is obvious — but the direction of the error. Each kept
  * point is snapped away from the source geometry's center, so the envelope it produces errs outward rather than
- * cutting inside the surface it stands for. A thinning that snapped the other way would quietly shrink every terrain
- * hull by up to a grid cell, which is exactly the kind of thing that goes unnoticed until cells intersect terrain.
+ * cutting inside the surface it stands for. A thinning that snapped the other way would quietly shrink every hull
+ * built through it by up to a grid cell, which is exactly the kind of thing that goes unnoticed until geometry
+ * intersects the terrain it was supposed to sit on.
  */
 
-N_TEST_HIGH(FNWorldAssemblyUtilsTests_GridReduce_SnapsOutward,
-	"NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyUtils::GridReduce::SnapsOutward",
+N_TEST_HIGH(FNVectorUtilsTests_GridReduce_SnapsOutward,
+	"NEXUS::UnitTests::NCore::FNVectorUtils::GridReduce::SnapsOutward",
 	N_TEST_CONTEXT_ANYWHERE)
 {
 	// One point per octant around the origin, none of them on a grid line.
@@ -29,7 +30,7 @@ N_TEST_HIGH(FNWorldAssemblyUtilsTests_GridReduce_SnapsOutward,
 
 	TSet<FIntVector> SeenCells;
 	TArray<FVector> Reduced;
-	FNWorldAssemblyUtils::GridReducePoints(Points, FVector::ZeroVector, 100.0, SeenCells, Reduced);
+	FNVectorUtils::GridReducePoints(Points, FVector::ZeroVector, 100.0, SeenCells, Reduced);
 
 	CHECK_EQUALS("Four points in four distinct cells are all kept.", Reduced.Num(), 4);
 
@@ -42,8 +43,8 @@ N_TEST_HIGH(FNWorldAssemblyUtilsTests_GridReduce_SnapsOutward,
 	}
 }
 
-N_TEST_HIGH(FNWorldAssemblyUtilsTests_GridReduce_ErrorBoundedByGrid,
-	"NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyUtils::GridReduce::ErrorBoundedByGrid",
+N_TEST_HIGH(FNVectorUtilsTests_GridReduce_ErrorBoundedByGrid,
+	"NEXUS::UnitTests::NCore::FNVectorUtils::GridReduce::ErrorBoundedByGrid",
 	N_TEST_CONTEXT_ANYWHERE)
 {
 	// A dense sweep, so cells land at every offset within the grid rather than at a convenient one.
@@ -63,7 +64,7 @@ N_TEST_HIGH(FNWorldAssemblyUtilsTests_GridReduce_ErrorBoundedByGrid,
 
 	TSet<FIntVector> SeenCells;
 	TArray<FVector> Reduced;
-	FNWorldAssemblyUtils::GridReducePoints(Points, Bounds.GetCenter(), GridSize, SeenCells, Reduced);
+	FNVectorUtils::GridReducePoints(Points, Bounds.GetCenter(), GridSize, SeenCells, Reduced);
 
 	CHECK_MESSAGE(TEXT("Thinning removes points."), Reduced.Num() < Points.Num());
 	CHECK_MESSAGE(TEXT("Thinning keeps at least one point."), Reduced.Num() > 0);
@@ -89,8 +90,8 @@ N_TEST_HIGH(FNWorldAssemblyUtilsTests_GridReduce_ErrorBoundedByGrid,
 		&& (ReducedBounds.Max - Bounds.Max).GetAbsMax() <= GridSize + UE_KINDA_SMALL_NUMBER);
 }
 
-N_TEST_MEDIUM(FNWorldAssemblyUtilsTests_GridReduce_SharedGridAcrossMeshes,
-	"NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyUtils::GridReduce::SharedGridAcrossMeshes",
+N_TEST_MEDIUM(FNVectorUtilsTests_GridReduce_SharedGridAcrossMeshes,
+	"NEXUS::UnitTests::NCore::FNVectorUtils::GridReduce::SharedGridAcrossMeshes",
 	N_TEST_CONTEXT_ANYWHERE)
 {
 	// Adjacent terrain sections share a seam, and their edge vertices coincide there. The cell set is carried across
@@ -100,33 +101,33 @@ N_TEST_MEDIUM(FNWorldAssemblyUtilsTests_GridReduce_SharedGridAcrossMeshes,
 
 	TSet<FIntVector> SeenCells;
 	TArray<FVector> Reduced;
-	FNWorldAssemblyUtils::GridReducePoints(SectionA, FVector::ZeroVector, 100.0, SeenCells, Reduced);
-	FNWorldAssemblyUtils::GridReducePoints(SectionB, FVector::ZeroVector, 100.0, SeenCells, Reduced);
+	FNVectorUtils::GridReducePoints(SectionA, FVector::ZeroVector, 100.0, SeenCells, Reduced);
+	FNVectorUtils::GridReducePoints(SectionB, FVector::ZeroVector, 100.0, SeenCells, Reduced);
 
 	CHECK_EQUALS("All four points fall in one cell and yield a single kept point.", Reduced.Num(), 1);
 }
 
-N_TEST_MEDIUM(FNWorldAssemblyUtilsTests_GridReduce_DisabledKeepsEveryPoint,
-	"NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyUtils::GridReduce::DisabledKeepsEveryPoint",
+N_TEST_MEDIUM(FNVectorUtilsTests_GridReduce_DisabledKeepsEveryPoint,
+	"NEXUS::UnitTests::NCore::FNVectorUtils::GridReduce::DisabledKeepsEveryPoint",
 	N_TEST_CONTEXT_ANYWHERE)
 {
 	const TArray<FVector> Points = { FVector(1.0, 2.0, 3.0), FVector(1.5, 2.5, 3.5), FVector(2.0, 3.0, 4.0) };
 
 	TSet<FIntVector> SeenCells;
 	TArray<FVector> Reduced;
-	FNWorldAssemblyUtils::GridReducePoints(Points, FVector::ZeroVector, 0.0, SeenCells, Reduced);
+	FNVectorUtils::GridReducePoints(Points, FVector::ZeroVector, 0.0, SeenCells, Reduced);
 
 	CHECK_EQUALS("A grid size of zero keeps every point.", Reduced.Num(), Points.Num());
 	CHECK_MESSAGE(TEXT("A grid size of zero leaves the points untouched."), Reduced[1].Equals(Points[1]));
 }
 
-N_TEST_MEDIUM(FNWorldAssemblyUtilsTests_GridReduce_EmptyInput,
-	"NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyUtils::GridReduce::EmptyInput",
+N_TEST_MEDIUM(FNVectorUtilsTests_GridReduce_EmptyInput,
+	"NEXUS::UnitTests::NCore::FNVectorUtils::GridReduce::EmptyInput",
 	N_TEST_CONTEXT_ANYWHERE)
 {
 	TSet<FIntVector> SeenCells;
 	TArray<FVector> Reduced;
-	FNWorldAssemblyUtils::GridReducePoints({}, FVector::ZeroVector, 100.0, SeenCells, Reduced);
+	FNVectorUtils::GridReducePoints({}, FVector::ZeroVector, 100.0, SeenCells, Reduced);
 
 	CHECK_EQUALS("An empty cloud yields nothing.", Reduced.Num(), 0);
 }

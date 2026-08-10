@@ -33,7 +33,7 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeWorldRail::CreateContent() const
 		.AutoHeight()
 		[
 			CreateTitledCommandPalette(
-				LOCTEXT("WorldHeader_Visualizers", "Visualizers"),
+				FText::GetEmpty(),
 				{ World.CommandInfo_ToggleCollisionVisualizer })
 		]
 

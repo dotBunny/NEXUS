@@ -7,6 +7,7 @@
 #include "ISourceControlModule.h"
 #include "Misc/ScopedSlowTask.h"
 #include "NEditorUtils.h"
+#include "NTerrainUtils.h"
 #include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "SourceControlOperations.h"
@@ -88,7 +89,7 @@ int32 UNUpdateCellDataCommandlet::Execute(bool bShouldErrorOnChanges, bool bShou
 				// computes for the same cell. Nothing else in a commandlet run pumps that build, so wait for it here.
 				if (LoadedWorld != nullptr)
 				{
-					FNWorldAssemblyEditorUtils::WaitForTerrainToSettle(LoadedWorld->PersistentLevel);
+					FNTerrainUtils::WaitForSettle(LoadedWorld->PersistentLevel);
 				}
 
 				FNWorldAssemblyEditorUtils::SaveCell(LoadedWorld);

@@ -50,7 +50,8 @@ TAttribute<bool> FNWorldAssemblyEdModeJunctionRail::GetAvailable() const
 	return TAttribute<bool>::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld);
 }
 
-TSharedPtr<SWidget> FNWorldAssemblyEdModeJunctionRail::CreateHeader() const
+/** @return A combo box naming the selected junction, and listing the level's others to switch to. */
+static TSharedRef<SWidget> CreateJunctionPicker()
 {
 	return SNew(SComboButton)
 		.ToolTipText(LOCTEXT("JunctionPicker_ToolTip", "Select a Junction in the current level."))
@@ -106,12 +107,24 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeJunctionRail::CreateContent() const
 
 	return SNew(SVerticalBox)
 
+		// Unheaded, and above the picker rather than below it: the tiles carry their own labels, so a "Tools" heading
+		// over them only repeats what they say.
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
 			CreateTitledCommandPalette(
-				LOCTEXT("JunctionHeader_Tools", "Tools"),
+				FText::GetEmpty(),
 				{ ToolCommands.BeginJunctionPlacementTool })
+		]
+
+		// The inset SNWorldAssemblyRailPanel gives its header slot, kept by hand so the picker sits where it always
+		// has now that it is part of the content rather than the header.
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.HAlign(HAlign_Fill)
+		.Padding(4.0f, 4.0f, 4.0f, 2.0f)
+		[
+			CreateJunctionPicker()
 		]
 
 		+ SVerticalBox::Slot()

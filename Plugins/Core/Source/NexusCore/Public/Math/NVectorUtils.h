@@ -72,6 +72,25 @@ public:
 	static TArray<FVector> OffsetPoints(const TArray<FVector>& Vectors, const FVector& Offset);
 
 	/**
+	 * Thin a point cloud onto a grid, keeping at most one point per cell and snapping each away from a center.
+	 *
+	 * Written for terrain, which hands a convex hull builder its entire surface — measured at a million points across
+	 * four sections, into a build that is superlinear in them. A convex hull is decided by its extreme points alone, so
+	 * nearly all of that is discarded anyway; this discards it first.
+	 * @param Points Source points, in world space.
+	 * @param Center Point to snap away from — the source geometry's own center.
+	 * @param GridSize Edge length of a cell, in world units. Values at or below zero return the points unchanged.
+	 * @param SeenCells Cells already represented; carried across calls so several meshes thin against one grid.
+	 * @param OutPoints Destination, appended to.
+	 * @note Snapping away from Center puts each kept point at or beyond the ones it replaces along each outward axis,
+	 *       so the error is bounded by roughly GridSize and biased outward. That bias is not a containment proof, and
+	 *       it assumes a convex build downstream — coordinate-wise domination does not imply membership of an
+	 *       arbitrary hull.
+	 */
+	static void GridReducePoints(const TArray<FVector>& Points, const FVector& Center, double GridSize,
+		TSet<FIntVector>& SeenCells, TArray<FVector>& OutPoints);
+
+	/**
 	 * Rotates WorldVector around WorldPoint using Rotation as the pivot axis.
 	 * @param WorldVector The world-space point being rotated.
 	 * @param WorldPoint The pivot around which the rotation occurs.
