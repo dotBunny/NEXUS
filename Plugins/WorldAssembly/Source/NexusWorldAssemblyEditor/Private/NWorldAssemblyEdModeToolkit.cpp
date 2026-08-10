@@ -27,9 +27,6 @@
 /** Inset of the category strip from the viewport's top-left corner. Matches what Mesh Terrain pins its palette at. */
 static constexpr float RailInset = 16.0f;
 
-/** Where the panel opens the first time, to the right of the strip and level with its top. */
-static constexpr float PanelInitialOffsetX = 116.0f;
-
 /** Smallest the user may drag the panel, below which the titled groups start ellipsizing their labels. */
 static constexpr float PanelMinimumWidth = 260.0f;
 

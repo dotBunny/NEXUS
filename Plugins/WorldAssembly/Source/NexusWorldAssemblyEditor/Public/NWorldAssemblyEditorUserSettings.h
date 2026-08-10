@@ -81,9 +81,12 @@ public:
 	 * @note Config but not EditAnywhere: this is layout state the user sets by dragging the panel, not a preference,
 	 *       so it persists without cluttering the settings panel with coordinates.
 	 * @note Only the panel is stored. The category strip beside it is pinned, so it has no position to remember.
+	 * @note The default opens it level with the strip's top and one strip-inset clear of its right edge, so the gutter
+	 *       between the two boxes matches the one between the strip and the viewport: 16 of inset, plus the strip's
+	 *       46 of width (13 either side of a 20 icon — see WorldAssemblyEd.CategoryToolBar), plus 16 again.
 	 */
 	UPROPERTY(Config)
-	FToolWidget_DragBoxPosition EdModePanelPosition = FToolWidget_DragBoxPosition(FVector2f(116.0f, 16.0f), HAlign_Left, VAlign_Top);
+	FToolWidget_DragBoxPosition EdModePanelPosition = FToolWidget_DragBoxPosition(FVector2f(78.0f, 16.0f), HAlign_Left, VAlign_Top);
 
 	/** Width the edit mode's category panel was last resized to, or 0 for its default. See EdModePanelPosition. */
 	UPROPERTY(Config)
