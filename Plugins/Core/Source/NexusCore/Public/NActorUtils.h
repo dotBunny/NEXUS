@@ -119,6 +119,14 @@ public:
 	static bool IsLandscapeClassName(const FString& ClassName);
 
 	/**
+	 * @param ClassName Unprefixed UClass name of a component.
+	 * @return true when the name is the Mesh Terrain collision component.
+	 * @note The landscape half of IsTerrainPrimitiveClassName has always been separable; this is the other half, so a
+	 *       caller can admit one representation without the other.
+	 */
+	static bool IsMeshTerrainPrimitiveClassName(const FString& ClassName);
+
+	/**
 	 * Identify a primitive that carries terrain geometry — a landscape component, or a Mesh Partition section's
 	 * collision component.
 	 * @param Primitive Primitive component to inspect.
@@ -159,6 +167,15 @@ public:
 	 *         to sample it instead.
 	 */
 	static bool IsLandscapeActor(const AActor* Actor);
+
+	/**
+	 * Identify an actor whose terrain is a Mesh Terrain section.
+	 * @param Actor Candidate actor under inspection. A null actor returns false.
+	 * @return true when the actor is a built terrain section, or owns a Mesh Terrain collision primitive.
+	 * @remark The counterpart to IsLandscapeActor, and the half that needs the transient exemption: Mesh Partition
+	 *         spawns its editor representation as transient actors, where a landscape is an ordinary saved actor.
+	 */
+	static bool IsMeshTerrainActor(const AActor* Actor);
 
 	/**
 	 * Test whether a primitive is reporting real geometry rather than the engine's placeholder bounds.

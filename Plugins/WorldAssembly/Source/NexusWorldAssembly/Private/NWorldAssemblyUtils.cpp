@@ -87,7 +87,8 @@ FBox FNWorldAssemblyUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCell
 	Filter.ActorIgnoreTags = Settings.ActorIgnoreTags;
 	Filter.bIncludeEditorOnly = Settings.bIncludeEditorOnly;
 	Filter.bIncludeNonColliding = Settings.bIncludeNonColliding;
-	Filter.bIncludeTerrain = Settings.bIncludeTerrain;
+	Filter.bIncludeLandscapes = Settings.bIncludeLandscapes;
+	Filter.bIncludeMeshTerrains = Settings.bIncludeMeshTerrains;
 
 	FNLevelUtils::DetermineLevelBounds(InLevel, LevelBounds, IgnoredActors, Filter);
 
@@ -138,13 +139,20 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 		// Terrain authoring apparatus is never geometry, at any setting — see FNActorUtils::IsTerrainAuthoringActor.
 		if (FNActorUtils::IsTerrainAuthoringActor(Actor)) continue;
 
-		// Terrain answers to its own setting rather than to the filters below — see FNCellHullGenerationSettings.
-		const bool bIsTerrain = FNActorUtils::IsTerrainActor(Actor);
-		if (bIsTerrain && !Settings.bIncludeTerrain) continue;
+		// Each terrain representation answers to its own setting rather than to the filters below — see
+		// FNCellHullGenerationSettings.
+		const bool bIsLandscape = FNActorUtils::IsLandscapeActor(Actor);
+		if (bIsLandscape && !Settings.bIncludeLandscapes) continue;
 
-		// Don't bother with transient actors, terrain excepted: Mesh Partition represents an authored terrain in the
-		// editor as transient actors spawned into the persistent level, so the blanket skip would leave the hull
-		// without the floor the cell stands on.
+		const bool bIsMeshTerrain = FNActorUtils::IsMeshTerrainActor(Actor);
+		if (bIsMeshTerrain && !Settings.bIncludeMeshTerrains) continue;
+
+		// Anything that got this far and is either representation, for the rules below that treat terrain as one thing.
+		const bool bIsTerrain = bIsLandscape || bIsMeshTerrain;
+
+		// Don't bother with transient actors, admitted terrain excepted: Mesh Partition represents an authored terrain
+		// in the editor as transient actors spawned into the persistent level, so the blanket skip would leave the
+		// hull without the floor the cell stands on.
 		if (Actor->HasAnyFlags(RF_Transient) && !bIsTerrain) continue;
 
 		// Ignore Tags
@@ -157,9 +165,9 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 		{
 			TerrainActorCount++;
 
-			// Landscape is separated again because it is the one terrain with no geometry to extract — it has to be
+			// Landscape is routed apart because it is the one terrain with no geometry to extract — it has to be
 			// sampled off the physics scene instead. See FNRawMeshFactory::FromLandscape.
-			if (FNActorUtils::IsLandscapeActor(Actor))
+			if (bIsLandscape)
 			{
 				LandscapeActors.Add(Actor);
 			}
@@ -383,7 +391,8 @@ FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const 
 	Filter.ActorIgnoreTags = Settings.ActorIgnoreTags;
 	Filter.bIncludeEditorOnly = Settings.bIncludeEditorOnly;
 	Filter.bIncludeNonColliding = Settings.bIncludeNonColliding;
-	Filter.bIncludeTerrain = Settings.bIncludeTerrain;
+	Filter.bIncludeLandscapes = Settings.bIncludeLandscapes;
+	Filter.bIncludeMeshTerrains = Settings.bIncludeMeshTerrains;
 
 	FBox Bounds(ForceInit);
 	FNLevelUtils::DetermineLevelBounds(InLevel, Bounds, IgnoredActors, Filter);

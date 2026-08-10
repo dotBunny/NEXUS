@@ -32,13 +32,23 @@ struct NEXUSWORLDASSEMBLY_API FNCellVoxelGenerationSettings
 	bool bIncludeEditorOnly = false;
 
 	/**
-	 * When true, terrain contributes to voxel occupancy.
-	 * @note Governs both halves of the calculation at once: whether terrain grows the voxel grid's extents, and
-	 *       whether the occupancy sweep can hit it. Excluded terrain joins the ignored-actor list the sweep is
-	 *       issued with, so it cannot register as occupied even though the physics world would otherwise report it.
+	 * When true, landscapes contribute to voxel occupancy.
+	 * @note Split from the Mesh Terrain flag below: the two are different kinds of actor with different reasons to be
+	 *       refused. A landscape is an ordinary saved actor whose surface has to be sampled rather than read, where a
+	 *       Mesh Terrain is transient and rebuilt.
 	 */
 	UPROPERTY(EditAnywhere)
-	bool bIncludeTerrain = true;
+	bool bIncludeLandscapes = true;
+
+	/**
+	 * When true, Mesh Terrain sections contribute to voxel occupancy.
+	 * @note Governs both halves of the calculation at once, as its landscape counterpart does: whether the terrain
+	 *       grows the voxel grid's extents, and whether the occupancy sweep can hit it. Excluded terrain joins the
+	 *       ignored-actor list the sweep is issued with, so it cannot register as occupied even though the physics
+	 *       world would otherwise report it.
+	 */
+	UPROPERTY(EditAnywhere)
+	bool bIncludeMeshTerrains = true;
 
 	/** Actors carrying any of these tags are excluded from the voxel calculation. */
 	UPROPERTY(EditAnywhere)
@@ -55,7 +65,8 @@ struct NEXUSWORLDASSEMBLY_API FNCellVoxelGenerationSettings
 		&& bCalculateOnSave == Other.bCalculateOnSave
 		&& bIncludeNonColliding == Other.bIncludeNonColliding
 		&& bIncludeEditorOnly == Other.bIncludeEditorOnly
-		&& bIncludeTerrain == Other.bIncludeTerrain
+		&& bIncludeLandscapes == Other.bIncludeLandscapes
+		&& bIncludeMeshTerrains == Other.bIncludeMeshTerrains
 		&& CollisionChannel == Other.CollisionChannel
 		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);
 	}

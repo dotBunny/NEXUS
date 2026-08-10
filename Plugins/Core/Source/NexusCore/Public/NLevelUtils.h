@@ -27,12 +27,19 @@ struct NEXUSCORE_API FNLevelBoundsFilter
 	bool bIncludeTransientActors = false;
 
 	/**
-	 * When true, actors carrying terrain geometry contribute even though they are transient.
-	 * @note Narrower than bIncludeTransientActors, which admits every transient actor. Mesh Partition represents an
-	 *       authored terrain in the editor as transient APreviewSection actors, so without this a level whose floor
-	 *       is a terrain produces bounds that omit it entirely.
+	 * When true, landscape actors contribute to the bounds.
+	 * @note A landscape is an ordinary saved actor, so unlike bIncludeMeshTerrains this buys no transient exemption —
+	 *       it is purely whether landscape geometry counts.
 	 */
-	bool bIncludeTerrain = false;
+	bool bIncludeLandscapes = false;
+
+	/**
+	 * When true, Mesh Terrain sections contribute to the bounds, even though they are transient.
+	 * @note Also narrower than bIncludeTransientActors, which admits every transient actor. Mesh Partition represents
+	 *       an authored terrain in the editor as transient APreviewSection actors, so without this a level whose floor
+	 *       is a Mesh Terrain produces bounds that omit it entirely.
+	 */
+	bool bIncludeMeshTerrains = false;
 };
 
 /**

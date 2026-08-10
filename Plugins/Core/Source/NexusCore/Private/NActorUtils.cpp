@@ -131,9 +131,14 @@ bool FNActorUtils::IsLandscapeClassName(const FString& ClassName)
 	return ClassName.StartsWith(NEXUS::Core::Terrain::LandscapeClassPrefix);
 }
 
+bool FNActorUtils::IsMeshTerrainPrimitiveClassName(const FString& ClassName)
+{
+	return ClassName == NEXUS::Core::Terrain::MeshPartitionCollisionClassName;
+}
+
 bool FNActorUtils::IsTerrainPrimitiveClassName(const FString& ClassName)
 {
-	return IsLandscapeClassName(ClassName) || ClassName == NEXUS::Core::Terrain::MeshPartitionCollisionClassName;
+	return IsLandscapeClassName(ClassName) || IsMeshTerrainPrimitiveClassName(ClassName);
 }
 
 bool FNActorUtils::IsTerrainSectionClassName(const FString& ClassName)
@@ -154,7 +159,7 @@ bool FNActorUtils::IsTerrainPrimitive(const UPrimitiveComponent* Primitive)
 	return IsTerrainPrimitiveClassName(Primitive->GetClass()->GetName());
 }
 
-bool FNActorUtils::IsTerrainActor(const AActor* Actor)
+bool FNActorUtils::IsMeshTerrainActor(const AActor* Actor)
 {
 	if (!IsValid(Actor)) return false;
 
@@ -171,10 +176,18 @@ bool FNActorUtils::IsTerrainActor(const AActor* Actor)
 	TInlineComponentArray<UPrimitiveComponent*> Primitives(Actor);
 	for (const UPrimitiveComponent* Primitive : Primitives)
 	{
-		if (IsTerrainPrimitive(Primitive)) return true;
+		if (Primitive == nullptr) continue;
+		if (IsMeshTerrainPrimitiveClassName(Primitive->GetClass()->GetName())) return true;
 	}
 
 	return false;
+}
+
+bool FNActorUtils::IsTerrainActor(const AActor* Actor)
+{
+	// Either representation. Composed rather than walking the primitives again, so the two halves and the whole
+	// cannot drift apart.
+	return IsMeshTerrainActor(Actor) || IsLandscapeActor(Actor);
 }
 
 bool FNActorUtils::IsTerrainAuthoringActor(const AActor* Actor)

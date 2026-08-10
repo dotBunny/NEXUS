@@ -88,8 +88,8 @@ void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray
 		{
 
 			// Terrain authoring apparatus is never geometry, at any setting — see FNActorUtils::IsTerrainAuthoringActor.
-			// Unconditional rather than tied to bIncludeTerrain: that flag chooses whether terrain *geometry* counts,
-			// and a modifier is not geometry under either answer.
+			// Unconditional rather than tied to the terrain flags: those choose whether terrain *geometry* counts, and
+			// a modifier is not geometry under any answer.
 			if (FNActorUtils::IsTerrainAuthoringActor(Actor))
 			{
 				OutIgnoredActors.Add(Actor);
@@ -103,10 +103,29 @@ void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray
 				continue;
 			}
 
-			const bool bIsTerrain = Filter.bIncludeTerrain && FNActorUtils::IsTerrainActor(Actor);
+			// Each representation answers to its own flag, and a refused one is dropped outright rather than merely
+			// losing the transient exemption below — a landscape is a saved actor, so exemption alone would leave
+			// bIncludeLandscapes unable to exclude anything.
+			const bool bIsLandscape = FNActorUtils::IsLandscapeActor(Actor);
+			if (bIsLandscape && !Filter.bIncludeLandscapes)
+			{
+				OutIgnoredActors.Add(Actor);
+				continue;
+			}
 
-			// Don't include transient actors. Terrain is the deliberate exception: Mesh Partition represents an
-			// authored terrain in the editor as transient APreviewSection actors spawned into the persistent level,
+			const bool bIsMeshTerrain = FNActorUtils::IsMeshTerrainActor(Actor);
+			if (bIsMeshTerrain && !Filter.bIncludeMeshTerrains)
+			{
+				OutIgnoredActors.Add(Actor);
+				continue;
+			}
+
+			// Anything that got this far and is either representation, for the two rules below that treat terrain as
+			// one thing: the transient exemption, and the placeholder-rejecting bounds read.
+			const bool bIsTerrain = bIsLandscape || bIsMeshTerrain;
+
+			// Don't include transient actors. Admitted terrain is the deliberate exception: Mesh Partition represents
+			// an authored terrain in the editor as transient APreviewSection actors spawned into the persistent level,
 			// so the blanket skip would drop a level's entire floor from its bounds.
 			if (!Filter.bIncludeTransientActors && Actor->HasAnyFlags(RF_Transient) && !bIsTerrain)
 			{

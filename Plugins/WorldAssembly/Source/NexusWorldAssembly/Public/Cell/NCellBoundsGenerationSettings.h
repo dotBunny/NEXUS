@@ -28,14 +28,23 @@ struct NEXUSWORLDASSEMBLY_API FNCellBoundsGenerationSettings
 	bool bIncludeEditorOnly = false;
 
 	/**
-	 * When true, terrain contributes to bounds.
-	 * @note Terrain needs its own opt-in because the editor represents a Mesh Partition terrain as transient actors,
-	 *       which every other path here skips. Without this a cell whose floor is a terrain gets bounds that omit it.
+	 * When true, landscapes contribute to bounds.
+	 * @note Split from the Mesh Terrain flag below: the two are different kinds of actor with different reasons to be
+	 *       refused. A landscape is an ordinary saved actor whose surface has to be sampled rather than read, where a
+	 *       Mesh Terrain is transient and rebuilt.
+	 */
+	UPROPERTY(EditAnywhere)
+	bool bIncludeLandscapes = true;
+
+	/**
+	 * When true, Mesh Terrain sections contribute to bounds.
+	 * @note Needs its own opt-in because the editor represents a Mesh Partition terrain as transient actors, which
+	 *       every other path here skips. Without this a cell whose floor is a Mesh Terrain gets bounds that omit it.
 	 * @remark ActorIgnoreTags cannot exclude a Mesh Partition terrain — its actors are regenerated on every build, so
 	 *         a tag placed on one does not survive. This flag is the only control over it.
 	 */
 	UPROPERTY(EditAnywhere)
-	bool bIncludeTerrain = true;
+	bool bIncludeMeshTerrains = true;
 
 	/** Actors carrying any of these tags are excluded from the bounds calculation. */
 	UPROPERTY(EditAnywhere)
@@ -48,7 +57,8 @@ struct NEXUSWORLDASSEMBLY_API FNCellBoundsGenerationSettings
 		return bCalculateOnSave == Other.bCalculateOnSave
 		&& bIncludeNonColliding == Other.bIncludeNonColliding
 		&& bIncludeEditorOnly == Other.bIncludeEditorOnly
-		&& bIncludeTerrain == Other.bIncludeTerrain
+		&& bIncludeLandscapes == Other.bIncludeLandscapes
+		&& bIncludeMeshTerrains == Other.bIncludeMeshTerrains
 		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);
 	}
 };

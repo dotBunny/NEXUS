@@ -44,15 +44,24 @@ struct NEXUSWORLDASSEMBLY_API FNCellHullGenerationSettings
 	bool bIncludeEditorOnly = false;
 
 	/**
-	 * When true, terrain contributes to the hull.
-	 * @note Terrain needs its own opt-in because the editor represents a Mesh Partition terrain as transient actors,
-	 *       which the hull's actor filter skips. Without this a cell whose floor is a terrain gets a hull with no
-	 *       floor in it, and the assembly penetration tests that consume the hull let other cells sink through it.
+	 * When true, landscapes contribute to the hull.
+	 * @note Split from the Mesh Terrain flag below: the two are different kinds of actor with different reasons to be
+	 *       refused. A landscape is an ordinary saved actor whose surface has to be sampled rather than read, where a
+	 *       Mesh Terrain is transient and rebuilt.
+	 */
+	UPROPERTY(EditAnywhere)
+	bool bIncludeLandscapes = true;
+
+	/**
+	 * When true, Mesh Terrain sections contribute to the hull.
+	 * @note Needs its own opt-in because the editor represents a Mesh Partition terrain as transient actors, which the
+	 *       hull's actor filter skips. Without this a cell whose floor is a Mesh Terrain gets a hull with no floor in
+	 *       it, and the assembly penetration tests that consume the hull let other cells sink through it.
 	 * @remark ActorIgnoreTags cannot exclude a Mesh Partition terrain — its actors are regenerated on every build, so
 	 *         a tag placed on one does not survive. This flag is the only control over it.
 	 */
 	UPROPERTY(EditAnywhere)
-	bool bIncludeTerrain = true;
+	bool bIncludeMeshTerrains = true;
 
 	/**
 	 * Grid size, in world units, that terrain vertices are thinned onto before the hull is built. 0 keeps every one.
@@ -105,7 +114,8 @@ struct NEXUSWORLDASSEMBLY_API FNCellHullGenerationSettings
 		&& bAllowNonConvex == Other.bAllowNonConvex
 		&& bIncludeNonColliding == Other.bIncludeNonColliding
 		&& bIncludeEditorOnly == Other.bIncludeEditorOnly && BuildMethod == Other.BuildMethod
-		&& bIncludeTerrain == Other.bIncludeTerrain
+		&& bIncludeLandscapes == Other.bIncludeLandscapes
+		&& bIncludeMeshTerrains == Other.bIncludeMeshTerrains
 		&& TerrainSimplificationGridSize == Other.TerrainSimplificationGridSize
 		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);
 	}
