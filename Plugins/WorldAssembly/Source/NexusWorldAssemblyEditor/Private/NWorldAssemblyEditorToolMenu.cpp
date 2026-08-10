@@ -84,7 +84,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		NexusGlobalSection.AddEntry(QuickAssemblyComboBox);
 
 		// Toggles between starting a Quick Assembly operation and cancelling the one it started. The icon, label and
-		// tooltip all key off FNWorldAssemblyEditorQuickAssemblyCommands::IsActive() so they stay in sync across both
+		// tooltip all key off FNWorldAssemblyEditorQuickAssembly::IsActive() so they stay in sync across both
 		// a running operation and the wait between auto-assembly runs.
 		FToolMenuEntry QuickAssemblyButton = FToolMenuEntry::InitToolBarButton(
 					"NWorldAssemblyEdMode_QuickAssemblyButton",

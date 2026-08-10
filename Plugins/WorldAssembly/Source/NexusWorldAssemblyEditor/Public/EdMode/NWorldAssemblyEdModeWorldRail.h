@@ -14,10 +14,11 @@ class FBindingContext;
  * volume. They are declared here rather than beside the rest of their subject's commands because a command belongs to
  * the category that offers it, and this is the only one that can offer these: the Cell and Organ rails are hidden
  * until the level already holds what these place. Only declaration and gating live here — the work stays with its
- * subject, in FNWorldAssemblyEditorCellOperations and FNWorldAssemblyEditorOrganOperations.
+ * subject, in FNWorldAssemblyEditorCellUtils and FNWorldAssemblyEditorOrganUtils.
  *
- * @note The only rail with no enablement predicate, and deliberately so. Every other category greys out until the
- *       thing it edits exists, so this one carries both Add commands — it is what stays usable in an empty level.
+ * @note The only rail with no availability predicate, and deliberately so. Every other category leaves the strip
+ *       until the thing it edits exists, so this one carries both Add commands — it is what stays reachable in an
+ *       empty level, and what FNWorldAssemblyRailState falls back to when the selected category disappears.
  * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyEdModeWorldRail final : public FNWorldAssemblyEdModeRail

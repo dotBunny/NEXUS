@@ -8,9 +8,11 @@
 class FBindingContext;
 
 /**
- * The Cell Data category: authoring the focused cell's data asset
+ * The Cell Data category: the focused cell's side-car asset, and the actor that owns it.
  *
- * Split into three groups — the interactive tools, the per-cell settings as checkboxes, and one-shot actions.
+ * Split off from FNWorldAssemblyEdModeCellRail, which authors the cell's geometry: everything here acts on the asset
+ * or on the actor's existence instead. Two groups of one-shot actions — the actor's, then the data's. The work itself
+ * lives in FNWorldAssemblyEditorCellUtils.
  *
  * @note Add Cell Actor is not here but on FNWorldAssemblyEdModeWorldRail: this category is off the rail until the
  *       level has a cell, so the command that puts one there cannot be the one that needs it to already exist.

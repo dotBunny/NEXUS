@@ -29,7 +29,7 @@ public:
 
 	/**
 	 * @return The toolbar's organ picker, showing the Quick Assembly target and its progress bar.
-	 * @note Opens an empty menu while FNWorldAssemblyEditorQuickAssemblyCommands::IsActive, which is the visible half
+	 * @note Opens an empty menu while FNWorldAssemblyEditorQuickAssembly::IsActive, which is the visible half
 	 *       of the selection lock; SetSelectedOrgan enforces it regardless.
 	 */
 	static TSharedRef<SWidget> CreateQuickAssemblyComboBox();
