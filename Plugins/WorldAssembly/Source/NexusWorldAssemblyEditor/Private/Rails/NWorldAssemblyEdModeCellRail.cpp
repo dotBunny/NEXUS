@@ -52,9 +52,9 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 			CreateTitledCommandGrid(
 				LOCTEXT("CellHeader_Calculate", "Calculate"),
 				{
-					Cell.CommandInfo_CalculateAll,
 					Cell.CommandInfo_CalculateBounds,
 					Cell.CommandInfo_CalculateHull,
+					Cell.CommandInfo_CalculateAll,
 					//Cell.CommandInfo_CalculateVoxelData,
 				})
 		]
