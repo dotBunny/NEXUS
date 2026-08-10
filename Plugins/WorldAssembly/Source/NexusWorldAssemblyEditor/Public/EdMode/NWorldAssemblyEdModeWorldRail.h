@@ -42,6 +42,9 @@ public:
 	/** @return true if a cell actor can be added: the level has none already, and holds no organs. */
 	static bool AddCellActor_CanExecute();
 
+	/** @return true if an organ volume can be added: the level is not itself a cell. */
+	static bool AddOrganVolume_CanExecute();
+
 	/** Add or remove the world-collision-ignore tag across the current actor selection. */
 	static void TagCollisionIgnore();
 	/**
