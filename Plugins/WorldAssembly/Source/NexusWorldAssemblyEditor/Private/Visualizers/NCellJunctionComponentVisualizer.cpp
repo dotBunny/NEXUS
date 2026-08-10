@@ -4,7 +4,7 @@
 #include "Visualizers/NCellJunctionComponentVisualizer.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NWorldAssemblyEditorColors.h"
-#include "NWorldAssemblyEdMode.h"
+#include "EdMode/NWorldAssemblyEdMode.h"
 
 void FNCellJunctionComponentVisualizer::DrawVisualization(const UActorComponent* Component, const FSceneView* View, FPrimitiveDrawInterface* PDI)
 {

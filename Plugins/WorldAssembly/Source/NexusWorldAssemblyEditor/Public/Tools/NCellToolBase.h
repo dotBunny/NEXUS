@@ -5,7 +5,7 @@
 
 #include "InteractiveTool.h"
 #include "InteractiveToolBuilder.h"
-#include "NWorldAssemblyEdMode.h"
+#include "EdMode/NWorldAssemblyEdMode.h"
 
 #include "NCellToolBase.generated.h"
 

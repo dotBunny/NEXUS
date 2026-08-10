@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Rails/NWorldAssemblyRailState.h"
+#include "EdMode/NWorldAssemblyRailState.h"
 #include "Widgets/SCompoundWidget.h"
 
 /**

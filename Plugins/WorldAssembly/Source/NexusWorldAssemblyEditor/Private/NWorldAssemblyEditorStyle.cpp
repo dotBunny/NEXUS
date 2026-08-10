@@ -4,7 +4,7 @@
 #include "NWorldAssemblyEditorStyle.h"
 
 #include "NEditorUtils.h"
-#include "Commands/NWorldAssemblyEditorQuickAssemblyCommands.h"
+#include "NWorldAssemblyEditorQuickAssembly.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Brushes/SlateImageBrush.h"
 #include "Brushes/SlateNoResource.h"
@@ -19,7 +19,7 @@ N_EDITOR_STYLE(FNWorldAssemblyEditorStyle)
 FSlateIcon FNWorldAssemblyEditorStyle::QuickAssemblyOperationIcon()
 {
 	// Show the cancel icon for the whole loop — both while an operation runs and during the wait between auto-runs.
-	if (FNWorldAssemblyEditorQuickAssemblyCommands::IsActive())
+	if (FNWorldAssemblyEditorQuickAssembly::IsActive())
 	{
 		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.CancelQuickAssemblyOperation");
 	}
@@ -30,60 +30,62 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 {
 	N_EDITOR_STYLE_CREATE
 
+	Style.Set("Icon.WorldAssembly", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Icon_WorldAssembly"), Icon128x128));
+	Style.Set("Icon.WorldAssembly.Small", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Icon_WorldAssembly"), Icon16x16));
 
-	// NCellActor
+	// CLASS ICONS
 	Style.Set("ClassIcon.NCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellActor"), Icon16x16));
 	Style.Set("ClassThumbnail.NCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellActor"), Icon128x128));
-
-	// NCellProxyActor
 	Style.Set("ClassIcon.NCellProxy", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellProxy"), Icon16x16));
 	Style.Set("ClassThumbnail.NCellProxy",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellProxy"), Icon128x128));
-
-	// NCellLevelInstance
 	Style.Set("ClassIcon.NCellLevelInstance", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellLevelInstance"), Icon16x16));
 	Style.Set("ClassThumbnail.NCellLevelInstance",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellLevelInstance"), Icon128x128));
-
-	// NCellRootComponent
 	Style.Set("ClassIcon.NCellRootComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellRootComponent"), Icon16x16));
 	Style.Set("ClassThumbnail.NCellRootComponent",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellRootComponent"), Icon128x128));
-
-	// NCellJunctionComponent
 	Style.Set("ClassIcon.NCellJunctionComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellJunctionComponent"), Icon16x16));
 	Style.Set("ClassThumbnail.NCellJunctionComponent",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellJunctionComponent"), Icon128x128));
-
-	// NBoneComponent
 	Style.Set("ClassIcon.NBoneComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NBoneComponent"), Icon16x16));
 	Style.Set("ClassThumbnail.NBoneComponent",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NBoneComponent"), Icon128x128));
 	Style.Set("ClassIcon.NBoneActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NBoneComponent"), Icon16x16));
 	Style.Set("ClassThumbnail.NBoneActor",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NBoneComponent"), Icon128x128));
-
-	// NWorldAssemblyVolume/NWorldAssemblyComponent
 	Style.Set("ClassIcon.NOrganComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NOrganVolume"), Icon16x16));
 	Style.Set("ClassThumbnail.NOrganComponent",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NOrganVolume"), Icon128x128));
 	Style.Set("ClassIcon.NOrganVolume", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NOrganVolume"), Icon16x16));
 	Style.Set("ClassThumbnail.NOrganVolume",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NOrganVolume"), Icon128x128));
-
-	// NCell
 	Style.Set("AssetOverlay.NCell", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("AssetOverlay_NCell"), Icon16x16));
 	Style.Set("ClassIcon.NCell", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCell"), Icon16x16));
 	Style.Set("ClassThumbnail.NCell",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCell"), Icon128x128));
-
-	// NCellSet
 	Style.Set("ClassIcon.NTissue", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NTissue"), Icon16x16));
 	Style.Set("ClassThumbnail.NTissue",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NTissue"), Icon128x128));
 
-	Style.Set("Icon.WorldAssembly", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Icon_WorldAssembly"), Icon128x128));
-	// FSlateIcon derives its small brush by appending ".Small" to the style name, so anything asking for the small
-	// variant of the mode icon — the toolkit rail's World category, and the Mode Toolbox tab header — silently fell
-	// back to the 128x128 brush above and sized itself to it.
-	Style.Set("Icon.WorldAssembly.Small", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Icon_WorldAssembly"), Icon16x16));
 
-	// Rail Icons
-	Style.Set("Rail.World.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rail_World"), Icon20x20));
-	Style.Set("Rail.Cell.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rail_Cell"), Icon20x20));
-	Style.Set("Rail.CellData.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rail_CellData"), Icon20x20));
-	Style.Set("Rail.Junction.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rail_Junction"), Icon20x20));
-	Style.Set("Rail.Organ.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rail_Organ"), Icon20x20));
+	// Editor Mode Rebuild
+	Style.Set("Rail.World.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rails/Rail_World"), Icon20x20));
+	Style.Set("Rail.Cell.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rails/Rail_Cell"), Icon20x20));
+	Style.Set("Rail.CellData.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rails/Rail_CellData"), Icon20x20));
+	Style.Set("Rail.Junction.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rails/Rail_Junction"), Icon20x20));
+
+	// CELL RAIL
+	Style.Set("Rail.Cell.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rails/Rail_Cell"), Icon20x20));
+	Style.Set("Rail.Cell.CalculateCellBounds", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_CalculateCellBounds"), Icon20x20));
+	Style.Set("Rail.Cell.CalculateCellHull", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_CalculateCellHull"), Icon20x20));
+	Style.Set("Rail.Cell.CalculateCellVoxel", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_CalculateCellVoxel"), Icon20x20));
+
+	// ORGAN RAIL
+	Style.Set("Rail.Organ.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rails/Rail_Organ"), Icon20x20));
+	Style.Set("Rail.Organ.GenerateAllProxies", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_GenerateAllProxies"), Icon20x20));
+	Style.Set("Rail.Organ.ClearAllProxies", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_ClearAllProxies"), Icon20x20));
+	Style.Set("Rail.Organ.LoadAllLevelInstances", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_LoadAllLevelInstances"), Icon20x20));
+	Style.Set("Rail.Organ.UnloadAllLevelInstances", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_UnloadAllLevelInstances"), Icon20x20));
+	Style.Set("Rail.Organ.GenerateProxies", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_GenerateAllProxies"), Icon20x20));
+	Style.Set("Rail.Organ.ClearProxies", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_ClearAllProxies"), Icon20x20));
+	Style.Set("Rail.Organ.LoadLevelInstances", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_LoadAllLevelInstances"), Icon20x20));
+	Style.Set("Rail.Organ.UnloadLevelInstances", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_UnloadAllLevelInstances"), Icon20x20));
+
+
+
+	// OLD STUFF
+
 
 	Style.Set("Command.WorldAssemblyEd.NCellLevelInstance", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NCellLevelInstance"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.NCellProxy", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NCellProxy"), Icon16x16));
@@ -91,20 +93,14 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 
 	Style.Set("Command.WorldAssemblyEd.SelectNCellJunctionComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_SelectNCellJunctionComponent"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.AddNCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_AddNCellActor"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.SelectNCellActor.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_SelectNCellActor_Selected"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.RemoveNCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_RemoveNCellActor"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.Bounds", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Bounds"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.Bounds.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Bounds_Selected"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.CalculateBounds", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CalculateBounds"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.Hull", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Hull"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.Hull.SplitEdge", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Hull_SplitEdge"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.Hull.AllowNonConvex", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Hull_AllowNonConvex"), Icon16x16));
 
 	Style.Set("Command.WorldAssemblyEd.Hull.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Hull_Selected"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.CalculateHull", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CalculateHull"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.CalculateVoxelData", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CalculateVoxelData"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.Voxel.Grid", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Grid"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.Voxel.Grid.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Grid_Selected"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.Voxel.Points", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Points"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.Voxel.Points.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Points_Selected"), Icon16x16));
 
@@ -115,58 +111,66 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 
 	Style.Set("Command.WorldAssemblyEd.Junction.CollectJunctionComponents", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Junction_CollectJunctionComponents"), Icon16x16));
 
-	Style.Set("Command.WorldAssemblyEd.CellIgnore_NotIgnored", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CellIgnore_NotIgnored"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.CellIgnore_Ignored", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CellIgnore_Ignored"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.CellIgnore_Unknown", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CellIgnore_Unknown"), Icon16x16));
-
-	Style.Set("Command.WorldAssemblyEd.WorldCollisionIgnore_NotIgnored", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_WorldCollisionIgnore_NotIgnored"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.WorldCollisionIgnore_Ignored", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_WorldCollisionIgnore_Ignored"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.WorldCollisionIgnore_Unknown", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_WorldCollisionIgnore_Unknown"), Icon16x16));
-
-
-	Style.Set("Command.WorldAssemblyEd.SelectNCellJunctionComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_SelectNCellJunctionComponent"), Icon16x16));
-
 	Style.Set("Command.WorldAssemblyEd.SelectNCellJunctionComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_SelectNCellJunctionComponent"), Icon16x16));
 
 	Style.Set("Command.WorldAssemblyEd.QuickAssemblyOperation", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_QuickAssemblyOperation"), Icon128x128));
 	Style.Set("Command.WorldAssemblyEd.CancelQuickAssemblyOperation", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CancelQuickAssemblyOperation"), Icon128x128));
 
-	// The toolbars behind FNWorldAssemblyEdModeRail's CreateTitledCommandGrid and CreateTitledCommandList. Everything
-	// about the labelled full-width buttons comes from the engine's SlimPaletteToolBar, which the toolkit builder
-	// renders a palette with; only the recessed backing is ours, so these groups sit in the same dark well as the
-	// icon-tile groups beside them instead of the lighter panel fill an unheaded full-panel palette wants. The column
-	// count is the only difference between the two.
 	// Rounded to sit inside the rounded box the panel itself is drawn on. A tighter radius than the 6 the two overlays
 	// use, because a group nested inside a rounded container reads wrong at the same radius as its container — the
 	// inner curve has to be the smaller one.
-	const FSlateRoundedBoxBrush TitledGroupBackground(FStyleColors::Recessed, 4.0f);
+	const FSlateRoundedBoxBrush GroupBackground(FStyleColors::Recessed, 4.0f);
 
-	// The escape hatch behind CreateTitledContent, and through it CreateTitledCheckList. Those draw their own border
-	// rather than getting one from a toolbar style, so they need the brush rather than the style below.
-	Style.Set("WorldAssemblyEd.TitledGroupBackground", new FSlateRoundedBoxBrush(TitledGroupBackground));
+	// Behind CreateContent, and through it the tile palettes and the Organ rail's operations list. The button
+	// groups gave their backing up and draw onto the panel, so this is no longer the frame every group shares — it is
+	// what marks out the two kinds of section that are not a row of labelled buttons.
+	Style.Set("WorldAssemblyEd.GroupBackground", new FSlateRoundedBoxBrush(GroupBackground));
 
-	// The icon tiles behind CreateTitledCommandPalette. Read by SNCommandTile rather than by a toolbar, so only the
+	// The toolbars behind FNWorldAssemblyEdModeRail's CreateCommandGrid and CreateCommandList. Everything
+	// about the labelled full-width buttons comes from the engine's SlimPaletteToolBar, which the toolkit builder
+	// renders a palette with. The column count is the only difference between the two.
+
+	// The icon tiles behind CreateCommandPalette. Read by SNCommandTile rather than by a toolbar, so only the
 	// pieces a tile draws itself from are live here — ButtonStyle, ToggleButton, LabelStyle, IconPadding, LabelPadding.
 	// Stock PaletteToolBar for all of them, which is what keeps a tile looking like the palette button it replaces.
-	FToolBarStyle TitledPaletteStyle = FAppStyle::Get().GetWidgetStyle<FToolBarStyle>("PaletteToolBar");
+	FToolBarStyle PaletteStyle = FAppStyle::Get().GetWidgetStyle<FToolBarStyle>("PaletteToolBar");
 
-	// Set anyway, for the same reason the styles below do: a squared-off backing would corner-clash with the grid and
-	// list groups. Nothing reads it on the tile path — the group's well comes from CreateTitledContent — but a style
-	// carrying the wrong one would be a trap for whatever puts these buttons in a toolbar next.
-	TitledPaletteStyle.SetBackground(TitledGroupBackground);
-	Style.Set("WorldAssemblyEd.TitledCommandPalette", TitledPaletteStyle);
+	// Nothing reads it on the tile path — the group's well comes from CreateContent — but a style carrying a
+	// different backing than the group it ends up in would be a trap for whatever puts these buttons in a toolbar next.
+	PaletteStyle.SetBackground(GroupBackground);
+	Style.Set("WorldAssemblyEd.CommandPalette", PaletteStyle);
 
-	FToolBarStyle TitledCommandStyle = FAppStyle::Get().GetWidgetStyle<FToolBarStyle>("SlimPaletteToolBar");
-	TitledCommandStyle.SetBackground(TitledGroupBackground);
-	// Asymmetric because the buttons are: SlimPaletteToolBar pads each one 4 on its left and top and nothing on its
-	// right and bottom, so the two sides only read as an even 8-unit inset once this makes up the difference.
-	TitledCommandStyle.SetBackgroundPadding(FMargin(4.0f, 4.0f, 8.0f, 8.0f));
+	FToolBarStyle CommandStyle = FAppStyle::Get().GetWidgetStyle<FToolBarStyle>("SlimPaletteToolBar");
+	CommandStyle.SetBackground(FSlateNoResource());
+	// Only the far side, because the buttons pad their own near side: SlimPaletteToolBar gives each one 4 on its left
+	// and top and nothing on its right and bottom, so this is what makes the two sides read even.
+	CommandStyle.SetBackgroundPadding(FMargin(0.0f, 0.0f, 4.0f, 4.0f));
 
-	TitledCommandStyle.SetNumColumns(2);
-	Style.Set("WorldAssemblyEd.TitledCommandGrid", TitledCommandStyle);
+	CommandStyle.SetNumColumns(2);
+	Style.Set("WorldAssemblyEd.CommandGrid", CommandStyle);
 
-	TitledCommandStyle.SetNumColumns(1);
-	Style.Set("WorldAssemblyEd.TitledCommandList", TitledCommandStyle);
+	// The list is the grid at one column and without the buttons' resting fill, so a row is its icon and label until
+	// the cursor is over it — the read Mesh Terrain's submode palettes have. SlimPaletteToolBar is what puts the fill
+	// there: its ButtonStyle.Normal is a Dropdown-filled rounded box, unlike the plain SlimToolBar it is built from,
+	// whose button comes from SimpleButton and paints nothing at rest. Clearing Normal alone gets it back — Hovered
+	// and Pressed keep the rounded Hover box, which is the highlight this leaves behind.
+	//
+	// The grid keeps its fill on purpose: two buttons to a row need an edge each to read as two, and the same tiles
+	// unfilled run together into one strip.
+	FToolBarStyle CommandListStyle = CommandStyle;
+	CommandListStyle.SetNumColumns(1);
+	CommandListStyle.ButtonStyle.SetNormal(FSlateNoResource());
+
+	// The toggle half of the same treatment, for a check-state command dropped into a list later. Only the unchecked
+	// image goes — checked stays filled, which is the whole of how a toggle reports itself here.
+	CommandListStyle.ToggleButton.SetUncheckedImage(FSlateNoResource());
+
+	Style.Set("WorldAssemblyEd.CommandList", CommandListStyle);
+
+	// The rule a rail can put between two groups. Box rather than an image so it stretches to whatever width the slot
+	// gives it, and Hover rather than a border color because it has to read against the panel fill without drawing as
+	// hard as an edge would — the same brush Mesh Terrain rules its tool panel sections with.
+	Style.Set("WorldAssemblyEd.GroupSeparator", new FSlateColorBrush(FStyleColors::Hover));
 
 	// The two boxes the edit mode floats over the viewport. A matched pair: the pinned category strip takes the
 	// lighter fill and the panel it drives takes the darker one, which is the same relationship Mesh Terrain's

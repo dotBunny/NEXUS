@@ -91,6 +91,15 @@ public:
 	/** @return Bitfield describing which World Assembly categories the current selection includes. */
 	static ENWorldAssemblySelectionFlags GetSelectionFlags();
 
+	/**
+	 * @return true when the focused level has a cell actor to act on and we are not in PIE.
+	 * @note The default gate for cell commands, shared by the Cell and Cell Data categories. Every command behind it
+	 *       mutates or saves cell data, which is authoring work with no meaning against a play world — the toolkit
+	 *       panel stays up during PIE, so without this they would happily run against it. Interactive tools get the
+	 *       same protection from UEdMode::ShouldToolStartBeAllowed; commands have no such default.
+	 */
+	static bool CanEditCell();
+
 	/** @return true if there are cell proxies currently alive from the last generation pass. */
 	static bool HasGeneratedCellProxies();
 

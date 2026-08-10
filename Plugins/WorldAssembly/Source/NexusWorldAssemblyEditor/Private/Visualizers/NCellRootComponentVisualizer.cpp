@@ -6,7 +6,7 @@
 #include "Cell/NCellRootComponent.h"
 #include "NWorldAssemblyEditorColors.h"
 #include "NWorldAssemblyEditorMinimal.h"
-#include "NWorldAssemblyEdMode.h"
+#include "EdMode/NWorldAssemblyEdMode.h"
 #include "NWorldAssemblySettings.h"
 
 void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Component, const FSceneView* View, FPrimitiveDrawInterface* PDI)

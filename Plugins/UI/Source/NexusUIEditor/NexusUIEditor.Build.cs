@@ -16,6 +16,9 @@ namespace UnrealBuildTool.Rules
 					"Blutility",
 					"Core",
 					"CommonUI",
+					// SNCommandTile's public header is built on SCompoundWidget and FToolBarStyle, so a consumer
+					// including it needs SlateCore's include path of its own.
+					"SlateCore",
 					"UnrealEd",
 					"ScriptableEditorWidgets"
 				]
@@ -28,12 +31,13 @@ namespace UnrealBuildTool.Rules
 					"DeveloperSettings",
 					"Engine",
 					"EditorSubsystem",
+					// FKey, reached through the FInputChord SNCommandTile appends to its tooltip.
+					"InputCore",
 					"Json",
 					"JsonUtilities",
 					"LevelEditor",
 					"Projects",
 					"Slate",
-					"SlateCore",
 					"ToolMenus",
 					"UMG",
 					"UMGEditor"
