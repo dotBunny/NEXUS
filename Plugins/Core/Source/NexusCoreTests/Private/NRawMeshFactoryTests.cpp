@@ -557,4 +557,52 @@ N_TEST_HIGH(FNRawMeshFactoryTests_FromActorsInBounds_StaticMeshActor_ProducesGeo
 	});
 }
 
+/*
+ * FromLandscapesInBounds's guards. What it does with a real landscape needs one in a world with an initialized physics
+ * scene, which is beyond a unit test — so what is pinned here is that it stays inert everywhere else, since it is
+ * called unconditionally beside FromActorsInBounds on actor lists that usually contain no landscape at all.
+ */
+
+N_TEST_HIGH(FNRawMeshFactoryTests_FromLandscapesInBounds_NonLandscapeActorsEmitNothing,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromLandscapesInBounds::NonLandscapeActorsEmitNothing",
+	N_TEST_CONTEXT_EDITOR)
+{
+	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	{
+		AActor* Actor = World->SpawnActor<AActor>();
+		if (Actor == nullptr)
+		{
+			ADD_ERROR("Failed to spawn AActor");
+			return;
+		}
+
+		const TArray<AActor*> Actors = { Actor };
+		TArray<FNRawMesh> OutMeshes;
+		TArray<FTransform> OutTransforms;
+
+		FNRawMeshFactory::FromLandscapesInBounds(Actors, {}, 100.0, OutMeshes, OutTransforms);
+
+		CHECK_EQUALS("An actor list with no landscape in it emits no meshes", OutMeshes.Num(), 0);
+		CHECK_EQUALS("An actor list with no landscape in it emits no transforms", OutTransforms.Num(), 0);
+	});
+}
+
+N_TEST_HIGH(FNRawMeshFactoryTests_FromLandscapesInBounds_NonPositiveGridSizeEmitsNothing,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromLandscapesInBounds::NonPositiveGridSizeEmitsNothing",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The documented way to opt landscape out entirely, which World Assembly surfaces as a Landscape Sample Spacing
+	// of 0 — so this has to short-circuit rather than divide by it.
+	TArray<FNRawMesh> OutMeshes;
+	TArray<FTransform> OutTransforms;
+
+	FNRawMeshFactory::FromLandscapesInBounds({}, {}, 0.0, OutMeshes, OutTransforms);
+	CHECK_EQUALS("A grid size of zero emits nothing", OutMeshes.Num(), 0);
+
+	FNRawMeshFactory::FromLandscapesInBounds({}, {}, -50.0, OutMeshes, OutTransforms);
+	CHECK_EQUALS("A negative grid size emits nothing", OutMeshes.Num(), 0);
+
+	CHECK_EQUALS("Nothing emitted leaves the transform array untouched", OutTransforms.Num(), 0);
+}
+
 #endif //WITH_TESTS

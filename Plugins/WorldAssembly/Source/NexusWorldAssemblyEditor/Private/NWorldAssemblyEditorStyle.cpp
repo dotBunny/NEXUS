@@ -145,9 +145,14 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 	// rather than getting one from a toolbar style, so they need the brush rather than the style below.
 	Style.Set("WorldAssemblyEd.TitledGroupBackground", new FSlateRoundedBoxBrush(TitledGroupBackground));
 
-	// The icon-tile groups behind CreateTitledCommandPalette. Stock PaletteToolBar in everything but its backing, which
-	// is squared off and so would corner-clash with the grid and list groups above and below it.
+	// The icon tiles behind CreateTitledCommandPalette. Read by SNCommandTile rather than by a toolbar, so only the
+	// pieces a tile draws itself from are live here — ButtonStyle, ToggleButton, LabelStyle, IconPadding, LabelPadding.
+	// Stock PaletteToolBar for all of them, which is what keeps a tile looking like the palette button it replaces.
 	FToolBarStyle TitledPaletteStyle = FAppStyle::Get().GetWidgetStyle<FToolBarStyle>("PaletteToolBar");
+
+	// Set anyway, for the same reason the styles below do: a squared-off backing would corner-clash with the grid and
+	// list groups. Nothing reads it on the tile path — the group's well comes from CreateTitledContent — but a style
+	// carrying the wrong one would be a trap for whatever puts these buttons in a toolbar next.
 	TitledPaletteStyle.SetBackground(TitledGroupBackground);
 	Style.Set("WorldAssemblyEd.TitledCommandPalette", TitledPaletteStyle);
 

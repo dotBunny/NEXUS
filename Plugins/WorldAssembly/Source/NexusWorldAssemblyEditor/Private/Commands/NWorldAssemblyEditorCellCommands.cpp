@@ -5,6 +5,7 @@
 
 #include "Editor.h"
 #include "NEditorUtils.h"
+#include "NTerrainUtils.h"
 #include "NUIEditorStyle.h"
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyEditorStyle.h"
@@ -224,10 +225,10 @@ void FNWorldAssemblyEditorCellCommands::SaveCell()
 	ANCellActor* CellActor = FNWorldAssemblyUtils::GetCellActorFromWorld(CurrentWorld, true);
 
 	// Here rather than inside SaveCell: this is the last point before the engine's save machinery takes over, and the
-	// wait must not run once it has — see WaitForTerrainToSettle's remark.
+	// wait must not run once it has — see FNTerrainUtils::WaitForSettle's remark.
 	if (CellActor != nullptr)
 	{
-		FNWorldAssemblyEditorUtils::WaitForTerrainToSettle(CellActor->GetLevel());
+		FNTerrainUtils::WaitForSettle(CellActor->GetLevel());
 	}
 
 	FNWorldAssemblyEditorUtils::SaveCell(CurrentWorld, CellActor, true);

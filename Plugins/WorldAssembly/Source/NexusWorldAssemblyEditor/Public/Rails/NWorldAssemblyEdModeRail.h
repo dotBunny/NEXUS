@@ -56,38 +56,40 @@ public:
 
 protected:
 	/**
-	 * Build a headed group of command buttons.
+	 * Build a headed group of icon tiles, wrapping across the panel.
 	 *
-	 * @param Title Heading shown above the buttons.
+	 * @param Title Heading shown above the tiles, or empty for a group that goes without one.
 	 * @param Commands Commands to lay out, resolved against the toolkit command list.
-	 * @return A titled toolbar widget.
-	 * @note FUniformToolBarBuilder, not the plain one: PaletteToolBar's sizing lives in its Min/MaxUniformToolbarSize
-	 *       entries, which only the uniform builder reads. This is the path FModeToolkit::CreatePaletteWidget takes,
-	 *       so these groups match the Landscape and Foliage palettes rather than approximating them.
+	 * @return A titled group of tiles, on the same recessed backing as the groups around it.
+	 * @note SNCommandTile in an SWrapBox rather than the FUniformToolBarBuilder this used to be. The builder is the
+	 *       path FModeToolkit::CreatePaletteWidget takes, so it matched the Landscape and Foliage palettes — including
+	 *       their limit, which is that SMultiBoxWidget caps a palette cell at 50 by 43 and PaletteToolBar's label style
+	 *       ellipsizes anything wider. Labels of more than about a word were unreadable, and nothing in the style or
+	 *       the builder could widen the cell or wrap the label. The tiles keep the style's buttons, label and paddings,
+	 *       so the group still reads as one of the engine's.
 	 */
 	TSharedRef<SWidget> CreateTitledCommandPalette(const FText& Title, const TArray<TSharedPtr<FUICommandInfo>>& Commands) const;
 
 	/**
 	 * Build a headed group of half-width command buttons, two to a row.
 	 *
-	 * @param Title Heading shown above the buttons.
+	 * @param Title Heading shown above the buttons, or empty for a group that goes without one.
 	 * @param Commands Commands to lay out, resolved against the toolkit command list.
 	 * @return A titled two-column toolbar widget, on the same recessed backing as CreateTitledCommandPalette's.
 	 * @note What the engine's own toolkit builder renders a palette as, reproduced here so a rail can head and split
 	 *       one. It is a different widget from CreateTitledCommandPalette's, not a wider setting on it: this is the plugin's
 	 *       WorldAssemblyEd.TitledCommandGrid style — SlimPaletteToolBar, recessed — on FSlimHorizontalUniformToolBarBuilder,
-	 *       whose SUniformWrapPanel fills its width across the style's two columns. The other builder's panel is
-	 *       left-aligned over fixed 48-unit cells, so it fits as many icon tiles per row as the panel is wide and the
-	 *       label under each is ellipsized to nothing useful.
-	 * @remark For commands whose labels have to be readable. The icon-tile groups suit a handful of commands the user
-	 *         learns by shape; these read as a list of named operations.
+	 *       whose SUniformWrapPanel fills its width across the style's two columns. Labels sit beside their icons here
+	 *       rather than under them, so a row can carry as much text as half the panel is wide.
+	 * @remark For commands whose labels are a phrase rather than a name. The tile groups suit a handful of commands the
+	 *         user learns by shape; these read as a list of named operations.
 	 */
 	TSharedRef<SWidget> CreateTitledCommandGrid(const FText& Title, const TArray<TSharedPtr<FUICommandInfo>>& Commands) const;
 
 	/**
 	 * Build a headed group of full-width command buttons, one to a row.
 	 *
-	 * @param Title Heading shown above the buttons.
+	 * @param Title Heading shown above the buttons, or empty for a group that goes without one.
 	 * @param Commands Commands to lay out, resolved against the toolkit command list.
 	 * @return A titled single-column toolbar widget.
 	 * @note CreateTitledCommandGrid's group at one column instead of two — the same builder, backing and inset, differing
@@ -100,7 +102,7 @@ protected:
 	/**
 	 * Build a headed group of labelled checkboxes, one per command.
 	 *
-	 * @param Title Heading shown above the checkboxes.
+	 * @param Title Heading shown above the checkboxes, or empty for a group that goes without one.
 	 * @param Commands Toggle commands to lay out, resolved against the toolkit command list.
 	 * @return A titled column of checkboxes, on the same recessed backing as the command groups.
 	 * @note For commands that read as persistent settings rather than actions. The same commands rendered into a
@@ -114,7 +116,7 @@ protected:
 	/**
 	 * Put an arbitrary widget under a group heading, on the same recessed backing the command groups sit on.
 	 *
-	 * @param Title Heading shown above the content.
+	 * @param Title Heading shown above the content, or empty for a group that goes without one.
 	 * @param Content The widget to head.
 	 * @return A titled group wrapping Content.
 	 * @note The escape hatch for a section that is not a set of commands. The backing is drawn here rather than coming

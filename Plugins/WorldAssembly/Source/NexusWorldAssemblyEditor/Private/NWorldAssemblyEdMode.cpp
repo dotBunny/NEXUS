@@ -11,6 +11,7 @@
 #include "NWorldAssemblyRegistry.h"
 #include "Cell/NCellRootComponent.h"
 #include "NEditorUtils.h"
+#include "NTerrainUtils.h"
 #include "NWorldAssemblyDebugDraw.h"
 #include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEditorSettings.h"
@@ -655,13 +656,15 @@ void UNWorldAssemblyEdMode::ModeTick(float DeltaTime)
 	// terrain edit disagrees with the same calculation after a reload. There is no engine-side barrier covering the
 	// whole pipeline to wait on, so a finished build is inferred from the geometry holding still.
 	const ULevel* TerrainLevel = CellActor.IsValid() ? CellActor->GetLevel() : nullptr;
-	if (const uint32 Fingerprint = FNWorldAssemblyEditorUtils::ComputeTerrainFingerprint(TerrainLevel); Fingerprint != TerrainFingerprint)
+	if (const uint32 Fingerprint = FNTerrainUtils::ComputeFingerprint(TerrainLevel); Fingerprint != TerrainFingerprint)
 	{
 		TerrainFingerprint = Fingerprint;
 		TerrainChangedTime = FPlatformTime::Seconds();
 		bTerrainSettled = false;
 	}
-	else if (!bTerrainSettled && (FPlatformTime::Seconds() - TerrainChangedTime) >= NEXUS::WorldAssembly::TerrainSettling::TerrainSettleSeconds)
+	// The same threshold FNTerrainUtils::WaitForSettle infers against, so this gate opening and that wait returning are
+	// never two different moments.
+	else if (!bTerrainSettled && (FPlatformTime::Seconds() - TerrainChangedTime) >= NEXUS::CoreEditor::Terrain::SettleSeconds)
 	{
 		bTerrainSettled = true;
 	}

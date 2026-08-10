@@ -8,13 +8,21 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Developer/NDeveloperUtils.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/World.h"
 #include "Math/NBoundsUtils.h"
+#include "NActorUtils.h"
 #include "PhysicsEngine/BodySetup.h"
 
 namespace NEXUS::Core::RawMeshFactory
 {
 	constexpr int32 SphereSegments = 16;
 	constexpr int32 SphereRings = 8;
+
+	/**
+	 * Clearance above and below a landscape's bounds that FromLandscape starts and ends its traces at, so a trace can
+	 * neither start inside the surface nor stop short of a dip.
+	 */
+	constexpr double LandscapeTraceMargin = 100.0;
 }
 
 void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const TArray<FBoxSphereBounds>& ContainingBounds, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms)
@@ -49,7 +57,9 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 		for (UPrimitiveComponent* ActorPrimitive : ActorPrimitives)
 		{
 			if (!ActorPrimitive || !ActorPrimitive->IsRegistered()) continue;
-			if (IsLandscapePrimitive(ActorPrimitive)) continue;
+			// Single-sourced with the terrain classification in FNActorUtils, so the class-name heuristic behind both
+			// cannot drift — and so an engine rename fails that class's tests rather than silently emptying a mesh here.
+			if (FNActorUtils::IsLandscapeClassName(ActorPrimitive->GetClass()->GetName())) continue;
 
 			UBodySetup* Body = ActorPrimitive->GetBodySetup();
 			if (!Body) continue;
@@ -538,6 +548,139 @@ bool FNRawMeshFactory::FromStaticMesh(const UStaticMesh* StaticMesh, FNRawMesh& 
 	return true;
 }
 
+bool FNRawMeshFactory::FromLandscape(const AActor* LandscapeActor, const double GridSize, FNRawMesh& OutMesh,
+	const FBox& SampleBounds)
+{
+	if (!IsValid(LandscapeActor) || GridSize <= 0.0) return false;
+
+	const UWorld* World = LandscapeActor->GetWorld();
+	if (World == nullptr) return false;
+
+	const FBox ActorBounds = LandscapeActor->GetComponentsBoundingBox(true);
+	if (!ActorBounds.IsValid) return false;
+
+	// Clipped in XY only — see the note on this function's declaration for why the traces keep the actor's full
+	// vertical extent rather than the region's.
+	FBox SampleArea = ActorBounds;
+	if (SampleBounds.IsValid)
+	{
+		SampleArea.Min.X = FMath::Max(ActorBounds.Min.X, SampleBounds.Min.X);
+		SampleArea.Min.Y = FMath::Max(ActorBounds.Min.Y, SampleBounds.Min.Y);
+		SampleArea.Max.X = FMath::Min(ActorBounds.Max.X, SampleBounds.Max.X);
+		SampleArea.Max.Y = FMath::Min(ActorBounds.Max.Y, SampleBounds.Max.Y);
+
+		// The region misses this landscape entirely.
+		if (SampleArea.Min.X > SampleArea.Max.X || SampleArea.Min.Y > SampleArea.Max.Y) return false;
+	}
+
+	const FVector Size = SampleArea.GetSize();
+	const int32 CountX = FMath::Max(1, FMath::CeilToInt32(Size.X / GridSize)) + 1;
+	const int32 CountY = FMath::Max(1, FMath::CeilToInt32(Size.Y / GridSize)) + 1;
+
+	const double TraceTop = ActorBounds.Max.Z + NEXUS::Core::RawMeshFactory::LandscapeTraceMargin;
+	const double TraceBottom = ActorBounds.Min.Z - NEXUS::Core::RawMeshFactory::LandscapeTraceMargin;
+
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(NRawMeshFactoryFromLandscape), true);
+
+	// Multi rather than single: the first blocking hit down a column is whatever sits on the landscape, and taking
+	// that would sample the props instead of the ground under them.
+	TArray<FHitResult> Hits;
+	TArray<FVector> Samples;
+	TArray<bool> SampleValid;
+	Samples.SetNum(CountX * CountY);
+	SampleValid.SetNum(CountX * CountY);
+
+	for (int32 IndexX = 0; IndexX < CountX; IndexX++)
+	{
+		for (int32 IndexY = 0; IndexY < CountY; IndexY++)
+		{
+			const double X = FMath::Min(SampleArea.Min.X + IndexX * GridSize, SampleArea.Max.X);
+			const double Y = FMath::Min(SampleArea.Min.Y + IndexY * GridSize, SampleArea.Max.Y);
+			const int32 SampleIndex = IndexX * CountY + IndexY;
+
+			Hits.Reset();
+			SampleValid[SampleIndex] = false;
+
+			if (!World->LineTraceMultiByChannel(Hits, FVector(X, Y, TraceTop), FVector(X, Y, TraceBottom), ECC_WorldStatic, Params))
+			{
+				continue;
+			}
+
+			for (const FHitResult& Hit : Hits)
+			{
+				if (Hit.GetActor() != LandscapeActor) continue;
+
+				Samples[SampleIndex] = Hit.ImpactPoint;
+				SampleValid[SampleIndex] = true;
+				break;
+			}
+		}
+	}
+
+	// Emit a quad only where all four of its corners found the surface, so a hole in the landscape leaves a hole here
+	// rather than a triangle stretched across it.
+	OutMesh = FNRawMesh();
+	TMap<int32, int32> SampleToVertex;
+	auto AddVertex = [&OutMesh, &SampleToVertex, &Samples](const int32 SampleIndex)
+	{
+		if (const int32* Existing = SampleToVertex.Find(SampleIndex)) return *Existing;
+
+		const int32 NewIndex = OutMesh.Vertices.Add(Samples[SampleIndex]);
+		SampleToVertex.Add(SampleIndex, NewIndex);
+		return NewIndex;
+	};
+
+	for (int32 IndexX = 0; IndexX < CountX - 1; IndexX++)
+	{
+		for (int32 IndexY = 0; IndexY < CountY - 1; IndexY++)
+		{
+			const int32 A = IndexX * CountY + IndexY;
+			const int32 B = (IndexX + 1) * CountY + IndexY;
+			const int32 C = (IndexX + 1) * CountY + (IndexY + 1);
+			const int32 D = IndexX * CountY + (IndexY + 1);
+			if (!SampleValid[A] || !SampleValid[B] || !SampleValid[C] || !SampleValid[D]) continue;
+
+			const int32 VertexA = AddVertex(A);
+			const int32 VertexB = AddVertex(B);
+			const int32 VertexC = AddVertex(C);
+			const int32 VertexD = AddVertex(D);
+
+			OutMesh.Loops.Add(FNRawMeshLoop(VertexA, VertexB, VertexC));
+			OutMesh.Loops.Add(FNRawMeshLoop(VertexA, VertexC, VertexD));
+		}
+	}
+
+	if (OutMesh.Loops.IsEmpty()) return false;
+
+	OutMesh.CalculateCenterAndBounds();
+	OutMesh.Validate();
+	return true;
+}
+
+void FNRawMeshFactory::FromLandscapesInBounds(const TArray<AActor*>& Actors, const TArray<FBoxSphereBounds>& ContainingBounds,
+	const double GridSize, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms)
+{
+	if (GridSize <= 0.0) return;
+
+	FBox SampleBounds(ForceInit);
+	for (const FBoxSphereBounds& Entry : ContainingBounds)
+	{
+		SampleBounds += Entry.GetBox();
+	}
+
+	for (const AActor* Actor : Actors)
+	{
+		if (!FNActorUtils::IsLandscapeActor(Actor)) continue;
+
+		FNRawMesh LandscapeMesh;
+		if (!FromLandscape(Actor, GridSize, LandscapeMesh, SampleBounds)) continue;
+
+		// Sampled in world space already, so it pairs with an identity transform.
+		OutMeshes.Add(MoveTemp(LandscapeMesh));
+		OutTransforms.Add(FTransform::Identity);
+	}
+}
+
 void FNRawMeshFactory::AppendChaosAggregateGeometry(const FKAggregateGeom& Agg, const FTransform& BaseToWorld, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms)
 {
 
@@ -580,12 +723,6 @@ void FNRawMeshFactory::AppendChaosAggregateGeometry(const FKAggregateGeom& Agg, 
 			OutTransforms.Add(MoveTemp(WorkingTransform));
 		}
 	}
-}
-
-bool FNRawMeshFactory::IsLandscapePrimitive(const UPrimitiveComponent* Prim)
-{
-	// Avoids taking a hard dependency on the Landscape module.
-	return Prim->GetClass()->GetName().StartsWith(TEXT("Landscape"));
 }
 
 bool FNRawMeshFactory::IsStaticMeshCPUReadable(const UStaticMesh* StaticMesh)

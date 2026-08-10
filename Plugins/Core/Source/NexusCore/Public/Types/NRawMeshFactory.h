@@ -32,7 +32,7 @@ public:
 	 * - A body that emits no simple geometry falls back to its complex tri mesh, so a mesh whose only collision is
 	 *   the complex one — the default for a sculpted or imported asset — is not silently skipped.
 	 * - UInstancedStaticMeshComponent emits one FNRawMesh entry per instance.
-	 * - Landscape-based primitives are skipped.
+	 * - Landscape-based primitives are skipped; FromLandscape is the way to obtain their surface.
 	 * @param Actors Candidate actors to process. Pre-filter at the call site (e.g. via FNActorUtils::GetWorldActors).
 	 * @param ContainingBounds Actor-bounds filter; an actor is processed when its bounds overlap any one of these. Skipped when empty.
 	 * @param OutMeshes Each mesh in element-local space, appended to the array.
@@ -117,6 +117,57 @@ public:
 	 */
 	static bool FromStaticMesh(const UStaticMesh* StaticMesh, FNRawMesh& OutMesh);
 
+	/**
+	 * Sample a landscape's surface into a triangulated grid mesh, by tracing down onto it.
+	 *
+	 * Landscape is the one terrain FromActorsInBounds cannot read: its collision is a Chaos heightfield behind no
+	 * UBodySetup, so the factory skips landscape primitives outright and anything built from it sees a hole where the
+	 * ground is. Sampling reconstructs a usable surface without taking a Landscape module dependency, and suits the
+	 * shape, since a heightfield is single valued in Z and a downward trace per grid point therefore misses nothing.
+	 * @param LandscapeActor Landscape to sample. Its own bounds set the sampled area unless SampleBounds narrows it.
+	 * @param GridSize Spacing between samples, in world units. Values at or below zero sample nothing.
+	 * @param OutMesh Destination, in world space — the caller pairs it with an identity transform.
+	 * @param SampleBounds Optional region of interest, clipping the sampled area in XY. Pass an invalid box (the
+	 *        default) to sample the whole landscape. Worth supplying whenever the caller is already gathering against
+	 *        a region: a landscape spans the level, so the unclipped cost is set by the landscape's size rather than
+	 *        by how much of it the caller cares about.
+	 * @return true when at least one triangle was produced.
+	 * @note SampleBounds clips in XY only — the traces still span the landscape's own vertical extent, because the
+	 *       ground beneath a region of interest routinely sits below the box describing it and a trace clipped to that
+	 *       box would report a hole where there is solid ground.
+	 * @note Traces the live physics scene, so this is game-thread only and yields nothing where none is initialized.
+	 *       That is why it is a separate entry point rather than a branch inside FromActorsInBounds, which carries no
+	 *       such constraint.
+	 * @remark **Single-valued surfaces only.** One downward trace per grid point keeps the first hit belonging to the
+	 *         actor, so a surface folding back over itself — an overhang, a cave roof, the underside of a closed shape
+	 *         — contributes only its topmost face. That is not a limitation for landscape, which is a heightfield and
+	 *         cannot be authored any other way, and it is why this is named for landscape rather than for terrain.
+	 *         Terrain that *can* be two-sided (a Mesh Partition sphere) has a UBodySetup and belongs in
+	 *         FromActorsInBounds, which reads its cooked triangles whole and makes no assumption about topology.
+	 * @note Approximate by construction: the surface is reproduced to within GridSize, and a sample that hits
+	 *       nothing (a hole in the landscape) drops the quads around it rather than guessing at them.
+	 */
+	static bool FromLandscape(const AActor* LandscapeActor, double GridSize, FNRawMesh& OutMesh,
+		const FBox& SampleBounds = FBox(ForceInit));
+
+	/**
+	 * Sample every landscape among a set of actors, as the landscape counterpart to FromActorsInBounds.
+	 *
+	 * The two are complements over the same actor list, and a caller wanting all of a level's geometry runs both:
+	 * FromActorsInBounds covers everything a UBodySetup can describe, this covers the one terrain that has none.
+	 * @param Actors Candidate actors; anything FNActorUtils::IsLandscapeActor rejects is skipped.
+	 * @param ContainingBounds Regions of interest, narrowing the sampled area. Skipped when empty, as in FromActorsInBounds.
+	 * @param GridSize Spacing between samples, in world units. Values at or below zero emit nothing.
+	 * @param OutMeshes Each sampled surface, in world space, appended to the array.
+	 * @param OutTransforms Matching transform per entry — always identity, since the samples are already placed.
+	 * @note The sampled area is the *union* of ContainingBounds, not one pass per entry: regions routinely overlap, and
+	 *       a pass each would emit the shared ground once per overlap for the caller to carry. The cost of the ground
+	 *       between two distant regions is bounded by the landscape's own extent either way.
+	 * @note Game-thread only, and yields nothing without an initialized physics scene — see FromLandscape.
+	 */
+	static void FromLandscapesInBounds(const TArray<AActor*>& Actors, const TArray<FBoxSphereBounds>& ContainingBounds,
+		double GridSize, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms);
+
 private:
 	/**
 	 * Dispatches an FKAggregateGeom's convex/box/sphere/capsule elements through the per-element appenders.
@@ -127,13 +178,6 @@ private:
 	 */
 	static void AppendChaosAggregateGeometry(const FKAggregateGeom& Agg, const FTransform& BaseToWorld,
 		TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms);
-
-	/**
-	 * Class-name heuristic to skip landscape primitives without taking a hard Landscape-module dependency.
-	 * @param Prim Primitive component to inspect.
-	 * @return true when the component's class name begins with "Landscape".
-	 */
-	static bool IsLandscapePrimitive(const UPrimitiveComponent* Prim);
 
 	/**
 	 * @param StaticMesh Mesh whose LOD0 render buffers are inspected.

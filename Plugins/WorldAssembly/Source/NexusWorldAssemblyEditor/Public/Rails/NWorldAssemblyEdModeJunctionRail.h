@@ -21,9 +21,13 @@ public:
 	/** @return A predicate requiring a cell actor; a junction is a component of one, so nothing here works without it. */
 	virtual TAttribute<bool> GetAvailable() const override;
 
-	/** @return A combo box naming the selected junction, and listing the level's others to switch to. */
-	virtual TSharedPtr<SWidget> CreateHeader() const override;
-
+	/**
+	 * @return The tools, then the junction picker, then the component operations.
+	 * @note No CreateHeader override, unlike the other categories with a picker: the panel puts a header above the
+	 *       content, and this category wants its tool tiles first. Building the picker as part of the content is what
+	 *       puts the ordering in the rail's hands, and it costs nothing — the panel drops both into the same scrolling
+	 *       column anyway, so the picker only has to carry the inset the header slot would have given it.
+	 */
 	virtual TSharedPtr<SWidget> CreateContent() const override;
 	//End FNWorldAssemblyEdModeRail
 };

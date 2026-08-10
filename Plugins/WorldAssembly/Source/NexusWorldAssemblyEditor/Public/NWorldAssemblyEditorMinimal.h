@@ -29,20 +29,3 @@ namespace NEXUS::WorldAssembly::EdModeMetrics
 	/** Line thickness of a highlighted edge. */
 	inline constexpr float HighlightThickness = 4.0f;
 }
-
-/**
- * Tuning shared by the two places that decide whether a terrain build has finished.
- */
-namespace NEXUS::WorldAssembly::TerrainSettling
-{
-	/**
-	 * How long a level's terrain fingerprint must hold still before the build behind it is treated as finished.
-	 *
-	 * Shared because the ed mode infers settling passively (to gate the Calculate commands) while
-	 * FNWorldAssemblyEditorUtils::WaitForTerrainToSettle infers it while actively pumping, and the two disagreeing
-	 * would mean a button re-enabling at a different moment than a wait returns.
-	 * @note Too short and a gap between two sections landing reads as the end of the build; too long and every
-	 *       calculation pays the difference. Sections land in quick succession once the build is moving.
-	 */
-	inline constexpr double TerrainSettleSeconds = 0.35;
-}

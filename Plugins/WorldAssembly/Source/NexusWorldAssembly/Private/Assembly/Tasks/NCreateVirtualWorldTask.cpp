@@ -2,7 +2,6 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "Assembly/Tasks/NCreateVirtualWorldTask.h"
-#include "NWorldAssemblyUtils.h"
 #include "Types/NRawMeshFactory.h"
 
 void FNCreateVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
@@ -24,20 +23,13 @@ void FNCreateVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const F
 	// landscape primitives because their collision is a heightfield behind no UBodySetup, so without this an assembly
 	// sees no ground and routes cells straight through it. Sampling has to happen here rather than in the process
 	// phase because it traces the live physics scene, which is game-thread only — the same reason this task is.
-	if (const float SampleSpacing = VirtualWorldContextPtr->WorldCollisionSettings.LandscapeSampleSpacing; SampleSpacing > 0.f)
-	{
-		for (const AActor* Actor : WorldActors)
-		{
-			if (!FNActorUtils::IsLandscapeActor(Actor)) continue;
-
-			FNRawMesh LandscapeMesh;
-			if (!FNWorldAssemblyUtils::SampleLandscapeSurface(Actor, SampleSpacing, LandscapeMesh)) continue;
-
-			// Sampled in world space already, so it pairs with an identity transform.
-			VirtualWorldContextPtr->WorldCollisionMeshes.Add(MoveTemp(LandscapeMesh));
-			VirtualWorldContextPtr->WorldCollisionTransforms.Add(FTransform::Identity);
-		}
-	}
+	//
+	// Deliberately unbounded, where the gather above is restricted to InputBounds: the organ volumes describe where
+	// cells may go, not what they must clear on the way, and an assembly reads this world well outside them.
+	FNRawMeshFactory::FromLandscapesInBounds(WorldActors, {},
+		VirtualWorldContextPtr->WorldCollisionSettings.LandscapeSampleSpacing,
+		VirtualWorldContextPtr->WorldCollisionMeshes,
+		VirtualWorldContextPtr->WorldCollisionTransforms);
 
 	N_ASSEMBLY_ANALYTICS(CreateVirtualWorldContextFinish)
 }
