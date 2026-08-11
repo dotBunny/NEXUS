@@ -151,9 +151,38 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 	Style.Set("WorldAssemblyEd.CommandList", CommandListStyle);
 
 	// The rule a rail can put between two groups. Box rather than an image so it stretches to whatever width the slot
-	// gives it, and Hover rather than a border color because it has to read against the panel fill without drawing as
-	// hard as an edge would — the same brush Mesh Terrain rules its tool panel sections with.
-	Style.Set("WorldAssemblyEd.GroupSeparator", new FSlateColorBrush(FStyleColors::Hover));
+	// gives it, and a fill color rather than a border color because it has to read against the panel fill without
+	// drawing as hard as an edge would.
+	//
+	// Dropdown rather than the Hover it started on: one step down the Starship greys, which against the Panel fill
+	// behind it leaves a rule that separates without announcing itself. A break between two runs of buttons is the
+	// quietest thing on the panel, and Hover put it about level with the buttons themselves.
+	Style.Set("WorldAssemblyEd.GroupSeparator", new FSlateColorBrush(FStyleColors::Dropdown));
+
+	// The name a rail can hang on that rule, sitting at its near end with the rule running out from it. Small and dim
+	// on purpose: the panel gave its group headings up, and a named rule is still meant to read as the break between
+	// two runs of groups rather than as a heading over the run below it — which is the same job, and so the same
+	// treatment, the engine's own menus give a section name.
+	//
+	// White25 rather than the Foreground the check-list labels carry, because those are things the user clicks and
+	// this is not. It stays a step brighter than the rule beside it, so the two read as a named line rather than as
+	// one flat grey.
+	FTextBlockStyle GroupSeparatorLabelStyle = FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("SmallText");
+	GroupSeparatorLabelStyle.SetColorAndOpacity(FStyleColors::White25);
+
+	// A point under SmallText's own 8, and bold. Both taken off the inherited font rather than built fresh, so the font
+	// family stays whatever the theme set it to and only the size and the typeface within it move.
+	//
+	// The label names a break rather than labelling a control, so it wants to sit below the smallest text the panel
+	// already carries — at 8 it read as another one of the tile labels. Bold is what buys that back: it holds an edge
+	// at 7 points where the regular weight goes soft, and it is the weight that keeps the name legible against a color
+	// picked to be nearly as quiet as the rule it sits on.
+	FSlateFontInfo GroupSeparatorLabelFont = GroupSeparatorLabelStyle.Font;
+	GroupSeparatorLabelFont.Size = 7;
+	GroupSeparatorLabelFont.TypefaceFontName = "Bold";
+	GroupSeparatorLabelStyle.SetFont(GroupSeparatorLabelFont);
+
+	Style.Set("WorldAssemblyEd.GroupSeparatorLabel", GroupSeparatorLabelStyle);
 
 	// The two boxes the edit mode floats over the viewport. A matched pair: the pinned category strip takes the
 	// lighter fill and the panel it drives takes the darker one, which is the same relationship Mesh Terrain's

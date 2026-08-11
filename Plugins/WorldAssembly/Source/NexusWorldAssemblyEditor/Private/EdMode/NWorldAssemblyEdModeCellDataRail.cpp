@@ -120,22 +120,8 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellDataRail::CreateContent() const
 				{
 					CommandInfo_RemoveActor,
 					CommandInfo_CaptureThumbnail,
-				})
-		]
-
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			CreateGroupSeparator()
-		]
-
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			CreateCommandList(
-				{
 					CommandInfo_SaveCell,
-					CommandInfo_ResetCell,
+					CommandInfo_ResetCell
 				})
 		];
 }

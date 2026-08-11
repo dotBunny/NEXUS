@@ -294,7 +294,7 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
-			CreateGroupSeparator()
+			CreateGroupSeparator(LOCTEXT("CellSelectedActorSeparator", "SELECTED ACTOR"))
 		]
 
 		+ SVerticalBox::Slot()
@@ -311,7 +311,7 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
-			CreateGroupSeparator()
+			CreateGroupSeparator(LOCTEXT("CellQuickOptionsSeparator", "QUICK OPTIONS"))
 		]
 
 		+ SVerticalBox::Slot()
