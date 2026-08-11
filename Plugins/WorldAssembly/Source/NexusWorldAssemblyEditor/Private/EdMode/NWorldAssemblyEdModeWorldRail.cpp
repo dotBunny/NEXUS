@@ -86,7 +86,15 @@ void FNWorldAssemblyEdModeWorldRail::ToggleCollisionVisualizer()
 
 	if (const TObjectPtr<ANDebugActor> NewVisualizer = UNWorldAssemblyEdMode::CreateCollisionVisualizer(FNEditorUtils::GetCurrentWorld()))
 	{
-		GEditor->SelectActor(NewVisualizer, true, false, false);
+		// Exclusively, rather than added to whatever the user had selected when they hit the button. The visualizer is
+		// one actor standing in for the whole level's collision, and it is built from the actors most likely to be
+		// selected at that moment — so an additive selection leaves the gizmo and the details panel on geometry the
+		// user has just replaced their view of, and dragging it moves the source out from under the merge.
+		//
+		// Notified, unlike the select this replaced: with the deselect above passing false, nothing else would call
+		// NoteSelectionChange and the details panel would sit on the outgoing selection.
+		GEditor->SelectNone(false, true);
+		GEditor->SelectActor(NewVisualizer, true, true, true, true);
 	}
 }
 

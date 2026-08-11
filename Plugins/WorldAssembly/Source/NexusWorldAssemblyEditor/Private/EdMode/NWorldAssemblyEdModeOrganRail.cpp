@@ -166,6 +166,15 @@ TAttribute<bool> FNWorldAssemblyEdModeOrganRail::GetAvailable() const
 	return TAttribute<bool>::CreateStatic(&FNWorldAssemblyEditorUtils::IsOrganComponentPresentInCurrentWorld);
 }
 
+bool FNWorldAssemblyEdModeOrganRail::ShouldAutoSelect() const
+{
+	// The other half of the pair the level can be: a level holding organs is one that assembles cells rather than
+	// authors one, and generating from them is what the mode is there to do. Second to Cell only because a level is
+	// meant to be one or the other — see AddOrganVolume_CanExecute — so the two can only both apply to data that
+	// predates that rule.
+	return true;
+}
+
 /** @return A combo box naming the selected organ, and listing the level's others to switch to. */
 static TSharedRef<SWidget> CreateOrganPicker()
 {

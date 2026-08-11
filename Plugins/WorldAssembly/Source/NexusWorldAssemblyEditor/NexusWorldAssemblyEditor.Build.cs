@@ -2,7 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 namespace UnrealBuildTool.Rules
-{	
+{
 	public class NexusWorldAssemblyEditor : ModuleRules
 	{
 		public NexusWorldAssemblyEditor(ReadOnlyTargetRules Target) : base(Target)
@@ -15,8 +15,6 @@ namespace UnrealBuildTool.Rules
 					"Core",
 					"DataValidation",
 					"RHI",
-					// Supplies FToolWidget_DragBoxPosition, persisted on UNWorldAssemblyEditorUserSettings, and
-					// UE::ToolWidgets::SDraggableBoxOverlay, which floats the edit mode's rail over the viewport.
 					"ToolWidgets",
 					"UnrealEd"
 				]
@@ -37,7 +35,6 @@ namespace UnrealBuildTool.Rules
 					"EditorSubsystem",
 					"Engine",
 					"GameplayTags",
-					// Supplies FImage/FImage::ResizeTo, used to scale the badge stamped into NCell thumbnails.
 					"ImageCore",
 					"InputCore",
 					"InteractiveToolsFramework",
@@ -51,14 +48,14 @@ namespace UnrealBuildTool.Rules
 					"UMGEditor"
 				]
 			);
-			
-			
-			
+
+
+
 			// NEXUS
 			PublicDependencyModuleNames.AddRange(["NexusCoreEditor", "NexusWorldAssembly"]);
 			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusToolingEditor", "NexusUI", "NexusUIEditor"]);
 
-			ShortName = "NexusWorldAssemblyEditor";						
+			ShortName = "NexusWorldAssemblyEditor";
 		}
 	}
 }
