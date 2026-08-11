@@ -246,6 +246,17 @@ TAttribute<bool> FNWorldAssemblyEdModeCellRail::GetAvailable() const
 	return TAttribute<bool>::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld);
 }
 
+bool FNWorldAssemblyEdModeCellRail::ShouldAutoSelect() const
+{
+	// A level holding a cell actor is a cell, and authoring it is the whole of what the mode is for there — so opening
+	// on World, which offers only the Add Cell Actor that has already been run, wastes the user's first click. No test
+	// of its own: available already means the level has a cell, which is the same question.
+	//
+	// Cell rather than Cell Data or Junction, which share that availability: those two are views onto a cell that
+	// already exists, while this is where it is built.
+	return true;
+}
+
 TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
 {
 	const FNWorldAssemblyEdModeToolCommands& ToolCommands = FNWorldAssemblyEdModeToolCommands::Get();

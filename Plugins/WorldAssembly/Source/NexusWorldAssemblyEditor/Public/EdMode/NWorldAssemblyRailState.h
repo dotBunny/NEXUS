@@ -60,6 +60,18 @@ public:
 	void RefreshAvailability();
 
 private:
+	/**
+	 * Move the selection onto the category the level's contents point at, if there is one.
+	 *
+	 * @note Runs once, from the constructor — which is once per mode entry, since the toolkit holding this is rebuilt
+	 *       every time the mode opens. Nothing re-seeds afterwards: past that first frame the selection is the user's,
+	 *       and the only thing that moves it is RefreshAvailability's fallback taking it off a category that has gone.
+	 * @note Rail order is the precedence, so a level somehow holding both a cell and organs opens on Cell. The two are
+	 *       mutually exclusive by rule — see FNWorldAssemblyEdModeWorldRail's add commands — so this only decides for
+	 *       data authored before that rule existed.
+	 */
+	void SeedActiveIndex();
+
 	/** The categories, in rail order. */
 	TArray<TSharedRef<FNWorldAssemblyEdModeRail>> Rails;
 

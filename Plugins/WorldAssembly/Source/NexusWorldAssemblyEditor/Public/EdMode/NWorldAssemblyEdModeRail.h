@@ -69,6 +69,16 @@ public:
 	 */
 	virtual TAttribute<bool> GetAvailable() const { return TAttribute<bool>(); }
 
+	/**
+	 * @return true when a level this category is available in is a level *about* this category, so the mode should open
+	 *         on it rather than on the first category it finds.
+	 * @note Read once, when FNWorldAssemblyRailState seeds itself as the mode opens — not polled like GetAvailable.
+	 *       Whatever the user picks afterwards stands for the rest of the session, however the level changes under it.
+	 * @note Only consulted for a category that is available, so one cannot be opened on while its button is hidden.
+	 *       Where several say yes, rail order settles it.
+	 */
+	virtual bool ShouldAutoSelect() const { return false; }
+
 	/** @return This category's own content — its groups of buttons — or null for a category with none. */
 	virtual TSharedPtr<SWidget> CreateContent() const { return nullptr; }
 

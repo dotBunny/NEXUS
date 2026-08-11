@@ -8,19 +8,14 @@
 FNWorldAssemblyRailState::FNWorldAssemblyRailState(TArray<TSharedRef<FNWorldAssemblyEdModeRail>> InRails)
 	: Rails(MoveTemp(InRails))
 {
+	// Leaves the selection on the first available category — its fallback fires here, because the INDEX_NONE this
+	// starts on is never available. First available rather than the first outright: Cell and Junction both sit above
+	// nothing when the level has no cell actor, and opening on a category whose button is hidden would show content
+	// with no way back to it.
 	RefreshAvailability();
 
-	// First available category rather than the first one outright: Cell and Junction both sit above nothing when the
-	// level has no cell actor, and opening on a category whose button is hidden would show content with no way back
-	// to it. RefreshAvailability cannot do this itself — it only moves off a category that has become unavailable,
-	// and INDEX_NONE was never available to begin with.
-	for (int32 Index = 0; Index < Rails.Num(); Index++)
-	{
-		if (!IsAvailable(Index)) continue;
-
-		ActiveIndex = Index;
-		break;
-	}
+	// ...which what the level actually holds then overrides.
+	SeedActiveIndex();
 }
 
 bool FNWorldAssemblyRailState::IsAvailable(const int32 Index) const
@@ -34,6 +29,19 @@ void FNWorldAssemblyRailState::SetActiveIndex(const int32 Index)
 
 	ActiveIndex = Index;
 	UNWorldAssemblyEdMode::EndActiveTool();
+}
+
+void FNWorldAssemblyRailState::SeedActiveIndex()
+{
+	for (int32 Index = 0; Index < Rails.Num(); Index++)
+	{
+		if (!IsAvailable(Index) || !Rails[Index]->ShouldAutoSelect()) continue;
+
+		// Assigned rather than set through SetActiveIndex: there is no tool running to end at construction, and the
+		// mode this would ask to end one on is still being entered.
+		ActiveIndex = Index;
+		return;
+	}
 }
 
 void FNWorldAssemblyRailState::RefreshAvailability()

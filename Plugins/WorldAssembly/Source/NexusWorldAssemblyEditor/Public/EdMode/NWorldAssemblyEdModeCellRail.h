@@ -66,6 +66,7 @@ public:
 	//~FNWorldAssemblyEdModeRail
 	virtual TSharedPtr<FUICommandInfo> GetCategoryCommand() const override;
 	virtual TAttribute<bool> GetAvailable() const override;
+	virtual bool ShouldAutoSelect() const override;
 	virtual TSharedPtr<SWidget> CreateContent() const override;
 	//End FNWorldAssemblyEdModeRail
 

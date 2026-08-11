@@ -36,6 +36,9 @@ public:
 	/** @return A predicate requiring an organ in the level; Add Organ Volume on the World rail is what brings this back. */
 	virtual TAttribute<bool> GetAvailable() const override;
 
+	/** @return Always true: a level holding organs is a level assembled from them, so the mode opens here. */
+	virtual bool ShouldAutoSelect() const override;
+
 	/**
 	 * @return The world-wide commands, then the Selected Organ section — the organ picker over the commands acting on
 	 *         what it names — then the operations list.
