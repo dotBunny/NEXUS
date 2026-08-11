@@ -320,26 +320,29 @@ TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateCheckList(const TArray<TSha
 			[
 				SNew(SCheckBox)
 				.ToolTipText(Command->GetDescription())
+				// The whole of why a long label used to run off the panel rather than shortening. SCheckBox arranges its
+				// content at the content's own desired width by default, so the label was handed however much room it
+				// asked for and the panel's border clipped whatever did not fit — no width was ever withheld from it, so
+				// neither wrapping nor an overflow policy had anything to act on. Off, the content slot fills the row,
+				// which is what gives the policy below a bound to ellipsize against. The engine's own filter bar turns it
+				// off for the same reason.
+				.CheckBoxContentUsesAutoWidth(false)
 				.IsChecked_Lambda([Commands_CommandList, CommandRef]() { return Commands_CommandList->GetCheckState(CommandRef); })
 				.IsEnabled_Lambda([Commands_CommandList, CommandRef]() { return Commands_CommandList->CanExecuteAction(CommandRef); })
 				// The command's own Execute already flips the underlying setting, so the new check state is discarded:
 				// these are toggles, and driving them from the reported state would double-apply the change.
 				.OnCheckStateChanged_Lambda([Commands_CommandList, CommandRef](ECheckBoxState) { Commands_CommandList->ExecuteAction(CommandRef); })
 				[
-					// SCheckBox sizes itself to its content, so a long label pushes the row past the panel rather than
-					// wrapping — the box has no width of its own to wrap against. Filling a slot gives it one: the row
-					// is now as wide as the group, and AutoWrapText has a bound to break on.
-					SNew(SBox)
-					.HAlign(HAlign_Fill)
-					[
-						SNew(STextBlock)
-						.Text(Command->GetLabel())
-						.Margin(FMargin(4.0f, 0.0f, 0.0f, 0.0f))
-						.AutoWrapText(true)
-						// The checkbox label is a name, not a heading — the same dim the group's own heading uses reads
-						// as secondary next to the palette buttons rather than competing with them.
-						.ColorAndOpacity(FStyleColors::Foreground)
-					]
+					SNew(STextBlock)
+					.Text(Command->GetLabel())
+					.Margin(FMargin(4.0f, 0.0f, 0.0f, 0.0f))
+					// Shortened rather than wrapped. A setting's name belongs on the line its checkbox is on, and wrapping
+					// it puts the rows out of step with each other at exactly the width the panel is hardest to read at.
+					// The tooltip already carries the description, so nothing is lost to the ellipsis that was not.
+					.OverflowPolicy(ETextOverflowPolicy::Ellipsis)
+					// The checkbox label is a name, not a heading — the same dim the group's own heading uses reads
+					// as secondary next to the palette buttons rather than competing with them.
+					.ColorAndOpacity(FStyleColors::Foreground)
 				]
 			];
 	}

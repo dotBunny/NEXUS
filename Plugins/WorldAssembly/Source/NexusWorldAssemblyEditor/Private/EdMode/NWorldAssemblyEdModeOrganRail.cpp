@@ -256,7 +256,7 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeOrganRail::CreateContent() const
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
-			CreateGroupSeparator()
+			CreateGroupSeparator(LOCTEXT("OrganSelectedOrganSeparator", "SELECTED ORGAN"))
 		]
 
 		+ SVerticalBox::Slot()

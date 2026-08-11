@@ -141,6 +141,8 @@ protected:
 	 * @note For commands that read as persistent settings rather than actions. The same commands rendered into a
 	 *       toolbar become icon buttons whose state is only legible from their highlight, which is the wrong shape
 	 *       for something the user is setting rather than doing.
+	 * @note A label stays on one line and ellipsizes when the panel is too narrow for it, so the rows keep step with
+	 *       each other at any width. The command's description is the tooltip, which is where a shortened one is read.
 	 */
 	TSharedRef<SWidget> CreateCheckList(const TArray<TSharedPtr<FUICommandInfo>>& Commands) const;
 

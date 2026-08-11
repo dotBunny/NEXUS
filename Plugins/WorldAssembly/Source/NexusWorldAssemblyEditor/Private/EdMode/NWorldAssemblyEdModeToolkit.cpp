@@ -22,13 +22,13 @@
 static constexpr float RailInset = 16.0f;
 
 /** Smallest the user may drag the panel, below which the titled groups start ellipsizing their labels. */
-static constexpr float PanelMinimumWidth = 160.0f;
+static constexpr float PanelMinimumWidth = 165.0f;
 
 /** Largest the user may drag the panel; past this it stops reading as an overlay. */
-static constexpr float PanelMaximumWidth = 520.0f;
+static constexpr float PanelMaximumWidth = 232.0f;
 
 /** Width the panel opens at before the user has resized it. */
-static constexpr float PanelDefaultWidth = 320.0f;
+static constexpr float PanelDefaultWidth = 232.0f;
 
 void FNWorldAssemblyEdModeToolkit::Init(const TSharedPtr<IToolkitHost>& InitToolkitHost, TWeakObjectPtr<UEdMode> InOwningMode)
 {
