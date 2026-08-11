@@ -25,7 +25,7 @@ void SNWorldAssemblyRailPanel::Construct(const FArguments& InArgs)
 
 	if (State.IsValid())
 	{
-		for (const TSharedRef<FNWorldAssemblyEdModeRail>& Rail : State->GetRails())
+		for (const TSharedRef<FNEdModeRail>& Rail : State->GetRails())
 		{
 			ContentSwitcher->AddSlot()
 				[
@@ -53,7 +53,7 @@ void SNWorldAssemblyRailPanel::Construct(const FArguments& InArgs)
 	];
 }
 
-TSharedRef<SWidget> SNWorldAssemblyRailPanel::CreateCategoryContent(const TSharedRef<FNWorldAssemblyEdModeRail>& Rail)
+TSharedRef<SWidget> SNWorldAssemblyRailPanel::CreateCategoryContent(const TSharedRef<FNEdModeRail>& Rail)
 {
 	// Straight into the scroll box. A rail's content is already a column of groups, so stacking it inside a box of our
 	// own only added a layout pass — the pickers that used to need a slot above it are part of that column now.

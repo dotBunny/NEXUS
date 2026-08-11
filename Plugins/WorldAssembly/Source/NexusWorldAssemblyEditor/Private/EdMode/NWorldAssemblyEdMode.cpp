@@ -18,7 +18,7 @@
 #include "NWorldAssemblyEditorStyle.h"
 #include "NWorldAssemblyEditorSubsystem.h"
 #include "NWorldAssemblyEditorUserSettings.h"
-#include "EdMode/NWorldAssemblyEdModeToolkit.h"
+#include "EdMode/NWorldAssemblyModeToolkit.h"
 #include "EdMode/NWorldAssemblyEdModeToolCommands.h"
 #include "BaseGizmos/TransformGizmoUtil.h"
 #include "InteractiveToolManager.h"
@@ -419,7 +419,7 @@ UNWorldAssemblyEdMode::UNWorldAssemblyEdMode()
 
 void UNWorldAssemblyEdMode::CreateToolkit()
 {
-	Toolkit = MakeShared<FNWorldAssemblyEdModeToolkit>();
+	Toolkit = MakeShared<FNWorldAssemblyModeToolkit>();
 }
 
 void UNWorldAssemblyEdMode::BindCommands()

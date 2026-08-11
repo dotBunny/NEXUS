@@ -1,17 +1,18 @@
 // Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "EdMode/NWorldAssemblyEdModeToolkit.h"
+#include "EdMode/NWorldAssemblyModeToolkit.h"
 
 #include "IAssetViewport.h"
+#include "NUIEditorStyle.h"
 #include "NWorldAssemblyEditorStyle.h"
 #include "NWorldAssemblyEditorUserSettings.h"
 #include "Overlay/SDraggableBoxOverlay.h"
-#include "EdMode/NWorldAssemblyEdModeCellDataRail.h"
-#include "EdMode/NWorldAssemblyEdModeCellRail.h"
-#include "EdMode/NWorldAssemblyEdModeJunctionRail.h"
-#include "EdMode/NWorldAssemblyEdModeOrganRail.h"
-#include "EdMode/NWorldAssemblyEdModeWorldRail.h"
+#include "EdMode/NCellDataEdModeRail.h"
+#include "EdMode/NCellEdModeRail.h"
+#include "EdMode/NJunctionEdModeRail.h"
+#include "EdMode/NOrganEdModeRail.h"
+#include "EdMode/NWorldEdModeRail.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/SNWorldAssemblyRail.h"
 #include "Widgets/SNWorldAssemblyRailPanel.h"
@@ -30,7 +31,7 @@ static constexpr float PanelMaximumWidth = 232.0f;
 /** Width the panel opens at before the user has resized it. */
 static constexpr float PanelDefaultWidth = 232.0f;
 
-void FNWorldAssemblyEdModeToolkit::Init(const TSharedPtr<IToolkitHost>& InitToolkitHost, TWeakObjectPtr<UEdMode> InOwningMode)
+void FNWorldAssemblyModeToolkit::Init(const TSharedPtr<IToolkitHost>& InitToolkitHost, TWeakObjectPtr<UEdMode> InOwningMode)
 {
 	FModeToolkit::Init(InitToolkitHost, InOwningMode);
 
@@ -40,11 +41,11 @@ void FNWorldAssemblyEdModeToolkit::Init(const TSharedPtr<IToolkitHost>& InitTool
 	// After Init, which is what establishes the host this subscribes to.
 	if (IsHosted())
 	{
-		GetToolkitHost()->OnActiveViewportChanged().AddSP(this, &FNWorldAssemblyEdModeToolkit::OnActiveViewportChanged);
+		GetToolkitHost()->OnActiveViewportChanged().AddSP(this, &FNWorldAssemblyModeToolkit::OnActiveViewportChanged);
 	}
 }
 
-FNWorldAssemblyEdModeToolkit::~FNWorldAssemblyEdModeToolkit()
+FNWorldAssemblyModeToolkit::~FNWorldAssemblyModeToolkit()
 {
 	// IsHosted before GetToolkitHost, not a check on what it returns: GetToolkitHost hands back a TSharedRef and
 	// pins the weak host inside itself, so it asserts rather than returning null once the host is gone. On editor
@@ -68,12 +69,12 @@ FNWorldAssemblyEdModeToolkit::~FNWorldAssemblyEdModeToolkit()
 	OverlayViewport.Reset();
 }
 
-FText FNWorldAssemblyEdModeToolkit::GetBaseToolkitName() const
+FText FNWorldAssemblyModeToolkit::GetBaseToolkitName() const
 {
 	return LOCTEXT("NWorldAssemblyEdModeToolkit_Name", "World Assembly");
 }
 
-void FNWorldAssemblyEdModeToolkit::RegisterRails()
+void FNWorldAssemblyModeToolkit::RegisterRails()
 {
 	// The rail buttons resolve their actions against the toolkit's own command list, so fold in the per-category lists
 	// the commands were already mapped into. This is also what scopes them to the mode: the Organ bindings used to be
@@ -82,24 +83,24 @@ void FNWorldAssemblyEdModeToolkit::RegisterRails()
 	// Every list is folded in before any rail is built, and a rail's own buttons resolve against the union rather than
 	// against its category alone — which is what lets a category offer a command another one declared.
 	const TSharedRef<FUICommandList> ToolkitCommandList = GetToolkitCommands();
-	ToolkitCommandList->Append(FNWorldAssemblyEdModeWorldRail::GetCommandList());
-	ToolkitCommandList->Append(FNWorldAssemblyEdModeCellRail::GetCommandList());
-	ToolkitCommandList->Append(FNWorldAssemblyEdModeCellDataRail::GetCommandList());
-	ToolkitCommandList->Append(FNWorldAssemblyEdModeJunctionRail::GetCommandList());
-	ToolkitCommandList->Append(FNWorldAssemblyEdModeOrganRail::GetCommandList());
+	ToolkitCommandList->Append(FNWorldEdModeRail::GetCommandList());
+	ToolkitCommandList->Append(FNCellEdModeRail::GetCommandList());
+	ToolkitCommandList->Append(FNCellDataEdModeRail::GetCommandList());
+	ToolkitCommandList->Append(FNJunctionEdModeRail::GetCommandList());
+	ToolkitCommandList->Append(FNOrganEdModeRail::GetCommandList());
 
 	// Order here is the order of the buttons on the strip.
-	TArray<TSharedRef<FNWorldAssemblyEdModeRail>> Rails;
-	Rails.Add(MakeShared<FNWorldAssemblyEdModeWorldRail>(ToolkitCommandList));
-	Rails.Add(MakeShared<FNWorldAssemblyEdModeCellRail>(ToolkitCommandList));
-	Rails.Add(MakeShared<FNWorldAssemblyEdModeCellDataRail>(ToolkitCommandList));
-	Rails.Add(MakeShared<FNWorldAssemblyEdModeJunctionRail>(ToolkitCommandList));
-	Rails.Add(MakeShared<FNWorldAssemblyEdModeOrganRail>(ToolkitCommandList));
+	TArray<TSharedRef<FNEdModeRail>> Rails;
+	Rails.Add(MakeShared<FNWorldEdModeRail>(ToolkitCommandList));
+	Rails.Add(MakeShared<FNCellEdModeRail>(ToolkitCommandList));
+	Rails.Add(MakeShared<FNCellDataEdModeRail>(ToolkitCommandList));
+	Rails.Add(MakeShared<FNJunctionEdModeRail>(ToolkitCommandList));
+	Rails.Add(MakeShared<FNOrganEdModeRail>(ToolkitCommandList));
 
-	RailState = MakeShared<FNWorldAssemblyRailState>(MoveTemp(Rails));
+	RailState = MakeShared<FNWorldAssemblyRails>(MoveTemp(Rails));
 }
 
-void FNWorldAssemblyEdModeToolkit::CreateOverlays()
+void FNWorldAssemblyModeToolkit::CreateOverlays()
 {
 	// See the destructor: GetToolkitHost asserts rather than returning null, so the guard has to be IsHosted.
 	if (!IsHosted()) return;
@@ -119,7 +120,7 @@ void FNWorldAssemblyEdModeToolkit::CreateOverlays()
 		.Content()
 		[
 			SNew(SBorder)
-			.BorderImage(FNWorldAssemblyEditorStyle::Get().GetBrush("WorldAssemblyEd.RailBackground"))
+			.BorderImage(FNUIEditorStyle::Get().GetBrush("Rail.RailBackground"))
 			// The largest of the three terms deciding the strip's gutter, the other two being
 			// WorldAssemblyEd.CategoryToolBar's ButtonPadding of 2 and its IconPadding of 4 — together putting every
 			// icon 13 off the rounded edge, which is what Mesh Terrain's palette measures out to.
@@ -164,7 +165,7 @@ void FNWorldAssemblyEdModeToolkit::CreateOverlays()
 		[
 			SNew(SBorder)
 			// The darker half of the pair; see WorldAssemblyEd.RailBackground for the lighter one on the strip.
-			.BorderImage(FNWorldAssemblyEditorStyle::Get().GetBrush("WorldAssemblyEd.PanelBackground"))
+			.BorderImage(FNUIEditorStyle::Get().GetBrush("Rail.PanelBackground"))
 			// The panel's gutter is 8 on every side, and these two numbers are whatever is left of that once the groups
 			// inside have carried their share: they claim 4 across (the inset their buttons and backings line up on)
 			// and GroupVerticalInset down, so this makes up 4 and 2 respectively.
@@ -182,7 +183,7 @@ void FNWorldAssemblyEdModeToolkit::CreateOverlays()
 	GetToolkitHost()->AddViewportOverlayWidget(PanelOverlay.ToSharedRef(), OverlayViewport);
 }
 
-void FNWorldAssemblyEdModeToolkit::SavePanelLayout() const
+void FNWorldAssemblyModeToolkit::SavePanelLayout() const
 {
 	if (!PanelOverlay.IsValid()) return;
 
@@ -192,7 +193,7 @@ void FNWorldAssemblyEdModeToolkit::SavePanelLayout() const
 	Settings->SaveConfig();
 }
 
-void FNWorldAssemblyEdModeToolkit::OnActiveViewportChanged(TSharedPtr<IAssetViewport> OldViewport, TSharedPtr<IAssetViewport> NewViewport)
+void FNWorldAssemblyModeToolkit::OnActiveViewportChanged(TSharedPtr<IAssetViewport> OldViewport, TSharedPtr<IAssetViewport> NewViewport)
 {
 	if (!IsHosted()) return;
 

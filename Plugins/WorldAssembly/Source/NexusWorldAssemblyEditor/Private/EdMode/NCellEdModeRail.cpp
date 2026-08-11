@@ -1,10 +1,9 @@
 // Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "EdMode/NWorldAssemblyEdModeCellRail.h"
+#include "EdMode/NCellEdModeRail.h"
 
 #include "Editor.h"
-#include "NEditorStyle.h"
 #include "NEditorUtils.h"
 #include "NUIEditorStyle.h"
 #include "NWorldAssemblyEditorCommands.h"
@@ -24,22 +23,22 @@
 
 #define LOCTEXT_NAMESPACE "NexusWorldAssemblyEditor"
 
-TSharedPtr<FUICommandList> FNWorldAssemblyEdModeCellRail::CategoryCommandList;
+TSharedPtr<FUICommandList> FNCellEdModeRail::CategoryCommandList;
 
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellRail::CommandInfo_SelectActor;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellRail::CommandInfo_TagIgnore;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellRail::CommandInfo_CalculateAll;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellRail::CommandInfo_CalculateBounds;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellRail::CommandInfo_CalculateHull;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellRail::CommandInfo_CalculateVoxelData;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellRail::CommandInfo_ToggleDrawVoxelData;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellRail::CommandInfo_ToggleBoundsCalculateOnSave;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellRail::CommandInfo_ToggleHullCalculateOnSave;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellRail::CommandInfo_ToggleHullAllowNonConvex;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellRail::CommandInfo_ToggleVoxelCalculateOnSave;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellRail::CommandInfo_ToggleVoxelData;
+TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_SelectActor;
+TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_TagIgnore;
+TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_CalculateAll;
+TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_CalculateBounds;
+TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_CalculateHull;
+TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_CalculateVoxelData;
+TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_ToggleDrawVoxelData;
+TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_ToggleBoundsCalculateOnSave;
+TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_ToggleHullCalculateOnSave;
+TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_ToggleHullAllowNonConvex;
+TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_ToggleVoxelCalculateOnSave;
+TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_ToggleVoxelData;
 
-void FNWorldAssemblyEdModeCellRail::RegisterCommands(const TSharedRef<FBindingContext>& Context)
+void FNCellEdModeRail::RegisterCommands(const TSharedRef<FBindingContext>& Context)
 {
 	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_CalculateAll,
 		"NWorldAssembly.NCell.CalculateAll",
@@ -151,30 +150,30 @@ void FNWorldAssemblyEdModeCellRail::RegisterCommands(const TSharedRef<FBindingCo
 	});
 }
 
-TSharedRef<FUICommandList> FNWorldAssemblyEdModeCellRail::GetCommandList()
+TSharedRef<FUICommandList> FNCellEdModeRail::GetCommandList()
 {
 	return CategoryCommandList.ToSharedRef();
 }
 
-void FNWorldAssemblyEdModeCellRail::SelectActor()
+void FNCellEdModeRail::SelectActor()
 {
 	GEditor->SelectNone(false, true);
 	GEditor->SelectActor(FNWorldAssemblyEditorUtils::GetCellActorFromCurrentWorld(),
 		true, true, true, true);
 }
 
-bool FNWorldAssemblyEdModeCellRail::SelectActor_CanExecute()
+bool FNCellEdModeRail::SelectActor_CanExecute()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
 	return UNWorldAssemblyEdMode::HasCellActor() && GEditor->CanSelectActor(UNWorldAssemblyEdMode::GetCellActor(), false);
 }
 
-bool FNWorldAssemblyEdModeCellRail::Calculate_CanExecute()
+bool FNCellEdModeRail::Calculate_CanExecute()
 {
 	return FNWorldAssemblyEditorUtils::CanEditCell() && UNWorldAssemblyEdMode::IsTerrainSettled();
 }
 
-bool FNWorldAssemblyEdModeCellRail::CalculateVoxelData_CanExecute()
+bool FNCellEdModeRail::CalculateVoxelData_CanExecute()
 {
 	if (!Calculate_CanExecute()) return false;
 
@@ -183,7 +182,7 @@ bool FNWorldAssemblyEdModeCellRail::CalculateVoxelData_CanExecute()
 	return CellActor->GetCellRoot()->Details.VoxelSettings.bUseVoxelData;
 }
 
-void FNWorldAssemblyEdModeCellRail::TagIgnore()
+void FNCellEdModeRail::TagIgnore()
 {
 	FNWorldAssemblyEditorTagUtils::ToggleTagOnSelection(
 		NEXUS::WorldAssembly::ActorTags::CellIgnore,
@@ -191,7 +190,7 @@ void FNWorldAssemblyEdModeCellRail::TagIgnore()
 		NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEdModeCellRail_TagIgnore_Remove", "Remove CellIgnore Tags"));
 }
 
-FSlateIcon FNWorldAssemblyEdModeCellRail::TagIgnoreIcon()
+FSlateIcon FNCellEdModeRail::TagIgnoreIcon()
 {
 	// Asks the same question ToggleTagOnSelection asks to pick its transaction, so the button cannot promise one thing
 	// and do the other: any tagged actor in the selection means the next click strips the tag from all of them.
@@ -201,7 +200,7 @@ FSlateIcon FNWorldAssemblyEdModeCellRail::TagIgnoreIcon()
 	return FSlateIcon(FNUIEditorStyle::GetStyleSetName(), bWouldRemove ? "Command.ToggleOn" : "Command.ToggleOff");
 }
 
-bool FNWorldAssemblyEdModeCellRail::TagIgnore_CanExecute()
+bool FNCellEdModeRail::TagIgnore_CanExecute()
 {
 	// Tagging writes to the actors and opens a transaction, so it is authoring work like the rest of the cell
 	// commands — not something to run against a play world.
@@ -212,7 +211,7 @@ bool FNWorldAssemblyEdModeCellRail::TagIgnore_CanExecute()
 		&& !FNWorldAssemblyEditorUtils::IsCellActorSelected();
 }
 
-void FNWorldAssemblyEdModeCellRail::ToggleDrawVoxelData()
+void FNCellEdModeRail::ToggleDrawVoxelData()
 {
 	switch (UNWorldAssemblyEdMode::GetCellVoxelMode())
 	{
@@ -228,17 +227,17 @@ void FNWorldAssemblyEdModeCellRail::ToggleDrawVoxelData()
 	}
 }
 
-bool FNWorldAssemblyEdModeCellRail::ToggleDrawVoxelData_IsActionChecked()
+bool FNCellEdModeRail::ToggleDrawVoxelData_IsActionChecked()
 {
 	return UNWorldAssemblyEdMode::GetCellVoxelMode() != UNWorldAssemblyEdMode::ENCellVoxelMode::None;
 }
 
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellRail::GetCategoryCommand() const
+TSharedPtr<FUICommandInfo> FNCellEdModeRail::GetCategoryCommand() const
 {
 	return FNWorldAssemblyEdModePaletteCommands::Get().LoadCellPalette;
 }
 
-TAttribute<bool> FNWorldAssemblyEdModeCellRail::GetAvailable() const
+TAttribute<bool> FNCellEdModeRail::GetAvailable() const
 {
 	// Level contents rather than the focused actor. The category is worth showing whenever the level has a cell to
 	// author, whether or not one is selected this instant; the buttons inside it are what go dead when nothing is
@@ -246,7 +245,7 @@ TAttribute<bool> FNWorldAssemblyEdModeCellRail::GetAvailable() const
 	return TAttribute<bool>::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld);
 }
 
-bool FNWorldAssemblyEdModeCellRail::ShouldAutoSelect() const
+bool FNCellEdModeRail::ShouldAutoSelect() const
 {
 	// A level holding a cell actor is a cell, and authoring it is the whole of what the mode is for there — so opening
 	// on World, which offers only the Add Cell Actor that has already been run, wastes the user's first click. No test
@@ -257,7 +256,7 @@ bool FNWorldAssemblyEdModeCellRail::ShouldAutoSelect() const
 	return true;
 }
 
-TSharedPtr<SWidget> FNWorldAssemblyEdModeCellRail::CreateContent() const
+TSharedPtr<SWidget> FNCellEdModeRail::CreateContent() const
 {
 	const FNWorldAssemblyEdModeToolCommands& ToolCommands = FNWorldAssemblyEdModeToolCommands::Get();
 

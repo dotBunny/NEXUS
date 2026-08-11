@@ -1,4 +1,4 @@
-// Copyright dotBunny Inc. All Rights Reserved.
+﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
@@ -10,17 +10,8 @@ class FUICommandInfo;
 class FUICommandList;
 class SWidget;
 
-/**
- * One category on the World Assembly edit mode's toolkit rail.
- *
- * A rail owns everything specific to its category: the command its rail button is built from, whether that button is
- * shown at all, the picker naming what it acts on, and the buttons beneath. SNWorldAssemblyRail owns the shared frame
- * — laying the buttons out, switching content on the active category, the active-tool row and the warning footer — so
- * a rail never has to know how it is being presented.
- *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
- */
-class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyEdModeRail
+
+class NEXUSUIEDITOR_API FNEdModeRail
 {
 public:
 	/**
@@ -50,9 +41,9 @@ public:
 	/**
 	 * @param InCommandList The toolkit's command list, which every button this rail builds resolves against.
 	 */
-	explicit FNWorldAssemblyEdModeRail(const TSharedRef<FUICommandList>& InCommandList) : CommandList(InCommandList) {}
+	explicit FNEdModeRail(const TSharedRef<FUICommandList>& InCommandList) : CommandList(InCommandList) {}
 
-	virtual ~FNWorldAssemblyEdModeRail() = default;
+	virtual ~FNEdModeRail() = default;
 
 	/** @return The command this category's rail button is built from. */
 	virtual TSharedPtr<FUICommandInfo> GetCategoryCommand() const = 0;
@@ -64,16 +55,12 @@ public:
 	 *       actor, not off one being focused: focus comes and goes with every selection change, and a button hiding
 	 *       on that would vanish constantly and shuffle the ones below it under the cursor. Whether the commands
 	 *       inside the category can run is each command's own business, and they already grey themselves out.
-	 * @remark Polled on a timer by SNWorldAssemblyRail rather than read per-frame, so it may walk the level — Cell's
-	 *         and Junction's do exactly that.
 	 */
 	virtual TAttribute<bool> GetAvailable() const { return TAttribute<bool>(); }
 
 	/**
 	 * @return true when a level this category is available in is a level *about* this category, so the mode should open
 	 *         on it rather than on the first category it finds.
-	 * @note Read once, when FNWorldAssemblyRailState seeds itself as the mode opens — not polled like GetAvailable.
-	 *       Whatever the user picks afterwards stands for the rest of the session, however the level changes under it.
 	 * @note Only consulted for a category that is available, so one cannot be opened on while its button is hidden.
 	 *       Where several say yes, rail order settles it.
 	 */
@@ -107,7 +94,7 @@ protected:
 	 * @return A two-column toolbar widget, drawn straight onto the panel.
 	 * @note What the engine's own toolkit builder renders a palette as, reproduced here so a rail can head and split
 	 *       one. It is a different widget from CreateCommandPalette's, not a wider setting on it: this is the plugin's
-	 *       WorldAssemblyEd.CommandGrid style — SlimPaletteToolBar with its backing cleared — on
+	 *       Rail.CommandGrid style — SlimPaletteToolBar with its backing cleared — on
 	 *       FSlimHorizontalUniformToolBarBuilder, whose SUniformWrapPanel fills its width across the style's two columns.
 	 *       Labels sit beside their icons here rather than under them, so a row can carry as much text as half the
 	 *       panel is wide.

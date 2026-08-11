@@ -8,11 +8,11 @@
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyEditorQuickAssembly.h"
 #include "Framework/Commands/UICommandList.h"
-#include "EdMode/NWorldAssemblyEdModeCellDataRail.h"
-#include "EdMode/NWorldAssemblyEdModeCellRail.h"
-#include "EdMode/NWorldAssemblyEdModeJunctionRail.h"
-#include "EdMode/NWorldAssemblyEdModeOrganRail.h"
-#include "EdMode/NWorldAssemblyEdModeWorldRail.h"
+#include "EdMode/NCellDataEdModeRail.h"
+#include "EdMode/NCellEdModeRail.h"
+#include "EdMode/NJunctionEdModeRail.h"
+#include "EdMode/NOrganEdModeRail.h"
+#include "EdMode/NWorldEdModeRail.h"
 
 void FNWorldAssemblyEditorCommands::RegisterCommands()
 {
@@ -20,11 +20,11 @@ void FNWorldAssemblyEditorCommands::RegisterCommands()
 
 	// The rails own their own commands, so registration goes through them. Static, and deliberately so: this runs once
 	// at module startup, while a rail instance is built fresh every time the edit mode is opened.
-	FNWorldAssemblyEdModeWorldRail::RegisterCommands(Context);
-	FNWorldAssemblyEdModeCellRail::RegisterCommands(Context);
-	FNWorldAssemblyEdModeCellDataRail::RegisterCommands(Context);
-	FNWorldAssemblyEdModeJunctionRail::RegisterCommands(Context);
-	FNWorldAssemblyEdModeOrganRail::RegisterCommands(Context);
+	FNWorldEdModeRail::RegisterCommands(Context);
+	FNCellEdModeRail::RegisterCommands(Context);
+	FNCellDataEdModeRail::RegisterCommands(Context);
+	FNJunctionEdModeRail::RegisterCommands(Context);
+	FNOrganEdModeRail::RegisterCommands(Context);
 
 	// No rail of its own — driven from the tool menu and the subsystem — so it stays a category class.
 	FNWorldAssemblyEditorQuickAssembly::Register(Context);

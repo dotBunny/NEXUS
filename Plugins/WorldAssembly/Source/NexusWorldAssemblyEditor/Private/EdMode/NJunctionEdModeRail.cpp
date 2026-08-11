@@ -1,7 +1,7 @@
 // Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "EdMode/NWorldAssemblyEdModeJunctionRail.h"
+#include "EdMode/NJunctionEdModeRail.h"
 
 #include "Cell/NCellJunctionComponent.h"
 #include "Editor.h"
@@ -25,10 +25,10 @@
 
 #define LOCTEXT_NAMESPACE "NexusWorldAssemblyEditor"
 
-TSharedPtr<FUICommandList> FNWorldAssemblyEdModeJunctionRail::CategoryCommandList;
+TSharedPtr<FUICommandList> FNJunctionEdModeRail::CategoryCommandList;
 
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeJunctionRail::CommandInfo_AddComponent;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeJunctionRail::CommandInfo_CollectComponents;
+TSharedPtr<FUICommandInfo> FNJunctionEdModeRail::CommandInfo_AddComponent;
+TSharedPtr<FUICommandInfo> FNJunctionEdModeRail::CommandInfo_CollectComponents;
 
 /**
  * @return Every junction component the current editor selection covers.
@@ -52,7 +52,7 @@ static TArray<UNCellJunctionComponent*> GetSelectedJunctions()
 	return Selected;
 }
 
-void FNWorldAssemblyEdModeJunctionRail::RegisterCommands(const TSharedRef<FBindingContext>& Context)
+void FNJunctionEdModeRail::RegisterCommands(const TSharedRef<FBindingContext>& Context)
 {
 	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_AddComponent,
 		"NWorldAssembly.NCellJunction.AddComponent",
@@ -76,12 +76,12 @@ void FNWorldAssemblyEdModeJunctionRail::RegisterCommands(const TSharedRef<FBindi
 	});
 }
 
-TSharedRef<FUICommandList> FNWorldAssemblyEdModeJunctionRail::GetCommandList()
+TSharedRef<FUICommandList> FNJunctionEdModeRail::GetCommandList()
 {
 	return CategoryCommandList.ToSharedRef();
 }
 
-bool FNWorldAssemblyEdModeJunctionRail::CanEditCellJunction()
+bool FNJunctionEdModeRail::CanEditCellJunction()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
 
@@ -90,12 +90,12 @@ bool FNWorldAssemblyEdModeJunctionRail::CanEditCellJunction()
 	return UNWorldAssemblyEdMode::HasCellActor() && FNEditorUtils::HasActorsSelected();
 }
 
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeJunctionRail::GetCategoryCommand() const
+TSharedPtr<FUICommandInfo> FNJunctionEdModeRail::GetCategoryCommand() const
 {
 	return FNWorldAssemblyEdModePaletteCommands::Get().LoadJunctionPalette;
 }
 
-TAttribute<bool> FNWorldAssemblyEdModeJunctionRail::GetAvailable() const
+TAttribute<bool> FNJunctionEdModeRail::GetAvailable() const
 {
 	// Junctions hang off cells, so the category is relevant exactly when the level has a cell to hang them off —
 	// the same test the Cell category uses, and level contents rather than the focused actor for the same reason.
@@ -167,7 +167,7 @@ static TSharedRef<SWidget> CreateJunctionPicker()
 		];
 }
 
-TSharedPtr<SWidget> FNWorldAssemblyEdModeJunctionRail::CreateContent() const
+TSharedPtr<SWidget> FNJunctionEdModeRail::CreateContent() const
 {
 	const FNWorldAssemblyEdModeToolCommands& ToolCommands = FNWorldAssemblyEdModeToolCommands::Get();
 

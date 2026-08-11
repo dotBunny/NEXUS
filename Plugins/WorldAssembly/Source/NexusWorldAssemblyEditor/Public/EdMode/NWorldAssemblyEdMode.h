@@ -4,13 +4,10 @@
 #pragma once
 
 #include "EditorModeManager.h"
-#include "NWorldAssemblyEditorColors.h"
-#include "NWorldAssemblyEditorModule.h"
 #include "Cell/NCellActor.h"
 #include "Developer/NDebugActor.h"
 #include "Tools/LegacyEdModeWidgetHelpers.h"
 #include "UObject/ObjectKey.h"
-#include "Visualizers/NCellRootComponentVisualizer.h"
 
 #include "NWorldAssemblyEdMode.generated.h"
 

@@ -16,7 +16,7 @@ namespace UnrealBuildTool.Rules
 					"DataValidation",
 					"RHI",
 					"ToolWidgets",
-					"UnrealEd"
+					"UnrealEd",
 				]
 			);
 
@@ -52,7 +52,7 @@ namespace UnrealBuildTool.Rules
 
 
 			// NEXUS
-			PublicDependencyModuleNames.AddRange(["NexusCoreEditor", "NexusWorldAssembly"]);
+			PublicDependencyModuleNames.AddRange(["NexusCoreEditor", "NexusUIEditor", "NexusWorldAssembly"]);
 			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusToolingEditor", "NexusUI", "NexusUIEditor"]);
 
 			ShortName = "NexusWorldAssemblyEditor";

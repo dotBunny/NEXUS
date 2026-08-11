@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "EdMode/NWorldAssemblyRailState.h"
+#include "EdMode/NWorldAssemblyRails.h"
 #include "Widgets/SCompoundWidget.h"
 
 /**
@@ -24,7 +24,7 @@ public:
 	SLATE_BEGIN_ARGS(SNWorldAssemblyRail) {}
 
 		/** Selection and availability, shared with the panel this strip drives. */
-		SLATE_ARGUMENT(TSharedPtr<FNWorldAssemblyRailState>, State)
+		SLATE_ARGUMENT(TSharedPtr<FNWorldAssemblyRails>, State)
 
 	SLATE_END_ARGS()
 
@@ -51,7 +51,7 @@ private:
 	EActiveTimerReturnType TickAvailability(double InCurrentTime, float InDeltaTime);
 
 	/** Selection and availability, shared with the panel. */
-	TSharedPtr<FNWorldAssemblyRailState> State;
+	TSharedPtr<FNWorldAssemblyRails> State;
 
 	/**
 	 * Command list carrying just the category actions.

@@ -3,6 +3,7 @@
 
 #include "Widgets/SNWorldAssemblyRail.h"
 
+#include "NUIEditorStyle.h"
 #include "NWorldAssemblyEditorStyle.h"
 #include "Framework/Commands/UICommandInfo.h"
 #include "Framework/Commands/UICommandList.h"
@@ -39,12 +40,12 @@ TSharedRef<SWidget> SNWorldAssemblyRail::CreateCategoryToolBar()
 	// Icon-only, on no background of its own — see WorldAssemblyEd.CategoryToolBar. Deliberately no SetLabelVisibility
 	// call: the style's ShowLabels is what suppresses the text, and setting visibility here would override it.
 	FVerticalToolBarBuilder ToolBarBuilder(CategoryCommandList, FMultiBoxCustomization::None);
-	ToolBarBuilder.SetStyle(&FNWorldAssemblyEditorStyle::Get(), "WorldAssemblyEd.CategoryToolBar");
+	ToolBarBuilder.SetStyle(&FNUIEditorStyle::Get(), "Rail.CategoryToolBar");
 
 	if (!State.IsValid()) return ToolBarBuilder.MakeWidget();
 
-	const TSharedPtr<FNWorldAssemblyRailState> RailState = State;
-	const TArray<TSharedRef<FNWorldAssemblyEdModeRail>>& Rails = RailState->GetRails();
+	const TSharedPtr<FNWorldAssemblyRails> RailState = State;
+	const TArray<TSharedRef<FNEdModeRail>>& Rails = RailState->GetRails();
 
 	for (int32 Index = 0; Index < Rails.Num(); Index++)
 	{

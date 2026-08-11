@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "EdMode/NWorldAssemblyRailState.h"
+#include "EdMode/NWorldAssemblyRails.h"
 #include "Toolkits/BaseToolkit.h"
 #include "Widgets/SNullWidget.h"
 
@@ -29,7 +29,7 @@ namespace UE::ToolWidgets
  *       movable one, and keeps both attached to whichever viewport is active.
  * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
-class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyEdModeToolkit final : public FModeToolkit
+class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyModeToolkit final : public FModeToolkit
 {
 public:
 	/**
@@ -38,7 +38,7 @@ public:
 	 * @remark Guarded on IsHosted rather than on what GetToolkitHost returns; see the definition for why the obvious
 	 *         null check does not work.
 	 */
-	virtual ~FNWorldAssemblyEdModeToolkit() override;
+	virtual ~FNWorldAssemblyModeToolkit() override;
 
 	//~FModeToolkit
 	virtual void Init(const TSharedPtr<IToolkitHost>& InitToolkitHost, TWeakObjectPtr<UEdMode> InOwningMode) override;
@@ -95,7 +95,7 @@ private:
 	void OnActiveViewportChanged(TSharedPtr<IAssetViewport> OldViewport, TSharedPtr<IAssetViewport> NewViewport);
 
 	/** Which category is selected and which are worth offering; read by both overlays. */
-	TSharedPtr<FNWorldAssemblyRailState> RailState;
+	TSharedPtr<FNWorldAssemblyRails> RailState;
 
 	/** The pinned category strip. */
 	TSharedPtr<UE::ToolWidgets::SDraggableBoxOverlay> RailOverlay;
