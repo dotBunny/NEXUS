@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "Components/PrimitiveComponent.h"
 #include "EngineUtils.h"
+#include "Developer/NDebugActor.h"
 #include "GameFramework/PlayerStart.h"
+#include "GameFramework/Volume.h"
 #include "Engine/SCS_Node.h"
 
 namespace NEXUS::Core::Terrain
@@ -117,6 +119,16 @@ bool FNActorUtils::PassesFilter(const AActor* Actor, const FNWorldActorFilterSet
 			return false;
 		}
 	}
+
+	// Exclude by class, ahead of the two checks below that have to walk the actor's components.
+	if (Settings.bExcludeVolumes && Actor->IsA<AVolume>()) return false;
+	if (Settings.bExcludeDebugActors && Actor->IsA<ANDebugActor>()) return false;
+	if (Settings.bExcludeTerrainAuthoring && IsTerrainAuthoringActor(Actor)) return false;
+
+	// Left until last of the built-in checks: these are the only two that inspect the actor's components, so they are
+	// only paid by whatever everything above already let through.
+	if (Settings.bExcludeMeshTerrains && IsMeshTerrainActor(Actor)) return false;
+	if (Settings.bExcludeLandscapes && IsLandscapeActor(Actor)) return false;
 
 	// Exclude because of filter
 	if (Settings.ExclusionFunction.IsSet() && !Settings.ExclusionFunction(Actor)) return false;

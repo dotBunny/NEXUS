@@ -44,6 +44,24 @@ struct FNWorldAssemblyWorldCollisionSettings
 	bool bIncludePlayerStarts = true;
 
 	/**
+	 * When true, landscapes are sampled into the world collision representation.
+	 * @note Enforced at each gather site rather than by the actor filter, because a landscape has to survive that
+	 *       filter for the sampling pass to find it — see FNCreateVirtualWorldTask::IsWorldCollisionSource.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName = "Include Landscapes (EXPERIMENTAL)",
+		meta=(ToolTip="Include Landscapes when creating world collision representations."))
+	bool bIncludeLandscapes = false;
+
+	/**
+	 * When true, Mesh Terrain sections contribute to the world collision representation.
+	 * @note Enforced by the actor filter, so a refused section is absent from the gathered source actors entirely —
+	 *       which also keeps it from highlighting in the ed mode or triggering a collision-cache rebuild when edited.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName = "Include Mesh Terrains (EXPERIMENTAL)",
+		meta=(ToolTip="Include Mesh Terrains when creating world collision representations."))
+	bool bIncludeMeshTerrains = false;
+
+	/**
 	 * Spacing between samples when reconstructing a landscape's surface as world collision, in world units. 0 leaves
 	 * landscape out of world collision entirely.
 	 * @note Landscape needs sampling where every other terrain is read directly: its collision is a Chaos heightfield

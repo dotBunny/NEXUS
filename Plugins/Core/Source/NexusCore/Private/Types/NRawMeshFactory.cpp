@@ -9,7 +9,6 @@
 #include "Developer/NDeveloperUtils.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
-#include "Math/NBoundsUtils.h"
 #include "NActorUtils.h"
 #include "PhysicsEngine/BodySetup.h"
 

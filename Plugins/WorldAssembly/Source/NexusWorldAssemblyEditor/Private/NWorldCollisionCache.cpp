@@ -112,9 +112,11 @@ FNRawMesh FNWorldCollisionCache::Build(const UWorld* World, const TArray<FBoxSph
 		return MergedMesh;
 	}
 
+	const FNWorldAssemblyWorldCollisionSettings& WorldCollisionSettings = UNWorldAssemblySettings::Get()->WorldCollisionSettings;
+
 	// Same world-geometry definition assembly uses: filtered actors' simple collision, gathered within Bounds.
 	const TArray<AActor*> WorldActors = FNActorUtils::GetWorldActors(World,
-		FNCreateVirtualWorldTask::CreateWorldActorFilterSettings(UNWorldAssemblySettings::Get()->WorldCollisionSettings));
+		FNCreateVirtualWorldTask::CreateWorldActorFilterSettings(WorldCollisionSettings));
 
 	if (OutSourceActors != nullptr)
 	{
@@ -125,12 +127,15 @@ FNRawMesh FNWorldCollisionCache::Build(const UWorld* World, const TArray<FBoxSph
 	TArray<FTransform> CollisionTransforms;
 	FNRawMeshFactory::FromActorsInBounds(WorldActors, Bounds, CollisionMeshes, CollisionTransforms);
 
-	// Mesh terrain needs nothing extra: its sections carry a UBodySetup, so the gather above reads them like any other
-	// geometry. Landscape is the exception — its collision is a Chaos heightfield behind no body setup, so the factory
-	// skips it and a cache built without this reports open air where the ground is. That shows up twice over, since the
-	// collision visualizer draws this mesh and the bone penetration readout measures against it.
-	FNRawMeshFactory::FromLandscapesInBounds(WorldActors, Bounds,
-		UNWorldAssemblySettings::Get()->WorldCollisionSettings.LandscapeSampleSpacing, CollisionMeshes, CollisionTransforms);
+	// Mesh terrain needs nothing extra either way: its sections carry a UBodySetup, so the gather above reads them like
+	// any other geometry when admitted, and the actor filter drops them outright when not. Landscape is the exception —
+	// its collision is a Chaos heightfield behind no body setup, so the factory skips it and a cache built without this
+	// reports open air where the ground is. That shows up twice over, since the collision visualizer draws this mesh and
+	// the bone penetration readout measures against it.
+	if (WorldCollisionSettings.bIncludeLandscapes)
+	{
+		FNRawMeshFactory::FromLandscapesInBounds(WorldActors, Bounds, WorldCollisionSettings.LandscapeSampleSpacing, CollisionMeshes, CollisionTransforms);
+	}
 
 	// Merge every emitted mesh into one origin-anchored (world-space) mesh, mirroring the collision visualizer path.
 	const FTransform MergedTransform = FTransform::Identity;
@@ -485,15 +490,20 @@ void FNWorldCollisionCache::GatherRaw(const UWorld* World, TArray<FNRawMesh>& Ou
 		return;
 	}
 
+	const FNWorldAssemblyWorldCollisionSettings& WorldCollisionSettings = UNWorldAssemblySettings::Get()->WorldCollisionSettings;
+
 	// Same world-geometry definition the synchronous Build uses, but left unmerged so the merge can run off-thread.
 	OutSourceActors = FNActorUtils::GetWorldActors(World,
-		FNCreateVirtualWorldTask::CreateWorldActorFilterSettings(UNWorldAssemblySettings::Get()->WorldCollisionSettings));
+		FNCreateVirtualWorldTask::CreateWorldActorFilterSettings(WorldCollisionSettings));
 	FNRawMeshFactory::FromActorsInBounds(OutSourceActors, {}, OutMeshes, OutTransforms);
 
 	// Sampled here rather than alongside the merge, because it traces the live physics scene — which is exactly what
 	// keeps the background merge free of world access. See Build for why landscape needs this and mesh terrain does not.
-	FNRawMeshFactory::FromLandscapesInBounds(OutSourceActors, {},
-		UNWorldAssemblySettings::Get()->WorldCollisionSettings.LandscapeSampleSpacing, OutMeshes, OutTransforms);
+	if (WorldCollisionSettings.bIncludeLandscapes)
+	{
+		FNRawMeshFactory::FromLandscapesInBounds(OutSourceActors, {}, WorldCollisionSettings.LandscapeSampleSpacing,
+			OutMeshes, OutTransforms);
+	}
 }
 
 FNWorldCollisionCache::FRebuildResult FNWorldCollisionCache::MergeAndBuild(TArray<FNRawMesh> Meshes,

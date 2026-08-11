@@ -49,8 +49,8 @@ struct NEXUSWORLDASSEMBLY_API FNCellHullGenerationSettings
 	 *       refused. A landscape is an ordinary saved actor whose surface has to be sampled rather than read, where a
 	 *       Mesh Terrain is transient and rebuilt.
 	 */
-	UPROPERTY(EditAnywhere)
-	bool bIncludeLandscapes = true;
+	UPROPERTY(EditAnywhere, DisplayName = "Include Landscapes (EXPERIMENTAL)")
+	bool bIncludeLandscapes = false;
 
 	/**
 	 * When true, Mesh Terrain sections contribute to the hull.
@@ -60,8 +60,8 @@ struct NEXUSWORLDASSEMBLY_API FNCellHullGenerationSettings
 	 * @remark ActorIgnoreTags cannot exclude a Mesh Partition terrain — its actors are regenerated on every build, so
 	 *         a tag placed on one does not survive. This flag is the only control over it.
 	 */
-	UPROPERTY(EditAnywhere)
-	bool bIncludeMeshTerrains = true;
+	UPROPERTY(EditAnywhere, DisplayName = "Include Mesh Terrains (EXPERIMENTAL)")
+	bool bIncludeMeshTerrains = false;
 
 	/**
 	 * Grid size, in world units, that terrain vertices are thinned onto before the hull is built. 0 keeps every one.

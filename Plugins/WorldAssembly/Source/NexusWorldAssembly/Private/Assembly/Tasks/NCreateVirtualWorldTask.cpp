@@ -19,17 +19,21 @@ void FNCreateVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const F
 		VirtualWorldContextPtr->WorldCollisionMeshes,
 		VirtualWorldContextPtr->WorldCollisionTransforms); // We'll bake the meshes off thread in the process phase
 
-	// Mesh terrain comes through the gather above like any other geometry. Landscape does not: the factory skips
-	// landscape primitives because their collision is a heightfield behind no UBodySetup, so without this an assembly
-	// sees no ground and routes cells straight through it. Sampling has to happen here rather than in the process
-	// phase because it traces the live physics scene, which is game-thread only — the same reason this task is.
+	// Mesh terrain comes through the gather above like any other geometry, or not at all when the filter above refused
+	// it. Landscape is neither: the factory skips landscape primitives because their collision is a heightfield behind
+	// no UBodySetup, so without this an assembly sees no ground and routes cells straight through it. Sampling has to
+	// happen here rather than in the process phase because it traces the live physics scene, which is game-thread only
+	// — the same reason this task is.
 	//
 	// Deliberately unbounded, where the gather above is restricted to InputBounds: the organ volumes describe where
 	// cells may go, not what they must clear on the way, and an assembly reads this world well outside them.
-	FNRawMeshFactory::FromLandscapesInBounds(WorldActors, {},
-		VirtualWorldContextPtr->WorldCollisionSettings.LandscapeSampleSpacing,
-		VirtualWorldContextPtr->WorldCollisionMeshes,
-		VirtualWorldContextPtr->WorldCollisionTransforms);
+	if (VirtualWorldContextPtr->WorldCollisionSettings.bIncludeLandscapes)
+	{
+		FNRawMeshFactory::FromLandscapesInBounds(WorldActors, {},
+			VirtualWorldContextPtr->WorldCollisionSettings.LandscapeSampleSpacing,
+			VirtualWorldContextPtr->WorldCollisionMeshes,
+			VirtualWorldContextPtr->WorldCollisionTransforms);
+	}
 
 	N_ASSEMBLY_ANALYTICS(CreateVirtualWorldContextFinish)
 }
