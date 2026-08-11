@@ -60,8 +60,10 @@ TSharedRef<FSlateStyleSet> FNUIEditorStyle::Create()
 	Style.Set("Rail.RailBackground",
 		new FSlateRoundedBoxBrush(FStyleColors::Dropdown, 6.0f, FColor(85, 85, 85), 1.0f));
 
+	FLinearColor PanelBackground = FStyleColors::Panel.GetSpecifiedColor();
+	PanelBackground.A = 0.95f;
 	Style.Set("Rail.PanelBackground",
-		new FSlateRoundedBoxBrush(FStyleColors::Panel, 6.0f, FColor(85, 85, 85), 1.0f));
+		new FSlateRoundedBoxBrush(PanelBackground, 6.0f, FColor(85, 85, 85), 1.0f));
 
 	FToolBarStyle CategoryToolBarStyle = FAppStyle::Get().GetWidgetStyle<FToolBarStyle>("CategoryDrivenContentBuilderToolbarWithoutLabels");
 	CategoryToolBarStyle.SetBackground(FSlateNoResource());

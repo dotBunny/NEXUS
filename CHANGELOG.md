@@ -31,6 +31,7 @@
 - Hot paths now route through junction connectors: an accepted pairing wires the node-level graph edge as well as the junction link, so `FNAssemblyGraph::FlagHotPath` treats a connector as the traversable route it is. Because a pairing can span two organs, a layout that previously produced two independent hot paths may now see them merge.
 - `FNCreateSpawnsTask` resolves every graph's hot path before generating any link details, rather than interleaving the two per graph. A connector link can reach a cell in another graph, and the previous ordering baked in that neighbor's hot-path flags before they had been computed.
 - Junction pairs whose sockets open *away* from each other are now rejected outright by the orientation gate, before a route is ever built. The fold check caught these downstream only while the two sockets sat close enough to force a tight turn; given enough distance the same pairing curves gently enough to clear every shape limit.
+- Project Levels is not added to the File menu without having levels set.
 
 ### Fixed
 
