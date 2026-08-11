@@ -190,7 +190,7 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeJunctionRail::CreateContent() const
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		.HAlign(HAlign_Fill)
-		.Padding(4.0f, 4.0f, 4.0f, 2.0f)
+		.Padding(4.0f, 4.0f, 4.0f, 6.0f)
 		[
 			CreateJunctionPicker()
 		];

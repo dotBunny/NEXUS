@@ -31,6 +31,21 @@ static constexpr float PaletteTileWidth = 64.0f;
 static constexpr float GroupOuterInset = 4.0f;
 
 /**
+ * Space every group's content carries above and below it, so the gap between one group and the next is twice this.
+ * @note Both halves of that gap come from the groups themselves rather than from the slots holding them, which is what
+ *       lets a rail stack groups without padding any of its slots. It is also why the gap only moves in twos — a value
+ *       here is spent on both sides of every group.
+ * @note Not the same number as GroupOuterInset even though the panel's gutter reads the same on all four sides, because
+ *       the two axes reach that gutter of 8 differently. Across, a group can only claim 4 of it — that inset is what
+ *       the toolbar buttons carry themselves, so anything else here and the groups stop lining up with each other — and
+ *       the panel's border makes up the remaining 4. Down, there is nothing to line up with, so the group claims as
+ *       much as the gap it wants between groups allows and the border makes up the difference. Change this and the
+ *       border's vertical padding has to move against it, or the panel's top and bottom stop matching its sides; the
+ *       two are commented at each other.
+ */
+static constexpr float GroupVerticalInset = 6.0f;
+
+/**
  * Near-side inset carried by group content that draws straight onto the panel.
  * @note What SlimPaletteToolBar gives each of its buttons, applied by hand to the unbacked content that is not one —
  *       the check lists and the grid's leading widget. Without it they would start a few units left of the button
@@ -84,8 +99,11 @@ static TSharedRef<SWidget> CreateGroup(const TSharedRef<SWidget>& Content)
 {
 	// The outer inset every kind of group shares, so their backings line up down the panel. What separates content from
 	// that backing is the backing's own padding, not this.
+	//
+	// Even top and bottom, so the first group in the panel stands off its top edge by exactly what the last one stands
+	// off the bottom by — see GroupVerticalInset for why that is not the same number as the horizontal one.
 	return SNew(SBox)
-		.Padding(FMargin(GroupOuterInset, 10.0f, GroupOuterInset, 6.0f))
+		.Padding(FMargin(GroupOuterInset, GroupVerticalInset))
 		[
 			Content
 		];
@@ -272,11 +290,11 @@ TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateGroupSeparator(const FText&
 		// Inset to the group edge horizontally, so the rule spans the same width the backings and buttons do rather
 		// than running out to the panel's own margin.
 		//
-		// Vertically it only tops up what is already there: CreateGroup leaves 6 below a group's content and 10 above
-		// the next one's, so 2 more above the rule is what lands it between the two rather than sitting against the
-		// group it follows. A labelled rule stands taller than a bare one by the height of its text and needs no more
-		// than that — the run it names is what the extra height belongs to.
-		.Padding(FMargin(GroupOuterInset, 2.0f, GroupOuterInset, 0.0f))
+		// Nothing vertically, because the groups either side already bring their own: GroupVerticalInset below the one
+		// it follows and the same again above the one it precedes, which lands the rule centered in the gap without it
+		// having to know how wide that gap is. A labelled rule stands taller than a bare one by the height of its text
+		// and needs no more than that — the run it names is what the extra height belongs to.
+		.Padding(FMargin(GroupOuterInset, 0.0f))
 		[
 			Content
 		];
