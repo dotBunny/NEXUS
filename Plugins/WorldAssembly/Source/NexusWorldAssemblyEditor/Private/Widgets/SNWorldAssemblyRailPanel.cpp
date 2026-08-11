@@ -17,8 +17,9 @@ void SNWorldAssemblyRailPanel::Construct(const FArguments& InArgs)
 {
 	State = InArgs._State;
 
-	// Clamped so an empty selection lands on a real slot rather than leaving the switcher with none. The strip only
-	// reports INDEX_NONE when no category at all is available, which the World category makes impossible in practice.
+	// Clamped so an empty selection lands on a real slot rather than leaving the switcher with none. Reached whenever
+	// the user closes the panel from the strip, but never painted: the toolkit collapses the whole overlay on the same
+	// condition, so the slot this falls back to is only ever the one a hidden switcher is pointing at.
 	ContentSwitcher = SNew(SWidgetSwitcher)
 		.WidgetIndex_Lambda([this]() { return State.IsValid() ? FMath::Max(State->GetActiveIndex(), 0) : 0; });
 

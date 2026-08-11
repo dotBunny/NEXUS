@@ -143,7 +143,17 @@ void FNWorldAssemblyEdModeToolkit::CreateOverlays()
 		.VAlign(SavedPosition.VAlign)
 		.InitialAlignmentOffset(SavedPosition.RelativeOffset)
 		.Cursor(EMouseCursor::Default)
-		.Visibility(EVisibility::SelfHitTestInvisible)
+		// The whole box goes, not just its content: clicking the lit rail button closes the panel, and a collapsed
+		// switcher inside a live box would leave its background and padding drawn over the viewport with nothing in
+		// them. Collapsed rather than Hidden so it stops taking space, and the box keeps its position for reopening.
+		//
+		// The state is captured rather than reached through this: an overlay can outlive the toolkit that added it, and
+		// a bound attribute is read on paint. Both widgets inside hold their own copy the same way.
+		.Visibility_Lambda([State = RailState]()
+		{
+			const bool bHasCategory = State.IsValid() && State->GetActiveIndex() != INDEX_NONE;
+			return bHasCategory ? EVisibility::SelfHitTestInvisible : EVisibility::Collapsed;
+		})
 		.Resizable(UE::ToolWidgets::EResizeEdges::Right)
 		.WidthOverride(SavedWidth > 0.0f ? SavedWidth : PanelDefaultWidth)
 		.MinimumBoxWidth(PanelMinimumWidth)
