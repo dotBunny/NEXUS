@@ -54,7 +54,7 @@ void FNWorldAssemblyEdModeCellDataRail::RegisterCommands(const TSharedRef<FBindi
 		"NWorldAssembly.NCell.RemoveActor",
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_RemoveActor", "Remove Actor"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_RemoveActor_Tooltip", "Removes the cell actor, no longer making this a cell."),
-		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.RemoveNCellActor"),
+		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Rail.Cell.Icon"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	using FOperations = FNWorldAssemblyEditorCellUtils;

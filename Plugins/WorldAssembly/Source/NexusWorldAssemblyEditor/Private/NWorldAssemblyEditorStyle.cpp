@@ -33,37 +33,48 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 	Style.Set("Icon.WorldAssembly", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Icon_WorldAssembly"), Icon128x128));
 	Style.Set("Icon.WorldAssembly.Small", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Icon_WorldAssembly"), Icon16x16));
 
-	// CLASS ICONS
-	Style.Set("ClassIcon.NCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellActor"), Icon16x16));
-	Style.Set("ClassThumbnail.NCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellActor"), Icon128x128));
-	Style.Set("ClassIcon.NCellProxy", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellProxy"), Icon16x16));
-	Style.Set("ClassThumbnail.NCellProxy",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellProxy"), Icon128x128));
-	Style.Set("ClassIcon.NCellLevelInstance", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellLevelInstance"), Icon16x16));
-	Style.Set("ClassThumbnail.NCellLevelInstance",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellLevelInstance"), Icon128x128));
-	Style.Set("ClassIcon.NCellRootComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellRootComponent"), Icon16x16));
-	Style.Set("ClassThumbnail.NCellRootComponent",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellRootComponent"), Icon128x128));
-	Style.Set("ClassIcon.NCellJunctionComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellJunctionComponent"), Icon16x16));
-	Style.Set("ClassThumbnail.NCellJunctionComponent",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellJunctionComponent"), Icon128x128));
-	Style.Set("ClassIcon.NBoneComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NBoneComponent"), Icon16x16));
-	Style.Set("ClassThumbnail.NBoneComponent",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NBoneComponent"), Icon128x128));
-	Style.Set("ClassIcon.NBoneActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NBoneComponent"), Icon16x16));
-	Style.Set("ClassThumbnail.NBoneActor",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NBoneComponent"), Icon128x128));
-	Style.Set("ClassIcon.NOrganComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NOrganVolume"), Icon16x16));
-	Style.Set("ClassThumbnail.NOrganComponent",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NOrganVolume"), Icon128x128));
-	Style.Set("ClassIcon.NOrganVolume", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NOrganVolume"), Icon16x16));
-	Style.Set("ClassThumbnail.NOrganVolume",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NOrganVolume"), Icon128x128));
-	Style.Set("AssetOverlay.NCell", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("AssetOverlay_NCell"), Icon16x16));
-	Style.Set("ClassIcon.NCell", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCell"), Icon16x16));
-	Style.Set("ClassThumbnail.NCell",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCell"), Icon128x128));
-	Style.Set("ClassIcon.NTissue", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NTissue"), Icon16x16));
-	Style.Set("ClassThumbnail.NTissue",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NTissue"), Icon128x128));
+	// CLASS ICONS - Colored
+	Style.Set("ClassIcon.NCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NCellActor"), Icon16x16));
+	Style.Set("ClassThumbnail.NCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NCellActor"), Icon128x128));
+	Style.Set("ClassIcon.NCellProxy", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NCellProxy"), Icon16x16));
+	Style.Set("ClassThumbnail.NCellProxy",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NCellProxy"), Icon128x128));
+	Style.Set("ClassIcon.NCellLevelInstance", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NCellLevelInstance"), Icon16x16));
+	Style.Set("ClassThumbnail.NCellLevelInstance",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NCellLevelInstance"), Icon128x128));
+	Style.Set("ClassIcon.NCellRootComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NCellRootComponent"), Icon16x16));
+	Style.Set("ClassThumbnail.NCellRootComponent",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NCellRootComponent"), Icon128x128));
+	Style.Set("ClassIcon.NCellJunctionComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NCellJunctionComponent"), Icon16x16));
+	Style.Set("ClassThumbnail.NCellJunctionComponent",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NCellJunctionComponent"), Icon128x128));
+	Style.Set("ClassIcon.NBoneComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NBoneComponent"), Icon16x16));
+	Style.Set("ClassThumbnail.NBoneComponent",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NBoneComponent"), Icon128x128));
+	Style.Set("ClassIcon.NBoneActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NBoneComponent"), Icon16x16));
+	Style.Set("ClassThumbnail.NBoneActor",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NBoneComponent"), Icon128x128));
+	Style.Set("ClassIcon.NOrganComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NOrganVolume"), Icon16x16));
+	Style.Set("ClassThumbnail.NOrganComponent",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NOrganVolume"), Icon128x128));
+	Style.Set("ClassIcon.NOrganVolume", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NOrganVolume"), Icon16x16));
+	Style.Set("ClassThumbnail.NOrganVolume",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NOrganVolume"), Icon128x128));
+	Style.Set("AssetOverlay.NCell", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/AssetOverlay_NCell"), Icon16x16));
+	Style.Set("ClassIcon.NCell", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NCell"), Icon16x16));
+	Style.Set("ClassThumbnail.NCell",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NCell"), Icon128x128));
+	Style.Set("ClassIcon.NTissue", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NTissue"), Icon16x16));
+	Style.Set("ClassThumbnail.NTissue",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NTissue"), Icon128x128));
+
+	// TOOLS
+	Style.Set("Tool.CollisionVisualizer", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Tools/Tool_CollisionVisualizer"), Icon20x20));
+	Style.Set("Tool.CellBounds", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Tools/Tool_CellBounds"), Icon20x20));
+	Style.Set("Tool.CellHullSplitEdge", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Tools/Tool_CellHullSplitEdge"), Icon20x20));
+	Style.Set("Tool.CellHullVertex", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Tools/Tool_CellHullVertex"), Icon20x20));
+	Style.Set("Tool.CellVoxelPoint", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Tools/Tool_CellVoxelPoint"), Icon20x20));
+	Style.Set("Tool.JunctionPlacement", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Tools/Tool_JunctionPlacement"), Icon20x20));
 
 
 	// Editor Mode Rebuild
 	Style.Set("Rail.World.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rails/Rail_World"), Icon20x20));
 	Style.Set("Rail.Cell.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rails/Rail_Cell"), Icon20x20));
 	Style.Set("Rail.CellData.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rails/Rail_CellData"), Icon20x20));
+
+	// JUNCTION RAIL
 	Style.Set("Rail.Junction.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rails/Rail_Junction"), Icon20x20));
+	Style.Set("Rail.Junction.CollectJunctions", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_CollectJunctions"), Icon16x16));
 
 	// CELL RAIL
 	Style.Set("Rail.Cell.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rails/Rail_Cell"), Icon20x20));
@@ -83,35 +94,7 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 	Style.Set("Rail.Organ.UnloadLevelInstances", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_UnloadAllLevelInstances"), Icon20x20));
 
 
-
-	// OLD STUFF
-
-
-	Style.Set("Command.WorldAssemblyEd.NCellLevelInstance", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NCellLevelInstance"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.NCellProxy", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NCellProxy"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.NOrganComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NOrganComponent"), Icon16x16));
-
-	Style.Set("Command.WorldAssemblyEd.SelectNCellJunctionComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_SelectNCellJunctionComponent"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.AddNCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_AddNCellActor"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.RemoveNCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_RemoveNCellActor"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.Bounds", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Bounds"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.Bounds.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Bounds_Selected"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.Hull", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Hull"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.Hull.SplitEdge", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Hull_SplitEdge"), Icon16x16));
-
-	Style.Set("Command.WorldAssemblyEd.Hull.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Hull_Selected"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.Voxel.Grid", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Grid"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.Voxel.Points", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Points"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.Voxel.Points.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Points_Selected"), Icon16x16));
-
-	Style.Set("Command.WorldAssemblyEd.Pin", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Pin"), Icon16x16));
-
-	Style.Set("Command.WorldAssemblyEd.HasCollisionVisualizer", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_HasCollisionVisualizer"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.CreateCollisionVisualizer", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CreateCollisionVisualizer"), Icon16x16));
-
-	Style.Set("Command.WorldAssemblyEd.Junction.CollectJunctionComponents", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Junction_CollectJunctionComponents"), Icon16x16));
-
-	Style.Set("Command.WorldAssemblyEd.SelectNCellJunctionComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_SelectNCellJunctionComponent"), Icon16x16));
+	// QUICK ASSEMBLY
 
 	Style.Set("Command.WorldAssemblyEd.QuickAssemblyOperation", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_QuickAssemblyOperation"), Icon128x128));
 	Style.Set("Command.WorldAssemblyEd.CancelQuickAssemblyOperation", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CancelQuickAssemblyOperation"), Icon128x128));

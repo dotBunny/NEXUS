@@ -25,27 +25,27 @@ void FNWorldAssemblyEdModeToolCommands::RegisterCommands()
 	N_WORLDASSEMBLY_TOOL_COMMAND(BeginCellBoundsTool, TEXT("BeginCellBoundsTool"),
 		LOCTEXT("CellBoundsToolLabel", "Bounds"),
 		LOCTEXT("CellBoundsToolToolTip", "Drag the min and max corners of the cell's axis-aligned bounds."),
-		"Command.WorldAssemblyEd.Bounds.Selected");
+		"Tool.CellBounds");
 
 	N_WORLDASSEMBLY_TOOL_COMMAND(BeginCellHullVertexTool, TEXT("BeginCellHullVertexTool"),
 		LOCTEXT("CellHullVertexToolLabel", "Vertices"),
 		LOCTEXT("CellHullVertexToolToolTip", "Drag the cell's hull vertices (requires a tri-based hull)."),
-		"Command.WorldAssemblyEd.Hull.Selected");
+		"Tool.CellHullVertex");
 
 	N_WORLDASSEMBLY_TOOL_COMMAND(BeginCellHullSplitTool, TEXT("BeginCellHullSplitTool"),
 		LOCTEXT("CellHullSplitToolLabel", "Edges"),
 		LOCTEXT("CellHullSplitToolToolTip", "Split Hull Edge: click a hull edge to insert a vertex where you clicked."),
-		"Command.WorldAssemblyEd.Hull.SplitEdge");
+		"Tool.CellHullSplitEdge");
 
 	N_WORLDASSEMBLY_TOOL_COMMAND(BeginCellVoxelTool, TEXT("BeginCellVoxelTool"),
 		LOCTEXT("CellVoxelToolLabel", "Voxels"),
 		LOCTEXT("CellVoxelToolToolTip", "Click voxels to toggle them between occupied and empty."),
-		"Command.WorldAssemblyEd.Voxel.Points.Selected");
+		"Tool.CellVoxelPoint");
 
 	N_WORLDASSEMBLY_TOOL_COMMAND(BeginJunctionPlacementTool, TEXT("BeginJunctionPlacementTool"),
 		LOCTEXT("JunctionPlacementToolLabel", "Place"),
 		LOCTEXT("JunctionPlacementToolToolTip", "Add a junction to the focused cell and position it."),
-		"ClassIcon.NCellJunctionComponent");
+		"Tool.JunctionPlacement");
 }
 
 #undef N_WORLDASSEMBLY_TOOL_COMMAND

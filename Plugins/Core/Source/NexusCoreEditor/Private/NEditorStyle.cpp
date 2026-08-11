@@ -22,11 +22,5 @@ TSharedRef<FSlateStyleSet> FNEditorStyle::Create()
 	Style.Set("ClassIcon.NDebugActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NDebugActor"), Icon16x16));
 	Style.Set("ClassThumbnail.NDebugActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NDebugActor"), Icon128x128));
 
-
-
-	Style.Set("Command.Select", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_Select"), Icon20x20));
-	Style.Set("Command.Tag", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_Tag"), Icon20x20));
-	Style.Set("Command.TagRemove", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_TagRemove"), Icon20x20));
-
 	return StyleRef;
 }
