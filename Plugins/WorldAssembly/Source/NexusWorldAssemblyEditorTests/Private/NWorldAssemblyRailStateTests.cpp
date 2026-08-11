@@ -15,6 +15,8 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailStateHarness
 	 *  Junction, Organ. */
 	constexpr int32 WorldIndex = 0;
 	constexpr int32 CellIndex = 1;
+	constexpr int32 CellDataIndex = 2;
+	constexpr int32 JunctionIndex = 3;
 	constexpr int32 OrganIndex = 4;
 
 	/** What one stand-in category answers with. */
@@ -36,19 +38,58 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailStateHarness
 	class FTestRail final : public FNWorldAssemblyEdModeRail
 	{
 	public:
-		FTestRail(const TSharedRef<FUICommandList>& InCommandList, const FTestRailDefinition& InDefinition)
+		FTestRail(const TSharedRef<FUICommandList>& InCommandList, const TSharedRef<FTestRailDefinition>& InDefinition)
 			: FNWorldAssemblyEdModeRail(InCommandList), Definition(InDefinition) {}
 
 		//~FNWorldAssemblyEdModeRail
 		/** @return Null; nothing in the rail state reads the category command, only the strip that draws it does. */
 		virtual TSharedPtr<FUICommandInfo> GetCategoryCommand() const override { return nullptr; }
 
-		virtual TAttribute<bool> GetAvailable() const override { return TAttribute<bool>(Definition.bAvailable); }
-		virtual bool ShouldAutoSelect() const override { return Definition.bAutoSelect; }
+		/**
+		 * @return A predicate reading the shared definition, rather than the flag's value at the time it was asked for.
+		 * @note Bound so a test can take a category away after the state is built, which is the whole of what a level
+		 *       losing its cell actor looks like from here.
+		 */
+		virtual TAttribute<bool> GetAvailable() const override
+		{
+			return TAttribute<bool>::CreateLambda([Definition = Definition]() { return Definition->bAvailable; });
+		}
+
+		virtual bool ShouldAutoSelect() const override { return Definition->bAutoSelect; }
 		//End FNWorldAssemblyEdModeRail
 
 	private:
-		const FTestRailDefinition Definition;
+		TSharedRef<FTestRailDefinition> Definition;
+	};
+
+	/** A rail state over stand-in categories, holding on to their definitions so a test can change what the level holds
+	 *  and refresh. */
+	struct FTestRig
+	{
+		explicit FTestRig(const TArray<FTestRailDefinition>& InDefinitions)
+		{
+			// One list shared by every stand-in, as the toolkit's is: a rail resolves its buttons against the union
+			// rather than against a list of its own.
+			const TSharedRef<FUICommandList> CommandList = MakeShared<FUICommandList>();
+
+			TArray<TSharedRef<FNWorldAssemblyEdModeRail>> Rails;
+			Rails.Reserve(InDefinitions.Num());
+			Definitions.Reserve(InDefinitions.Num());
+			for (const FTestRailDefinition& Definition : InDefinitions)
+			{
+				Definitions.Add(MakeShared<FTestRailDefinition>(Definition));
+				Rails.Add(MakeShared<FTestRail>(CommandList, Definitions.Last()));
+			}
+
+			// Seeding is the constructor's whole job, so the state is selected on by the time this returns.
+			State = MakeShared<FNWorldAssemblyRailState>(MoveTemp(Rails));
+		}
+
+		/** What each stand-in answers with, in rail order; writable to move the level under a built state. */
+		TArray<TSharedRef<FTestRailDefinition>> Definitions;
+
+		/** The state under test. */
+		TSharedPtr<FNWorldAssemblyRailState> State;
 	};
 
 	/**
@@ -57,19 +98,7 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailStateHarness
 	 */
 	int32 GetSeededIndex(const TArray<FTestRailDefinition>& Definitions)
 	{
-		// One list shared by every stand-in, as the toolkit's is: a rail resolves its buttons against the union rather
-		// than against a list of its own.
-		const TSharedRef<FUICommandList> CommandList = MakeShared<FUICommandList>();
-
-		TArray<TSharedRef<FNWorldAssemblyEdModeRail>> Rails;
-		Rails.Reserve(Definitions.Num());
-		for (const FTestRailDefinition& Definition : Definitions)
-		{
-			Rails.Add(MakeShared<FTestRail>(CommandList, Definition));
-		}
-
-		// Seeding is the constructor's whole job, so the state is read where it is built.
-		return FNWorldAssemblyRailState(MoveTemp(Rails)).GetActiveIndex();
+		return FTestRig(Definitions).State->GetActiveIndex();
 	}
 
 	/**
@@ -166,6 +195,81 @@ N_TEST_LOW(FNWorldAssemblyRailStateTests_Seed_NothingAvailableSelectsNothing,
 	};
 
 	CHECK_EQUALS("No available category should leave nothing selected.", GetSeededIndex(Rails), INDEX_NONE)
+}
+
+N_TEST_HIGH(FNWorldAssemblyRailStateTests_Toggle_ClickingTheActiveCategoryClosesThePanel,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailState::Toggle::ClickingTheActiveCategoryClosesThePanel",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailStateHarness;
+
+	// Verifies clicking the lit rail button leaves no category selected, which is what the panel reads as closed.
+	FTestRig Rig(MakeProductionRails(true, false));
+	Rig.State->ToggleActiveIndex(CellIndex);
+
+	CHECK_EQUALS("Toggling the selected category should select nothing.", Rig.State->GetActiveIndex(), INDEX_NONE)
+}
+
+N_TEST_MEDIUM(FNWorldAssemblyRailStateTests_Toggle_ClickingAnotherCategorySelectsIt,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailState::Toggle::ClickingAnotherCategorySelectsIt",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailStateHarness;
+
+	// Verifies the toggle only closes the category it is already on — every other button still just switches.
+	FTestRig Rig(MakeProductionRails(true, true));
+	Rig.State->ToggleActiveIndex(OrganIndex);
+
+	CHECK_EQUALS("Toggling an unselected category should select it.", Rig.State->GetActiveIndex(), OrganIndex)
+}
+
+N_TEST_MEDIUM(FNWorldAssemblyRailStateTests_Toggle_ClosedPanelReopensOnTheSameButton,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailState::Toggle::ClosedPanelReopensOnTheSameButton",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailStateHarness;
+
+	// Verifies the closed state is not a dead end: the button that shut the panel opens it again.
+	FTestRig Rig(MakeProductionRails(true, false));
+	Rig.State->ToggleActiveIndex(CellIndex);
+	Rig.State->ToggleActiveIndex(CellIndex);
+
+	CHECK_EQUALS("Toggling a closed category should select it again.", Rig.State->GetActiveIndex(), CellIndex)
+}
+
+N_TEST_HIGH(FNWorldAssemblyRailStateTests_Toggle_ClosedPanelSurvivesAnAvailabilityRefresh,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailState::Toggle::ClosedPanelSurvivesAnAvailabilityRefresh",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailStateHarness;
+
+	// Verifies the poll leaves a closed panel closed. It runs four times a second, so a fallback that treated nothing
+	// selected as something to recover from would reopen the panel before the user let go of the mouse.
+	FTestRig Rig(MakeProductionRails(true, false));
+	Rig.State->ToggleActiveIndex(CellIndex);
+	Rig.State->RefreshAvailability();
+
+	CHECK_EQUALS("Refreshing availability should not reopen a closed panel.", Rig.State->GetActiveIndex(), INDEX_NONE)
+}
+
+N_TEST_HIGH(FNWorldAssemblyRailStateTests_Availability_LosingTheActiveCategoryFallsBack,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailState::Availability::LosingTheActiveCategoryFallsBack",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailStateHarness;
+
+	// Verifies the other half of the rule the closed-panel guard has to leave standing: a category going out from under
+	// the selection still moves it somewhere the strip is drawing a button for.
+	FTestRig Rig(MakeProductionRails(true, false));
+
+	// The cell actor deleted, which takes every category keyed on it at once — including the selected one.
+	Rig.Definitions[CellIndex]->bAvailable = false;
+	Rig.Definitions[CellDataIndex]->bAvailable = false;
+	Rig.Definitions[JunctionIndex]->bAvailable = false;
+	Rig.State->RefreshAvailability();
+
+	CHECK_EQUALS("Losing the selected category should fall back to the first available one.",
+		Rig.State->GetActiveIndex(), WorldIndex)
 }
 
 #endif //WITH_TESTS

@@ -55,9 +55,11 @@ TSharedRef<SWidget> SNWorldAssemblyRail::CreateCategoryToolBar()
 		// one the user can do anything about, so a greyed button would spend a strip slot communicating a dead end.
 		// SToolBarButtonBlock resolves this through the command list and collapses the block, so the buttons below
 		// simply close the gap.
+		// Toggle rather than select: clicking the lit button closes the panel and leaves no category selected, which is
+		// what the ToggleButton these are registered as has always looked like it would do.
 		CategoryCommandList->MapAction(
 			CategoryCommand,
-			FExecuteAction::CreateLambda([RailState, Index]() { RailState->SetActiveIndex(Index); }),
+			FExecuteAction::CreateLambda([RailState, Index]() { RailState->ToggleActiveIndex(Index); }),
 			FCanExecuteAction(),
 			FIsActionChecked::CreateLambda([RailState, Index]() { return RailState->GetActiveIndex() == Index; }),
 			FIsActionButtonVisible::CreateLambda([RailState, Index]() { return RailState->IsAvailable(Index); }));

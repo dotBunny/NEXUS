@@ -8,13 +8,10 @@
 FNWorldAssemblyRailState::FNWorldAssemblyRailState(TArray<TSharedRef<FNWorldAssemblyEdModeRail>> InRails)
 	: Rails(MoveTemp(InRails))
 {
-	// Leaves the selection on the first available category — its fallback fires here, because the INDEX_NONE this
-	// starts on is never available. First available rather than the first outright: Cell and Junction both sit above
-	// nothing when the level has no cell actor, and opening on a category whose button is hidden would show content
-	// with no way back to it.
+	// Fills the availability cache the seed then reads. It cannot seed on its own account any more: its fallback no
+	// longer fires from INDEX_NONE, which is now a state the user can ask for rather than only the state this starts in.
 	RefreshAvailability();
 
-	// ...which what the level actually holds then overrides.
 	SeedActiveIndex();
 }
 
@@ -31,14 +28,27 @@ void FNWorldAssemblyRailState::SetActiveIndex(const int32 Index)
 	UNWorldAssemblyEdMode::EndActiveTool();
 }
 
+void FNWorldAssemblyRailState::ToggleActiveIndex(const int32 Index)
+{
+	SetActiveIndex(ActiveIndex == Index ? INDEX_NONE : Index);
+}
+
 void FNWorldAssemblyRailState::SeedActiveIndex()
 {
+	// Assigned rather than set through SetActiveIndex throughout: there is no tool running to end at construction, and
+	// the mode this would ask to end one on is still being entered.
 	for (int32 Index = 0; Index < Rails.Num(); Index++)
 	{
 		if (!IsAvailable(Index) || !Rails[Index]->ShouldAutoSelect()) continue;
 
-		// Assigned rather than set through SetActiveIndex: there is no tool running to end at construction, and the
-		// mode this would ask to end one on is still being entered.
+		ActiveIndex = Index;
+		return;
+	}
+
+	for (int32 Index = 0; Index < Rails.Num(); Index++)
+	{
+		if (!IsAvailable(Index)) continue;
+
 		ActiveIndex = Index;
 		return;
 	}
@@ -56,7 +66,9 @@ void FNWorldAssemblyRailState::RefreshAvailability()
 		Available[Index] = !Predicate.IsSet() || Predicate.Get();
 	}
 
-	if (IsAvailable(ActiveIndex)) return;
+	// Closed on purpose is not something to recover from — see the header. Only a category that has gone out from
+	// under the selection is.
+	if (ActiveIndex == INDEX_NONE || IsAvailable(ActiveIndex)) return;
 
 	for (int32 Index = 0; Index < Rails.Num(); Index++)
 	{

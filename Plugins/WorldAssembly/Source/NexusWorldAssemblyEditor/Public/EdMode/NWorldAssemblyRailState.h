@@ -23,13 +23,16 @@ public:
 	/** @return The categories, in rail order. */
 	const TArray<TSharedRef<FNWorldAssemblyEdModeRail>>& GetRails() const { return Rails; }
 
-	/** @return Position in GetRails of the selected category, or INDEX_NONE when nothing is selectable. */
+	/**
+	 * @return Position in GetRails of the selected category, or INDEX_NONE for no category at all — which the user can
+	 *         ask for by clicking the selected category's button, and which the panel reads as closed.
+	 */
 	int32 GetActiveIndex() const { return ActiveIndex; }
 
 	/**
 	 * Select a category, ending whatever tool the outgoing one left running.
 	 *
-	 * @param Index Position in GetRails.
+	 * @param Index Position in GetRails, or INDEX_NONE to select nothing and close the panel.
 	 * @note Leaving a category leaves its tool. The tools are scoped to their category — the hull tools belong to
 	 *       Cell, junction placement to Junction — so one left running under a category that is no longer presented
 	 *       keeps drawing handles and swallowing viewport clicks with nothing on screen to say what is doing it or how
@@ -37,6 +40,15 @@ public:
 	 *       its next tick rather than tearing the tool down mid-frame.
 	 */
 	void SetActiveIndex(int32 Index);
+
+	/**
+	 * Select a category, or close the panel when it is the one already selected.
+	 *
+	 * @param Index Position in GetRails.
+	 * @note What a rail button does, as opposed to what selecting a category does — the strip is the only way to the
+	 *       closed state, and a lit button that does nothing when clicked is the one thing a toggle must not be.
+	 */
+	void ToggleActiveIndex(int32 Index);
 
 	/**
 	 * @param Index Position in GetRails.
@@ -56,16 +68,22 @@ public:
 	 * @note The fallback is the half hiding categories needs that greying them out did not. A disabled button that is
 	 *       already selected simply stays selected, but a hidden one would leave the strip pointing at a category with
 	 *       no button while the panel beside it still showed that category's content.
+	 * @note Nothing to fall back from where the user has closed the panel: INDEX_NONE is a state they asked for rather
+	 *       than one a vanished category left behind, and recovering from it would reopen the panel a quarter of a
+	 *       second after it was shut.
 	 */
 	void RefreshAvailability();
 
 private:
 	/**
-	 * Move the selection onto the category the level's contents point at, if there is one.
+	 * Choose the category to open on: the first available one the level's contents point at, or failing that the first
+	 * available one outright.
 	 *
 	 * @note Runs once, from the constructor — which is once per mode entry, since the toolkit holding this is rebuilt
 	 *       every time the mode opens. Nothing re-seeds afterwards: past that first frame the selection is the user's,
 	 *       and the only thing that moves it is RefreshAvailability's fallback taking it off a category that has gone.
+	 * @note First available rather than the first outright: Cell and Junction both sit above nothing when the level has
+	 *       no cell actor, and opening on a category whose button is hidden would show content with no way back to it.
 	 * @note Rail order is the precedence, so a level somehow holding both a cell and organs opens on Cell. The two are
 	 *       mutually exclusive by rule — see FNWorldAssemblyEdModeWorldRail's add commands — so this only decides for
 	 *       data authored before that rule existed.
