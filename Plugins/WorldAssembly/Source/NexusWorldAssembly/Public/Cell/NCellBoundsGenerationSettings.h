@@ -33,8 +33,8 @@ struct NEXUSWORLDASSEMBLY_API FNCellBoundsGenerationSettings
 	 *       refused. A landscape is an ordinary saved actor whose surface has to be sampled rather than read, where a
 	 *       Mesh Terrain is transient and rebuilt.
 	 */
-	UPROPERTY(EditAnywhere)
-	bool bIncludeLandscapes = true;
+	UPROPERTY(EditAnywhere, DisplayName = "Include Landscapes (EXPERIMENTAL)")
+	bool bIncludeLandscapes = false;
 
 	/**
 	 * When true, Mesh Terrain sections contribute to bounds.
@@ -43,8 +43,8 @@ struct NEXUSWORLDASSEMBLY_API FNCellBoundsGenerationSettings
 	 * @remark ActorIgnoreTags cannot exclude a Mesh Partition terrain — its actors are regenerated on every build, so
 	 *         a tag placed on one does not survive. This flag is the only control over it.
 	 */
-	UPROPERTY(EditAnywhere)
-	bool bIncludeMeshTerrains = true;
+	UPROPERTY(EditAnywhere, DisplayName = "Include Mesh Terrains (EXPERIMENTAL)")
+	bool bIncludeMeshTerrains = false;
 
 	/** Actors carrying any of these tags are excluded from the bounds calculation. */
 	UPROPERTY(EditAnywhere)

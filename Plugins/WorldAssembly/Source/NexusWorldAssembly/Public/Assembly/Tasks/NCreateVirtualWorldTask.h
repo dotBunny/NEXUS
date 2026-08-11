@@ -4,6 +4,7 @@
 #pragma once
 
 #include "NActorUtils.h"
+#include "NWorldAssemblyMinimal.h"
 #include "Assembly/NAssemblyTaskAnalytics.h"
 #include "Assembly/Contexts/NVirtualWorldContext.h"
 
@@ -29,7 +30,11 @@ public:
 	/** Executed by the task graph: populates the virtual-world context with world collision data. */
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
-	/** @return The shared filter settings used to gather collision-source actors from the world. */
+	/**
+	 * @return The shared filter settings used to gather collision-source actors from the world.
+	 * @note ExclusionFunction is deliberately left unset. It is the end-user hook, and nothing this filter needs is
+	 *       user policy — everything below is either a project setting or a framework invariant.
+	 */
 	static FNWorldActorFilterSettings CreateWorldActorFilterSettings(const FNWorldAssemblyWorldCollisionSettings& Settings)
 	{
 		// Collect the world AActors that we need to care about
@@ -37,36 +42,31 @@ public:
 
 		ActorFilterSettings.bExcludeNonCollisionEnabledActors = Settings.bExcludeNonCollisionEnabledActors;
 		ActorFilterSettings.bIncludePlayerStarts = Settings.bIncludePlayerStarts;
+
+		// The markup tag rides along with the user's list rather than getting a flag of its own — it is an ignore tag,
+		// and the filter already knows how to test those.
 		ActorFilterSettings.WorldCollisionActorIgnoreTags = Settings.ActorIgnoreTags;
+		ActorFilterSettings.WorldCollisionActorIgnoreTags.AddUnique(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
 
-		ActorFilterSettings.ExclusionFunction = &IsWorldCollisionSource;
+		// Mesh Terrain is settled here, where landscape is settled at each gather site as well. That asymmetry is the
+		// shape of the two representations rather than an oversight: a Mesh Terrain section carries a UBodySetup, so it
+		// arrives through the ordinary geometry gather and dropping the actor is the only way to leave it out, while a
+		// landscape has to survive this filter for FNRawMeshFactory::FromLandscapesInBounds to find and sample it at all.
+		ActorFilterSettings.bExcludeMeshTerrains = !Settings.bIncludeMeshTerrains;
+		ActorFilterSettings.bExcludeLandscapes = !Settings.bIncludeLandscapes;
+
+		// Not settings-driven, and deliberately so. Volumes are generation inputs rather than obstacles, debug actors
+		// are diagnostics, and terrain authoring apparatus describes how a terrain is built rather than being a surface
+		// to place cells against — a modifier's bounds are its region of influence, measured against a real level as
+		// larger than every piece of geometry in it put together. The cell bounds and hull calculations reject all
+		// three for the same reasons, and the world view has to agree with them: these settings are what the editor's
+		// collision visualizer and penetration cache gather through, so a phantom obstacle admitted here would be drawn
+		// as world collision and avoided during assembly.
+		ActorFilterSettings.bExcludeVolumes = true;
+		ActorFilterSettings.bExcludeDebugActors = true;
+		ActorFilterSettings.bExcludeTerrainAuthoring = true;
+
 		return ActorFilterSettings;
-	}
-
-	/**
-	 * Actor filter for world-collision gathering.
-	 * @param Actor Candidate actor under inspection.
-	 * @return false to exclude organ volumes (they are inputs, not obstacles) and terrain authoring apparatus; true otherwise.
-	 */
-	static bool IsWorldCollisionSource(const AActor* Actor)
-	{
-		// Check global ignore tag
-		if (Actor->ActorHasTag(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore)) return false;
-
-		// We are going to outright ignore volumes as collision data
-		if (Actor->IsA<AVolume>()) return false;
-
-		// Nor should any of our debug actors
-		if (Actor->IsA<ANDebugActor>()) return false;
-
-		// Terrain authoring apparatus describes how a terrain is built rather than being something to place cells
-		// against — a modifier's bounds are its region of influence, not a surface. The cell bounds and hull
-		// calculations reject these for the same reason, and the world view has to agree with them: this predicate
-		// is what the editor's collision visualizer and penetration cache gather through, so a phantom obstacle here
-		// would be drawn as world collision and avoided during assembly.
-		if (FNActorUtils::IsTerrainAuthoringActor(Actor)) return false;
-
-		return true;
 	}
 
 private:

@@ -37,8 +37,8 @@ struct NEXUSWORLDASSEMBLY_API FNCellVoxelGenerationSettings
 	 *       refused. A landscape is an ordinary saved actor whose surface has to be sampled rather than read, where a
 	 *       Mesh Terrain is transient and rebuilt.
 	 */
-	UPROPERTY(EditAnywhere)
-	bool bIncludeLandscapes = true;
+	UPROPERTY(EditAnywhere, DisplayName = "Include Landscapes (EXPERIMENTAL)")
+	bool bIncludeLandscapes = false;
 
 	/**
 	 * When true, Mesh Terrain sections contribute to voxel occupancy.
@@ -47,8 +47,8 @@ struct NEXUSWORLDASSEMBLY_API FNCellVoxelGenerationSettings
 	 *       ignored-actor list the sweep is issued with, so it cannot register as occupied even though the physics
 	 *       world would otherwise report it.
 	 */
-	UPROPERTY(EditAnywhere)
-	bool bIncludeMeshTerrains = true;
+	UPROPERTY(EditAnywhere, DisplayName = "Include Mesh Terrains (EXPERIMENTAL)")
+	bool bIncludeMeshTerrains = false;
 
 	/** Actors carrying any of these tags are excluded from the voxel calculation. */
 	UPROPERTY(EditAnywhere)

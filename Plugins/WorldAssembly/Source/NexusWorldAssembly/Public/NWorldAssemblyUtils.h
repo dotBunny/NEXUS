@@ -3,8 +3,10 @@
 
 #pragma once
 
+#include "NActorUtils.h"
 #include "Cell/NCellActor.h"
 #include "Cell/NCellJunctionDetails.h"
+#include "Developer/NDebugActor.h"
 #include "Math/NVectorUtils.h"
 
 class UNOrganComponent;
