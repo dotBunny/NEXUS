@@ -182,7 +182,7 @@ static TSharedRef<SWidget> CreateOrganPicker()
 				MenuBuilder.AddMenuEntry(
 					OrganName,
 					FText::Format(LOCTEXT("OrganPicker_Select", "Select {0}"), OrganName),
-					FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.NOrganComponent"),
+					FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "ClassIcon.NOrganVolume"),
 					FUIAction(
 						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorOrganUtils::SelectComponent, Organ),
 						FCanExecuteAction(),

@@ -241,7 +241,7 @@ TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
 				MenuBuilder.AddMenuEntry(
 					OrganName,
 					FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "SelectOrganForQuickAssembly", "Select {0} for Quick Assembly"), OrganName),
-					FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.NOrganComponent"),
+					FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "ClassIcon.NOrganVolume"),
 					FUIAction(FExecuteAction::CreateLambda([OrganComponent]() {
 						FNWorldAssemblyEditorQuickAssembly::SetSelectedOrgan(OrganComponent);
 					}))
@@ -289,7 +289,7 @@ TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
 							{
 								return FSlateIcon(FNEditorStyle::GetStyleSetName(), "Lock.Desaturated").GetIcon();
 							}
-							return FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.NOrganComponent").GetIcon();
+							return FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "ClassIcon.NOrganVolume").GetIcon();
 						})
 						.Visibility_Lambda([]()
 						{

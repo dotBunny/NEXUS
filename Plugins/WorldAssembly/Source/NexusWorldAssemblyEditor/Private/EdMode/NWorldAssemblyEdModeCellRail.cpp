@@ -113,7 +113,7 @@ void FNWorldAssemblyEdModeCellRail::RegisterCommands(const TSharedRef<FBindingCo
 		"NWorldAssembly.NCell.SelectActor",
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_SelectActor", "Select Actor"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_SelectActor_Tooltip", "Select the NCellActor in the level."),
-		FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.Select"),
+		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Select"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_ToggleDrawVoxelData,
@@ -127,9 +127,9 @@ void FNWorldAssemblyEdModeCellRail::RegisterCommands(const TSharedRef<FBindingCo
 	// bounds/hull/voxel calculations, which is why it sits with the Cell actions rather than the world ones.
 	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_TagIgnore,
 		"NWorldAssembly.NCell.TagIgnore",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_TagIgnore", "Ignore Cell Collision"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_TagIgnore", "Cell Collision"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_TagIgnore_Tooltip", "Toggles the necessary tag to have the selected actors ignored when calculating the bounds/hull/etc for a Cell."),
-		FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.Tag"),
+		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Tag"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	using FOperations = FNWorldAssemblyEditorCellUtils;
@@ -198,7 +198,7 @@ FSlateIcon FNWorldAssemblyEdModeCellRail::TagIgnoreIcon()
 	const bool bWouldRemove = FNWorldAssemblyEditorTagUtils::IsTagOnAnySelectedActor(
 		NEXUS::WorldAssembly::ActorTags::CellIgnore);
 
-	return FSlateIcon(FNEditorStyle::GetStyleSetName(), bWouldRemove ? "Command.TagRemove" : "Command.Tag");
+	return FSlateIcon(FNUIEditorStyle::GetStyleSetName(), bWouldRemove ? "Command.ToggleOn" : "Command.ToggleOff");
 }
 
 bool FNWorldAssemblyEdModeCellRail::TagIgnore_CanExecute()

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 2048 2048" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g id="Command_ToggleOff">
+        <g id="Shadow" transform="matrix(75.7543,0,0,75.7543,1402.77,1104)">
+            <path d="M0,0C0,2.761 -2.238,5 -5,5C-7.762,5 -10,2.761 -10,0C-10,-2.761 -7.762,-5 -5,-5C-2.238,-5 0,-2.761 0,0M-5,8C-9.411,8 -13,4.411 -13,0C-13,-4.411 -9.411,-8 -5,-8C-0.589,-8 3,-4.411 3,0C3,4.411 -0.589,8 -5,8M-5,-11C-11.065,-11 -16,-6.065 -16,0C-16,6.065 -11.065,11 -5,11C1.065,11 6,6.065 6,0C6,-6.065 1.065,-11 -5,-11" style="fill:rgb(54,54,54);fill-opacity:0.25;fill-rule:nonzero;"/>
+        </g>
+        <g id="Icon" transform="matrix(75.7543,0,0,75.7543,1402.77,1024)">
+            <path d="M0,0C0,2.761 -2.238,5 -5,5C-7.762,5 -10,2.761 -10,0C-10,-2.761 -7.762,-5 -5,-5C-2.238,-5 0,-2.761 0,0M-5,8C-9.411,8 -13,4.411 -13,0C-13,-4.411 -9.411,-8 -5,-8C-0.589,-8 3,-4.411 3,0C3,4.411 -0.589,8 -5,8M-5,-11C-11.065,-11 -16,-6.065 -16,0C-16,6.065 -11.065,11 -5,11C1.065,11 6,6.065 6,0C6,-6.065 1.065,-11 -5,-11" style="fill:white;fill-rule:nonzero;"/>
+        </g>
+    </g>
+</svg>

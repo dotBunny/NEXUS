@@ -6,6 +6,7 @@
 #include "Editor.h"
 #include "NEditorStyle.h"
 #include "NEditorUtils.h"
+#include "NUIEditorStyle.h"
 #include "EdMode/NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyEditorCommands.h"
 #include "NWorldAssemblyEditorStyle.h"
@@ -35,7 +36,7 @@ void FNWorldAssemblyEdModeWorldRail::RegisterCommands(const TSharedRef<FBindingC
 		"NWorldAssembly.World.ToggleCollisionVisualizer",
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_ToggleCollisionVisualizer", "Collision Visualizer"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_ToggleCollisionVisualizer_Tooltip", "Creates and destroys a temporary/transient visualizer of the worlds collision geometry used during assembly."),
-		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.CreateCollisionVisualizer"),
+		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Tool.CollisionVisualizer"),
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_AddCellActor,
@@ -54,9 +55,9 @@ void FNWorldAssemblyEdModeWorldRail::RegisterCommands(const TSharedRef<FBindingC
 
 	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_TagCollisionIgnore,
 		"NWorldAssembly.World.TagCollisionIgnore",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_TagCollisionIgnore", "Ignore World Collision"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_TagCollisionIgnore", "World Collision"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_TagCollisionIgnore_Tooltip", "Toggles the necessary tag to have the selected actors ignored in the world collision system when placing Cells during assembly."),
-		FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.Tag"),
+		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Tag"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	using FOperations = FNWorldAssemblyEditorCellUtils;
@@ -133,7 +134,7 @@ FSlateIcon FNWorldAssemblyEdModeWorldRail::TagCollisionIgnoreIcon()
 	const bool bWouldRemove = FNWorldAssemblyEditorTagUtils::IsTagOnAnySelectedActor(
 		NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
 
-	return FSlateIcon(FNEditorStyle::GetStyleSetName(), bWouldRemove ? "Command.TagRemove" : "Command.Tag");
+	return FSlateIcon(FNUIEditorStyle::GetStyleSetName(), bWouldRemove ? "Command.ToggleOn" : "Command.ToggleOff");
 }
 
 bool FNWorldAssemblyEdModeWorldRail::TagCollisionIgnore_CanExecute()

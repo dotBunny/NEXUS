@@ -56,16 +56,16 @@ void FNWorldAssemblyEdModeJunctionRail::RegisterCommands(const TSharedRef<FBindi
 {
 	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_AddComponent,
 		"NWorldAssembly.NCellJunction.AddComponent",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_AddComponent", "Add"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_AddComponent", "Add Component"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_AddComponent_Tooltip", "Add a NCellJunction component to current actor."),
-		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
+		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Rail.Junction.Icon"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_CollectComponents,
 		"NWorldAssembly.NCellJunction.CollectComponents",
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_CollectComponents", "Collect All"),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCellJunction_CollectComponents_Tooltip", "Collects all Junctions and move them to the selected Actor, maintaining their world transforms."),
-		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.Junction.CollectJunctionComponents"),
+		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Rail.Junction.CollectJunctions"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	using FOperations = FNWorldAssemblyEditorJunctionUtils;
@@ -118,7 +118,7 @@ static TSharedRef<SWidget> CreateJunctionPicker()
 				MenuBuilder.AddMenuEntry(
 					JunctionName,
 					FText::Format(LOCTEXT("JunctionPicker_Select", "Select {0}"), JunctionName),
-					FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.SelectNCellJunctionComponent"),
+					FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "ClassIcon.NCellJunctionComponent"),
 					FUIAction(
 						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorJunctionUtils::SelectComponent, Junction),
 						FCanExecuteAction(),
