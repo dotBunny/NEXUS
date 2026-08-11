@@ -156,15 +156,20 @@ protected:
 	TSharedRef<SWidget> CreateBackedContent(const TSharedRef<SWidget>& Content) const;
 
 	/**
-	 * Rule off one run of groups from the next.
+	 * Rule off one run of groups from the next, optionally naming the run that follows.
 	 *
-	 * @return A full-width horizontal rule, inset to the same edge the groups around it sit on.
+	 * @param Label Text to sit at the near end of the rule, with the rule running out from it to the far edge, or
+	 *              empty for a bare rule spanning the whole width.
+	 * @return A horizontal rule, inset to the same edge the groups around it sit on.
 	 * @note The only break there is, now that no group carries a heading — so it earns its place between runs of
 	 *       groups that are a different kind of thing from each other, not between every pair of them.
+	 * @note A label rides on the rule rather than sitting above it, the way the engine's menus name a section: the
+	 *       rule is centered against the text, so the two read as one line with a name in it. Keep them short —
+	 *       nothing wraps, and a long one leaves no rule to speak of.
 	 * @remark Drop it in its own slot between two group slots. It carries the whole of its own spacing, so the slot
 	 *         wants no padding of its own.
 	 */
-	static TSharedRef<SWidget> CreateGroupSeparator();
+	static TSharedRef<SWidget> CreateGroupSeparator(const FText& Label = FText::GetEmpty());
 
 	/** The toolkit's command list; every button a rail builds resolves its action against this. */
 	TSharedRef<FUICommandList> CommandList;

@@ -10,6 +10,7 @@
 #include "Framework/Commands/UICommandList.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Framework/MultiBox/SToolBarButtonBlock.h"
+#include "Styling/SlateTypes.h"
 #include "Styling/StyleColors.h"
 #include "Widgets/Input/SCheckBox.h"
 #include "Widgets/Layout/SBorder.h"
@@ -36,6 +37,9 @@ static constexpr float GroupOuterInset = 4.0f;
  *       groups, which shows as a ragged left edge down the panel now that no backing squares them up.
  */
 static constexpr float UnbackedContentInset = 4.0f;
+
+/** Gap between a group separator's label and the rule running out from it, so the two read as one line and not as one word. */
+static constexpr float GroupSeparatorLabelSpacing = 6.0f;
 
 /**
  * Work out how many lines of label a group of commands needs.
@@ -229,20 +233,52 @@ TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateBackedContent(const TShared
 		]);
 }
 
-TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateGroupSeparator()
+TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateGroupSeparator(const FText& Label)
 {
+	// The rule itself: the whole of the widget when there is no label, and the tail of it when there is.
+	const TSharedRef<SWidget> Rule = SNew(SSeparator)
+		.SeparatorImage(FNWorldAssemblyEditorStyle::Get().GetBrush("WorldAssemblyEd.GroupSeparator"))
+		.Thickness(1.0f);
+
+	TSharedRef<SWidget> Content = Rule;
+	if (!Label.IsEmpty())
+	{
+		Content = SNew(SHorizontalBox)
+
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.VAlign(VAlign_Center)
+			// Near side carries the same inset the check lists and the toolbar buttons do, so a name lines up with the
+			// text below it rather than with the rule's own edge. Far side is the gap that keeps the rule reading as
+			// something running out from the name rather than striking through it.
+			.Padding(UnbackedContentInset, 0.0f, GroupSeparatorLabelSpacing, 0.0f)
+			[
+				SNew(STextBlock)
+				.Text(Label)
+				.TextStyle(&FNWorldAssemblyEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("WorldAssemblyEd.GroupSeparatorLabel"))
+			]
+
+			+ SHorizontalBox::Slot()
+			.FillWidth(1.0f)
+			// Centered against the text rather than aligned to the row, which is the whole of what makes the name read
+			// as sitting on the line: the row is as tall as the label, and the rule is one unit through the middle of it.
+			.VAlign(VAlign_Center)
+			[
+				Rule
+			];
+	}
+
 	return SNew(SBox)
 		// Inset to the group edge horizontally, so the rule spans the same width the backings and buttons do rather
 		// than running out to the panel's own margin.
 		//
 		// Vertically it only tops up what is already there: CreateGroup leaves 6 below a group's content and 10 above
 		// the next one's, so 2 more above the rule is what lands it between the two rather than sitting against the
-		// group it follows.
+		// group it follows. A labelled rule stands taller than a bare one by the height of its text and needs no more
+		// than that — the run it names is what the extra height belongs to.
 		.Padding(FMargin(GroupOuterInset, 2.0f, GroupOuterInset, 0.0f))
 		[
-			SNew(SSeparator)
-			.SeparatorImage(FNWorldAssemblyEditorStyle::Get().GetBrush("WorldAssemblyEd.GroupSeparator"))
-			.Thickness(1.0f)
+			Content
 		];
 }
 

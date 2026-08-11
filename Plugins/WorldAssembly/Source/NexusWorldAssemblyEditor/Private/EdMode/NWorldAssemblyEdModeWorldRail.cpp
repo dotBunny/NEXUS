@@ -182,7 +182,7 @@ TSharedPtr<SWidget> FNWorldAssemblyEdModeWorldRail::CreateContent() const
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
-			CreateGroupSeparator()
+			CreateGroupSeparator(LOCTEXT("WorldSelectedActorSeparator", "SELECTED ACTOR"))
 		]
 
 		+ SVerticalBox::Slot()
