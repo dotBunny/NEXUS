@@ -22,7 +22,9 @@
 void FNToolingEditorCommands::AddMenuEntries()
 {
 	// Project Levels
-	if (UToolMenu* FileMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.File"))
+	const UNToolingEditorSettings* Settings = UNToolingEditorSettings::Get();
+	if (UToolMenu* FileMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.File");
+		Settings->ProjectLevels.Num() > 0)
 	{
 		FToolMenuSection& FileOpenSection = FileMenu->FindOrAddSection("FileOpen");
 		FileOpenSection.AddSubMenu(
