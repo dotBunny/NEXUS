@@ -22,13 +22,13 @@
 static constexpr float RailInset = 16.0f;
 
 /** Smallest the user may drag the panel, below which the titled groups start ellipsizing their labels. */
-static constexpr float PanelMinimumWidth = 200.0f;
+static constexpr float PanelMinimumWidth = 160.0f;
 
 /** Largest the user may drag the panel; past this it stops reading as an overlay. */
 static constexpr float PanelMaximumWidth = 520.0f;
 
 /** Width the panel opens at before the user has resized it. */
-static constexpr float PanelDefaultWidth = 200.0f;
+static constexpr float PanelDefaultWidth = 320.0f;
 
 void FNWorldAssemblyEdModeToolkit::Init(const TSharedPtr<IToolkitHost>& InitToolkitHost, TWeakObjectPtr<UEdMode> InOwningMode)
 {
@@ -165,7 +165,13 @@ void FNWorldAssemblyEdModeToolkit::CreateOverlays()
 			SNew(SBorder)
 			// The darker half of the pair; see WorldAssemblyEd.RailBackground for the lighter one on the strip.
 			.BorderImage(FNWorldAssemblyEditorStyle::Get().GetBrush("WorldAssemblyEd.PanelBackground"))
-			.Padding(4.0f)
+			// The panel's gutter is 8 on every side, and these two numbers are whatever is left of that once the groups
+			// inside have carried their share: they claim 4 across (the inset their buttons and backings line up on)
+			// and GroupVerticalInset down, so this makes up 4 and 2 respectively.
+			//
+			// Which means this moves whenever GroupVerticalInset does — that constant sets the gap between groups, and
+			// what it does not spend on the panel's own top and bottom lands here. See NWorldAssemblyEdModeRail.cpp.
+			.Padding(FMargin(4.0f, 2.0f))
 			[
 				SNew(SNWorldAssemblyRailPanel)
 				.State(RailState)

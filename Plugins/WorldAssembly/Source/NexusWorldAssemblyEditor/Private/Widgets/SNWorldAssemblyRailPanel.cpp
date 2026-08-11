@@ -70,8 +70,12 @@ TSharedRef<SWidget> SNWorldAssemblyRailPanel::CreateWarningFooter()
 {
 	// Visibility goes on the outer box rather than the border: with it on the border the padding below would survive
 	// the collapse and leave a gap at the bottom of the panel with nothing to warn about.
+	//
+	// Padded to land on the panel's 8-a-side gutter the same way a group does, and by the same split — 4 across and 6
+	// below, on top of the 4 and 2 the panel's border carries. Nothing above, because the last group's own bottom inset
+	// is already the gap between the two.
 	return SNew(SBox)
-		.Padding(FMargin(6.0f, 2.0f, 6.0f, 6.0f))
+		.Padding(FMargin(4.0f, 0.0f, 4.0f, 6.0f))
 		.Visibility_Lambda([]()
 		{
 			return UNWorldAssemblyEdMode::GetWarningText().IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible;
