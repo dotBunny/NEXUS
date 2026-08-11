@@ -25,14 +25,14 @@ namespace UnrealBuildTool.Rules
 					"Engine",
 					"FunctionalTesting",
 					"Projects",
-					// Supplies FUICommandList, which every FNWorldAssemblyEdModeRail is constructed against.
 					"Slate",
-					"SlateCore",
+					"SlateCore"
 				]
 			);
 
 			// NEXUS
 			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusWorldAssembly", "NexusWorldAssemblyEditor"]);
+			PrivateDependencyModuleNames.AddRange(["NexusUIEditor"]);
 
 			ShortName = "NexusWorldAssemblyEditorTests";
 		}

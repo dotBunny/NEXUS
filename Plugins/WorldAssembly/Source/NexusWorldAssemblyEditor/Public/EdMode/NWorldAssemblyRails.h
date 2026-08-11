@@ -2,8 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
-
-#include "EdMode/NWorldAssemblyEdModeRail.h"
+#include "NEdModeRail.h"
 
 /**
  * Which rail category is selected, and which are worth showing at all.
@@ -14,14 +13,14 @@
  *
  * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
-class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyRailState
+class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyRails
 {
 public:
 	/** @param InRails The categories, in the order their buttons appear down the rail. */
-	explicit FNWorldAssemblyRailState(TArray<TSharedRef<FNWorldAssemblyEdModeRail>> InRails);
+	explicit FNWorldAssemblyRails(TArray<TSharedRef<FNEdModeRail>> InRails);
 
 	/** @return The categories, in rail order. */
-	const TArray<TSharedRef<FNWorldAssemblyEdModeRail>>& GetRails() const { return Rails; }
+	const TArray<TSharedRef<FNEdModeRail>>& GetRails() const { return Rails; }
 
 	/**
 	 * @return Position in GetRails of the selected category, or INDEX_NONE for no category at all — which the user can
@@ -91,7 +90,7 @@ private:
 	void SeedActiveIndex();
 
 	/** The categories, in rail order. */
-	TArray<TSharedRef<FNWorldAssemblyEdModeRail>> Rails;
+	TArray<TSharedRef<FNEdModeRail>> Rails;
 
 	/** Last polled availability per category; indices line up with Rails. */
 	TArray<bool> Available;

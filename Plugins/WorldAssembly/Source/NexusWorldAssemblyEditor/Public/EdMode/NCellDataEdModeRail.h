@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "EdMode/NWorldAssemblyEdModeRail.h"
+#include "NEdModeRail.h"
 
 class FBindingContext;
 
@@ -18,10 +18,10 @@ class FBindingContext;
  *       level has a cell, so the command that puts one there cannot be the one that needs it to already exist.
  * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
-class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyEdModeCellDataRail final : public FNWorldAssemblyEdModeRail
+class NEXUSWORLDASSEMBLYEDITOR_API FNCellDataEdModeRail final : public FNEdModeRail
 {
 public:
-	using FNWorldAssemblyEdModeRail::FNWorldAssemblyEdModeRail;
+	using FNEdModeRail::FNEdModeRail;
 
 	/**
 	 * Declare every cell data command against the module's binding context and map each to its action.

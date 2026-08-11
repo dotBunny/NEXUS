@@ -2,8 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
-
-#include "EdMode/NWorldAssemblyEdModeRail.h"
+#include "NEdModeRail.h"
 
 class FBindingContext;
 
@@ -16,10 +15,10 @@ class FBindingContext;
  *       level has an organ, so the command that puts one there cannot be the one that needs it to already exist.
  * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
-class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyEdModeOrganRail final : public FNWorldAssemblyEdModeRail
+class NEXUSWORLDASSEMBLYEDITOR_API FNOrganEdModeRail final : public FNEdModeRail
 {
 public:
-	using FNWorldAssemblyEdModeRail::FNWorldAssemblyEdModeRail;
+	using FNEdModeRail::FNEdModeRail;
 
 	/**
 	 * Declare every organ command against the module's binding context and map each to its action.

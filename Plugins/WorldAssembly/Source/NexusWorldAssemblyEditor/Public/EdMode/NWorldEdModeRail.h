@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "EdMode/NWorldAssemblyEdModeRail.h"
+#include "NEdModeRail.h"
 
 class FBindingContext;
 
@@ -21,10 +21,10 @@ class FBindingContext;
  *       empty level, and what FNWorldAssemblyRailState falls back to when the selected category disappears.
  * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
-class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyEdModeWorldRail final : public FNWorldAssemblyEdModeRail
+class NEXUSWORLDASSEMBLYEDITOR_API FNWorldEdModeRail final : public FNEdModeRail
 {
 public:
-	using FNWorldAssemblyEdModeRail::FNWorldAssemblyEdModeRail;
+	using FNEdModeRail::FNEdModeRail;
 
 	/**
 	 * Declare every world command against the module's binding context and map each to its action.

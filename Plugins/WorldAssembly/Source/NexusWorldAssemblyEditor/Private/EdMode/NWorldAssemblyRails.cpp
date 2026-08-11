@@ -1,11 +1,11 @@
 // Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "EdMode/NWorldAssemblyRailState.h"
+#include "EdMode/NWorldAssemblyRails.h"
 
 #include "EdMode/NWorldAssemblyEdMode.h"
 
-FNWorldAssemblyRailState::FNWorldAssemblyRailState(TArray<TSharedRef<FNWorldAssemblyEdModeRail>> InRails)
+FNWorldAssemblyRails::FNWorldAssemblyRails(TArray<TSharedRef<FNEdModeRail>> InRails)
 	: Rails(MoveTemp(InRails))
 {
 	// Fills the availability cache the seed then reads. It cannot seed on its own account any more: its fallback no
@@ -15,12 +15,12 @@ FNWorldAssemblyRailState::FNWorldAssemblyRailState(TArray<TSharedRef<FNWorldAsse
 	SeedActiveIndex();
 }
 
-bool FNWorldAssemblyRailState::IsAvailable(const int32 Index) const
+bool FNWorldAssemblyRails::IsAvailable(const int32 Index) const
 {
 	return Available.IsValidIndex(Index) && Available[Index];
 }
 
-void FNWorldAssemblyRailState::SetActiveIndex(const int32 Index)
+void FNWorldAssemblyRails::SetActiveIndex(const int32 Index)
 {
 	if (ActiveIndex == Index) return;
 
@@ -28,12 +28,12 @@ void FNWorldAssemblyRailState::SetActiveIndex(const int32 Index)
 	UNWorldAssemblyEdMode::EndActiveTool();
 }
 
-void FNWorldAssemblyRailState::ToggleActiveIndex(const int32 Index)
+void FNWorldAssemblyRails::ToggleActiveIndex(const int32 Index)
 {
 	SetActiveIndex(ActiveIndex == Index ? INDEX_NONE : Index);
 }
 
-void FNWorldAssemblyRailState::SeedActiveIndex()
+void FNWorldAssemblyRails::SeedActiveIndex()
 {
 	// Assigned rather than set through SetActiveIndex throughout: there is no tool running to end at construction, and
 	// the mode this would ask to end one on is still being entered.
@@ -54,7 +54,7 @@ void FNWorldAssemblyRailState::SeedActiveIndex()
 	}
 }
 
-void FNWorldAssemblyRailState::RefreshAvailability()
+void FNWorldAssemblyRails::RefreshAvailability()
 {
 	Available.SetNum(Rails.Num());
 

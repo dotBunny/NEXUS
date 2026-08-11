@@ -1,7 +1,7 @@
 // Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "EdMode/NWorldAssemblyEdModeWorldRail.h"
+#include "EdMode/NWorldEdModeRail.h"
 
 #include "Editor.h"
 #include "NEditorStyle.h"
@@ -23,14 +23,14 @@
 
 #define LOCTEXT_NAMESPACE "NexusWorldAssemblyEditor"
 
-TSharedPtr<FUICommandList> FNWorldAssemblyEdModeWorldRail::CategoryCommandList;
+TSharedPtr<FUICommandList> FNWorldEdModeRail::CategoryCommandList;
 
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeWorldRail::CommandInfo_ToggleCollisionVisualizer;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeWorldRail::CommandInfo_AddCellActor;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeWorldRail::CommandInfo_AddOrganVolume;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeWorldRail::CommandInfo_TagCollisionIgnore;
+TSharedPtr<FUICommandInfo> FNWorldEdModeRail::CommandInfo_ToggleCollisionVisualizer;
+TSharedPtr<FUICommandInfo> FNWorldEdModeRail::CommandInfo_AddCellActor;
+TSharedPtr<FUICommandInfo> FNWorldEdModeRail::CommandInfo_AddOrganVolume;
+TSharedPtr<FUICommandInfo> FNWorldEdModeRail::CommandInfo_TagCollisionIgnore;
 
-void FNWorldAssemblyEdModeWorldRail::RegisterCommands(const TSharedRef<FBindingContext>& Context)
+void FNWorldEdModeRail::RegisterCommands(const TSharedRef<FBindingContext>& Context)
 {
 	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_ToggleCollisionVisualizer,
 		"NWorldAssembly.World.ToggleCollisionVisualizer",
@@ -71,12 +71,12 @@ void FNWorldAssemblyEdModeWorldRail::RegisterCommands(const TSharedRef<FBindingC
 	});
 }
 
-TSharedRef<FUICommandList> FNWorldAssemblyEdModeWorldRail::GetCommandList()
+TSharedRef<FUICommandList> FNWorldEdModeRail::GetCommandList()
 {
 	return CategoryCommandList.ToSharedRef();
 }
 
-void FNWorldAssemblyEdModeWorldRail::ToggleCollisionVisualizer()
+void FNWorldEdModeRail::ToggleCollisionVisualizer()
 {
 	if (UNWorldAssemblyEdMode::HasCollisionVisualizer())
 	{
@@ -98,12 +98,12 @@ void FNWorldAssemblyEdModeWorldRail::ToggleCollisionVisualizer()
 	}
 }
 
-bool FNWorldAssemblyEdModeWorldRail::ToggleCollisionVisualizer_IsActionChecked()
+bool FNWorldEdModeRail::ToggleCollisionVisualizer_IsActionChecked()
 {
 	return UNWorldAssemblyEdMode::HasCollisionVisualizer();
 }
 
-bool FNWorldAssemblyEdModeWorldRail::AddCellActor_CanExecute()
+bool FNWorldEdModeRail::AddCellActor_CanExecute()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
 
@@ -113,7 +113,7 @@ bool FNWorldAssemblyEdModeWorldRail::AddCellActor_CanExecute()
 	return !UNWorldAssemblyEdMode::HasCellActor() && !FNWorldAssemblyEditorUtils::IsOrganComponentPresentInCurrentWorld();
 }
 
-bool FNWorldAssemblyEdModeWorldRail::AddOrganVolume_CanExecute()
+bool FNWorldEdModeRail::AddOrganVolume_CanExecute()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
 
@@ -127,7 +127,7 @@ bool FNWorldAssemblyEdModeWorldRail::AddOrganVolume_CanExecute()
 	return !UNWorldAssemblyEdMode::HasCellActor();
 }
 
-void FNWorldAssemblyEdModeWorldRail::TagCollisionIgnore()
+void FNWorldEdModeRail::TagCollisionIgnore()
 {
 	FNWorldAssemblyEditorTagUtils::ToggleTagOnSelection(
 		NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore,
@@ -135,7 +135,7 @@ void FNWorldAssemblyEdModeWorldRail::TagCollisionIgnore()
 		NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEdModeWorldRail_TagCollisionIgnore_Remove", "Remove WorldCollisionIgnore Tags"));
 }
 
-FSlateIcon FNWorldAssemblyEdModeWorldRail::TagCollisionIgnoreIcon()
+FSlateIcon FNWorldEdModeRail::TagCollisionIgnoreIcon()
 {
 	// Asks the same question ToggleTagOnSelection asks to pick its transaction, so the button cannot promise one thing
 	// and do the other: any tagged actor in the selection means the next click strips the tag from all of them.
@@ -145,7 +145,7 @@ FSlateIcon FNWorldAssemblyEdModeWorldRail::TagCollisionIgnoreIcon()
 	return FSlateIcon(FNUIEditorStyle::GetStyleSetName(), bWouldRemove ? "Command.ToggleOn" : "Command.ToggleOff");
 }
 
-bool FNWorldAssemblyEdModeWorldRail::TagCollisionIgnore_CanExecute()
+bool FNWorldEdModeRail::TagCollisionIgnore_CanExecute()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
 
@@ -154,12 +154,12 @@ bool FNWorldAssemblyEdModeWorldRail::TagCollisionIgnore_CanExecute()
 	return UNWorldAssemblyEdMode::IsActive() && !UNWorldAssemblyEdMode::HasCellActor() && FNEditorUtils::HasActorsSelected();
 }
 
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeWorldRail::GetCategoryCommand() const
+TSharedPtr<FUICommandInfo> FNWorldEdModeRail::GetCategoryCommand() const
 {
 	return FNWorldAssemblyEdModePaletteCommands::Get().LoadWorldPalette;
 }
 
-TSharedPtr<SWidget> FNWorldAssemblyEdModeWorldRail::CreateContent() const
+TSharedPtr<SWidget> FNWorldEdModeRail::CreateContent() const
 {
 	return SNew(SVerticalBox)
 

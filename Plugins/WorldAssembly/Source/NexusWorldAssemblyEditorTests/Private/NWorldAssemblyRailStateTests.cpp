@@ -3,8 +3,8 @@
 
 #if WITH_TESTS
 
-#include "EdMode/NWorldAssemblyEdModeRail.h"
-#include "EdMode/NWorldAssemblyRailState.h"
+#include "NEdModeRail.h"
+#include "EdMode/NWorldAssemblyRails.h"
 #include "Framework/Commands/UICommandList.h"
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
@@ -35,11 +35,11 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailStateHarness
 	 * The production rails answer both by walking the level, which is exactly what this replaces: what is under test is
 	 * the order the state resolves those answers in, not the predicates themselves.
 	 */
-	class FTestRail final : public FNWorldAssemblyEdModeRail
+	class FTestRail final : public FNEdModeRail
 	{
 	public:
 		FTestRail(const TSharedRef<FUICommandList>& InCommandList, const TSharedRef<FTestRailDefinition>& InDefinition)
-			: FNWorldAssemblyEdModeRail(InCommandList), Definition(InDefinition) {}
+			: FNEdModeRail(InCommandList), Definition(InDefinition) {}
 
 		//~FNWorldAssemblyEdModeRail
 		/** @return Null; nothing in the rail state reads the category command, only the strip that draws it does. */
@@ -72,7 +72,7 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailStateHarness
 			// rather than against a list of its own.
 			const TSharedRef<FUICommandList> CommandList = MakeShared<FUICommandList>();
 
-			TArray<TSharedRef<FNWorldAssemblyEdModeRail>> Rails;
+			TArray<TSharedRef<FNEdModeRail>> Rails;
 			Rails.Reserve(InDefinitions.Num());
 			Definitions.Reserve(InDefinitions.Num());
 			for (const FTestRailDefinition& Definition : InDefinitions)
@@ -82,14 +82,14 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailStateHarness
 			}
 
 			// Seeding is the constructor's whole job, so the state is selected on by the time this returns.
-			State = MakeShared<FNWorldAssemblyRailState>(MoveTemp(Rails));
+			State = MakeShared<FNWorldAssemblyRails>(MoveTemp(Rails));
 		}
 
 		/** What each stand-in answers with, in rail order; writable to move the level under a built state. */
 		TArray<TSharedRef<FTestRailDefinition>> Definitions;
 
 		/** The state under test. */
-		TSharedPtr<FNWorldAssemblyRailState> State;
+		TSharedPtr<FNWorldAssemblyRails> State;
 	};
 
 	/**

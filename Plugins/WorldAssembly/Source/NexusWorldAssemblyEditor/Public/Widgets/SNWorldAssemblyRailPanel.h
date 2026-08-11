@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "EdMode/NWorldAssemblyRailState.h"
+#include "EdMode/NWorldAssemblyRails.h"
 #include "Widgets/SCompoundWidget.h"
 
 class SWidgetSwitcher;
@@ -25,7 +25,7 @@ public:
 	SLATE_BEGIN_ARGS(SNWorldAssemblyRailPanel) {}
 
 		/** Selection and availability, shared with the strip driving this panel. */
-		SLATE_ARGUMENT(TSharedPtr<FNWorldAssemblyRailState>, State)
+		SLATE_ARGUMENT(TSharedPtr<FNWorldAssemblyRails>, State)
 
 	SLATE_END_ARGS()
 
@@ -41,7 +41,7 @@ private:
 	 * @note Scrolled because Cell alone carries six titled groups, which outgrows anything that reads as an overlay
 	 *       rather than a panel.
 	 */
-	static TSharedRef<SWidget> CreateCategoryContent(const TSharedRef<FNWorldAssemblyEdModeRail>& Rail);
+	static TSharedRef<SWidget> CreateCategoryContent(const TSharedRef<FNEdModeRail>& Rail);
 
 	/**
 	 * @return The focused cell's warnings, boxed, collapsing to nothing when there are none.
@@ -52,7 +52,7 @@ private:
 	static TSharedRef<SWidget> CreateWarningFooter();
 
 	/** Selection and availability, shared with the strip. */
-	TSharedPtr<FNWorldAssemblyRailState> State;
+	TSharedPtr<FNWorldAssemblyRails> State;
 
 	/** Switches to the selected category's content; indices line up with the state's rails. */
 	TSharedPtr<SWidgetSwitcher> ContentSwitcher;

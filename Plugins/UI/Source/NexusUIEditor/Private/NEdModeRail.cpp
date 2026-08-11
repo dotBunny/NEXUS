@@ -1,9 +1,9 @@
-// Copyright dotBunny Inc. All Rights Reserved.
+﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "EdMode/NWorldAssemblyEdModeRail.h"
+#include "NEdModeRail.h"
 
-#include "NWorldAssemblyEditorStyle.h"
+#include "NUIEditorStyle.h"
 #include "Fonts/FontMeasure.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Commands/UICommandInfo.h"
@@ -113,17 +113,17 @@ static TSharedRef<SWidget> CreateGroup(const TSharedRef<SWidget>& Content)
  * Build a group of labelled buttons laid out by one of the plugin's uniform toolbar styles.
  *
  * @param CommandList The toolkit's command list, which every button resolves against.
- * @param StyleName A WorldAssemblyEd.Command* style; its NumColumns is what decides the layout.
+ * @param StyleName A Rail.Command* style; its NumColumns is what decides the layout.
  * @param Commands Commands to lay out.
  * @return The bare toolbar widget, backed and inset by its style but with no heading of its own.
  */
 static TSharedRef<SWidget> CreateUniformToolBar(const TSharedRef<FUICommandList>& CommandList, const FName StyleName,
-	const TArray<FNWorldAssemblyEdModeRail::FNRailCommand>& Commands)
+	const TArray<FNEdModeRail::FNRailCommand>& Commands)
 {
 	FSlimHorizontalUniformToolBarBuilder ToolBarBuilder(CommandList, FMultiBoxCustomization::None);
-	ToolBarBuilder.SetStyle(&FNWorldAssemblyEditorStyle::Get(), StyleName);
+	ToolBarBuilder.SetStyle(&FNUIEditorStyle::Get(), StyleName);
 
-	for (const FNWorldAssemblyEdModeRail::FNRailCommand& Entry : Commands)
+	for (const FNEdModeRail::FNRailCommand& Entry : Commands)
 	{
 		if (!Entry.Command.IsValid()) continue;
 
@@ -152,7 +152,7 @@ static TSharedRef<SWidget> CreateUniformToolBar(const TSharedRef<FUICommandList>
  * Build a group of labelled buttons laid out by one of the plugin's uniform toolbar styles.
  *
  * @param CommandList The toolkit's command list, which every button resolves against.
- * @param StyleName A WorldAssemblyEd.Command* style; its NumColumns is what decides the layout.
+ * @param StyleName A Rail.Command* style; its NumColumns is what decides the layout.
  * @param Commands Commands to lay out.
  * @param LeadingContent Widget to sit above the buttons in the same group, or null for the buttons alone.
  * @return The assembled group.
@@ -160,7 +160,7 @@ static TSharedRef<SWidget> CreateUniformToolBar(const TSharedRef<FUICommandList>
  *       the list differ only in the style they name, and a picker sits above one exactly as it sits above the other.
  */
 static TSharedRef<SWidget> CreateUniformToolBarGroup(const TSharedRef<FUICommandList>& CommandList, const FName StyleName,
-	const TArray<FNWorldAssemblyEdModeRail::FNRailCommand>& Commands, const TSharedPtr<SWidget>& LeadingContent)
+	const TArray<FNEdModeRail::FNRailCommand>& Commands, const TSharedPtr<SWidget>& LeadingContent)
 {
 	if (!LeadingContent.IsValid())
 	{
@@ -190,9 +190,9 @@ static TSharedRef<SWidget> CreateUniformToolBarGroup(const TSharedRef<FUICommand
 		]);
 }
 
-TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateCommandPalette(const TArray<TSharedPtr<FUICommandInfo>>& Commands) const
+TSharedRef<SWidget> FNEdModeRail::CreateCommandPalette(const TArray<TSharedPtr<FUICommandInfo>>& Commands) const
 {
-	const FToolBarStyle& TileStyle = FNWorldAssemblyEditorStyle::Get().GetWidgetStyle<FToolBarStyle>("WorldAssemblyEd.CommandPalette");
+	const FToolBarStyle& TileStyle = FNUIEditorStyle::Get().GetWidgetStyle<FToolBarStyle>("Rail.CommandPalette");
 
 	// UseAllottedSize because the tiles are a fixed size and the panel they wrap into is not: the user drags it between
 	// 260 and 520 wide. SWrapBox re-reads its allotted width every tick and invalidates its own layout when it changes,
@@ -226,36 +226,36 @@ TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateCommandPalette(const TArray
 	return CreateBackedContent(Tiles);
 }
 
-TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateCommandGrid(const TArray<FNRailCommand>& Commands,
+TSharedRef<SWidget> FNEdModeRail::CreateCommandGrid(const TArray<FNRailCommand>& Commands,
 	const TSharedPtr<SWidget>& LeadingContent) const
 {
-	return CreateUniformToolBarGroup(CommandList, "WorldAssemblyEd.CommandGrid", Commands, LeadingContent);
+	return CreateUniformToolBarGroup(CommandList, "Rail.CommandGrid", Commands, LeadingContent);
 }
 
-TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateCommandList(const TArray<FNRailCommand>& Commands,
+TSharedRef<SWidget> FNEdModeRail::CreateCommandList(const TArray<FNRailCommand>& Commands,
 	const TSharedPtr<SWidget>& LeadingContent) const
 {
-	return CreateUniformToolBarGroup(CommandList, "WorldAssemblyEd.CommandList", Commands, LeadingContent);
+	return CreateUniformToolBarGroup(CommandList, "Rail.CommandList", Commands, LeadingContent);
 }
 
-TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateBackedContent(const TSharedRef<SWidget>& Content) const
+TSharedRef<SWidget> FNEdModeRail::CreateBackedContent(const TSharedRef<SWidget>& Content) const
 {
 	// The one group that still draws a backing. The command groups gave theirs up and sit on the panel, so a well here
 	// now marks out the section that is not a row of commands rather than being the frame every group shares.
 	return CreateGroup(
 		SNew(SBorder)
-		.BorderImage(FNWorldAssemblyEditorStyle::Get().GetBrush("WorldAssemblyEd.GroupBackground"))
+		.BorderImage(FNUIEditorStyle::Get().GetBrush("Rail.GroupBackground"))
 		.Padding(FMargin(8.0f))
 		[
 			Content
 		]);
 }
 
-TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateGroupSeparator(const FText& Label)
+TSharedRef<SWidget> FNEdModeRail::CreateGroupSeparator(const FText& Label)
 {
 	// The rule itself: the whole of the widget when there is no label, and the tail of it when there is.
 	const TSharedRef<SWidget> Rule = SNew(SSeparator)
-		.SeparatorImage(FNWorldAssemblyEditorStyle::Get().GetBrush("WorldAssemblyEd.GroupSeparator"))
+		.SeparatorImage(FNUIEditorStyle::Get().GetBrush("Rail.GroupSeparator"))
 		.Thickness(1.0f);
 
 	TSharedRef<SWidget> Content = Rule;
@@ -273,7 +273,7 @@ TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateGroupSeparator(const FText&
 			[
 				SNew(STextBlock)
 				.Text(Label)
-				.TextStyle(&FNWorldAssemblyEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("WorldAssemblyEd.GroupSeparatorLabel"))
+				.TextStyle(&FNUIEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("Rail.GroupSeparatorLabel"))
 			]
 
 			+ SHorizontalBox::Slot()
@@ -300,7 +300,7 @@ TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateGroupSeparator(const FText&
 		];
 }
 
-TSharedRef<SWidget> FNWorldAssemblyEdModeRail::CreateCheckList(const TArray<TSharedPtr<FUICommandInfo>>& Commands) const
+TSharedRef<SWidget> FNEdModeRail::CreateCheckList(const TArray<TSharedPtr<FUICommandInfo>>& Commands) const
 {
 	const TSharedRef<SVerticalBox> Column = SNew(SVerticalBox);
 

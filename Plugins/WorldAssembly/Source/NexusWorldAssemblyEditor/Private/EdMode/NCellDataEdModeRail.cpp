@@ -1,7 +1,7 @@
 // Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "EdMode/NWorldAssemblyEdModeCellDataRail.h"
+#include "EdMode/NCellDataEdModeRail.h"
 
 #include "NEditorUtils.h"
 #include "NTerrainUtils.h"
@@ -20,14 +20,14 @@
 
 #define LOCTEXT_NAMESPACE "NexusWorldAssemblyEditor"
 
-TSharedPtr<FUICommandList> FNWorldAssemblyEdModeCellDataRail::CategoryCommandList;
+TSharedPtr<FUICommandList> FNCellDataEdModeRail::CategoryCommandList;
 
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellDataRail::CommandInfo_RemoveActor;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellDataRail::CommandInfo_CaptureThumbnail;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellDataRail::CommandInfo_ResetCell;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellDataRail::CommandInfo_SaveCell;
+TSharedPtr<FUICommandInfo> FNCellDataEdModeRail::CommandInfo_RemoveActor;
+TSharedPtr<FUICommandInfo> FNCellDataEdModeRail::CommandInfo_CaptureThumbnail;
+TSharedPtr<FUICommandInfo> FNCellDataEdModeRail::CommandInfo_ResetCell;
+TSharedPtr<FUICommandInfo> FNCellDataEdModeRail::CommandInfo_SaveCell;
 
-void FNWorldAssemblyEdModeCellDataRail::RegisterCommands(const TSharedRef<FBindingContext>& Context)
+void FNCellDataEdModeRail::RegisterCommands(const TSharedRef<FBindingContext>& Context)
 {
 	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_CaptureThumbnail,
 		"NWorldAssembly.NCell.CaptureThumbnails",
@@ -68,12 +68,12 @@ void FNWorldAssemblyEdModeCellDataRail::RegisterCommands(const TSharedRef<FBindi
 	});
 }
 
-TSharedRef<FUICommandList> FNWorldAssemblyEdModeCellDataRail::GetCommandList()
+TSharedRef<FUICommandList> FNCellDataEdModeRail::GetCommandList()
 {
 	return CategoryCommandList.ToSharedRef();
 }
 
-void FNWorldAssemblyEdModeCellDataRail::SaveCell()
+void FNCellDataEdModeRail::SaveCell()
 {
 	UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
 	ANCellActor* CellActor = FNWorldAssemblyUtils::GetCellActorFromWorld(CurrentWorld, true);
@@ -88,7 +88,7 @@ void FNWorldAssemblyEdModeCellDataRail::SaveCell()
 	FNWorldAssemblyEditorUtils::SaveCell(CurrentWorld, CellActor, true);
 }
 
-bool FNWorldAssemblyEdModeCellDataRail::CaptureThumbnail_CanExecute()
+bool FNCellDataEdModeRail::CaptureThumbnail_CanExecute()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
 
@@ -96,12 +96,12 @@ bool FNWorldAssemblyEdModeCellDataRail::CaptureThumbnail_CanExecute()
 	return World != nullptr && !FNEditorUtils::IsUnsavedWorld(World);
 }
 
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeCellDataRail::GetCategoryCommand() const
+TSharedPtr<FUICommandInfo> FNCellDataEdModeRail::GetCategoryCommand() const
 {
 	return FNWorldAssemblyEdModePaletteCommands::Get().LoadCellDataPalette;
 }
 
-TAttribute<bool> FNWorldAssemblyEdModeCellDataRail::GetAvailable() const
+TAttribute<bool> FNCellDataEdModeRail::GetAvailable() const
 {
 	// Level contents rather than the focused actor. The category is worth showing whenever the level has a cell to
 	// author, whether or not one is selected this instant; the buttons inside it are what go dead when nothing is
@@ -109,7 +109,7 @@ TAttribute<bool> FNWorldAssemblyEdModeCellDataRail::GetAvailable() const
 	return TAttribute<bool>::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld);
 }
 
-TSharedPtr<SWidget> FNWorldAssemblyEdModeCellDataRail::CreateContent() const
+TSharedPtr<SWidget> FNCellDataEdModeRail::CreateContent() const
 {
 	return SNew(SVerticalBox)
 

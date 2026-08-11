@@ -1,7 +1,7 @@
 // Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "EdMode/NWorldAssemblyEdModeOrganRail.h"
+#include "EdMode/NOrganEdModeRail.h"
 
 #include "Editor.h"
 #include "NEditorUtils.h"
@@ -24,16 +24,16 @@
 
 #define LOCTEXT_NAMESPACE "NexusWorldAssemblyEditor"
 
-TSharedPtr<FUICommandList> FNWorldAssemblyEdModeOrganRail::CategoryCommandList;
+TSharedPtr<FUICommandList> FNOrganEdModeRail::CategoryCommandList;
 
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeOrganRail::CommandInfo_GenerateProxies;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeOrganRail::CommandInfo_GenerateAllProxies;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeOrganRail::CommandInfo_ClearProxies;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeOrganRail::CommandInfo_ClearAllProxies;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeOrganRail::CommandInfo_LoadLevelInstances;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeOrganRail::CommandInfo_CreateAllLevelInstances;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeOrganRail::CommandInfo_UnloadLevelInstances;
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeOrganRail::CommandInfo_UnloadAllLevelInstances;
+TSharedPtr<FUICommandInfo> FNOrganEdModeRail::CommandInfo_GenerateProxies;
+TSharedPtr<FUICommandInfo> FNOrganEdModeRail::CommandInfo_GenerateAllProxies;
+TSharedPtr<FUICommandInfo> FNOrganEdModeRail::CommandInfo_ClearProxies;
+TSharedPtr<FUICommandInfo> FNOrganEdModeRail::CommandInfo_ClearAllProxies;
+TSharedPtr<FUICommandInfo> FNOrganEdModeRail::CommandInfo_LoadLevelInstances;
+TSharedPtr<FUICommandInfo> FNOrganEdModeRail::CommandInfo_CreateAllLevelInstances;
+TSharedPtr<FUICommandInfo> FNOrganEdModeRail::CommandInfo_UnloadLevelInstances;
+TSharedPtr<FUICommandInfo> FNOrganEdModeRail::CommandInfo_UnloadAllLevelInstances;
 
 /**
  * @return Every organ component the current editor selection covers, without duplicates.
@@ -77,7 +77,7 @@ static TArray<UNOrganComponent*> GetSelectedOrgans()
 	return Selected;
 }
 
-void FNWorldAssemblyEdModeOrganRail::RegisterCommands(const TSharedRef<FBindingContext>& Context)
+void FNOrganEdModeRail::RegisterCommands(const TSharedRef<FBindingContext>& Context)
 {
 	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_GenerateAllProxies,
 	"NWorldAssembly.NOrganComponent.GenerateAllProxies",
@@ -149,24 +149,24 @@ void FNWorldAssemblyEdModeOrganRail::RegisterCommands(const TSharedRef<FBindingC
 	});
 }
 
-TSharedRef<FUICommandList> FNWorldAssemblyEdModeOrganRail::GetCommandList()
+TSharedRef<FUICommandList> FNOrganEdModeRail::GetCommandList()
 {
 	return CategoryCommandList.ToSharedRef();
 }
 
-TSharedPtr<FUICommandInfo> FNWorldAssemblyEdModeOrganRail::GetCategoryCommand() const
+TSharedPtr<FUICommandInfo> FNOrganEdModeRail::GetCategoryCommand() const
 {
 	return FNWorldAssemblyEdModePaletteCommands::Get().LoadOrganPalette;
 }
 
-TAttribute<bool> FNWorldAssemblyEdModeOrganRail::GetAvailable() const
+TAttribute<bool> FNOrganEdModeRail::GetAvailable() const
 {
 	// Stated explicitly rather than left to the base's always-available default, which would keep the category on the
 	// rail in a level with no organs.
 	return TAttribute<bool>::CreateStatic(&FNWorldAssemblyEditorUtils::IsOrganComponentPresentInCurrentWorld);
 }
 
-bool FNWorldAssemblyEdModeOrganRail::ShouldAutoSelect() const
+bool FNOrganEdModeRail::ShouldAutoSelect() const
 {
 	// The other half of the pair the level can be: a level holding organs is one that assembles cells rather than
 	// authors one, and generating from them is what the mode is there to do. Second to Cell only because a level is
@@ -237,7 +237,7 @@ static TSharedRef<SWidget> CreateOrganPicker()
 		];
 }
 
-TSharedPtr<SWidget> FNWorldAssemblyEdModeOrganRail::CreateContent() const
+TSharedPtr<SWidget> FNOrganEdModeRail::CreateContent() const
 {
 	return SNew(SVerticalBox)
 
