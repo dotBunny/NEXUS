@@ -12,6 +12,9 @@
 #include "NToolingEditorStyle.h"
 #include "NToolingEditorUserSettings.h"
 #include "NToolingEditorUtils.h"
+#include "SelectionLock/NSelectionLock.h"
+#include "SelectionLock/NSelectionLockColumn.h"
+#include "SelectionLock/NSelectionLockMenu.h"
 #include "Brushes/SlateImageBrush.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
@@ -43,6 +46,9 @@ void FNToolingEditorModule::ShutdownModule()
 
 	FNToolingEditorCommands::RemoveMenuEntries();
 	FNMultiplayerTestToolbarSection::RemoveSection();
+	FNSelectionLockMenu::RemoveMenuEntries();
+	FNSelectionLockColumn::Unregister();
+	FNSelectionLock::Shutdown();
 
 	if (InputProcessor.IsValid())
 	{
@@ -66,13 +72,21 @@ void FNToolingEditorModule::OnPostEngineInit()
 
 	UNToolingEditorUserSettings::OnPostEngineInit();
 
+	const UNToolingEditorSettings* Settings = UNToolingEditorSettings::Get();
+
+	// Read once at startup; the setting is marked ConfigRestartRequired, so it cannot change under us.
+	if (Settings->bSelectionLockEnabled)
+	{
+		FNSelectionLock::Initialize();
+		FNSelectionLockColumn::Register();
+	}
+
 	// Initialize Tool Menu
 	if (FSlateApplication::IsInitialized())
 	{
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNToolingEditorCommands::AddMenuEntries));
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNMultiplayerTestToolbarSection::AddSection));
-
-		const UNToolingEditorSettings* Settings = UNToolingEditorSettings::Get();
+		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNSelectionLockMenu::AddMenuEntries));
 
 		// Apply Starship style override of AppIcon
 		ApplyAppIcon(Settings->ProjectAppIconPath);

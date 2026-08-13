@@ -30,5 +30,7 @@ TSharedRef<FSlateStyleSet> FNToolingEditorStyle::Create()
 	Style.Set("ClassIcon.NCollisionVisualizerActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCollisionVisualizerActor"), Icon16x16));
 	Style.Set("ClassThumbnail.NCollisionVisualizerActor",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCollisionVisualizerActor"), Icon128x128));
 
+	Style.Set("Status.Locked",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Status_Locked"), Icon16x16));
+
 	return StyleRef;
 }
