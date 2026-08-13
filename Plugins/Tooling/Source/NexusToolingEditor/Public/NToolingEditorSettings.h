@@ -116,6 +116,10 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test", meta = (DisplayName = "Use Online Subsystem", Tooltip = "Should authentication use the Online Subsystem?"))
 	bool bMultiplayerTestUseOnlineSubsystem = false;
 
+	/** When true, the Selection Lock column and context-menu toggle are installed; takes effect after an editor restart. */
+	UPROPERTY(EditAnywhere, config, Category = "Selection Lock", DisplayName = "Enabled", meta=(ConfigRestartRequired = true, ToolTip="Should Selection Lock be enabled? Existing locks are kept on disk either way, so turning this back on restores them. A restart of the editor is required for it to take effect."))
+	bool bSelectionLockEnabled = true;
+
 	/**
 	 * Forwards the project-level multiplayer-test toggles onto the supplied play-session request.
 	 * @param Params The play-session request whose Online Subsystem behavior should be set.
