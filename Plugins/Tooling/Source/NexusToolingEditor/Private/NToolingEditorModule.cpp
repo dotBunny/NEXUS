@@ -6,6 +6,7 @@
 #include "NCoreMinimal.h"
 #include "NEditorUtils.h"
 #include "MultiplayerTest/NMultiplayerTestToolbarSection.h"
+#include "NToolingEditorBindings.h"
 #include "NToolingEditorCommands.h"
 #include "NToolingEditorMinimal.h"
 #include "NToolingEditorSettings.h"
@@ -50,6 +51,9 @@ void FNToolingEditorModule::ShutdownModule()
 	FNSelectionLockColumn::Unregister();
 	FNSelectionLock::Shutdown();
 
+	FNToolingEditorBindings::UnmapActions();
+	FNToolingEditorBindings::Unregister();
+
 	if (InputProcessor.IsValid())
 	{
 		if (FSlateApplication::IsInitialized()) // Still around
@@ -79,6 +83,14 @@ void FNToolingEditorModule::OnPostEngineInit()
 	{
 		FNSelectionLock::Initialize();
 		FNSelectionLockColumn::Register();
+	}
+
+	// Likewise ConfigRestartRequired: leaving the command unregistered is what keeps it out of the
+	// keyboard shortcut list, and that list is built from the binding manager as it stands right now.
+	if (UNToolingEditorUserSettings::Get()->bQuickHighResScreenshotEnabled)
+	{
+		FNToolingEditorBindings::Register();
+		FNToolingEditorBindings::MapActions();
 	}
 
 	// Initialize Tool Menu

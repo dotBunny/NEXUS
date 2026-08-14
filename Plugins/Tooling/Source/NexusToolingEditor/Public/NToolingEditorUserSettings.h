@@ -58,6 +58,19 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Leak Check", DisplayName ="Duration", meta=(ToolTip="How long should the leak check run?"))
 	float LeakCheckTime = 30.f;
 
+	/** When true, the Quick HighRes Screenshot command and its chord are registered; takes effect after an editor restart. */
+	UPROPERTY(EditAnywhere, config, Category = "Quick HighRes Screenshot", DisplayName = "Enabled", meta=(ConfigRestartRequired = true, ToolTip="Should the Quick HighRes Screenshot command be available? Off by default, as it claims Alt+F9 for as long as it is on. Turning it off also takes it out of Editor Preferences > Keyboard Shortcuts, leaving the chord free for something else. A restart of the editor is required for it to take effect."))
+	bool bQuickHighResScreenshotEnabled = false;
+
+	/**
+	 * Resolution multiplier applied to the viewport size when taking a quick high-resolution screenshot.
+	 * @note Read at capture time rather than cached, so an edit takes effect on the very next keypress.
+	 */
+	UPROPERTY(EditAnywhere, config, Category = "Quick HighRes Screenshot", DisplayName = "Multiplier",
+		meta = (ClampMin = "0.5", ClampMax = "5.0", UIMin = "1.0", UIMax = "5.0",
+			ToolTip = "How much larger than the viewport a quick high-resolution screenshot is captured. Below 1.0 downscales instead. A multiplier that produces an image larger than the GPU's maximum texture dimension is rejected with a warning."))
+	float QuickHighResScreenshotMultiplier = 2.0f;
+
 	/** Color of a distribution visualizer's outer boundary. */
 	UPROPERTY(EditAnywhere, config, Category = "Visualizers|Distribution", DisplayName = "Outer Color", meta = (Tooltip = "Color used to draw the outer boundary of a distribution visualizer."))
 	FColor VisualizationDistributionOuterColor = FColor(255,0,88);

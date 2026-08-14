@@ -114,7 +114,7 @@ const TSharedRef<SWidget> FNSelectionLockColumn::ConstructRowWidget(FSceneOutlin
 		[
 			SNew(SNSelectionLockWidget, WeakOutliner, TreeItem, &Row)
 				.ToolTipText(NSLOCTEXT("NexusToolingEditor", "SelectionLockToggleTooltip",
-					"Lock this actor against being selected by clicking it in a level viewport. It can still be selected here in the Outliner."))
+					"Lock this actor against being selected by clicking it in a level viewport. It can still be selected here in the Outliner.\n\nNanite meshes cannot be locked: Nanite resolves hit proxies through its own pass, which the lock has no say over."))
 		];
 }
 
