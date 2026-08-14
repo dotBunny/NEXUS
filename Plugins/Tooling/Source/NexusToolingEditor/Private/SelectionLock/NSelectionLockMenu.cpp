@@ -38,7 +38,7 @@ void FNSelectionLockMenu::AddMenuEntries()
 		"ToggleSelectionLock",
 		NSLOCTEXT("NexusToolingEditor", "ToggleSelectionLock", "Lock Selection"),
 		NSLOCTEXT("NexusToolingEditor", "ToggleSelectionLock_Tooltip",
-			"Lock these actors against being selected by clicking them in a level viewport. They can still be selected from the Outliner."),
+			"Lock these actors against being selected by clicking them in a level viewport. They can still be selected from the Outliner.\n\nNanite meshes cannot be locked: Nanite resolves hit proxies through its own pass, which the lock has no say over."),
 		FSlateIcon(FNToolingEditorStyle::GetStyleSetName(), "Status.Locked"),
 		FUIAction(
 			FExecuteAction::CreateStatic(&ToggleSelectionLock),
