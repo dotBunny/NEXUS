@@ -130,16 +130,18 @@ public:
 	}
 
 	/**
-	 * Returns the current editor level.
-	 * @return The ULevel the user is editing, or nullptr while PIE is active.
-	 */
-	static ULevel* GetCurrentLevel();
-
-	/**
-	 * Returns the world that owns the current editor level.
-	 * @return The owning UWorld, or nullptr while PIE is active or no level is loaded.
+	 * Returns the world the user is editing.
+	 * @return The editor UWorld, or nullptr while PIE is active or no map is loaded.
+	 * @note Answers nullptr silently — an editor with no map open yet is an expected state, not a failure.
 	 */
 	static UWorld* GetCurrentWorld();
+
+	/**
+	 * Returns the current level of the world the user is editing.
+	 * @return The ULevel the user is editing, or nullptr while PIE is active or no map is loaded.
+	 * @note Answers nullptr silently — an editor with no map open yet is an expected state, not a failure.
+	 */
+	static ULevel* GetCurrentLevel();
 
 	/**
 	 * Tests whether World has never been saved (new map or in-memory only).

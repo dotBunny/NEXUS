@@ -9,10 +9,10 @@
 #include "ISettingsModule.h"
 #include "KismetCompilerModule.h"
 #include "LevelEditor.h"
-#include "LevelEditorSubsystem.h"
 #include "NCoreEditorMinimal.h"
 #include "Selection.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Engine/World.h"
 #include "Kismet2/KismetEditorUtilities.h"
 
 void FNEditorUtils::RegisterSettings(UDeveloperSettings* SettingsObject)
@@ -118,27 +118,26 @@ UBlueprint* FNEditorUtils::CreateBlueprint(const FString& InPath, const TSubclas
 	return Blueprint;
 }
 
-ULevel* FNEditorUtils::GetCurrentLevel()
+UWorld* FNEditorUtils::GetCurrentWorld()
 {
 	if (IsPlayInEditor())
 	{
 		return nullptr;
 	}
 
-	ULevelEditorSubsystem* LevelEditorSubsystem = GEditor->GetEditorSubsystem<ULevelEditorSubsystem>();
-	if (LevelEditorSubsystem != nullptr)
-	{
-		return LevelEditorSubsystem->GetCurrentLevel();
-	}
-	return nullptr;
+	// Read the editor world context directly rather than going through ULevelEditorSubsystem::GetCurrentLevel(), which
+	// resolves to this exact lookup but logs an Error when it comes back empty. This is a query — toolbar visibility
+	// attributes and edit mode availability run it every time the level editor rebuilds, including before the first map
+	// has loaded — so "there is no world yet" is an ordinary answer, not a failure worth a line in the log.
+	return GEditor->GetEditorWorldContext().World();
 }
 
-UWorld* FNEditorUtils::GetCurrentWorld()
+ULevel* FNEditorUtils::GetCurrentLevel()
 {
-	ULevel* CurrentLevel = GetCurrentLevel();
-	if (CurrentLevel != nullptr)
+	const UWorld* CurrentWorld = GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		return CurrentLevel->OwningWorld;
+		return CurrentWorld->GetCurrentLevel();
 	}
 	return nullptr;
 }
