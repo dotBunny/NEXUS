@@ -1,7 +1,7 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Elements/NFilterEdgePoints2DXYElement.h"
+#include "PCG/Elements/NFilterEdgePoints2DXYElement.h"
 #include "Data/PCGPointData.h"
 #include "PCGContext.h"
 #include "Async/ParallelFor.h"

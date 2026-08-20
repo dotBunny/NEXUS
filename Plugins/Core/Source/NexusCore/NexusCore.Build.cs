@@ -17,6 +17,7 @@ namespace UnrealBuildTool.Rules
 					"GameplayTags",
 					"GeometryCore",
 					"GeometryFramework",
+					"PCG",
 					"PhysicsCore"
 				]
 			);
@@ -30,7 +31,7 @@ namespace UnrealBuildTool.Rules
 				]
 			);
 
-			ShortName = "NexusCore";						
+			ShortName = "NexusCore";
 		}
 	}
 }

@@ -11,7 +11,7 @@
  * PCG settings node that orders a 2D point cloud into a nearest-neighbour chain along XY and
  * optionally annotates every point with turn direction, cardinal facing, and segment metadata.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/elements/sort-line-2d-xy/">UNSortLine2DXYSettings</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/pcg/types/elements/sort-line-2d-xy/">UNSortLine2DXYSettings</a>
  */
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
 class UNSortLine2DXYSettings : public UPCGSettings
@@ -107,7 +107,7 @@ protected:
 	virtual FPCGElementPtr CreateElement() const override;
 };
 
-namespace NEXUS::WorldAssembly::SortLine
+namespace NEXUS::PCG::SortLine
 {
 	/**
 	 * Deadzone half-width for turn classification, expressed in sin(theta) space (~30 degrees).
@@ -156,7 +156,7 @@ public:
 	 * @param TurnTolerance Deadzone half-width — a turn whose magnitude is <= TurnTolerance is treated as straight (a wall).
 	 * @param OutInfo Receives one entry per input turn value.
 	 */
-	static NEXUSWORLDASSEMBLY_API void ClassifyLine(const TArray<float>& TurnValues, float TurnTolerance, TArray<FNSortLinePointInfo>& OutInfo);
+	static NEXUSCORE_API void ClassifyLine(const TArray<float>& TurnValues, float TurnTolerance, TArray<FNSortLinePointInfo>& OutInfo);
 
 protected:
 	virtual bool ExecuteInternal(FPCGContext* Context) const override;

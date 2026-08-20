@@ -1,7 +1,7 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Elements/NSortLine2DXYElement.h"
+#include "PCG/Elements/NSortLine2DXYElement.h"
 
 #include "Data/PCGPointData.h"
 #include "PCGContext.h"
@@ -215,7 +215,7 @@ bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
 
         	// Classify every point and resolve its segment bookkeeping (see FNSortLine2DXYElement::ClassifyLine).
         	TArray<FNSortLinePointInfo> PointInfos;
-        	ClassifyLine(CachedTurnValues, NEXUS::WorldAssembly::SortLine::TurnDeadzone, PointInfos);
+        	ClassifyLine(CachedTurnValues, NEXUS::PCG::SortLine::TurnDeadzone, PointInfos);
 
         	FPCGMetadataAttribute<int32>* SegmentIndexAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SegmentIndexAttributeName, 0, false, true);
         	FPCGMetadataAttribute<int32>* SubsegmentIndexAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SubsegmentIndexAttributeName, 0, false, true);

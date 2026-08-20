@@ -1,7 +1,7 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Elements/NSetPositionZElement.h"
+#include "PCG/Elements/NSetPositionZElement.h"
 
 #include "PCGContext.h"
 #include "Data/PCGPointData.h"
