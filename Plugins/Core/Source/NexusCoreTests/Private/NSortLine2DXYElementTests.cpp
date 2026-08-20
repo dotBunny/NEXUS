@@ -3,14 +3,14 @@
 
 #if WITH_TESTS
 
-#include "Elements/NSortLine2DXYElement.h"
+#include "PCG/Elements/NSortLine2DXYElement.h"
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
-namespace NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElementHarness
+namespace NEXUS::UnitTests::NCore::FNSortLine2DXYElementHarness
 {
 	/** The production deadzone, so tests exercise the same classification thresholds as the element. */
-	constexpr float Tolerance = NEXUS::WorldAssembly::SortLine::TurnDeadzone;
+	constexpr float Tolerance = NEXUS::PCG::SortLine::TurnDeadzone;
 
 	/** Part types as ints, matching ENSortLinePart, for terse expected-array literals. */
 	constexpr int32 Wall = static_cast<int32>(ENSortLinePart::Wall);
@@ -65,10 +65,10 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElementHarness
 //
 
 N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_AllWalls,
-	"NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElement::ClassifyLine::AllWalls",
+	"NEXUS::UnitTests::NCore::FNSortLine2DXYElement::ClassifyLine::AllWalls",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	using namespace NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElementHarness;
+	using namespace NEXUS::UnitTests::NCore::FNSortLine2DXYElementHarness;
 	// A straight open line: every point is a wall in a single segment whose length is the point count.
 	TArray<FNSortLinePointInfo> Info;
 	FNSortLine2DXYElement::ClassifyLine({ 0.f, 0.f, 0.f, 0.f }, Tolerance, Info);
@@ -82,10 +82,10 @@ N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_AllWalls,
 }
 
 N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_SingleCorner,
-	"NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElement::ClassifyLine::SingleCorner",
+	"NEXUS::UnitTests::NCore::FNSortLine2DXYElement::ClassifyLine::SingleCorner",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	using namespace NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElementHarness;
+	using namespace NEXUS::UnitTests::NCore::FNSortLine2DXYElementHarness;
 	// Open line with one left corner at index 2: walls split into two runs of length 2 either side of it.
 	TArray<FNSortLinePointInfo> Info;
 	FNSortLine2DXYElement::ClassifyLine({ 0.f, 0.f, 1.f, 0.f, 0.f }, Tolerance, Info);
@@ -99,10 +99,10 @@ N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_SingleCorner,
 }
 
 N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_ConsecutiveCorners,
-	"NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElement::ClassifyLine::ConsecutiveCorners",
+	"NEXUS::UnitTests::NCore::FNSortLine2DXYElement::ClassifyLine::ConsecutiveCorners",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	using namespace NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElementHarness;
+	using namespace NEXUS::UnitTests::NCore::FNSortLine2DXYElementHarness;
 	// Adjacent corners (left then right) leave a zero-length gap segment between them that no point owns;
 	// the bounds invariant must still hold and every point's reported length must be >= 1.
 	TArray<FNSortLinePointInfo> Info;
@@ -118,10 +118,10 @@ N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_ConsecutiveCorners,
 }
 
 N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_CornerAtFirstIndex,
-	"NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElement::ClassifyLine::CornerAtFirstIndex",
+	"NEXUS::UnitTests::NCore::FNSortLine2DXYElement::ClassifyLine::CornerAtFirstIndex",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	using namespace NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElementHarness;
+	using namespace NEXUS::UnitTests::NCore::FNSortLine2DXYElementHarness;
 	// A loop's closure turn lands at index 0; that corner must not try to close a preceding wall run.
 	TArray<FNSortLinePointInfo> Info;
 	FNSortLine2DXYElement::ClassifyLine({ 1.f, 0.f, 0.f, 0.f }, Tolerance, Info);
@@ -135,10 +135,10 @@ N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_CornerAtFirstIndex,
 }
 
 N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_CornerAtLastIndex,
-	"NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElement::ClassifyLine::CornerAtLastIndex",
+	"NEXUS::UnitTests::NCore::FNSortLine2DXYElement::ClassifyLine::CornerAtLastIndex",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	using namespace NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElementHarness;
+	using namespace NEXUS::UnitTests::NCore::FNSortLine2DXYElementHarness;
 	// A corner at the final index closes the leading wall run and produces a trailing length-1 segment.
 	TArray<FNSortLinePointInfo> Info;
 	FNSortLine2DXYElement::ClassifyLine({ 0.f, 0.f, 0.f, 1.f }, Tolerance, Info);
@@ -153,10 +153,10 @@ N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_CornerAtLastIndex,
 }
 
 N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_ClosedSquare,
-	"NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElement::ClassifyLine::ClosedSquare",
+	"NEXUS::UnitTests::NCore::FNSortLine2DXYElement::ClassifyLine::ClosedSquare",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	using namespace NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElementHarness;
+	using namespace NEXUS::UnitTests::NCore::FNSortLine2DXYElementHarness;
 	// A four-corner loop with no walls: every point is a corner owning its own length-1 segment, and the
 	// segment indices must stay within the resolved-length array (the bounds invariant under all corners).
 	TArray<FNSortLinePointInfo> Info;
@@ -172,10 +172,10 @@ N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_ClosedSquare,
 }
 
 N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_SubsegmentIndexIsZeroBased,
-	"NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElement::ClassifyLine::SubsegmentIndexIsZeroBased",
+	"NEXUS::UnitTests::NCore::FNSortLine2DXYElement::ClassifyLine::SubsegmentIndexIsZeroBased",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	using namespace NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElementHarness;
+	using namespace NEXUS::UnitTests::NCore::FNSortLine2DXYElementHarness;
 	// Subsegment index is the 0-based position of a point within its segment: a corner is always 0, and
 	// every wall run counts up from 0 -- including the leading run on an open line.
 	TArray<FNSortLinePointInfo> StraightInfo;
@@ -195,10 +195,10 @@ N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_SubsegmentIndexIsZeroBased,
 //
 
 N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_OffGridTurnsAreNamed,
-	"NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElement::ClassifyLine::OffGridTurnsAreNamed",
+	"NEXUS::UnitTests::NCore::FNSortLine2DXYElement::ClassifyLine::OffGridTurnsAreNamed",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	using namespace NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElementHarness;
+	using namespace NEXUS::UnitTests::NCore::FNSortLine2DXYElementHarness;
 	// Regression for WA-3: a non-90 turn (e.g. ~45 degrees -> 0.707) used to enter the corner branch but
 	// match neither +-1, leaving the point with the default classification. It must now resolve by sign.
 	TArray<FNSortLinePointInfo> Info;
@@ -209,10 +209,10 @@ N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_OffGridTurnsAreNamed,
 }
 
 N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_DeadzoneKeepsShallowTurnsAsWalls,
-	"NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElement::ClassifyLine::DeadzoneKeepsShallowTurnsAsWalls",
+	"NEXUS::UnitTests::NCore::FNSortLine2DXYElement::ClassifyLine::DeadzoneKeepsShallowTurnsAsWalls",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	using namespace NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElementHarness;
+	using namespace NEXUS::UnitTests::NCore::FNSortLine2DXYElementHarness;
 	// Float noise on a "straight" run and shallow sub-threshold turns stay walls instead of registering
 	// as corners (the deadzone replaces the old exact == 0 test).
 	TArray<FNSortLinePointInfo> Info;
@@ -225,10 +225,10 @@ N_TEST_HIGH(FNSortLine2DXYElementTests_ClassifyLine_DeadzoneKeepsShallowTurnsAsW
 }
 
 N_TEST_MEDIUM(FNSortLine2DXYElementTests_ClassifyLine_SignMapsToLeftRight,
-	"NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElement::ClassifyLine::SignMapsToLeftRight",
+	"NEXUS::UnitTests::NCore::FNSortLine2DXYElement::ClassifyLine::SignMapsToLeftRight",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	using namespace NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElementHarness;
+	using namespace NEXUS::UnitTests::NCore::FNSortLine2DXYElementHarness;
 	// Sign convention: a positive turn is a left corner, a negative turn is a right corner.
 	TArray<FNSortLinePointInfo> LeftInfo;
 	FNSortLine2DXYElement::ClassifyLine({ 0.f, 1.f }, Tolerance, LeftInfo);
@@ -242,10 +242,10 @@ N_TEST_MEDIUM(FNSortLine2DXYElementTests_ClassifyLine_SignMapsToLeftRight,
 }
 
 N_TEST_LOW(FNSortLine2DXYElementTests_ClassifyLine_Empty,
-	"NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElement::ClassifyLine::Empty",
+	"NEXUS::UnitTests::NCore::FNSortLine2DXYElement::ClassifyLine::Empty",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	using namespace NEXUS::UnitTests::NWorldAssembly::FNSortLine2DXYElementHarness;
+	using namespace NEXUS::UnitTests::NCore::FNSortLine2DXYElementHarness;
 	// An empty input must produce empty output without touching the segment-length arrays.
 	TArray<FNSortLinePointInfo> Info;
 	FNSortLine2DXYElement::ClassifyLine({}, Tolerance, Info);

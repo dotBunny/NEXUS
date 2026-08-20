@@ -25,7 +25,7 @@ struct FNFilterEdgePoints2DParams
  * XY neighbour count within Spacing * 1.5 (>= 8 neighbours is interior).
  *
  * @remark The border points are emitted on the OutsideFilter pin; InsideFilter carries the interior fill.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/elements/filter-edge-points-2d-xy/">UNFilterEdgePoints2DXYSettings</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/pcg/types/elements/filter-edge-points-2d-xy/">UNFilterEdgePoints2DXYSettings</a>
  */
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
 class UNFilterEdgePoints2DXYSettings : public UPCGSettings
