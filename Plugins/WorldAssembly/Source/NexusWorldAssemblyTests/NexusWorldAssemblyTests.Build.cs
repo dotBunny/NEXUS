@@ -24,7 +24,6 @@ namespace UnrealBuildTool.Rules
 					"FunctionalTesting",
 					"GameplayTags",
 					"GeometryCore",
-					"PCG",
 					"Projects",
 				]
 			);
