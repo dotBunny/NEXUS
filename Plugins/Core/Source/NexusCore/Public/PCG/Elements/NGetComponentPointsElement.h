@@ -6,7 +6,7 @@
 #include "PCG/NTargetPointComponent.h"
 #include "PCGSettings.h"
 
-#include "NGetTargetPointsElement.generated.h"
+#include "NGetComponentPointsElement.generated.h"
 
 /**
  * PCG settings node that emits one point per target point component found on the actor running the
@@ -17,17 +17,17 @@
  * data at all through Get Actor Data. This node reads them directly, which keeps markers authorable as
  * components on the PCG actor itself rather than as separate actors scattered through the outliner.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/pcg/types/elements/get-target-points/">UNGetTargetPointsSettings</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/pcg/types/elements/get-component-points/">UNGetComponentPointsSettings</a>
  */
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
-class UNGetTargetPointsSettings : public UPCGSettings
+class UNGetComponentPointsSettings : public UPCGSettings
 {
 	GENERATED_BODY()
 
 public:
 
 #if WITH_EDITOR
-	virtual FName GetDefaultNodeName() const override { return TEXT("NEXUS | Get Target Points"); }
+	virtual FName GetDefaultNodeName() const override { return TEXT("NEXUS | Get Component Points"); }
 	virtual FText GetNodeTooltipText() const override { return INVTEXT("Emits one point per target point component on the actor running the graph."); }
 	virtual FLinearColor GetNodeTitleColor() const override;
 	virtual EPCGSettingsType GetType() const override { return EPCGSettingsType::InputOutput; }
@@ -38,7 +38,7 @@ public:
 
 	/** Component class to gather. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", meta = (PCG_Overridable, ToolTip = "Component class to gather. Narrow this to a subclass to keep separate sets of markers on one actor apart from each other."))
-	TSubclassOf<UNTargetPointComponent> ComponentClass = UNTargetPointComponent::StaticClass();
+	TSubclassOf<USceneComponent> ComponentClass = UNTargetPointComponent::StaticClass();
 
 	/** When true, gather only components carrying the tag below. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Filter By Tag?", Category = "Settings", meta = (PCG_Overridable, ToolTip = "Should only components carrying the tag below be gathered? Lets one actor hold several sets of markers that different nodes pick up separately."))
@@ -53,9 +53,9 @@ protected:
 };
 
 /**
- * Executor paired with UNGetTargetPointsSettings.
+ * Executor paired with UNGetComponentPointsSettings.
  */
-class FNGetTargetPointsElement : public IPCGElement
+class FNGetComponentPointsElement : public IPCGElement
 {
 public:
 	/**
