@@ -11,7 +11,7 @@ class UNCellJunctionComponent;
  * The author-time operations a junction command performs on the focused cell's junctions.
  *
  * Companion to FNWorldAssemblyEditorCellUtils for the junction category: the commands in
- * FNWorldAssemblyEdModeJunctionRail declares, binds and gates; these do the work.
+ * FNJunctionEdModeRail declares, binds and gates; these do the work.
  *
  * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */

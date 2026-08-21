@@ -10,11 +10,11 @@ class FBindingContext;
 /**
  * The Cell Data category: the focused cell's side-car asset, and the actor that owns it.
  *
- * Split off from FNWorldAssemblyEdModeCellRail, which authors the cell's geometry: everything here acts on the asset
+ * Split off from FNCellEdModeRail, which authors the cell's geometry: everything here acts on the asset
  * or on the actor's existence instead. Two groups of one-shot actions — the actor's, then the data's. The work itself
  * lives in FNWorldAssemblyEditorCellUtils.
  *
- * @note Add Cell Actor is not here but on FNWorldAssemblyEdModeWorldRail: this category is off the rail until the
+ * @note Add Cell Actor is not here but on FNWorldEdModeRail: this category is off the rail until the
  *       level has a cell, so the command that puts one there cannot be the one that needs it to already exist.
  * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
@@ -38,7 +38,7 @@ public:
 	/** @return true if the active viewport is suitable for thumbnail capture. */
 	static bool CaptureThumbnail_CanExecute();
 
-	//~FNWorldAssemblyEdModeRail
+	//~FNEdModeRail
 	virtual TSharedPtr<FUICommandInfo> GetCategoryCommand() const override;
 
 	/**
@@ -50,7 +50,7 @@ public:
 	virtual TAttribute<bool> GetAvailable() const override;
 
 	virtual TSharedPtr<SWidget> CreateContent() const override;
-	//End FNWorldAssemblyEdModeRail
+	//End FNEdModeRail
 
 private:
 	/**

@@ -12,7 +12,7 @@ class FUICommandList;
  * The binding context every World Assembly editor command is declared against.
  *
  * Holds no commands of its own beyond the edit-mode entry point. RegisterCommands hands this context to each
- * category — FNWorldAssemblyEdModeCellRail and its peers — which declare their own commands, build their own
+ * category — FNCellEdModeRail and its peers — which declare their own commands, build their own
  * FUICommandList, and map their own actions. One context rather than one per category, so every command lands in a
  * single Editor Preferences > Keyboard Shortcuts section and saved chords stay keyed to the same name.
  *
@@ -41,7 +41,7 @@ public:
 	 *
 	 * @param Actions Every command the category owns, paired with the delegates it binds to.
 	 * @return A fresh list with all of them mapped, for the toolkit to fold into its own.
-	 * @note Here rather than on FNWorldAssemblyEdModeRail because not every category has a rail —
+	 * @note Here rather than on FNEdModeRail because not every category has a rail —
 	 *       FNWorldAssemblyEditorQuickAssembly is driven from the tool menu and the subsystem, and registers
 	 *       through this same context.
 	 */

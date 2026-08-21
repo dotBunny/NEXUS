@@ -84,7 +84,7 @@ private:
 	 * @note First available rather than the first outright: Cell and Junction both sit above nothing when the level has
 	 *       no cell actor, and opening on a category whose button is hidden would show content with no way back to it.
 	 * @note Rail order is the precedence, so a level somehow holding both a cell and organs opens on Cell. The two are
-	 *       mutually exclusive by rule — see FNWorldAssemblyEdModeWorldRail's add commands — so this only decides for
+	 *       mutually exclusive by rule — see FNWorldEdModeRail's add commands — so this only decides for
 	 *       data authored before that rule existed.
 	 */
 	void SeedActiveIndex();

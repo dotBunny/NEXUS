@@ -62,12 +62,12 @@ public:
 	/** @return checked state of the draw-voxel-data toggle for UI binding. */
 	static bool ToggleDrawVoxelData_IsActionChecked();
 
-	//~FNWorldAssemblyEdModeRail
+	//~FNEdModeRail
 	virtual TSharedPtr<FUICommandInfo> GetCategoryCommand() const override;
 	virtual TAttribute<bool> GetAvailable() const override;
 	virtual bool ShouldAutoSelect() const override;
 	virtual TSharedPtr<SWidget> CreateContent() const override;
-	//End FNWorldAssemblyEdModeRail
+	//End FNEdModeRail
 
 private:
 	/**

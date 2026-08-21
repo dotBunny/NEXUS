@@ -11,7 +11,7 @@ class FBindingContext;
  *
  * @note Every command here comes in a pair — one acting on the organ the picker names, one on every organ in the
  *       level — so the palette is split along that line rather than by what the commands do.
- * @note Add Organ Volume is not here but on FNWorldAssemblyEdModeWorldRail: this category is off the rail until the
+ * @note Add Organ Volume is not here but on FNWorldEdModeRail: this category is off the rail until the
  *       level has an organ, so the command that puts one there cannot be the one that needs it to already exist.
  * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
@@ -29,7 +29,7 @@ public:
 	/** @return This category's commands, mapped to their actions, for the toolkit to fold into its own list. */
 	static TSharedRef<FUICommandList> GetCommandList();
 
-	//~FNWorldAssemblyEdModeRail
+	//~FNEdModeRail
 	virtual TSharedPtr<FUICommandInfo> GetCategoryCommand() const override;
 
 	/** @return A predicate requiring an organ in the level; Add Organ Volume on the World rail is what brings this back. */
@@ -45,7 +45,7 @@ public:
 	 *       section whose commands it decides the target of instead of floating over the whole category.
 	 */
 	virtual TSharedPtr<SWidget> CreateContent() const override;
-	//End FNWorldAssemblyEdModeRail
+	//End FNEdModeRail
 
 private:
 	/**

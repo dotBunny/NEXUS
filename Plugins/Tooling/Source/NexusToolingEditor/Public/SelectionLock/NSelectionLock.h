@@ -41,7 +41,7 @@ namespace NEXUS::ToolingEditor::SelectionLock
  * @remark Nanite meshes cannot be locked against clicking. Nanite renders hit proxies through its own
  *         pass, which reads a per-material hit-proxy table rather than the mesh batches bSelectable
  *         gates, so a locked Nanite mesh still resolves a hit proxy and still selects.
- * @see <a href="https://nexus-framework.com/docs/plugins/tooling/editor-types/selection-lock/selection-lock/">FNSelectionLock</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/tooling/editor-types/selection-lock/selection-lock-state/">FNSelectionLock</a>
  */
 class NEXUSTOOLINGEDITOR_API FNSelectionLock
 {

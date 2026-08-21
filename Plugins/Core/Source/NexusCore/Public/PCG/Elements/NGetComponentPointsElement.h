@@ -17,7 +17,7 @@
  * data at all through Get Actor Data. This node reads them directly, which keeps markers authorable as
  * components on the PCG actor itself rather than as separate actors scattered through the outliner.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/pcg/types/elements/get-component-points/">UNGetComponentPointsSettings</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/pcg/elements/get-component-points/">UNGetComponentPointsSettings</a>
  */
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
 class UNGetComponentPointsSettings : public UPCGSettings

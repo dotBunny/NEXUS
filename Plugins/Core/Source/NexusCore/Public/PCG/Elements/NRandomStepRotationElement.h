@@ -26,7 +26,7 @@ enum class ENRotationSpace : uint8
  * degrees — because a full 360 turn lands back on the unrotated orientation. The roll is driven by
  * each point's own seed, so points keep their orientation across regenerations.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/elements/random-step-rotation/">UNRandomStepRotationSettings</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/pcg/elements/random-step-rotation/">UNRandomStepRotationSettings</a>
  */
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
 class UNRandomStepRotationSettings : public UPCGSettings
