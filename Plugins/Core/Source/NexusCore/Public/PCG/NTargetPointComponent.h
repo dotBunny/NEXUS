@@ -15,6 +15,11 @@
  * so a plain scene component yields no data through Get Actor Data. Pair this with the Get Target Points
  * element, which reads these directly and emits one point per marker.
  *
+ * @note Nothing is attached here to make the marker visible — it stays a bare scene component, and drawing
+ *       is FNTargetPointComponentVisualizer's job. That keeps markers out of Get Actor Data entirely: any
+ *       primitive hung off one, sprite or otherwise, is something PCG's actor parsing has to be trusted to
+ *       skip. It also means a marker is only drawn while its actor is selected, which is when it is being
+ *       authored.
  * @see <a href="https://nexus-framework.com/docs/plugins/core/types/target-point-component/">UNTargetPointComponent</a>
  */
 // Tags is deliberately left visible: Get Target Points filters on this component's own tags, so hiding

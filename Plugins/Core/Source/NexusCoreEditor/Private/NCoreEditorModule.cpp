@@ -9,7 +9,11 @@
 #include "NEditorUtils.h"
 #include "NPropertySections.h"
 #include "DelayedEditorTasks/NUpdateCheckDelayedEditorTask.h"
+#include "Editor/UnrealEdEngine.h"
 #include "Modules/ModuleManager.h"
+#include "PCG/NTargetPointComponent.h"
+#include "UnrealEdGlobals.h"
+#include "Visualizers/NTargetPointComponentVisualizer.h"
 
 N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE_IMPLEMENTATION(FNCoreEditorModule)
 
@@ -45,6 +49,13 @@ void FNCoreEditorModule::ShutdownModule()
 	// never ran (headless cook/commandlet path), the cached pointers are null and the queues empty, so this is a no-op.
 	FNPropertySections::Unregister();
 
+	// Mirror the registration in OnPostEngineInit. Unregistering a visualizer that was never registered — the
+	// automated path, where OnPostEngineInit returns before reaching it — is a no-op, so this is unconditional.
+	if (GUnrealEd != nullptr)
+	{
+		GUnrealEd->UnregisterComponentVisualizer(UNTargetPointComponent::StaticClass()->GetFName());
+	}
+
 	FNEditorStyle::Shutdown();
 	IModuleInterface::ShutdownModule();
 }
@@ -67,6 +78,15 @@ void FNCoreEditorModule::OnPostEngineInit()
 
 	// Initialize our simplified property section manager
 	FNPropertySections::Register();
+
+	// Visualizers. Kept as a local rather than a module member: it is only ever used through the base
+	// FComponentVisualizer interface, and UnrealEd holds its own shared ref once registered.
+	if (GUnrealEd != nullptr)
+	{
+		const TSharedPtr<FComponentVisualizer> TargetPointComponentVisualizer = MakeShared<FNTargetPointComponentVisualizer>();
+		GUnrealEd->RegisterComponentVisualizer(UNTargetPointComponent::StaticClass()->GetFName(), TargetPointComponentVisualizer);
+		TargetPointComponentVisualizer->OnRegister();
+	}
 
 	// Start update check
 	UNUpdateCheckDelayedEditorTask::Create();
