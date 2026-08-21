@@ -35,7 +35,7 @@ enum class ENRowParity : uint8
  * The row grouping is internal bookkeeping used only to decide which points move — the output keeps
  * the input's point order, so downstream nodes that index into the data are unaffected.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/elements/stagger-rows/">UNStaggerRowsSettings</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/pcg/elements/stagger-rows/">UNStaggerRowsSettings</a>
  */
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
 class UNStaggerRowsSettings : public UPCGSettings

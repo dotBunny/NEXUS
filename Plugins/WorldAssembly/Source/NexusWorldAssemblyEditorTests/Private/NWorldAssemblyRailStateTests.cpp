@@ -41,7 +41,7 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailStateHarness
 		FTestRail(const TSharedRef<FUICommandList>& InCommandList, const TSharedRef<FTestRailDefinition>& InDefinition)
 			: FNEdModeRail(InCommandList), Definition(InDefinition) {}
 
-		//~FNWorldAssemblyEdModeRail
+		//~FNEdModeRail
 		/** @return Null; nothing in the rail state reads the category command, only the strip that draws it does. */
 		virtual TSharedPtr<FUICommandInfo> GetCategoryCommand() const override { return nullptr; }
 
@@ -56,7 +56,7 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNWorldAssemblyRailStateHarness
 		}
 
 		virtual bool ShouldAutoSelect() const override { return Definition->bAutoSelect; }
-		//End FNWorldAssemblyEdModeRail
+		//End FNEdModeRail
 
 	private:
 		TSharedRef<FTestRailDefinition> Definition;

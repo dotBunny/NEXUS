@@ -20,7 +20,7 @@
  *       primitive hung off one, sprite or otherwise, is something PCG's actor parsing has to be trusted to
  *       skip. It also means a marker is only drawn while its actor is selected, which is when it is being
  *       authored.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/target-point-component/">UNTargetPointComponent</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/pcg/target-point-component/">UNTargetPointComponent</a>
  */
 // Tags is deliberately left visible: Get Component Points filters on this component's own tags, so hiding
 // the category the way the other NEXUS marker components do would put that filter out of reach.

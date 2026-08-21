@@ -56,10 +56,10 @@ public:
 	/** @return true if the world-collision-ignore tagging action can act on the current selection. */
 	static bool TagCollisionIgnore_CanExecute();
 
-	//~FNWorldAssemblyEdModeRail
+	//~FNEdModeRail
 	virtual TSharedPtr<FUICommandInfo> GetCategoryCommand() const override;
 	virtual TSharedPtr<SWidget> CreateContent() const override;
-	//End FNWorldAssemblyEdModeRail
+	//End FNEdModeRail
 
 private:
 	/**

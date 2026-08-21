@@ -154,7 +154,7 @@ public:
 	/**
 	 * @return Every warning currently applying to the focused cell, one per line, or empty text when there is nothing
 	 *         to report (or no active mode).
-	 * @remark Consumed by FNWorldAssemblyEdModeToolkit's warning area. This replaced the viewport HUD text the mode
+	 * @remark Consumed by FNWorldAssemblyModeToolkit's warning area. This replaced the viewport HUD text the mode
 	 *         used to draw over the canvas — the panel is a better home for it, and it no longer competes with the
 	 *         scene or has to be suppressed for screenshots.
 	 */
@@ -244,7 +244,7 @@ public:
 	virtual bool RequiresLegacyViewportInteractions() const override { return false; }
 
 	/**
-	 * @return Always true: the mode's UI is built and owned by FNWorldAssemblyEdModeToolkit.
+	 * @return Always true: the mode's UI is built and owned by FNWorldAssemblyModeToolkit.
 	 * @note Turning this on is what makes the editor host the toolkit at all. It no longer implies a Mode Toolbox
 	 *       panel — the toolkit floats its rail over the viewport and overrides RequestModeUITabs to leave the tab
 	 *       spawner unbound, which is what stops FModeToolkit::InvokeUI from opening one.

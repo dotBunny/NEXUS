@@ -11,6 +11,19 @@ class FUICommandList;
 class SWidget;
 
 
+/**
+ * One category on an editor-mode rail: the button that selects it, the rule deciding whether it appears at all, and
+ * the panel content shown while it is selected.
+ *
+ * A subclass supplies a command and some content; how a group of buttons is drawn lives here, so every rail across
+ * every NEXUS edit mode reads the same. The group builders are the vocabulary — tiles for commands learned by shape,
+ * grids and lists for commands named as phrases, check lists for what is a setting rather than an action, and a
+ * separator between runs that are a different kind of thing from each other.
+ *
+ * @note GetAvailable asks "is this category relevant to the level", not "can the user act right now" — see its own
+ *       note for why a rail button hiding on transient state is worse than one that stays put.
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/ed-mode-rail/">FNEdModeRail</a>
+ */
 class NEXUSUIEDITOR_API FNEdModeRail
 {
 public:

@@ -10,14 +10,14 @@ struct FNCellRootDetails;
 /**
  * The author-time operations a cell command performs on the focused cell.
  *
- * Everything here mutates the cell actor, its root details, or its side-car package. FNWorldAssemblyEdModeCellRail
+ * Everything here mutates the cell actor, its root details, or its side-car package. FNCellEdModeRail
  * supplies the declaration, binding and gating; this supplies the work, so the cell editing behavior stays out of the
  * Slate layer entirely.
  *
  * @note Every entry point but AddActor assumes the focused world holds a cell actor. Callers gate on
  *       FNWorldAssemblyEditorUtils::CanEditCell before invoking, which is also what keeps these out of PIE. AddActor
  *       is the one that runs before there is a cell, so its own gate is the World category's
- *       FNWorldAssemblyEdModeWorldRail::AddCellActor_CanExecute, which asks the opposite question.
+ *       FNWorldEdModeRail::AddCellActor_CanExecute, which asks the opposite question.
  * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyEditorCellUtils

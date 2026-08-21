@@ -14,7 +14,7 @@
  *
  * Distinct from FNToolingEditorCommands, which despite the name is not a TCommands at all — it is the
  * ToolMenus menu builder and carries no chords.
- * @see <a href="https://nexus-framework.com/docs/plugins/tooling/editor-types/quick-highres-screenshot/">Quick HighRes Screenshot</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/tooling/editor-types/tooling-editor-bindings/">FNToolingEditorBindings</a>
  */
 class NEXUSTOOLINGEDITOR_API FNToolingEditorBindings final : public TCommands<FNToolingEditorBindings>
 {

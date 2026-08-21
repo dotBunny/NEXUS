@@ -28,7 +28,7 @@ public:
 	/** @return true when the focused level has a cell actor, actors are selected, and we are not in PIE. */
 	static bool CanEditCellJunction();
 
-	//~FNWorldAssemblyEdModeRail
+	//~FNEdModeRail
 	virtual TSharedPtr<FUICommandInfo> GetCategoryCommand() const override;
 
 	/** @return A predicate requiring a cell actor; a junction is a component of one, so nothing here works without it. */
@@ -41,7 +41,7 @@ public:
 	 *       picker only has to carry the inset the header slot would have given it.
 	 */
 	virtual TSharedPtr<SWidget> CreateContent() const override;
-	//End FNWorldAssemblyEdModeRail
+	//End FNEdModeRail
 
 private:
 	/**

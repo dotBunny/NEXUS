@@ -13,7 +13,7 @@ class UNOrganComponent;
  * Each generate/clear/load/unload action comes in a pair: one driven by the current selection, one covering every
  * organ in the world. Both route through UNWorldAssemblyEditorSubsystem, which owns the operation lifetime.
  *
- * @note All but AddVolume are declared and gated by FNWorldAssemblyEdModeOrganRail. AddVolume is the one that runs
+ * @note All but AddVolume are declared and gated by FNOrganEdModeRail. AddVolume is the one that runs
  *       before there is an organ to select, so it is a World command — the Organ category is off the rail until it has
  *       been run at least once.
  *

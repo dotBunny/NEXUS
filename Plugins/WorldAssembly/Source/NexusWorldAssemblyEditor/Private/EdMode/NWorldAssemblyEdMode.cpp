@@ -427,7 +427,7 @@ void UNWorldAssemblyEdMode::BindCommands()
 	Super::BindCommands();
 
 	// RegisterTool maps each command into the toolkit's command list — the same list the rail palettes resolve their
-	// buttons against — so the palette entries added in FNWorldAssemblyEdModeToolkit::RegisterPalettes light up from
+	// buttons against — so the palette entries added in FNWorldAssemblyModeToolkit::RegisterPalettes light up from
 	// here even though the toolkit was built first.
 	const FNWorldAssemblyEdModeToolCommands& ToolCommands = FNWorldAssemblyEdModeToolCommands::Get();
 
