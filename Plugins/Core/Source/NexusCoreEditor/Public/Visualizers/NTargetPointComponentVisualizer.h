@@ -7,10 +7,10 @@
 
 /**
  * Component visualizer for UNTargetPointComponent — draws the marker's orientation and scale in the level
- * viewport, and labels it with the component tags Get Target Points filters on.
+ * viewport, and labels it with the component tags Get Component Points filters on.
  *
  * This is the whole of a target point's presence in the world: the component itself attaches nothing, so what
- * is drawn here is all there is to see and all there is to click. Get Target Points emits the component
+ * is drawn here is all there is to see and all there is to click. Get Component Points emits the component
  * transform whole, so rotation and scale reach every spawner downstream and both are drawn, not just position.
  *
  * What it draws is also what is clicked: the marker carries a hit proxy, so clicking it selects the component

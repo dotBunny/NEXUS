@@ -1,7 +1,7 @@
 // Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "PCG/Elements/NGetTargetPointsElement.h"
+#include "PCG/Elements/NGetComponentPointsElement.h"
 
 #include "NColor.h"
 #include "PCGContext.h"
@@ -10,15 +10,15 @@
 #include "Data/PCGBasePointData.h"
 #include "GameFramework/Actor.h"
 
-#define LOCTEXT_NAMESPACE "NGetTargetPointsElement"
+#define LOCTEXT_NAMESPACE "NGetComponentPointsElement"
 
-TArray<FPCGPinProperties> UNGetTargetPointsSettings::InputPinProperties() const
+TArray<FPCGPinProperties> UNGetComponentPointsSettings::InputPinProperties() const
 {
 	// A source node: everything it emits comes from the level, not from an upstream pin.
 	return TArray<FPCGPinProperties>();
 }
 
-TArray<FPCGPinProperties> UNGetTargetPointsSettings::OutputPinProperties() const
+TArray<FPCGPinProperties> UNGetComponentPointsSettings::OutputPinProperties() const
 {
 	TArray<FPCGPinProperties> PinProperties;
 	PinProperties.Emplace(PCGPinConstants::DefaultOutputLabel, EPCGDataType::Point);
@@ -26,18 +26,18 @@ TArray<FPCGPinProperties> UNGetTargetPointsSettings::OutputPinProperties() const
 }
 
 #if WITH_EDITOR
-FLinearColor UNGetTargetPointsSettings::GetNodeTitleColor() const
+FLinearColor UNGetComponentPointsSettings::GetNodeTitleColor() const
 {
 	return FNColor::GetElement;
 }
 #endif
 
-FPCGElementPtr UNGetTargetPointsSettings::CreateElement() const
+FPCGElementPtr UNGetComponentPointsSettings::CreateElement() const
 {
-	return MakeShared<FNGetTargetPointsElement>();
+	return MakeShared<FNGetComponentPointsElement>();
 }
 
-bool FNGetTargetPointsElement::MatchesTagFilter(const TConstArrayView<FName> ComponentTags, const bool bFilterByTag, const FName Tag)
+bool FNGetComponentPointsElement::MatchesTagFilter(const TConstArrayView<FName> ComponentTags, const bool bFilterByTag, const FName Tag)
 {
 	// With filtering off, or on but with nothing to match against, every component qualifies. Treating an
 	// empty tag as "match nothing" would leave the node silently emitting no points the moment the box is
@@ -50,12 +50,12 @@ bool FNGetTargetPointsElement::MatchesTagFilter(const TConstArrayView<FName> Com
 	return ComponentTags.Contains(Tag);
 }
 
-bool FNGetTargetPointsElement::ExecuteInternal(FPCGContext* Context) const
+bool FNGetComponentPointsElement::ExecuteInternal(FPCGContext* Context) const
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(FNGetTargetPointsElement::Execute);
+	TRACE_CPUPROFILER_EVENT_SCOPE(FNGetComponentPointsElement::Execute);
 	check(Context);
 
-	const UNGetTargetPointsSettings* Settings = Context->GetInputSettings<UNGetTargetPointsSettings>();
+	const UNGetComponentPointsSettings* Settings = Context->GetInputSettings<UNGetComponentPointsSettings>();
 	check(Settings);
 
 	IPCGGraphExecutionSource* ExecutionSource = Context->ExecutionSource.Get();
@@ -78,9 +78,9 @@ bool FNGetTargetPointsElement::ExecuteInternal(FPCGContext* Context) const
 
 	// Fall back to the base class rather than gathering nothing, so clearing the class in the details
 	// panel does not quietly empty the node's output.
-	const TSubclassOf<UNTargetPointComponent> ComponentClass = Settings->ComponentClass
+	const TSubclassOf<USceneComponent> ComponentClass = Settings->ComponentClass
 		? Settings->ComponentClass
-		: TSubclassOf<UNTargetPointComponent>(UNTargetPointComponent::StaticClass());
+		: TSubclassOf<USceneComponent>(UNTargetPointComponent::StaticClass());
 
 	TArray<UActorComponent*> ActorComponents;
 	SourceActor->GetComponents(ComponentClass, ActorComponents);
