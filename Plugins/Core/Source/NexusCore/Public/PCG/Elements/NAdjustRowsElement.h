@@ -6,7 +6,7 @@
 #include "Math/NVectorUtils.h"
 #include "PCGSettings.h"
 
-#include "NStaggerRowsElement.generated.h"
+#include "NAdjustRowsElement.generated.h"
 
 /** How a point's position along the row axis resolves to the row it belongs to. */
 UENUM(BlueprintType)
@@ -29,24 +29,28 @@ enum class ENRowParity : uint8
 };
 
 /**
- * PCG settings node that groups a point cloud into rows along one axis and shifts every other row
- * along another, producing a staggered running-bond layout.
+ * PCG settings node that groups a point cloud into rows along one axis, then adjusts alternate rows.
  *
- * The row grouping is internal bookkeeping used only to decide which points move — the output keeps
- * the input's point order, so downstream nodes that index into the data are unaffected.
+ * There are two adjustments and each carries its own parity, so they can be aimed at the same rows or
+ * at opposite ones. Offset shifts a row along an axis, which is what produces a staggered running-bond
+ * layout. Rotation turns a row about an axis in the mesh's own space, which is what stops a run of one
+ * mesh reading as a repeat — half a turn on alternate rows interlocks them instead.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/pcg/elements/stagger-rows/">UNStaggerRowsSettings</a>
+ * The row grouping is internal bookkeeping used only to decide which points are adjusted — the output
+ * keeps the input's point order, so downstream nodes that index into the data are unaffected.
+ *
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/pcg/elements/adjust-rows/">UNAdjustRowsSettings</a>
  */
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
-class UNStaggerRowsSettings : public UPCGSettings
+class UNAdjustRowsSettings : public UPCGSettings
 {
 	GENERATED_BODY()
 
 public:
 
 #if WITH_EDITOR
-	virtual FName GetDefaultNodeName() const override { return TEXT("NEXUS | Stagger Rows"); }
-	virtual FText GetNodeTooltipText() const override { return INVTEXT("Groups points into rows along one axis, then offsets every other row along another."); }
+	virtual FName GetDefaultNodeName() const override { return TEXT("NEXUS | Adjust Rows"); }
+	virtual FText GetNodeTooltipText() const override { return INVTEXT("Groups points into rows along one axis, then offsets and turns alternate rows."); }
 	virtual FLinearColor GetNodeTitleColor() const override;
 	virtual EPCGSettingsType GetType() const override { return EPCGSettingsType::PointOps; }
 #endif
@@ -82,6 +86,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Offset", meta = (PCG_Overridable, ToolTip = "Amount added along the offset axis for every point in a matching row. Half the point spacing gives an evenly staggered running bond."))
 	double RowOffset = 0.0;
 
+	/** Axis the row rotation is applied around. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Rotation", meta = (PCG_Overridable, ToolTip = "Axis the row rotation is applied around: X rolls, Y pitches, Z yaws. None leaves every row unrotated. This is separate from the row and offset axes — turning a mesh about the axis its rows run along is a perfectly reasonable thing to want."))
+	ENAxis RotationAxis = ENAxis::Z;
+
+	/** Which half of the rows receives the rotation. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Rotation", meta = (PCG_Overridable, ToolTip = "Which half of the rows receives the rotation. Held apart from the offset's parity on purpose: offsetting one set of rows while turning the other is a real layout, and tying them together would make it impossible."))
+	ENRowParity RotationParity = ENRowParity::Odd;
+
+	/** Turn applied to every point in a matching row, in the mesh's own space. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Rotation", meta = (ClampMin = "-360.0", ClampMax = "360.0", PCG_Overridable, ToolTip = "Turn applied to every point in a matching row, in degrees. 180 flips alternate rows so meshes interlock rather than repeating; smaller angles break up a run that reads as too regular. Applied in the mesh's own space, so a point that arrives tilted turns about its own axis rather than the world's."))
+	double RowRotation = 0.0;
+
 	/** When true, write each point's resolved row index out as an attribute. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Write Row Index?", Category = "Settings|Metadata", meta = (PCG_Overridable, ToolTip = "Should each point's resolved row index be written out as an attribute?"))
 	bool bWriteRowIndex = true;
@@ -95,9 +111,9 @@ protected:
 };
 
 /**
- * Executor paired with UNStaggerRowsSettings.
+ * Executor paired with UNAdjustRowsSettings.
  */
-class FNStaggerRowsElement : public IPCGElement
+class FNAdjustRowsElement : public IPCGElement
 {
 public:
 	/**
@@ -131,6 +147,15 @@ public:
 	 * @return True when the row should be shifted along the offset axis.
 	 */
 	static NEXUSCORE_API bool ShouldOffsetRow(int32 RowIndex, ENRowParity Parity);
+
+	/**
+	 * Builds the turn applied to a row that matches the rotation parity.
+	 * Pure and PCG-free so the axis handling can be unit-tested directly.
+	 * @param Degrees How far to turn.
+	 * @param Axis The axis to turn around; ENAxis::None leaves the row unrotated.
+	 * @return The delta rotation to compose onto a point's existing rotation.
+	 */
+	static NEXUSCORE_API FQuat GetRowRotation(double Degrees, ENAxis Axis);
 
 protected:
 	virtual bool ExecuteInternal(FPCGContext* Context) const override;

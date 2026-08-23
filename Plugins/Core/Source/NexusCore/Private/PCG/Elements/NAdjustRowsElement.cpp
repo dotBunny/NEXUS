@@ -1,7 +1,7 @@
 // Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "PCG/Elements/NStaggerRowsElement.h"
+#include "PCG/Elements/NAdjustRowsElement.h"
 
 #include "NColor.h"
 #include "PCGContext.h"
@@ -9,14 +9,14 @@
 #include "Data/PCGBasePointData.h"
 #include "Metadata/PCGMetadata.h"
 
-TArray<FPCGPinProperties> UNStaggerRowsSettings::InputPinProperties() const
+TArray<FPCGPinProperties> UNAdjustRowsSettings::InputPinProperties() const
 {
 	TArray<FPCGPinProperties> PinProperties;
 	PinProperties.Emplace(PCGPinConstants::DefaultInputLabel, EPCGDataType::Point);
 	return PinProperties;
 }
 
-TArray<FPCGPinProperties> UNStaggerRowsSettings::OutputPinProperties() const
+TArray<FPCGPinProperties> UNAdjustRowsSettings::OutputPinProperties() const
 {
 	TArray<FPCGPinProperties> PinProperties;
 	PinProperties.Emplace(PCGPinConstants::DefaultOutputLabel, EPCGDataType::Point);
@@ -24,18 +24,18 @@ TArray<FPCGPinProperties> UNStaggerRowsSettings::OutputPinProperties() const
 }
 
 #if WITH_EDITOR
-FLinearColor UNStaggerRowsSettings::GetNodeTitleColor() const
+FLinearColor UNAdjustRowsSettings::GetNodeTitleColor() const
 {
 	return FNColor::SortElement;
 }
 #endif
 
-FPCGElementPtr UNStaggerRowsSettings::CreateElement() const
+FPCGElementPtr UNAdjustRowsSettings::CreateElement() const
 {
-	return MakeShared<FNStaggerRowsElement>();
+	return MakeShared<FNAdjustRowsElement>();
 }
 
-int32 FNStaggerRowsElement::GetAxisIndex(const ENAxis Axis)
+int32 FNAdjustRowsElement::GetAxisIndex(const ENAxis Axis)
 {
 	switch (Axis)
 	{
@@ -50,7 +50,7 @@ int32 FNStaggerRowsElement::GetAxisIndex(const ENAxis Axis)
 	}
 }
 
-void FNStaggerRowsElement::AssignRowIndices(const TConstArrayView<double> Positions, const double Tolerance, TArray<int32>& OutRowIndices)
+void FNAdjustRowsElement::AssignRowIndices(const TConstArrayView<double> Positions, const double Tolerance, TArray<int32>& OutRowIndices)
 {
 	const int32 NumPoints = Positions.Num();
 	OutRowIndices.Reset();
@@ -86,7 +86,7 @@ void FNStaggerRowsElement::AssignRowIndices(const TConstArrayView<double> Positi
 	}
 }
 
-int32 FNStaggerRowsElement::GetFixedRowIndex(const double Position, const double RowSize)
+int32 FNAdjustRowsElement::GetFixedRowIndex(const double Position, const double RowSize)
 {
 	// A zero or negative band width has no meaningful division; collapse everything into the first row.
 	if (RowSize <= UE_DOUBLE_SMALL_NUMBER)
@@ -97,7 +97,7 @@ int32 FNStaggerRowsElement::GetFixedRowIndex(const double Position, const double
 	return FMath::FloorToInt32(Position / RowSize);
 }
 
-bool FNStaggerRowsElement::ShouldOffsetRow(const int32 RowIndex, const ENRowParity Parity)
+bool FNAdjustRowsElement::ShouldOffsetRow(const int32 RowIndex, const ENRowParity Parity)
 {
 	// Fixed-size detection produces negative row indices on the negative side of the origin, where C++ '%'
 	// yields a negative remainder; normalize into {0, 1} before comparing against the requested parity.
@@ -105,12 +105,35 @@ bool FNStaggerRowsElement::ShouldOffsetRow(const int32 RowIndex, const ENRowPari
 	return NormalizedParity == (Parity == ENRowParity::Even ? 0 : 1);
 }
 
-bool FNStaggerRowsElement::ExecuteInternal(FPCGContext* Context) const
+FQuat FNAdjustRowsElement::GetRowRotation(const double Degrees, const ENAxis Axis)
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(FNStaggerRowsElement::Execute);
+	FVector AxisVector;
+	switch (Axis)
+	{
+		case ENAxis::X:
+			AxisVector = FVector::XAxisVector;
+			break;
+		case ENAxis::Y:
+			AxisVector = FVector::YAxisVector;
+			break;
+		case ENAxis::Z:
+			AxisVector = FVector::ZAxisVector;
+			break;
+		default:
+			// ENAxis carries a None; it has to mean "leave the row alone" rather than quietly falling
+			// through to one of the real axes and rotating anyway.
+			return FQuat::Identity;
+	}
+
+	return FQuat(AxisVector, FMath::DegreesToRadians(Degrees));
+}
+
+bool FNAdjustRowsElement::ExecuteInternal(FPCGContext* Context) const
+{
+	TRACE_CPUPROFILER_EVENT_SCOPE(FNAdjustRowsElement::Execute);
 	check(Context);
 
-	const UNStaggerRowsSettings* Settings = Context->GetInputSettings<UNStaggerRowsSettings>();
+	const UNAdjustRowsSettings* Settings = Context->GetInputSettings<UNAdjustRowsSettings>();
 	check(Settings);
 
 	const TArray<FPCGTaggedData> Inputs = Context->InputData.GetInputsByPin(PCGPinConstants::DefaultInputLabel);
@@ -119,8 +142,20 @@ bool FNStaggerRowsElement::ExecuteInternal(FPCGContext* Context) const
 	const int32 RowAxisIndex = GetAxisIndex(Settings->RowAxis);
 	const int32 OffsetAxisIndex = GetAxisIndex(Settings->OffsetAxis);
 
-	// Without a row axis there is nothing to group by, and without an offset axis nothing to move along.
-	if (RowAxisIndex == INDEX_NONE || OffsetAxisIndex == INDEX_NONE)
+	const FQuat RowRotation = GetRowRotation(Settings->RowRotation, Settings->RotationAxis);
+	const bool bRotatesRows = !RowRotation.IsIdentity(UE_DOUBLE_KINDA_SMALL_NUMBER);
+	const bool bOffsetsRows = OffsetAxisIndex != INDEX_NONE && !FMath::IsNearlyZero(Settings->RowOffset);
+
+	// Without a row axis there is nothing to group by at all. With one, the node still has the row index
+	// to write out even where neither adjustment would move anything, so only the missing axis bails.
+	if (RowAxisIndex == INDEX_NONE)
+	{
+		Outputs.Append(Inputs);
+		return true;
+	}
+
+	// Nothing to adjust and nothing to record leaves the points exactly as they arrived.
+	if (!bOffsetsRows && !bRotatesRows && !Settings->bWriteRowIndex)
 	{
 		Outputs.Append(Inputs);
 		return true;
@@ -184,11 +219,21 @@ bool FNStaggerRowsElement::ExecuteInternal(FPCGContext* Context) const
 		{
 			const int32 RowIndex = RowIndices[Index];
 
-			if (ShouldOffsetRow(RowIndex, Settings->RowParity))
+			if (bOffsetsRows && ShouldOffsetRow(RowIndex, Settings->RowParity))
 			{
 				FVector Translation = OutputTransforms[Index].GetTranslation();
 				Translation[OffsetAxisIndex] += Settings->RowOffset;
 				OutputTransforms[Index].SetTranslation(Translation);
+			}
+
+			// Its own parity, so a layout can offset one set of rows and turn the other. Composed on the
+			// right, which turns the mesh about its own axis rather than the world's — a point that
+			// arrived tilted then spins about the axis it was tilted to, which is what "base rotation"
+			// means everywhere else in NEXUS.
+			if (bRotatesRows && ShouldOffsetRow(RowIndex, Settings->RotationParity))
+			{
+				FTransform& Transform = OutputTransforms[Index];
+				Transform.SetRotation((Transform.GetRotation() * RowRotation).GetNormalized());
 			}
 
 			if (RowIndexAttribute)
