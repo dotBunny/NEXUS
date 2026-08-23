@@ -685,6 +685,10 @@ void UNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 		return;
 	}
 
+	// Fetched once for the whole frame rather than per component: every block below reads it, and the root loop
+	// alone would otherwise resolve the CDO once per cell in the level on every frame the overlay is up.
+	const UNWorldAssemblyEditorUserSettings* WorldAssemblyEditorUserSettings = UNWorldAssemblyEditorUserSettings::Get();
+
 	// Iterate all roots and draw their bounds
 	if (FNWorldAssemblyRegistry::HasRootComponents())
 	{
@@ -710,14 +714,15 @@ void UNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 
 			// Draw debug information
 			RootComponent->DrawDebugPDI(PDI, static_cast<uint8>(CellVoxelMode),
-				FNWorldAssemblyEditorColors::GetCellBounds(), FNWorldAssemblyEditorColors::GetCellHull());
+				FNWorldAssemblyEditorColors::GetCellBounds(), FNWorldAssemblyEditorColors::GetCellHull(),
+				WorldAssemblyEditorUserSettings->bDebugCellDrawBounds,
+				WorldAssemblyEditorUserSettings->bDebugCellDrawHull);
 			// We can't use caching because we are drawing ALL the possible roots
 		}
 	}
 	if (FNWorldAssemblyRegistry::HasJunctionComponents() || FNWorldAssemblyRegistry::HasBoneComponents())
 	{
 		const UNWorldAssemblySettings* WorldAssemblySettings = UNWorldAssemblySettings::Get();
-		const UNWorldAssemblyEditorUserSettings* WorldAssemblyEditorUserSettings = UNWorldAssemblyEditorUserSettings::Get();
 
 		// Draw Junctions
 		for (const auto JunctionComponent : FNWorldAssemblyRegistry::GetCellJunctionComponents())
@@ -739,6 +744,7 @@ void UNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 					false,
 					true,
 					true,
+					WorldAssemblyEditorUserSettings->bDebugCellDrawFillBounds,
 					WorldAssemblySettings);
 				continue;
 			}
@@ -757,6 +763,7 @@ void UNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsValid,
 					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsValid,
 					false, true, true, true,
+					WorldAssemblyEditorUserSettings->bDebugCellDrawFillBounds,
 					WorldAssemblySettings);
 				continue;
 			}
@@ -774,6 +781,7 @@ void UNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsValid,
 					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsInvalid,
 					false,true,bConnectedDrawer, bConnectedDrawer,
+					WorldAssemblyEditorUserSettings->bDebugCellDrawFillBounds,
 					WorldAssemblySettings);
 				continue;
 			}
@@ -785,6 +793,7 @@ void UNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsUnfilled,
 					WorldAssemblyEditorUserSettings->ColorPaletteJunctionsUnfilled,
 					false,false,true, false,
+					WorldAssemblyEditorUserSettings->bDebugCellDrawFillBounds,
 					WorldAssemblySettings);
 			}
 		}
@@ -799,7 +808,7 @@ void UNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 	// Draw the routes the connector pass proved clear. Deliberately outside the junction-component block above: the
 	// routes come from the editor subsystem's own cache rather than the registry, so they draw in the default
 	// proxy-only preview too — which is exactly the case with no junction components to hang them off.
-	if (UNWorldAssemblyEditorUserSettings::Get()->bDebugWorldDrawJunctionConnectors)
+	if (WorldAssemblyEditorUserSettings->bDebugWorldDrawJunctionConnectors)
 	{
 		const UWorld* CurrentWorld = GetWorld();
 		for (const TPair<int32, UNWorldAssemblyEditorSubsystem::FNGeneratedConnections>& Entry :

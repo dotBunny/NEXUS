@@ -196,7 +196,7 @@ void UNCellJunctionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor& ValidColor, const FLinearColor& InvalidColor,
                                            const bool bShowDepth, const bool bIsConnected, const bool bDrawBox, const bool bDrawCornerLines,
-                                           const UNWorldAssemblySettings* Settings) const
+                                           const bool bDrawFillDepth, const UNWorldAssemblySettings* Settings) const
 {
 	FLinearColor GizmoColor = ValidColor; // Default color
 	const FVector ComponentLocation = GetComponentLocation();
@@ -207,8 +207,7 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const F
 	SocketSettings.SocketSize = Settings->SocketSize;
 	SocketSettings.SocketType = Details.Type;
 
-	// Do we want to make this an option?
-	SocketSettings.bDrawFillDepth = true;
+	SocketSettings.bDrawFillDepth = bDrawFillDepth;
 	SocketSettings.FillDepthMode = Details.FillDepthMode;
 	SocketSettings.FillDepth = GetFillDepth();
 

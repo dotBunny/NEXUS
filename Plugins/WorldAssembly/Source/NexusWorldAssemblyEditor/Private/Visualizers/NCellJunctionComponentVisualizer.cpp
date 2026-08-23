@@ -4,6 +4,7 @@
 #include "Visualizers/NCellJunctionComponentVisualizer.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NWorldAssemblyEditorColors.h"
+#include "NWorldAssemblyEditorUserSettings.h"
 #include "EdMode/NWorldAssemblyEdMode.h"
 
 void FNCellJunctionComponentVisualizer::DrawVisualization(const UActorComponent* Component, const FSceneView* View, FPrimitiveDrawInterface* PDI)
@@ -18,8 +19,11 @@ void FNCellJunctionComponentVisualizer::DrawVisualization(const UActorComponent*
 	// We need to draw the base wireframes
 	if (!UNWorldAssemblyEdMode::IsActive())
 	{
+		// Every argument from here on is the call's own default but the fill-depth flag, which has to be stated
+		// positionally to reach it.
 		JunctionComponent->DrawDebugPDI(PDI,
 			FNWorldAssemblyEditorColors::GetJunctionValid(),
-			FNWorldAssemblyEditorColors::GetJunctionInvalid(), false);
+			FNWorldAssemblyEditorColors::GetJunctionInvalid(), false, true, true, true,
+			UNWorldAssemblyEditorUserSettings::Get()->bDebugCellDrawFillBounds);
 	}
 }

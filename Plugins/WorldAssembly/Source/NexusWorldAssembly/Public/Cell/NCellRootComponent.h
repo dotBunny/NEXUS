@@ -36,10 +36,22 @@ public:
 	/** @return The owning ANCellActor, or nullptr if the component is not owned by a cell actor. */
 	ANCellActor* GetNCellActor() const;
 
-	/** Draw the cell's debug bounds, hull and voxels using the current stored Details. */
-	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const uint8 DrawVoxelMode, const FLinearColor& BoundsColor, const FLinearColor& HullColor) const;
-	/** Draw the cell's debug bounds, hull and voxels using an override world-space bounds/hull. */
-	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FBox& WorldBoundsBox,  const FLinearColor& BoundsColor, const TArray<FVector>& WorldHullVertices, const FLinearColor& HullColor, const uint8 DrawVoxelMode) const;
+	/**
+	 * Draw the cell's debug bounds, hull and voxels using the current stored Details.
+	 * @param bDrawBounds Draw the bounds wire box.
+	 * @param bDrawHull Draw the hull mesh. Also decides whether the hull's vertices are transformed at all, since
+	 *                  drawing them is the only thing this overload does with them.
+	 */
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const uint8 DrawVoxelMode, const FLinearColor& BoundsColor, const FLinearColor& HullColor,
+		const bool bDrawBounds = true, const bool bDrawHull = true) const;
+	/**
+	 * Draw the cell's debug bounds, hull and voxels using an override world-space bounds/hull.
+	 * @param bDrawBounds Draw the bounds wire box.
+	 * @param bDrawHull Draw the hull mesh.
+	 */
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FBox& WorldBoundsBox, const FLinearColor& BoundsColor,
+		const TArray<FVector>& WorldHullVertices, const FLinearColor& HullColor, const uint8 DrawVoxelMode,
+		const bool bDrawBounds = true, const bool bDrawHull = true) const;
 
 	/** @return The offset rotator authored on this root component's details. */
 	FRotator GetOffsetRotator() const;

@@ -64,6 +64,21 @@ public:
 		meta=(Tooltip="Draws the center and socket-corner curves of every route the connector pass accepted during the last operation."))
 	bool bDebugWorldDrawJunctionConnectors = true;
 
+	/** Draw the wire box of a cell's bounds, wherever a cell is drawn. */
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Draw Bounds",
+		meta=(Tooltip="Draws the wire box of a cell's bounds, whether or not the World Assembly edit mode is active."))
+	bool bDebugCellDrawBounds = true;
+
+	/** Draw a cell's convex hull — its collision mesh — wherever a cell is drawn. */
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Draw Hull",
+		meta=(Tooltip="Draws a cell's convex hull (its collision mesh), whether or not the World Assembly edit mode is active."))
+	bool bDebugCellDrawHull = true;
+
+	/** Draw the grey box previewing the volume a filler would occupy at each of a cell's junctions. */
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Draw Fill Bounds",
+		meta=(Tooltip="Draws the box extruded from each junction socket that previews the volume its filler would occupy, whether or not the World Assembly edit mode is active."))
+	bool bDebugCellDrawFillBounds = true;
+
 	/** Show a toast notification when an editor-triggered Assembly Operation completes, and summarize Quick Assembly runs. */
 	UPROPERTY(EditAnywhere, config,  Category="Notifications", DisplayName="Toast Editor Assembly Operations", meta=(Tooltip="Show a toast notification when an editor-triggered Assembly Operation completes and/or summarize Quick Assembly operations."))
 	bool bNotificationsToastEditorAssemblyOperations = true;

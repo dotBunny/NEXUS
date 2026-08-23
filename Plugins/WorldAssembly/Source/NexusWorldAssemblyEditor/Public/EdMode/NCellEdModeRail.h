@@ -62,6 +62,21 @@ public:
 	/** @return checked state of the draw-voxel-data toggle for UI binding. */
 	static bool ToggleDrawVoxelData_IsActionChecked();
 
+	/** Turn the cell bounds wire box on or off, everywhere a cell draws. */
+	static void ToggleDrawBounds();
+	/** @return checked state of the draw-bounds toggle for UI binding. */
+	static bool ToggleDrawBounds_IsActionChecked();
+
+	/** Turn the cell hull on or off, everywhere a cell draws. */
+	static void ToggleDrawHull();
+	/** @return checked state of the draw-hull toggle for UI binding. */
+	static bool ToggleDrawHull_IsActionChecked();
+
+	/** Turn the junction fill-volume boxes on or off, everywhere a cell draws. */
+	static void ToggleDrawFillBounds();
+	/** @return checked state of the draw-fill-bounds toggle for UI binding. */
+	static bool ToggleDrawFillBounds_IsActionChecked();
+
 	//~FNEdModeRail
 	virtual TSharedPtr<FUICommandInfo> GetCategoryCommand() const override;
 	virtual TAttribute<bool> GetAvailable() const override;
@@ -87,6 +102,9 @@ private:
 	static TSharedPtr<FUICommandInfo> CommandInfo_CalculateVoxelData;
 
 	static TSharedPtr<FUICommandInfo> CommandInfo_ToggleDrawVoxelData;
+	static TSharedPtr<FUICommandInfo> CommandInfo_ToggleDrawBounds;
+	static TSharedPtr<FUICommandInfo> CommandInfo_ToggleDrawHull;
+	static TSharedPtr<FUICommandInfo> CommandInfo_ToggleDrawFillBounds;
 	static TSharedPtr<FUICommandInfo> CommandInfo_ToggleBoundsCalculateOnSave;
 	static TSharedPtr<FUICommandInfo> CommandInfo_ToggleHullCalculateOnSave;
 	static TSharedPtr<FUICommandInfo> CommandInfo_ToggleHullAllowNonConvex;
