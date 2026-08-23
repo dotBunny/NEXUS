@@ -6,6 +6,7 @@
 #include "Cell/NCellRootComponent.h"
 #include "NWorldAssemblyEditorColors.h"
 #include "NWorldAssemblyEditorMinimal.h"
+#include "NWorldAssemblyEditorUserSettings.h"
 #include "EdMode/NWorldAssemblyEdMode.h"
 #include "NWorldAssemblySettings.h"
 
@@ -29,8 +30,13 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 	// We need to draw the base wireframes
 	if (!UNWorldAssemblyEdMode::IsActive())
 	{
+		// The same two preferences the mode's own Render honors. Gating both paths is what lets them mean "do not
+		// draw this", rather than "do not draw this while the mode happens to be open".
+		const UNWorldAssemblyEditorUserSettings* UserSettings = UNWorldAssemblyEditorUserSettings::Get();
+
 		CellRootComponent->DrawDebugPDI(PDI, static_cast<uint8>(UNWorldAssemblyEdMode::GetCellVoxelMode()),
-			FNWorldAssemblyEditorColors::GetCellBounds(), FNWorldAssemblyEditorColors::GetCellHull());
+			FNWorldAssemblyEditorColors::GetCellBounds(), FNWorldAssemblyEditorColors::GetCellHull(),
+			UserSettings->bDebugCellDrawBounds, UserSettings->bDebugCellDrawHull);
 		return;
 	}
 

@@ -8,6 +8,7 @@
 #include "NUIEditorStyle.h"
 #include "NWorldAssemblyEditorCommands.h"
 #include "NWorldAssemblyEditorStyle.h"
+#include "NWorldAssemblyEditorUserSettings.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "EdMode/NWorldAssemblyEdMode.h"
 #include "EdMode/NWorldAssemblyEdModePaletteCommands.h"
@@ -32,6 +33,9 @@ TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_CalculateBounds;
 TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_CalculateHull;
 TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_CalculateVoxelData;
 TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_ToggleDrawVoxelData;
+TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_ToggleDrawBounds;
+TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_ToggleDrawHull;
+TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_ToggleDrawFillBounds;
 TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_ToggleBoundsCalculateOnSave;
 TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_ToggleHullCalculateOnSave;
 TSharedPtr<FUICommandInfo> FNCellEdModeRail::CommandInfo_ToggleHullAllowNonConvex;
@@ -122,6 +126,30 @@ void FNCellEdModeRail::RegisterCommands(const TSharedRef<FBindingContext>& Conte
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.Voxel.Points"),
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 
+	// Iconless for the same reason the Quick Options above are — they draw as check-list rows. What they are not is
+	// Quick Options: those write into the cell that ships, while these two are this user's own view state, and they
+	// hold wherever a cell draws rather than only on the focused one.
+	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_ToggleDrawBounds,
+		"NWorldAssembly.NCell.ToggleDrawBounds",
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ToggleDrawBounds", "Draw Bounds"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ToggleDrawBounds_Tooltip", "Draw the wire box of a cell's bounds in the viewport."),
+		FSlateIcon(),
+		EUserInterfaceActionType::ToggleButton, FInputChord());
+
+	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_ToggleDrawHull,
+		"NWorldAssembly.NCell.ToggleDrawHull",
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ToggleDrawHull", "Draw Hull"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ToggleDrawHull_Tooltip", "Draw a cell's convex hull, its collision mesh, in the viewport."),
+		FSlateIcon(),
+		EUserInterfaceActionType::ToggleButton, FInputChord());
+
+	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_ToggleDrawFillBounds,
+		"NWorldAssembly.NCell.ToggleDrawFillBounds",
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ToggleDrawFillBounds", "Draw Fill Bounds"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ToggleDrawFillBounds_Tooltip", "Draw the box at each junction previewing the volume its filler would occupy."),
+		FSlateIcon(),
+		EUserInterfaceActionType::ToggleButton, FInputChord());
+
 	// Cell-scoped despite acting on the actor selection: the tag it toggles only means anything to a cell's
 	// bounds/hull/voxel calculations, which is why it sits with the Cell actions rather than the world ones.
 	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_TagIgnore,
@@ -142,6 +170,11 @@ void FNCellEdModeRail::RegisterCommands(const TSharedRef<FBindingContext>& Conte
 		{ CommandInfo_CalculateHull,               FExecuteAction::CreateStatic(&FOperations::CalculateHull),                 FCanExecuteAction::CreateStatic(&Calculate_CanExecute) },
 		{ CommandInfo_CalculateVoxelData,          FExecuteAction::CreateStatic(&FOperations::CalculateVoxelData),            FCanExecuteAction::CreateStatic(&CalculateVoxelData_CanExecute) },
 		{ CommandInfo_ToggleDrawVoxelData,         FExecuteAction::CreateStatic(&ToggleDrawVoxelData),                        CanEditCell, FIsActionChecked::CreateStatic(&ToggleDrawVoxelData_IsActionChecked) },
+		// No CanExecute, unlike every row around them: those act on the focused cell and have nothing to do without
+		// one, while what to draw stays a decision worth making whenever the category is on screen.
+		{ CommandInfo_ToggleDrawBounds,            FExecuteAction::CreateStatic(&ToggleDrawBounds),                           FCanExecuteAction(), FIsActionChecked::CreateStatic(&ToggleDrawBounds_IsActionChecked) },
+		{ CommandInfo_ToggleDrawHull,              FExecuteAction::CreateStatic(&ToggleDrawHull),                             FCanExecuteAction(), FIsActionChecked::CreateStatic(&ToggleDrawHull_IsActionChecked) },
+		{ CommandInfo_ToggleDrawFillBounds,        FExecuteAction::CreateStatic(&ToggleDrawFillBounds),                       FCanExecuteAction(), FIsActionChecked::CreateStatic(&ToggleDrawFillBounds_IsActionChecked) },
 		{ CommandInfo_ToggleBoundsCalculateOnSave, FExecuteAction::CreateStatic(&FOperations::ToggleBoundsCalculateOnSave),   CanEditCell, FIsActionChecked::CreateStatic(&FOperations::ToggleBoundsCalculateOnSave_IsActionChecked) },
 		{ CommandInfo_ToggleHullCalculateOnSave,   FExecuteAction::CreateStatic(&FOperations::ToggleHullCalculateOnSave),     CanEditCell, FIsActionChecked::CreateStatic(&FOperations::ToggleHullCalculateOnSave_IsActionChecked) },
 		{ CommandInfo_ToggleHullAllowNonConvex,    FExecuteAction::CreateStatic(&FOperations::ToggleHullAllowNonConvex),      CanEditCell, FIsActionChecked::CreateStatic(&FOperations::ToggleHullAllowNonConvex_IsActionChecked) },
@@ -230,6 +263,44 @@ void FNCellEdModeRail::ToggleDrawVoxelData()
 bool FNCellEdModeRail::ToggleDrawVoxelData_IsActionChecked()
 {
 	return UNWorldAssemblyEdMode::GetCellVoxelMode() != UNWorldAssemblyEdMode::ENCellVoxelMode::None;
+}
+
+void FNCellEdModeRail::ToggleDrawBounds()
+{
+	// Written through on every click rather than on mode exit: this is the user's preference for every level they
+	// open next, and an editor that goes down without a clean shutdown should not take it with it.
+	UNWorldAssemblyEditorUserSettings* Settings = UNWorldAssemblyEditorUserSettings::GetMutable();
+	Settings->bDebugCellDrawBounds = !Settings->bDebugCellDrawBounds;
+	Settings->SaveConfig();
+}
+
+bool FNCellEdModeRail::ToggleDrawBounds_IsActionChecked()
+{
+	return UNWorldAssemblyEditorUserSettings::Get()->bDebugCellDrawBounds;
+}
+
+void FNCellEdModeRail::ToggleDrawHull()
+{
+	UNWorldAssemblyEditorUserSettings* Settings = UNWorldAssemblyEditorUserSettings::GetMutable();
+	Settings->bDebugCellDrawHull = !Settings->bDebugCellDrawHull;
+	Settings->SaveConfig();
+}
+
+bool FNCellEdModeRail::ToggleDrawHull_IsActionChecked()
+{
+	return UNWorldAssemblyEditorUserSettings::Get()->bDebugCellDrawHull;
+}
+
+void FNCellEdModeRail::ToggleDrawFillBounds()
+{
+	UNWorldAssemblyEditorUserSettings* Settings = UNWorldAssemblyEditorUserSettings::GetMutable();
+	Settings->bDebugCellDrawFillBounds = !Settings->bDebugCellDrawFillBounds;
+	Settings->SaveConfig();
+}
+
+bool FNCellEdModeRail::ToggleDrawFillBounds_IsActionChecked()
+{
+	return UNWorldAssemblyEditorUserSettings::Get()->bDebugCellDrawFillBounds;
 }
 
 TSharedPtr<FUICommandInfo> FNCellEdModeRail::GetCategoryCommand() const
@@ -323,6 +394,26 @@ TSharedPtr<SWidget> FNCellEdModeRail::CreateContent() const
 					CommandInfo_ToggleHullAllowNonConvex,
 					//CommandInfo_ToggleVoxelCalculateOnSave,
 					//CommandInfo_ToggleVoxelData,
+				})
+		]
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			CreateGroupSeparator(LOCTEXT("CellDisplaySeparator", "DISPLAY"))
+		]
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			// Ruled off from the Quick Options rather than folded in with them, because the two persist somewhere
+			// different: those are authored into the cell and travel with it, these are this machine's own view
+			// state. One check list holding both would say they are the same kind of setting.
+			CreateCheckList(
+				{
+					CommandInfo_ToggleDrawBounds,
+					CommandInfo_ToggleDrawHull,
+					CommandInfo_ToggleDrawFillBounds,
 				})
 		];
 }

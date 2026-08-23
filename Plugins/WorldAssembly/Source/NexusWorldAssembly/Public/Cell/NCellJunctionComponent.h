@@ -166,10 +166,14 @@ public:
 	void GetCachedHullPenetration(const FNRawMesh& Hull, const FVector2D& SettingsSocketSize,
 		float& OutMaximumDepth, double& OutLowestCornerZ) const;
 
-	/** Draw the junction's debug visualization through the supplied PDI. */
+	/**
+	 * Draw the junction's debug visualization through the supplied PDI.
+	 * @param bDrawFillDepth Draw the box extruded along the facing axis that previews the volume a filler would
+	 *                       occupy. Sized and anchored by the junction's own fill depth and depth mode.
+	 */
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI,
 		const FLinearColor& ValidColor, const FLinearColor& Invalid, bool bShowDepth = false,
-		bool bIsConnected = true, bool bDrawBox = true, bool bDrawCornerLines = true,
+		bool bIsConnected = true, bool bDrawBox = true, bool bDrawCornerLines = true, bool bDrawFillDepth = true,
 		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get()) const;
 
 	/**
