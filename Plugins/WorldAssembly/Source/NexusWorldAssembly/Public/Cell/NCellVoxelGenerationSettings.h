@@ -50,6 +50,16 @@ struct NEXUSWORLDASSEMBLY_API FNCellVoxelGenerationSettings
 	UPROPERTY(EditAnywhere, DisplayName = "Include Mesh Terrains (EXPERIMENTAL)")
 	bool bIncludeMeshTerrains = false;
 
+	/**
+	 * When true, foliage actors contribute to voxel occupancy.
+	 * @note Governs both halves of the calculation at once, as its landscape counterpart does: whether foliage grows
+	 *       the voxel grid's extents, and whether the occupancy sweep can hit it.
+	 * @note Landscape grass is not foliage under this flag: it belongs to its landscape and answers to
+	 *       bIncludeLandscapes. See FNActorUtils::IsFoliageActor.
+	 */
+	UPROPERTY(EditAnywhere, DisplayName = "Include Foliage")
+	bool bIncludeFoliage = false;
+
 	/** Actors carrying any of these tags are excluded from the voxel calculation. */
 	UPROPERTY(EditAnywhere)
 	TArray<FName> ActorIgnoreTags = { NEXUS::WorldAssembly::ActorTags::CellIgnore, NEXUS::WorldAssembly::ActorTags::CellVoxelIgnore };
@@ -67,6 +77,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellVoxelGenerationSettings
 		&& bIncludeEditorOnly == Other.bIncludeEditorOnly
 		&& bIncludeLandscapes == Other.bIncludeLandscapes
 		&& bIncludeMeshTerrains == Other.bIncludeMeshTerrains
+		&& bIncludeFoliage == Other.bIncludeFoliage
 		&& CollisionChannel == Other.CollisionChannel
 		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);
 	}

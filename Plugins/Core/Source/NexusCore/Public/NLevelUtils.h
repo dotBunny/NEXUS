@@ -40,6 +40,14 @@ struct NEXUSCORE_API FNLevelBoundsFilter
 	 *       is a Mesh Terrain produces bounds that omit it entirely.
 	 */
 	bool bIncludeMeshTerrains = false;
+
+	/**
+	 * When true, foliage actors contribute to the bounds.
+	 * @note A flag rather than an unconditional refusal, unlike the PCG partition container this filter drops outright.
+	 *       Foliage is scenery in nearly every case, but a level whose only occupants are trees still has bounds worth
+	 *       measuring — so the answer is the caller's, exactly as it is for landscape.
+	 */
+	bool bIncludeFoliage = false;
 };
 
 /**

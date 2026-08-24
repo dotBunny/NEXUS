@@ -96,6 +96,15 @@ void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray
 				continue;
 			}
 
+			// The PCG partition container, refused on the same terms and for the same reason: it is not geometry under
+			// any answer. It is a box the generator owns and rewrites, holding whatever the graph last happened to
+			// scatter — bounds measured to include it describe the last generation rather than the level.
+			if (FNActorUtils::IsPCGPartitionActor(Actor))
+			{
+				OutIgnoredActors.Add(Actor);
+				continue;
+			}
+
 			// Ignore Tags
 			if (FNArrayUtils::ContainsAny(Actor->Tags, Filter.ActorIgnoreTags))
 			{
@@ -115,6 +124,15 @@ void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray
 
 			const bool bIsMeshTerrain = FNActorUtils::IsMeshTerrainActor(Actor);
 			if (bIsMeshTerrain && !Filter.bIncludeMeshTerrains)
+			{
+				OutIgnoredActors.Add(Actor);
+				continue;
+			}
+
+			// Foliage answers to its own flag in the same way, and is deliberately tested after the two terrain flags:
+			// landscape grass belongs to its landscape, so a grassy landscape has to be settled as landscape before
+			// anything here has a chance to read it as foliage.
+			if (!Filter.bIncludeFoliage && FNActorUtils::IsFoliageActor(Actor))
 			{
 				OutIgnoredActors.Add(Actor);
 				continue;
