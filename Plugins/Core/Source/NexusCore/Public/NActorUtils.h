@@ -41,6 +41,26 @@ struct NEXUSCORE_API FNWorldActorFilterSettings
 	 */
 	bool bExcludeTerrainAuthoring = false;
 
+	/**
+	 * When true, foliage actors are skipped — both the actor holding instanced foliage and the individual actors that
+	 * actor-type foliage spawns.
+	 * @note Defaults true, alone among the exclusions here, because foliage is scenery in every case this filter
+	 *       serves. A gathered world is read for collision and for placement, and a forest admitted to either is an
+	 *       obstacle nobody put there. Callers wanting it back have to say so.
+	 * @note Landscape grass is deliberately not foliage under this flag — see FNActorUtils::IsFoliageActor.
+	 */
+	bool bExcludeFoliage = true;
+
+	/**
+	 * When true, PCG partition actors are skipped — the per-grid-cell actors PCG gathers its generated output into.
+	 * @note Defaults true, for the same reason foliage does. A partition actor is a container the generator owns and
+	 *       rewrites, holding scattered dressing rather than anything placed; a gathered world that admits it picks up
+	 *       whatever the graph last happened to spawn, and picks it up again differently after the next regeneration.
+	 * @note Matched on the partition actor itself, not on what it holds. Anything the graph spawns as an actor in its
+	 *       own right is an ordinary actor and answers to the rest of these flags.
+	 */
+	bool bExcludePCGPartitionActor = true;
+
 	/** When true, AVolume actors are skipped. */
 	bool bExcludeVolumes = false;
 
@@ -156,6 +176,34 @@ public:
 	static bool IsMeshTerrainPrimitiveClassName(const FString& ClassName);
 
 	/**
+	 * @param ClassName Unprefixed UClass name of an actor.
+	 * @return true when the name is the actor instanced foliage gathers into.
+	 */
+	static bool IsFoliageActorClassName(const FString& ClassName);
+
+	/**
+	 * @param ClassName Unprefixed UClass name of a component.
+	 * @return true when the name is the component instanced foliage lives in.
+	 * @note Landscape grass has a component class of its own and is deliberately not matched here — see IsFoliageActor.
+	 */
+	static bool IsFoliagePrimitiveClassName(const FString& ClassName);
+
+	/**
+	 * @param ClassName Unprefixed UClass name of an actor.
+	 * @return true when the name is the actor PCG gathers its generated output into.
+	 * @note Exact rather than by prefix, and matched on the leaf class rather than the APartitionActor base it shares
+	 *       with instanced foliage — a base match would make the two exclusions unable to act independently.
+	 */
+	static bool IsPCGPartitionActorClassName(const FString& ClassName);
+
+	/**
+	 * @return The tag the engine puts on every actor that actor-type foliage spawns.
+	 * @note Mirrors FFoliageHelper's tag without linking the Foliage module. Exposed so the string can be pinned by a
+	 *       test, since an engine-side rename would otherwise leave actor foliage silently unrecognized.
+	 */
+	static FName GetFoliageActorInstanceTag();
+
+	/**
 	 * Identify a primitive that carries terrain geometry — a landscape component, or a Mesh Partition section's
 	 * collision component.
 	 * @param Primitive Primitive component to inspect.
@@ -196,6 +244,38 @@ public:
 	 *         to sample it instead.
 	 */
 	static bool IsLandscapeActor(const AActor* Actor);
+
+	/**
+	 * Identify an actor that is foliage rather than something placed.
+	 * @param Actor Candidate actor under inspection. A null actor returns false.
+	 * @return true when the actor holds instanced foliage, carries foliage primitives, or is itself an instance that
+	 *         actor-type foliage spawned.
+	 * @remark Three representations, because foliage has three. Instanced foliage gathers into one holder actor per
+	 *         level or partition cell; foliage primitives can be attached to actors that are not that holder; and
+	 *         actor-type foliage spawns ordinary actors, which the engine marks with a tag as it places them. Matching
+	 *         only the holder would leave the latter two indistinguishable from hand-placed scenery.
+	 * @remark Landscape grass is deliberately excluded from this answer. Grass components are created with the
+	 *         landscape proxy as their outer, so recognizing them here would make every grassy landscape foliage —
+	 *         and under the default-true exclusion, would quietly drop landscapes from every filter that never asked
+	 *         to lose them, FNRawMeshFactory::FromLandscapesInBounds among them. Grass belongs to its landscape and
+	 *         is settled by bExcludeLandscapes.
+	 * @note Matched by class name and actor tag rather than through the Foliage module, so NexusCore takes no
+	 *       dependency on it — the same reason landscape is matched by class name here.
+	 */
+	static bool IsFoliageActor(const AActor* Actor);
+
+	/**
+	 * Identify an actor that is a PCG partition container rather than something placed.
+	 * @param Actor Candidate actor under inspection. A null actor returns false.
+	 * @return true when the actor is the container PCG gathers a grid cell's generated output into.
+	 * @remark One check rather than three, unlike foliage. PCG hangs its generated components on the partition actor
+	 *         itself, so there is no component class that has to be recognized separately and no tag on anything it
+	 *         spawns — what a graph spawns as a standalone actor is an ordinary actor, and deliberately still visible
+	 *         to this filter.
+	 * @note Matched by class name rather than through the PCG module, so NexusCore takes no dependency on it — the
+	 *       same reason landscape and foliage are matched by class name here.
+	 */
+	static bool IsPCGPartitionActor(const AActor* Actor);
 
 	/**
 	 * Identify an actor whose terrain is a Mesh Terrain section.

@@ -51,6 +51,38 @@ namespace NEXUS::Core::Terrain
 	constexpr double MinimumBuiltHalfExtent = 0.01;
 }
 
+namespace NEXUS::Core::Foliage
+{
+	/**
+	 * Actor class name of the holder every instanced foliage type gathers into — one per level, or one per grid cell
+	 * in a partitioned world.
+	 */
+	constexpr const TCHAR* InstancedFoliageActorClassName = TEXT("InstancedFoliageActor");
+
+	/**
+	 * Class name of the component instanced foliage lives in.
+	 * @note Its grass counterpart is deliberately absent. Landscape grass uses a component class of its own, created
+	 *       with the landscape proxy as its outer, so matching it would make every grassy landscape read as foliage.
+	 */
+	constexpr const TCHAR* FoliageInstancedMeshClassName = TEXT("FoliageInstancedStaticMeshComponent");
+
+	/**
+	 * Tag the engine puts on every actor that actor-type foliage spawns, mirroring FFoliageHelper. Read as a tag so
+	 * this stays free of the Foliage module, exactly as the landscape checks stay free of the Landscape module.
+	 */
+	constexpr const TCHAR* FoliageActorInstanceTag = TEXT("FoliageActorInstance");
+}
+
+namespace NEXUS::Core::PCG
+{
+	/**
+	 * Actor class name of the container PCG gathers a grid cell's generated output into.
+	 * @note A sibling of the instanced foliage holder rather than a relation: both derive from APartitionActor, which
+	 *       is why this matches the leaf name instead of the shared base.
+	 */
+	constexpr const TCHAR* PartitionActorClassName = TEXT("PCGPartitionActor");
+}
+
 USceneComponent* FNActorUtils::GetRootComponentFromDefaultObject(const TSubclassOf<AActor>& ActorClass)
 {
 	if (ActorClass == nullptr) return nullptr;
@@ -120,15 +152,17 @@ bool FNActorUtils::PassesFilter(const AActor* Actor, const FNWorldActorFilterSet
 		}
 	}
 
-	// Exclude by class, ahead of the two checks below that have to walk the actor's components.
+	// Exclude by class, ahead of the checks below that have to walk the actor's components.
 	if (Settings.bExcludeVolumes && Actor->IsA<AVolume>()) return false;
 	if (Settings.bExcludeDebugActors && Actor->IsA<ANDebugActor>()) return false;
 	if (Settings.bExcludeTerrainAuthoring && IsTerrainAuthoringActor(Actor)) return false;
+	if (Settings.bExcludePCGPartitionActor && IsPCGPartitionActor(Actor)) return false;
 
-	// Left until last of the built-in checks: these are the only two that inspect the actor's components, so they are
+	// Left until last of the built-in checks: these are the only three that inspect the actor's components, so they are
 	// only paid by whatever everything above already let through.
 	if (Settings.bExcludeMeshTerrains && IsMeshTerrainActor(Actor)) return false;
 	if (Settings.bExcludeLandscapes && IsLandscapeActor(Actor)) return false;
+	if (Settings.bExcludeFoliage && IsFoliageActor(Actor)) return false;
 
 	// Exclude because of filter
 	if (Settings.ExclusionFunction.IsSet() && !Settings.ExclusionFunction(Actor)) return false;
@@ -206,6 +240,57 @@ bool FNActorUtils::IsTerrainAuthoringActor(const AActor* Actor)
 {
 	if (!IsValid(Actor)) return false;
 	return IsTerrainAuthoringClassName(Actor->GetClass()->GetName());
+}
+
+bool FNActorUtils::IsFoliageActorClassName(const FString& ClassName)
+{
+	return ClassName == NEXUS::Core::Foliage::InstancedFoliageActorClassName;
+}
+
+bool FNActorUtils::IsFoliagePrimitiveClassName(const FString& ClassName)
+{
+	return ClassName == NEXUS::Core::Foliage::FoliageInstancedMeshClassName;
+}
+
+FName FNActorUtils::GetFoliageActorInstanceTag()
+{
+	return FName(NEXUS::Core::Foliage::FoliageActorInstanceTag);
+}
+
+bool FNActorUtils::IsPCGPartitionActorClassName(const FString& ClassName)
+{
+	return ClassName == NEXUS::Core::PCG::PartitionActorClassName;
+}
+
+bool FNActorUtils::IsPCGPartitionActor(const AActor* Actor)
+{
+	if (!IsValid(Actor)) return false;
+
+	return IsPCGPartitionActorClassName(Actor->GetClass()->GetName());
+}
+
+bool FNActorUtils::IsFoliageActor(const AActor* Actor)
+{
+	if (!IsValid(Actor)) return false;
+
+	// The holder, matched on its own class. One of these gathers every instanced foliage type in a level, or in a
+	// partition cell, and it carries nothing else worth keeping.
+	if (IsFoliageActorClassName(Actor->GetClass()->GetName())) return true;
+
+	// An instance that actor-type foliage spawned. These are ordinary actors of whatever class the foliage type names,
+	// so there is no class to match — the engine tags them as it places them, and the tag is the only mark they carry.
+	if (Actor->ActorHasTag(GetFoliageActorInstanceTag())) return true;
+
+	// Foliage primitives attached to something that is not the holder, which is where partitioned foliage and any
+	// hand-assembled arrangement of it end up.
+	TInlineComponentArray<UPrimitiveComponent*> Primitives(Actor);
+	for (const UPrimitiveComponent* Primitive : Primitives)
+	{
+		if (Primitive == nullptr) continue;
+		if (IsFoliagePrimitiveClassName(Primitive->GetClass()->GetName())) return true;
+	}
+
+	return false;
 }
 
 bool FNActorUtils::IsLandscapeActor(const AActor* Actor)

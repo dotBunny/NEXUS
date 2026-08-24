@@ -119,6 +119,52 @@ N_TEST_MEDIUM(FNActorUtilsTests_TerrainClassification_MeshTerrain,
 		&& FNActorUtils::IsTerrainPrimitiveClassName(TEXT("LandscapeHeightfieldCollisionComponent")));
 }
 
+N_TEST_MEDIUM(FNActorUtilsTests_TerrainClassification_Foliage,
+	"NEXUS::UnitTests::NCore::FNActorUtils::TerrainClassification::Foliage",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	CHECK_MESSAGE(TEXT("The instanced foliage holder is foliage."),
+		FNActorUtils::IsFoliageActorClassName(TEXT("InstancedFoliageActor")));
+	CHECK_MESSAGE(TEXT("The foliage instance component is foliage."),
+		FNActorUtils::IsFoliagePrimitiveClassName(TEXT("FoliageInstancedStaticMeshComponent")));
+
+	// The load-bearing one. Landscape grass is instanced through a component of its own, created with the landscape
+	// proxy as its outer — so were it matched here, every grassy landscape would read as foliage and the default-true
+	// exclusion would quietly drop landscapes from filters that never asked to lose them. Grass belongs to its
+	// landscape and is settled by bExcludeLandscapes.
+	CHECK_FALSE_MESSAGE(TEXT("Landscape grass is not foliage."),
+		FNActorUtils::IsFoliagePrimitiveClassName(TEXT("GrassInstancedStaticMeshComponent")));
+
+	// Foliage components derive from the hierarchical instanced mesh, so the base classes must not match either or
+	// every instanced mesh in a level would be foliage.
+	CHECK_FALSE_MESSAGE(TEXT("A hierarchical instanced mesh is not foliage."),
+		FNActorUtils::IsFoliagePrimitiveClassName(TEXT("HierarchicalInstancedStaticMeshComponent")));
+	CHECK_FALSE_MESSAGE(TEXT("An ordinary static mesh component is not foliage."),
+		FNActorUtils::IsFoliagePrimitiveClassName(TEXT("StaticMeshComponent")));
+
+	// Actor-type foliage spawns actors of whatever class the type names, so the tag is the only mark they carry —
+	// an engine-side rename of it would leave them silently unrecognized.
+	CHECK_EQUALS("The actor foliage tag should be the engine's.",
+		FNActorUtils::GetFoliageActorInstanceTag(), FName(TEXT("FoliageActorInstance")));
+}
+
+N_TEST_MEDIUM(FNActorUtilsTests_TerrainClassification_PCGPartition,
+	"NEXUS::UnitTests::NCore::FNActorUtils::TerrainClassification::PCGPartition",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	CHECK_MESSAGE(TEXT("The PCG partition container is a partition actor."),
+		FNActorUtils::IsPCGPartitionActorClassName(TEXT("PCGPartitionActor")));
+
+	// It and the instanced foliage holder both derive from APartitionActor, so the two exclusions have to stay able
+	// to act independently — a match on the shared base would tie them together.
+	CHECK_FALSE_MESSAGE(TEXT("The instanced foliage holder is not a PCG partition actor."),
+		FNActorUtils::IsPCGPartitionActorClassName(TEXT("InstancedFoliageActor")));
+	CHECK_FALSE_MESSAGE(TEXT("The shared partition base is not a PCG partition actor."),
+		FNActorUtils::IsPCGPartitionActorClassName(TEXT("PartitionActor")));
+	CHECK_FALSE_MESSAGE(TEXT("And the reverse holds too."),
+		FNActorUtils::IsFoliageActorClassName(TEXT("PCGPartitionActor")));
+}
+
 N_TEST_MEDIUM(FNActorUtilsTests_TerrainClassification_NullActors,
 	"NEXUS::UnitTests::NCore::FNActorUtils::TerrainClassification::NullActors",
 	N_TEST_CONTEXT_ANYWHERE)
@@ -128,6 +174,8 @@ N_TEST_MEDIUM(FNActorUtilsTests_TerrainClassification_NullActors,
 	CHECK_FALSE_MESSAGE(TEXT("A null actor is not authoring apparatus."), FNActorUtils::IsTerrainAuthoringActor(nullptr));
 	CHECK_FALSE_MESSAGE(TEXT("A null actor is not landscape."), FNActorUtils::IsLandscapeActor(nullptr));
 	CHECK_FALSE_MESSAGE(TEXT("A null actor is not mesh terrain."), FNActorUtils::IsMeshTerrainActor(nullptr));
+	CHECK_FALSE_MESSAGE(TEXT("A null actor is not foliage."), FNActorUtils::IsFoliageActor(nullptr));
+	CHECK_FALSE_MESSAGE(TEXT("A null actor is not a PCG partition actor."), FNActorUtils::IsPCGPartitionActor(nullptr));
 	CHECK_FALSE_MESSAGE(TEXT("A null primitive is not a terrain primitive."), FNActorUtils::IsTerrainPrimitive(nullptr));
 	CHECK_FALSE_MESSAGE(TEXT("A null primitive has no built geometry."), FNActorUtils::HasBuiltGeometry(nullptr));
 

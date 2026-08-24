@@ -64,6 +64,17 @@ struct NEXUSWORLDASSEMBLY_API FNCellHullGenerationSettings
 	bool bIncludeMeshTerrains = false;
 
 	/**
+	 * When true, foliage actors contribute to the hull.
+	 * @note A setting rather than an unconditional refusal, unlike the PCG partition container the hull drops outright.
+	 *       Foliage is scenery in nearly every case, but it is scenery somebody placed and may legitimately want
+	 *       accounted for — so the answer is the author's, exactly as it is for landscape.
+	 * @note Landscape grass is not foliage under this flag: it belongs to its landscape and answers to
+	 *       bIncludeLandscapes. See FNActorUtils::IsFoliageActor.
+	 */
+	UPROPERTY(EditAnywhere, DisplayName = "Include Foliage")
+	bool bIncludeFoliage = false;
+
+	/**
 	 * Grid size, in world units, that terrain vertices are thinned onto before the hull is built. 0 keeps every one.
 	 *
 	 * Reads as how much slack the envelope is allowed rather than how detailed it is: a convex hull is decided by its
@@ -116,6 +127,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellHullGenerationSettings
 		&& bIncludeEditorOnly == Other.bIncludeEditorOnly && BuildMethod == Other.BuildMethod
 		&& bIncludeLandscapes == Other.bIncludeLandscapes
 		&& bIncludeMeshTerrains == Other.bIncludeMeshTerrains
+		&& bIncludeFoliage == Other.bIncludeFoliage
 		&& TerrainSimplificationGridSize == Other.TerrainSimplificationGridSize
 		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);
 	}

@@ -89,6 +89,7 @@ FBox FNWorldAssemblyUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCell
 	Filter.bIncludeNonColliding = Settings.bIncludeNonColliding;
 	Filter.bIncludeLandscapes = Settings.bIncludeLandscapes;
 	Filter.bIncludeMeshTerrains = Settings.bIncludeMeshTerrains;
+	Filter.bIncludeFoliage = Settings.bIncludeFoliage;
 
 	FNLevelUtils::DetermineLevelBounds(InLevel, LevelBounds, IgnoredActors, Filter);
 
@@ -139,6 +140,11 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 		// Terrain authoring apparatus is never geometry, at any setting — see FNActorUtils::IsTerrainAuthoringActor.
 		if (FNActorUtils::IsTerrainAuthoringActor(Actor)) continue;
 
+		// The PCG partition container, refused on the same terms. A hull is the shape a cell occupies, and a container
+		// the generator rewrites holds whatever the graph last scattered — a hull swollen to enclose it describes the
+		// last generation rather than the cell, and changes shape the next time the graph runs.
+		if (FNActorUtils::IsPCGPartitionActor(Actor)) continue;
+
 		// Each terrain representation answers to its own setting rather than to the filters below — see
 		// FNCellHullGenerationSettings.
 		const bool bIsLandscape = FNActorUtils::IsLandscapeActor(Actor);
@@ -146,6 +152,10 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 
 		const bool bIsMeshTerrain = FNActorUtils::IsMeshTerrainActor(Actor);
 		if (bIsMeshTerrain && !Settings.bIncludeMeshTerrains) continue;
+
+		// Foliage answers to its own setting, tested after the two terrain flags: landscape grass belongs to its
+		// landscape, so a grassy landscape has to be settled as landscape before anything reads it as foliage.
+		if (!Settings.bIncludeFoliage && FNActorUtils::IsFoliageActor(Actor)) continue;
 
 		// Anything that got this far and is either representation, for the rules below that treat terrain as one thing.
 		const bool bIsTerrain = bIsLandscape || bIsMeshTerrain;
@@ -393,6 +403,7 @@ FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const 
 	Filter.bIncludeNonColliding = Settings.bIncludeNonColliding;
 	Filter.bIncludeLandscapes = Settings.bIncludeLandscapes;
 	Filter.bIncludeMeshTerrains = Settings.bIncludeMeshTerrains;
+	Filter.bIncludeFoliage = Settings.bIncludeFoliage;
 
 	FBox Bounds(ForceInit);
 	FNLevelUtils::DetermineLevelBounds(InLevel, Bounds, IgnoredActors, Filter);

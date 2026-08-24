@@ -46,6 +46,17 @@ struct NEXUSWORLDASSEMBLY_API FNCellBoundsGenerationSettings
 	UPROPERTY(EditAnywhere, DisplayName = "Include Mesh Terrains (EXPERIMENTAL)")
 	bool bIncludeMeshTerrains = false;
 
+	/**
+	 * When true, foliage actors contribute to the bounds.
+	 * @note A setting rather than an unconditional refusal, unlike the PCG partition container the bounds drops outright.
+	 *       Foliage is scenery in nearly every case, but it is scenery somebody placed and may legitimately want
+	 *       accounted for — so the answer is the author's, exactly as it is for landscape.
+	 * @note Landscape grass is not foliage under this flag: it belongs to its landscape and answers to
+	 *       bIncludeLandscapes. See FNActorUtils::IsFoliageActor.
+	 */
+	UPROPERTY(EditAnywhere, DisplayName = "Include Foliage")
+	bool bIncludeFoliage = false;
+
 	/** Actors carrying any of these tags are excluded from the bounds calculation. */
 	UPROPERTY(EditAnywhere)
 	TArray<FName> ActorIgnoreTags = { NEXUS::WorldAssembly::ActorTags::CellIgnore, NEXUS::WorldAssembly::ActorTags::CellBoundsIgnore };
@@ -59,6 +70,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellBoundsGenerationSettings
 		&& bIncludeEditorOnly == Other.bIncludeEditorOnly
 		&& bIncludeLandscapes == Other.bIncludeLandscapes
 		&& bIncludeMeshTerrains == Other.bIncludeMeshTerrains
+		&& bIncludeFoliage == Other.bIncludeFoliage
 		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);
 	}
 };
