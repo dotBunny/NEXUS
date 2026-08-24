@@ -47,6 +47,15 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellDataSummary
 	 *         exercising the tag-counter gate through FilterCellInputData must set it explicitly.
 	 */
 	bool bAnyTagCounterConstraints = false;
+
+	/**
+	 * true if any cell in the pool declares a floor or ceiling of its own. When false — and the organ declares
+	 * neither — FilterCellInputData skips resolving each candidate's prospective world bounds entirely, which is
+	 * the only per-junction geometry work the filter would otherwise do.
+	 * @remark Populated by the production constructor; the test-only constructor leaves this false, so a test
+	 *         exercising the height gate through FilterCellInputData must set it explicitly.
+	 */
+	bool bAnyHeightConstraints = false;
 };
 
 /**
@@ -110,6 +119,28 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	 *         NodeDepth (the source node's NodeDepth + 1). See NMaximumNodeDepthTests.cpp before changing it.
 	 */
 	int32 MaximumNodeDepth = 0;
+
+	/** When true, this cell may not be placed anywhere its world bounds would reach below MinimumFloor. */
+	bool bUseMinimumFloor = false;
+
+	/**
+	 * The lowest world-space Z, in world units, any part of this cell's bounds may occupy while bUseMinimumFloor
+	 * is set. Absolute world height, not relative to the organ.
+	 * @remark Gating is enforced in FNVirtualOrganContext::FilterCellInputData against the rotation-baked world
+	 *         AABB the candidate would occupy, narrowed against the organ's own floor. See NHeightConstraintTests.cpp.
+	 */
+	double MinimumFloor = 0.0;
+
+	/** When true, this cell may not be placed anywhere its world bounds would reach above MaximumCeiling. */
+	bool bUseMaximumCeiling = false;
+
+	/**
+	 * The highest world-space Z, in world units, any part of this cell's bounds may occupy while bUseMaximumCeiling
+	 * is set. Absolute world height, not relative to the organ.
+	 * @remark Gating is enforced in FNVirtualOrganContext::FilterCellInputData against the rotation-baked world
+	 *         AABB the candidate would occupy, narrowed against the organ's own ceiling. See NHeightConstraintTests.cpp.
+	 */
+	double MaximumCeiling = 0.0;
 
 	/** When true, this cell may only be placed toward DirectionConstraint relative to the organ's start point. */
 	bool bHasDirectionConstraint = false;

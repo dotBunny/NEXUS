@@ -22,6 +22,20 @@ public:
 
 	FNAssemblyGraphCellNode(const FNAssemblyGraphNodeParams& Params, FNVirtualCellData* InputData, const FVector& VoxelSize);
 
+	/**
+	 * Resolve the rotation-baked world-space AABB a cell would occupy, without constructing a node for it.
+	 *
+	 * This is the constructor's own WorldBounds computation, factored out so a caller that has to answer "where
+	 * would this land" before paying for a node — FNVirtualOrganContext::FilterCellInputData, deciding whether a
+	 * candidate clears its floor/ceiling — gets the identical box rather than a second implementation of it.
+	 * @param LocalBounds The cell's authored bounds, in cell space (FNCellRootDetails::Bounds).
+	 * @param WorldRotation Rotation the cell would be placed at.
+	 * @param WorldPosition World-space position of the cell's pivot.
+	 * @return The AABB enclosing the rotated authored bounds. Deliberately exceeds the space the cell actually
+	 *         occupies once rotated off-axis, matching what the node caches and every placement test compares.
+	 */
+	static FBox ComputeWorldBounds(const FBox& LocalBounds, const FRotator& WorldRotation, const FVector& WorldPosition);
+
 	/** @return true if at least one junction on this cell is still unlinked. */
 	bool HasOpenJunctions() const;
 
