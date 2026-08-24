@@ -42,6 +42,21 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 
 	// Keep a local copy of this here
 	bUnbound = WorldOrganContext->SourceComponent->bUnbound;
+
+	// The organ's blanket height window. Deliberately read regardless of bUnbound: it is the only vertical limit an
+	// unbound organ can express, since the bounds containment check it would otherwise be clipped by is skipped.
+	bUseMinimumFloor = WorldOrganContext->SourceComponent->bUseMinimumFloor;
+	MinimumFloor = WorldOrganContext->SourceComponent->MinimumFloor;
+	bUseMaximumCeiling = WorldOrganContext->SourceComponent->bUseMaximumCeiling;
+	MaximumCeiling = WorldOrganContext->SourceComponent->MaximumCeiling;
+
+	if (bUseMinimumFloor && bUseMaximumCeiling && MinimumFloor > MaximumCeiling)
+	{
+		UE_LOG(LogNexusWorldAssembly, Warning,
+			TEXT("Organ '%s' has MinimumFloor(%f) above MaximumCeiling(%f), leaving no height at which any cell can be placed."),
+			*GetNameSafe(WorldOrganContext->SourceComponent->GetOwner()), MinimumFloor, MaximumCeiling);
+	}
+
 	RequiredTagCounters = WorldOrganContext->SourceComponent->TagCounters;
 	RequiredContextTags = WorldOrganContext->SourceComponent->ContextTags;
 
@@ -137,6 +152,20 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		CellDetails.bHasDirectionConstraint = Cell.Value.bHasDirectionConstraint;
 		CellDetails.DirectionConstraint = Cell.Value.DirectionConstraint;
 
+		CellDetails.bUseMinimumFloor = Cell.Value.bUseMinimumFloor;
+		CellDetails.MinimumFloor = Cell.Value.MinimumFloor;
+		CellDetails.bUseMaximumCeiling = Cell.Value.bUseMaximumCeiling;
+		CellDetails.MaximumCeiling = Cell.Value.MaximumCeiling;
+
+		// Contradictory configuration: a floor above the cell's own ceiling leaves no height it can occupy. The
+		// gate handles it correctly (nothing places), but the cell then silently never appears, so surface it.
+		if (CellDetails.bUseMinimumFloor && CellDetails.bUseMaximumCeiling && CellDetails.MinimumFloor > CellDetails.MaximumCeiling)
+		{
+			UE_LOG(LogNexusWorldAssembly, Warning,
+				TEXT("Cell '%s' has MinimumFloor(%f) above MaximumCeiling(%f), which can never be satisfied. It will never be placed."),
+				*GetNameSafe(Cell.Key), CellDetails.MinimumFloor, CellDetails.MaximumCeiling);
+		}
+
 		// We won't touch this till later
 		CellDetails.Template = Cell.Key;
 
@@ -160,6 +189,10 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		if (!CellInputDataSummary.bAnyTagCounterConstraints && CellDetails.TagCounterConstraints.Num() > 0)
 		{
 			CellInputDataSummary.bAnyTagCounterConstraints = true;
+		}
+		if (!CellInputDataSummary.bAnyHeightConstraints && (CellDetails.bUseMinimumFloor || CellDetails.bUseMaximumCeiling))
+		{
+			CellInputDataSummary.bAnyHeightConstraints = true;
 		}
 
 		CellInputData.Add(CellDetails); // TODO: Check this is a Move
@@ -194,6 +227,9 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	PreFilter.SocketSize = BoneInputData[0].SocketSize;
 	PreFilter.SourceQuat = FQuat(BoneInputData[0].WorldRotation);
 	PreFilter.bIsStartNode = true;
+	// The bone is where a start cell attaches, so it is this filter's attach point. Unset, WorldPosition defaults to
+	// an uninitialized FVector, which the position-sensitive gates (direction, height) would then read.
+	PreFilter.WorldPosition = BoneInputData[0].WorldPosition;
 
 	// TODO: Odd spot but right now just using one bone
 	// Seed the directional-constraint reference point per the configured mode. StartBone uses the start bone;
@@ -464,6 +500,29 @@ bool FNVirtualOrganContext::IsGatedByMaximumNodeDepth(const int32 MaximumNodeDep
 	return MaximumNodeDepth > 0 && CandidateNodeDepth > MaximumNodeDepth;
 }
 
+bool FNVirtualOrganContext::IsGatedByHeight(const FBox& CandidateWorldBounds, const bool bUseFloor, const double Floor,
+	const bool bUseCeiling, const double Ceiling)
+{
+	// A candidate with no bounds cannot be judged; let it through rather than rejecting on missing data, matching
+	// how the collision paths treat an unbounded hull.
+	if (!CandidateWorldBounds.IsValid)
+	{
+		return false;
+	}
+
+	// Inclusive at both limits: bounds resting exactly on the floor, or reaching exactly to the ceiling, sit within
+	// the allowed window. Only a genuine overshoot gates.
+	if (bUseFloor && CandidateWorldBounds.Min.Z < Floor)
+	{
+		return true;
+	}
+	if (bUseCeiling && CandidateWorldBounds.Max.Z > Ceiling)
+	{
+		return true;
+	}
+	return false;
+}
+
 bool FNVirtualOrganContext::IsGatedByDirectionalConstraint(float Angle, ENCardinalDirection Direction, float Tolerance)
 {
 	return !FNCardinalDirectionUtils::IsCloseToDirection(Direction, Angle, Tolerance);
@@ -491,12 +550,17 @@ FRotator FNVirtualOrganContext::GetRequiredJunctionRotation(const FQuat& SourceQ
 	return GetRequiredJunctionRotationPrepared(SourceQuat * YawFlipQuat, JunctionWorldRotation.Quaternion().Inverse());
 }
 
+FQuat FNVirtualOrganContext::GetRequiredJunctionQuatPrepared(const FQuat& SourceFlippedQuat, const FQuat& JunctionInverseQuat)
+{
+	return SourceFlippedQuat * JunctionInverseQuat;
+}
+
 FRotator FNVirtualOrganContext::GetRequiredJunctionRotationPrepared(const FQuat& SourceFlippedQuat, const FQuat& JunctionInverseQuat)
 {
 	// FQuat::Rotator() already returns each axis pre-normalized (pitch in [-90,90] from asin, yaw/roll in (-180,180]
 	// from atan2), and FRotator::NormalizeAxis is a bit-exact identity over that range, so no further normalization
 	// is needed here before feeding the matching-rotation constraints.
-	return (SourceFlippedQuat * JunctionInverseQuat).Rotator();
+	return GetRequiredJunctionQuatPrepared(SourceFlippedQuat, JunctionInverseQuat).Rotator();
 }
 
 bool FNVirtualOrganContext::IsGatedByJunctionRotation(const FQuat& SourceQuat, const FRotator& JunctionWorldRotation,
@@ -587,6 +651,11 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		DirectionReferencePoint = CellGraph->GetCellCentroid();
 	}
 
+	// The height gate is the only per-junction geometry work in this loop, so skip it outright unless the organ or
+	// some cell in the pool actually declares a floor or ceiling. Resolved once: the organ's window is the same for
+	// every candidate, and each candidate narrows it with its own below.
+	const bool bHeightGateActive = bUseMinimumFloor || bUseMaximumCeiling || CellInputDataSummary.bAnyHeightConstraints;
+
 	// Reused across candidates rather than declared per iteration: this held one heap allocation per surviving
 	// candidate, and Reset keeps the buffer for the whole call.
 	TArray<int32> GoodJunctions;
@@ -602,7 +671,18 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 	// Capped so a pool with many distinct orientations degrades to the direct computation instead of growing an
 	// unbounded scratch buffer.
 	constexpr int32 MaxCachedRotations = 16;
-	TArray<TPair<FQuat, FRotator>, TInlineAllocator<MaxCachedRotations>> RequiredRotations;
+	struct FCachedRequiredRotation
+	{
+		/** The junction's inverse world quat this entry was composed from; the exact-compare key. */
+		FQuat JunctionInverseQuat;
+
+		/** The composition, kept unconverted for the height gate's offset rotation. */
+		FQuat Composed;
+
+		/** The composition as a rotator, for the matching-rotation constraints. */
+		FRotator Required;
+	};
+	TArray<FCachedRequiredRotation, TInlineAllocator<MaxCachedRotations>> RequiredRotations;
 
 	for (const int32 i : *SocketBucket)
 	{
@@ -691,6 +771,34 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 			}
 		}
 
+		// HEIGHT WINDOW
+		// The organ's window narrowed by the candidate's own: whichever floor sits higher and whichever ceiling sits
+		// lower is the one enforced, so a cell may be stricter than its organ but can never place outside it.
+		// Resolved per candidate; the gate itself needs a placement to test and runs in the junction loop below.
+		bool bUseCandidateFloor = false;
+		bool bUseCandidateCeiling = false;
+		double CandidateFloor = 0.0;
+		double CandidateCeiling = 0.0;
+		if (bHeightGateActive)
+		{
+			bUseCandidateFloor = bUseMinimumFloor || CellData->bUseMinimumFloor;
+			bUseCandidateCeiling = bUseMaximumCeiling || CellData->bUseMaximumCeiling;
+
+			if (bUseCandidateFloor)
+			{
+				CandidateFloor = bUseMinimumFloor && CellData->bUseMinimumFloor
+					? FMath::Max(MinimumFloor, CellData->MinimumFloor)
+					: (bUseMinimumFloor ? MinimumFloor : CellData->MinimumFloor);
+			}
+			if (bUseCandidateCeiling)
+			{
+				CandidateCeiling = bUseMaximumCeiling && CellData->bUseMaximumCeiling
+					? FMath::Min(MaximumCeiling, CellData->MaximumCeiling)
+					: (bUseMaximumCeiling ? MaximumCeiling : CellData->MaximumCeiling);
+			}
+		}
+		const bool bCheckCandidateHeight = bUseCandidateFloor || bUseCandidateCeiling;
+
 		const FNRotationConstraints& CellRotationConstraints = CellData->CellDetails.RotationConstraints;
 
 		// Parse Junctions. Iterated by const reference: FNCellJunctionDetails is a ~150-byte struct and this loop
@@ -706,33 +814,64 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 				// and the composition itself is memoized per distinct junction orientation.
 				// Covered by NJunctionRotationTests.cpp.
 				const FQuat& JunctionInverseQuat = Pair.Value.CachedInverseWorldQuat;
-				const FRotator* CachedRequired = nullptr;
-				for (const TPair<FQuat, FRotator>& Entry : RequiredRotations)
+				const FCachedRequiredRotation* CachedRequired = nullptr;
+				for (const FCachedRequiredRotation& Entry : RequiredRotations)
 				{
-					if (Entry.Key == JunctionInverseQuat)
+					if (Entry.JunctionInverseQuat == JunctionInverseQuat)
 					{
-						CachedRequired = &Entry.Value;
+						CachedRequired = &Entry;
 						break;
 					}
 				}
 
+				FQuat Composed;
 				FRotator Required;
 				if (CachedRequired != nullptr)
 				{
-					Required = *CachedRequired;
+					Composed = CachedRequired->Composed;
+					Required = CachedRequired->Required;
 				}
 				else
 				{
-					Required = GetRequiredJunctionRotationPrepared(SourceFlippedQuat, JunctionInverseQuat);
+					Composed = GetRequiredJunctionQuatPrepared(SourceFlippedQuat, JunctionInverseQuat);
+					Required = Composed.Rotator();
 					if (RequiredRotations.Num() < MaxCachedRotations)
 					{
-						RequiredRotations.Emplace(JunctionInverseQuat, Required);
+						RequiredRotations.Add({ JunctionInverseQuat, Composed, Required });
 					}
 				}
 
 				if (IsGatedByMatchingRotation(Required, CellRotationConstraints, Pair.Value.RotationConstraints))
 				{
 					continue;
+				}
+
+				// HEIGHT
+				// Resolve where this junction would actually put the cell and reject the pairing if the resulting
+				// bounds break the height window. Gating here rather than at attach time means a junction that
+				// cannot take this cell is still offered the rest of the pool, instead of being left open.
+				// Covered by NHeightConstraintTests.cpp.
+				if (bCheckCandidateHeight)
+				{
+					// A start cell mates to a bone by matching its facing, where every other placement opposes the
+					// source junction's; FNOrganGraphBuilderTask::StartGraph composes the unflipped source quat for
+					// exactly that reason. Reusing the flipped composition here would resolve the start cell a full
+					// 180 degrees from where it lands.
+					const FQuat PlacementQuat = Filter.bIsStartNode
+						? Filter.SourceQuat * JunctionInverseQuat
+						: Composed;
+					const FRotator PlacementRotation = Filter.bIsStartNode ? PlacementQuat.Rotator() : Required;
+
+					// Mirrors TryAttachCellToJunction: back the cell's pivot off the attach point by its junction's
+					// authored offset, rotated into place.
+					const FVector PlacementPosition = Filter.WorldPosition - PlacementQuat.RotateVector(Pair.Value.WorldLocation);
+
+					if (IsGatedByHeight(
+						FNAssemblyGraphCellNode::ComputeWorldBounds(CellData->CellDetails.Bounds, PlacementRotation, PlacementPosition),
+						bUseCandidateFloor, CandidateFloor, bUseCandidateCeiling, CandidateCeiling))
+					{
+						continue;
+					}
 				}
 
 				GoodJunctions.Add(Pair.Key);

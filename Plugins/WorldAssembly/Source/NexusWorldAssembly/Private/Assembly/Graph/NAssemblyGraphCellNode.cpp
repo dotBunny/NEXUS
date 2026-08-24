@@ -15,13 +15,7 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(const FNAssemblyGraphNodeParams
 
 	// Create a new WorldBounds reflecting the rotation in the world, this will make an AABB that will exceed the actual space,
 	// but will follow the defined bounds previously defined at author-time, but rotated.
-	TStaticArray<FVector, 8> Corners;
-	InputData->CellDetails.Bounds.GetVertices(Corners.Elements);
-	WorldBounds = FBox(ForceInit);
-	for (const FVector& Corner : Corners)
-	{
-		WorldBounds += Params.WorldRotation.RotateVector(Corner) + Params.WorldPosition;
-	}
+	WorldBounds = ComputeWorldBounds(InputData->CellDetails.Bounds, Params.WorldRotation, Params.WorldPosition);
 
 	// Copy our hull data and rotate it into its new world-space position/rotation
 	Hull = InputData->CellDetails.Hull;
@@ -43,6 +37,23 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(const FNAssemblyGraphNodeParams
 
 	// Junction data is deliberately NOT built here — see EnsureJunctions. The placement tests never read it, and
 	// most candidates are rejected, so filling it up front was work thrown away on the majority of constructions.
+}
+
+FBox FNAssemblyGraphCellNode::ComputeWorldBounds(const FBox& LocalBounds, const FRotator& WorldRotation, const FVector& WorldPosition)
+{
+	TStaticArray<FVector, 8> Corners;
+	LocalBounds.GetVertices(Corners.Elements);
+
+	// FRotator::RotateVector builds an FRotationMatrix per call, so the matrix is hoisted here rather than
+	// reconstructed eight times. Same math, and the filter runs this per candidate junction.
+	const FRotationMatrix RotationMatrix(WorldRotation);
+
+	FBox Result(ForceInit);
+	for (const FVector& Corner : Corners)
+	{
+		Result += RotationMatrix.TransformVector(Corner) + WorldPosition;
+	}
+	return Result;
 }
 
 void FNAssemblyGraphCellNode::EnsureJunctions() const

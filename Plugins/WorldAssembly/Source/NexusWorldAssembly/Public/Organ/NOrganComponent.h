@@ -68,6 +68,33 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Inputs")
 	bool bUnbound = false;
 
+	/**
+	 * When true, no cell this organ places may reach below MinimumFloor.
+	 * @note Independent of bUnbound, and the only vertical limit an unbound organ can express — an unbound organ
+	 *       carries no volume bounds for the containment check to clip against.
+	 */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Inputs")
+	bool bUseMinimumFloor = false;
+
+	/**
+	 * The lowest world-space Z, in world units, any cell this organ places may occupy while bUseMinimumFloor is set.
+	 * @note Absolute world height. A cell's own FNTissueEntry floor narrows this further — whichever floor sits
+	 *       higher is enforced — so a cell can never place below the organ's floor by raising its own.
+	 */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Inputs", meta=(EditCondition=bUseMinimumFloor))
+	float MinimumFloor = 0.f;
+
+	/** When true, no cell this organ places may reach above MaximumCeiling. */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Inputs")
+	bool bUseMaximumCeiling = false;
+
+	/**
+	 * The highest world-space Z, in world units, any cell this organ places may occupy while bUseMaximumCeiling is set.
+	 * @note Absolute world height, narrowed the same way as MinimumFloor by a cell's own FNTissueEntry ceiling.
+	 */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Inputs", meta=(EditCondition=bUseMaximumCeiling))
+	float MaximumCeiling = 0.f;
+
 	/** Lower bound on the cell count placed in this organ; 0 means no minimum. */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Requirements", meta=(ClampMin=0))
 	int32 MinimumCellCount = 0;

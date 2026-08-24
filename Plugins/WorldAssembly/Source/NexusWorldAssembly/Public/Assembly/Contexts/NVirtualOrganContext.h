@@ -54,8 +54,12 @@ struct FNCellInputDataFilter
 	/** Orientation applied to the candidate's junction to match the source. */
 	FQuat SourceQuat = FQuat();
 
-	/** World position the candidate would occupy; its bearing from the directional reference point drives the cardinal-direction constraint. */
-	FVector WorldPosition;
+	/**
+	 * World position the candidate would attach at — the source junction's world location, or the bone's for a
+	 * start filter. Its bearing from the directional reference point drives the cardinal-direction constraint, and
+	 * the height gate resolves the candidate's prospective world bounds from it.
+	 */
+	FVector WorldPosition = FVector::ZeroVector;
 };
 
 /**
@@ -137,6 +141,18 @@ public:
 
 	/** When true, the graph may extend past Bounds. */
 	bool bUnbound = false;
+
+	/** When true, no cell this organ places may reach below MinimumFloor. Independent of bUnbound. */
+	bool bUseMinimumFloor = false;
+
+	/** Lowest world-space Z any placed cell's bounds may occupy while bUseMinimumFloor is set. Absolute, not organ-relative. */
+	double MinimumFloor = 0.0;
+
+	/** When true, no cell this organ places may reach above MaximumCeiling. Independent of bUnbound. */
+	bool bUseMaximumCeiling = false;
+
+	/** Highest world-space Z any placed cell's bounds may occupy while bUseMaximumCeiling is set. Absolute, not organ-relative. */
+	double MaximumCeiling = 0.0;
 
 	/** Spatial bounds the graph must stay within unless bUnbounded. */
 	FBoxSphereBounds Bounds = FBoxSphereBounds(ForceInit);
@@ -299,6 +315,24 @@ public:
 	static NEXUSWORLDASSEMBLY_API bool IsGatedByMaximumNodeDepth(int32 MaximumNodeDepth, int32 CandidateNodeDepth);
 
 	/**
+	 * Gate a candidate by world height. Floor and Ceiling are absolute world-space Z values (not organ-relative),
+	 * and CandidateWorldBounds is the rotation-baked AABB the candidate would occupy — the same box the placed node
+	 * caches, so what is tested here is exactly what gets placed. The comparison is inclusive: bounds resting
+	 * exactly on the floor, or reaching exactly to the ceiling, are allowed.
+	 *
+	 * The caller resolves Floor and Ceiling by narrowing the organ's window with the candidate's own, so a cell can
+	 * be stricter than its organ but never escape it.
+	 * @param CandidateWorldBounds The world-space AABB the candidate would occupy.
+	 * @param bUseFloor Whether the floor is enforced at all.
+	 * @param Floor Lowest world Z the candidate's bounds may reach.
+	 * @param bUseCeiling Whether the ceiling is enforced at all.
+	 * @param Ceiling Highest world Z the candidate's bounds may reach.
+	 * @return true if the candidate breaks either limit and must be gated out.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByHeight(const FBox& CandidateWorldBounds, bool bUseFloor, double Floor,
+		bool bUseCeiling, double Ceiling);
+
+	/**
 	 * Gate a candidate by its required compass heading. Angle is the candidate's bearing measured from the
 	 * configured directional reference point (see FilterCellInputData and AssemblyDirectionMode), and the candidate
 	 * survives only when that bearing lands within Tolerance degrees of Direction. Wrapping is handled by
@@ -346,6 +380,17 @@ public:
 	 * @return The per-axis-normalized rotation the candidate cell must take on for this junction to line up.
 	 */
 	static FRotator GetRequiredJunctionRotationPrepared(const FQuat& SourceFlippedQuat, const FQuat& JunctionInverseQuat);
+
+	/**
+	 * The composition GetRequiredJunctionRotationPrepared converts to a rotator, exposed as the quaternion it is.
+	 * The height gate needs it in this form to rotate the candidate junction's authored offset — the same term
+	 * FNOrganGraphBuilderTask::TryAttachCellToJunction rotates by to resolve where the cell actually lands, which
+	 * it does with the quat rather than the rotator.
+	 * @param SourceFlippedQuat SourceQuat already multiplied by the 180-around-Up flip.
+	 * @param JunctionInverseQuat The candidate junction's authored rotation as a quaternion, inverted.
+	 * @return The rotation the candidate cell must take on for this junction to line up, unconverted.
+	 */
+	static FQuat GetRequiredJunctionQuatPrepared(const FQuat& SourceFlippedQuat, const FQuat& JunctionInverseQuat);
 
 	/**
 	 * Gate a candidate junction by the rotation it would have to adapt to mate with the source. Both the cell

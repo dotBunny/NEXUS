@@ -84,6 +84,40 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	int32 MaximumNodeDepth = 0;
 
 	/**
+	 * When true, this cell may not be placed anywhere its world bounds would reach below MinimumFloor.
+	 * @note Combines with the organ's own floor by narrowing: whichever of the two sits higher is the one enforced,
+	 *       so a cell can be stricter than its organ but never escape it.
+	 */
+	UPROPERTY(EditAnywhere)
+	bool bUseMinimumFloor = false;
+
+	/**
+	 * The lowest world-space Z, in world units, any part of this cell's bounds may occupy while bUseMinimumFloor is set.
+	 * @note Absolute world height, not relative to the organ — a tissue authored against one altitude behaves
+	 *       differently when reused by an organ sitting at another.
+	 * @remark Enforced in FNVirtualOrganContext::FilterCellInputData against the rotation-baked world AABB the
+	 *         candidate would occupy. See NHeightConstraintTests.cpp before changing it.
+	 */
+	UPROPERTY(EditAnywhere, meta=(EditCondition=bUseMinimumFloor))
+	float MinimumFloor = 0.f;
+
+	/**
+	 * When true, this cell may not be placed anywhere its world bounds would reach above MaximumCeiling.
+	 * @note Combines with the organ's own ceiling by narrowing: whichever of the two sits lower is the one enforced.
+	 */
+	UPROPERTY(EditAnywhere)
+	bool bUseMaximumCeiling = false;
+
+	/**
+	 * The highest world-space Z, in world units, any part of this cell's bounds may occupy while bUseMaximumCeiling is set.
+	 * @note Absolute world height, as with MinimumFloor.
+	 * @remark Enforced in FNVirtualOrganContext::FilterCellInputData against the rotation-baked world AABB the
+	 *         candidate would occupy. See NHeightConstraintTests.cpp before changing it.
+	 */
+	UPROPERTY(EditAnywhere, meta=(EditCondition=bUseMaximumCeiling))
+	float MaximumCeiling = 0.f;
+
+	/**
 	 * When true, this cell may only be placed toward DirectionConstraint relative to the organ's start point,
 	 * limiting it to candidates whose compass bearing from the start lands within the assembly direction tolerance.
 	 */

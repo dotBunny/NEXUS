@@ -39,6 +39,21 @@ EDataValidationResult UAssetDefinition_NTissue::ValidateAsset(const FAssetData& 
 		{
 			Result = EDataValidationResult::Invalid;
 			Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NTissue_MissingCell", "Tissue {0} has an entry with a missing cell."), FText::FromString(Set->GetName())));
+			continue;
+		}
+
+		// A floor above the entry's own ceiling leaves no height the cell can occupy, so it would silently never
+		// be placed rather than failing loudly during generation.
+		if (Entry.bUseMinimumFloor && Entry.bUseMaximumCeiling && Entry.MinimumFloor > Entry.MaximumCeiling)
+		{
+			Result = EDataValidationResult::Invalid;
+			Context.AddError(FText::Format(
+				NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NTissue_InvertedHeightWindow",
+					"Tissue {0} entry {1} has a Minimum Floor ({2}) above its Maximum Ceiling ({3}), so the cell can never be placed."),
+				FText::FromString(Set->GetName()),
+				FText::FromString(Entry.Cell.GetAssetName()),
+				FText::AsNumber(Entry.MinimumFloor),
+				FText::AsNumber(Entry.MaximumCeiling)));
 		}
 	}
 	return Result;
