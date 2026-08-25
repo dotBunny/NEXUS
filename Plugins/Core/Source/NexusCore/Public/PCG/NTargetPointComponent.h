@@ -29,4 +29,6 @@ UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Target Point", meta = (Bluepri
 class NEXUSCORE_API UNTargetPointComponent : public USceneComponent
 {
 	GENERATED_BODY()
+
+	UNTargetPointComponent(const FObjectInitializer& ObjectInitializer);
 };
