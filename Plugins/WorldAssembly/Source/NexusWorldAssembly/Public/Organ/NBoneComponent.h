@@ -69,6 +69,7 @@ public:
 	//~USceneComponent
 	virtual void OnRegister() override;
 	virtual void OnUnregister() override;
+	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 	//End USceneComponent
 
 #if WITH_EDITOR
@@ -115,5 +116,5 @@ public:
 
 	TArray<FVector> GetWorldCornerPoints(const FVector2D& SettingSocketSize) const;
 private:
-	N_WORLD_ICON_HEADER()
+	N_WORLD_ICON_COMPONENT_HEADER()
 };

@@ -26,8 +26,10 @@
 			if (!StyleInstance.IsValid()) \
 			{ \
 				const TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(TEXT(PluginName)); \
-				checkf(Plugin.IsValid(), TEXT("NEXUS: plugin '%hs' not found while initializing Slate style."), PluginName); \
-				PluginDirectory = Plugin->GetBaseDir(); \
+				if(Plugin.IsValid()) \
+				{ \
+					PluginDirectory = Plugin->GetBaseDir(); \
+				} \
 				StyleInstance = Create(); \
 				FSlateStyleRegistry::RegisterSlateStyle(*StyleInstance); \
 			} \

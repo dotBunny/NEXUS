@@ -43,10 +43,11 @@ void FNTargetPointComponentVisualizer::DrawVisualization(const UActorComponent* 
 
 
 	// Everything the marker draws sits behind one hit proxy, so clicking any part of it selects the component
-	// rather than the actor holding it — which is what puts the transform gizmo on the marker being moved. It is
-	// also the marker's only click target, the component having nothing else in the world to hit. Foreground
-	// priority to match the depth priority below, so a click lands on a marker drawn over the geometry it sits
-	// inside rather than on the geometry itself.
+	// rather than the actor holding it — which is what puts the transform gizmo on the marker being moved. The
+	// component's sprite is a click target too, but only an indirect one: it is a child component, so selecting it
+	// resolves up the attachment chain rather than landing on the marker outright. Foreground priority to match
+	// the depth priority below, so a click lands on a marker drawn over the geometry it sits inside rather than on
+	// the geometry itself, and on the marker rather than on its own sprite.
 	PDI->SetHitProxy(new HComponentVisProxy(Component, HPP_Foreground));
 
 	// The point itself is drawn as a screen-space handle rather than as world-space geometry, so it stays both
