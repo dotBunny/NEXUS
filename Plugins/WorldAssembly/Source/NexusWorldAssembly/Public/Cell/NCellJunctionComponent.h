@@ -57,8 +57,6 @@ class NEXUSWORLDASSEMBLY_API UNCellJunctionComponent : public USceneComponent
 		}
 		TransformUpdated.AddUObject(this, &UNCellJunctionComponent::OnTransformUpdated);
 #endif // WITH_EDITOR
-
-		N_WORLD_ICON_SCENE_COMPONENT("/NexusWorldAssembly/EditorResources/S_NCellJunctionComponent", this, false, 0.35f)
 	}
 
 public:
@@ -107,6 +105,7 @@ public:
 	//~USceneComponent
 	virtual void OnRegister() override;
 	virtual void OnUnregister() override;
+	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 	//End USceneComponent
 
 	/** @return The cell level instance this junction was spawned as part of, or nullptr before it is streamed in. */
@@ -258,5 +257,5 @@ private:
 	 */
 	mutable FCachedHullPenetration CachedHullPenetration;
 
-	N_WORLD_ICON_HEADER()
+	N_WORLD_ICON_COMPONENT_HEADER()
 };

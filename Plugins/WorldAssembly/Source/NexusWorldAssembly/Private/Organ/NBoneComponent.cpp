@@ -12,7 +12,9 @@
 #include "Components/BillboardComponent.h"
 #include "Components/BrushComponent.h"
 #include "Developer/NPrimitiveFont.h"
+#include "Engine/CollisionProfile.h"
 #include "Engine/Level.h"
+#include "Engine/Texture2D.h"
 #include "Engine/World.h"
 #include "GameFramework/Volume.h"
 #include "Macros/NActorMacros.h"
@@ -32,8 +34,6 @@ UNBoneComponent::UNBoneComponent(const FObjectInitializer& ObjectInitializer) : 
 #if WITH_EDITOR
 	TransformUpdated.AddUObject(this, &UNBoneComponent::OnTransformUpdated);
 #endif
-
-	N_WORLD_ICON_SCENE_COMPONENT("/NexusWorldAssembly/EditorResources/S_NBoneComponent", this, false, 0.35f)
 }
 
 
@@ -69,6 +69,9 @@ void UNBoneComponent::OnRegister()
 #endif // WITH_EDITOR
 
 	FNWorldAssemblyRegistry::RegisterBoneComponent(this);
+
+	N_WORLD_ICON_ON_REGISTER("/NexusWorldAssembly/EditorResources/S_NBoneComponent", 0.35f)
+
 	Super::OnRegister();
 }
 
@@ -76,6 +79,13 @@ void UNBoneComponent::OnUnregister()
 {
 	FNWorldAssemblyRegistry::UnregisterBoneComponent(this);
 	Super::OnUnregister();
+}
+
+void UNBoneComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
+{
+	Super::OnComponentDestroyed(bDestroyingHierarchy);
+
+	N_WORLD_ICON_CLEANUP(bDestroyingHierarchy)
 }
 
 #if WITH_EDITOR

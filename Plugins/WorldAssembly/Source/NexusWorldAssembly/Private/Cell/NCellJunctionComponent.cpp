@@ -18,7 +18,9 @@
 #include "Collections/NWeightedIntegerArray.h"
 #include "Developer/NPrimitiveFont.h"
 #include "Engine/AssetManager.h"
+#include "Engine/CollisionProfile.h"
 #include "Engine/Level.h"
+#include "Engine/Texture2D.h"
 #include "Engine/World.h"
 #include "LevelInstance/LevelInstanceActor.h"
 #include "LevelInstance/LevelInstanceInterface.h"
@@ -364,6 +366,9 @@ void UNCellJunctionComponent::OnRegister()
 	}
 
 	FNWorldAssemblyRegistry::RegisterCellJunctionComponent(this);
+
+	N_WORLD_ICON_ON_REGISTER("/NexusWorldAssembly/EditorResources/S_NCellJunctionComponent", 0.35f)
+
 	Super::OnRegister();
 }
 
@@ -376,6 +381,13 @@ void UNCellJunctionComponent::OnUnregister()
 	}
 	FNWorldAssemblyRegistry::UnregisterCellJunctionComponent(this);
 	Super::OnUnregister();
+}
+
+void UNCellJunctionComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
+{
+	Super::OnComponentDestroyed(bDestroyingHierarchy);
+
+	N_WORLD_ICON_CLEANUP(bDestroyingHierarchy)
 }
 
 
