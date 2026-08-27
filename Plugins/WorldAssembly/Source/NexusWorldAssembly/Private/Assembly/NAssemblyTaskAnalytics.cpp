@@ -241,6 +241,58 @@ void FNAssemblyTaskAnalytics::ConnectJunctions_StraighteningSuccess()
 	ConnectJunctionsAnalytics.StraighteningSuccessCount++;
 }
 
+void FNAssemblyTaskAnalytics::EvaluateGraphsStart()
+{
+	EvaluateGraphsAnalytics.Timer.Start();
+}
+
+void FNAssemblyTaskAnalytics::EvaluateGraphsFinish()
+{
+	EvaluateGraphsAnalytics.Timer.Stop();
+}
+
+void FNAssemblyTaskAnalytics::EvaluateGraphs_HotPathStart()
+{
+	EvaluateGraphsAnalytics.HotPathTimer.Start();
+}
+
+void FNAssemblyTaskAnalytics::EvaluateGraphs_HotPathFinish()
+{
+	EvaluateGraphsAnalytics.HotPathTimer.Stop();
+}
+
+void FNAssemblyTaskAnalytics::EvaluateGraphs_ProximityStart()
+{
+	EvaluateGraphsAnalytics.ProximityTimer.Start();
+}
+
+void FNAssemblyTaskAnalytics::EvaluateGraphs_ProximityFinish()
+{
+	EvaluateGraphsAnalytics.ProximityTimer.Stop();
+}
+
+void FNAssemblyTaskAnalytics::EvaluateGraphs_LinkDetailsStart()
+{
+	EvaluateGraphsAnalytics.LinkDetailsTimer.Start();
+}
+
+void FNAssemblyTaskAnalytics::EvaluateGraphs_LinkDetailsFinish()
+{
+	EvaluateGraphsAnalytics.LinkDetailsTimer.Stop();
+}
+
+void FNAssemblyTaskAnalytics::EvaluateGraphs_SetCounts(const int32 GraphCount, const int32 CellCount)
+{
+	EvaluateGraphsAnalytics.GraphCount = GraphCount;
+	EvaluateGraphsAnalytics.CellCount = CellCount;
+}
+
+void FNAssemblyTaskAnalytics::EvaluateGraphs_SetSeedCounts(const int32 HotPathGoalCount, const int32 ImportantCellCount)
+{
+	EvaluateGraphsAnalytics.HotPathGoalCount = HotPathGoalCount;
+	EvaluateGraphsAnalytics.ImportantCellCount = ImportantCellCount;
+}
+
 void FNAssemblyTaskAnalytics::CreateSpawnCellsContextStart()
 {
 	CreateSpawnCellsContextTimer.Start();
@@ -283,9 +335,11 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	FNReportContentBlock* AnalyticsContentBlock = Report->GetContentBlock(AnalyticsContentTicket);
 	AnalyticsContentBlock->SetHeading("Analytics");
 
+	// Only the graph-evaluation stage's own Timer is summed; its three sub-timers measure spans inside it and
+	// would double-count.
 	double DurationTotal = TaskGraphCreationTimer.Duration + CreateVirtualWorldContextTimer.Duration +
 		ProcessVirtualWorldContextTimer.Duration + CreateSpawnCellsContextTimer.Duration +
-		ConnectJunctionsAnalytics.Timer.Duration;
+		ConnectJunctionsAnalytics.Timer.Duration + EvaluateGraphsAnalytics.Timer.Duration;
 
 
 	const int32 TimespanContentTicket = Report->CreateContentBlock(AnalyticsContentTicket);
@@ -337,7 +391,26 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	OverviewTable = Report->GetTableBlock(OverviewTableTicket);
 	OverviewTable->AddRow({"Task", "Process Pass", FString::SanitizeFloat(LoopTotal)});
 	OverviewTable->AddRow({"Task", "Connect Junctions", FString::SanitizeFloat(ConnectJunctionsAnalytics.Timer.Duration)});
+	OverviewTable->AddRow({"Task", "Evaluate Graphs", FString::SanitizeFloat(EvaluateGraphsAnalytics.Timer.Duration)});
 	OverviewTable->AddRow({"Task", "Create SpawnCellsContext", FString::SanitizeFloat(CreateSpawnCellsContextTimer.Duration)});
+
+	// Graph-evaluation breakdown. The three passes are split out because they do not scale alike: hot path runs a
+	// search per goal and is almost always what dominates, where scoring is a fixed number of sweeps and link
+	// details a single linear walk. Read the hot path duration against the goal count rather than on its own.
+	if (EvaluateGraphsAnalytics.GraphCount > 0)
+	{
+		const int32 EvaluateGraphsTableTicket = Report->CreateTableBlock(TimespanContentTicket);
+		FNReportTableBlock* EvaluateGraphsTable = Report->GetTableBlock(EvaluateGraphsTableTicket);
+		EvaluateGraphsTable->SetHeading("FNEvaluateGraphsTask");
+		EvaluateGraphsTable->Initialize({ "Pass", "Count", "ms" });
+		EvaluateGraphsTable->AddRow({"Hot Path", FString::FromInt(EvaluateGraphsAnalytics.HotPathGoalCount),
+			FString::SanitizeFloat(EvaluateGraphsAnalytics.HotPathTimer.Duration)});
+		EvaluateGraphsTable->AddRow({"Proximity Scoring", FString::FromInt(EvaluateGraphsAnalytics.ImportantCellCount),
+			FString::SanitizeFloat(EvaluateGraphsAnalytics.ProximityTimer.Duration)});
+		EvaluateGraphsTable->AddRow({"Link Details", FString::FromInt(EvaluateGraphsAnalytics.CellCount),
+			FString::SanitizeFloat(EvaluateGraphsAnalytics.LinkDetailsTimer.Duration)});
+		EvaluateGraphsTable->AddRow({"Graphs", FString::FromInt(EvaluateGraphsAnalytics.GraphCount), TEXT("")});
+	}
 
 	// Junction connector breakdown, laid out so the dominant rejection reason is the thing that stands out — that is
 	// what tells a designer whether a sparse result is the length budget or genuinely dense geometry.
@@ -472,9 +545,11 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 
 float FNAssemblyTaskAnalytics::GetTotalDuration()
 {
+	// Only the graph-evaluation stage's own Timer is summed; its three sub-timers measure spans inside it and
+	// would double-count.
 	double DurationTotal = TaskGraphCreationTimer.Duration + CreateVirtualWorldContextTimer.Duration +
 		ProcessVirtualWorldContextTimer.Duration + CreateSpawnCellsContextTimer.Duration +
-		ConnectJunctionsAnalytics.Timer.Duration;
+		ConnectJunctionsAnalytics.Timer.Duration + EvaluateGraphsAnalytics.Timer.Duration;
 
 	for (const auto Analytic : OrganGraphBuilderAnalytics)
 	{

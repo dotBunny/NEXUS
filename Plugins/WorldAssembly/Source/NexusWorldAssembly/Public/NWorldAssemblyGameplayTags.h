@@ -18,7 +18,8 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Behavior_RequiredAny);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Behavior_BadNeighbors);
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Flag_AlwaysRelevant);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Flag_Hotpath); // Maybe add a lesser Pathfinding version?
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Flag_Hotpath);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Flag_Important);
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Counter_Alpha);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Counter_Beta);

@@ -61,6 +61,20 @@ namespace NEXUS::WorldAssembly
 	}
 
 	/**
+	 * Shared constants for the per-cell proximity scores.
+	 */
+	namespace Proximity
+	{
+		/**
+		 * Reported by every proximity score when no seed of that kind is reachable — and equally when one sits
+		 * further away than a byte can express. Lives here rather than on FNCellAssemblyData so FNCellLinkDetails
+		 * can reach it too; that struct is included *by* the assembly data, so it cannot include it back.
+		 * @see FNCellAssemblyData::UnreachableScore, the name to prefer when the assembly data is already in scope.
+		 */
+		inline constexpr uint8 UnreachableScore = MAX_uint8;
+	}
+
+	/**
 	 * Named World Assembly operations registered with the subsystem.
 	 */
 	namespace Operations

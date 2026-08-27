@@ -81,6 +81,49 @@ public:
 		return AssemblyData.bHotPathSequential;
 	}
 
+	/**
+	 * @return How many cells separate this one from the hot path, taking whichever variant runs nearer — the
+	 *         numeric counterpart of IsHotPath, and 0 exactly when it returns true.
+	 */
+	uint8 GetHotPathScore() const
+	{
+		return FMath::Min(AssemblyData.HotPathShortestScore, AssemblyData.HotPathSequentialScore);
+	}
+
+	/** @return Hops in cells to the nearest cell on the shortest-path hot path; 0 when this cell is on it. */
+	uint8 GetHotPathShortestScore() const
+	{
+		return AssemblyData.HotPathShortestScore;
+	}
+
+	/** @return Hops in cells to the nearest cell on the sequential hot path; 0 when this cell is on it. */
+	uint8 GetHotPathSequentialScore() const
+	{
+		return AssemblyData.HotPathSequentialScore;
+	}
+
+	/** @return Hops in cells to the nearest Important-flagged cell; 0 when this cell carries the tag itself. */
+	uint8 GetImportanceScore() const
+	{
+		return AssemblyData.ImportanceScore;
+	}
+
+	/**
+	 * @param JunctionIdentifier The junction to test.
+	 * @return true when the cell across that junction sits nearer the hot path than this one does — the doorway to
+	 *         take when heading for the route.
+	 * @note Answered from the score carried on the link rather than by resolving the far cell, which frequently is
+	 *       not streamed in. False for an unconnected junction, for one reaching a bone, and for a junction whose
+	 *       neighbour is equally near or further, so a cell already on the route reports false in every direction.
+	 */
+	bool DoesJunctionLeadTowardHotPath(int32 JunctionIdentifier);
+
+	/**
+	 * @param JunctionIdentifier The junction to test.
+	 * @return true when the cell across that junction sits nearer an Important-flagged cell than this one does.
+	 */
+	bool DoesJunctionLeadTowardImportant(int32 JunctionIdentifier);
+
 	/** @return Mutable access to the assembly tags recorded on this cell's assembly data. */
 	FGameplayTagContainer& GetAssemblyTags()
 	{

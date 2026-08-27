@@ -109,8 +109,24 @@ void FNObjectSnapshotUtils::RemoveKnownLeaks(FNObjectSnapshotDiff& Diff)
 	{
 		const FNObjectSnapshotEntry& Entry = Diff.Added[i];
 
+		// An object that came off disk is a loaded asset, not a leak. A test that touches an asset for the first
+		// time pays to load it, and the asset then stays resident for the rest of the editor session by design —
+		// RF_Standalone is precisely the flag that survives the GC pass the leak check runs beforehand. The most
+		// common source is a component whose OnRegister pulls in its editor icon (N_WORLD_ICON_ON_REGISTER), which
+		// drags in the texture, its package, and the texture's import metadata.
+		//
+		// The tell that these are not leaks is that they are order-dependent: whichever test registers such a
+		// component first reports them, and every test after it passes because the package is already resident. No
+		// real leak behaves that way.
+		//
+		// This only ever suppresses the asset itself. Objects a test allocates — spawned actors, NewObject'd
+		// components, the body setups below — are never loaded, so they never carry the flag and stay reportable.
+		const UObject* Object = Entry.ObjectPtr.Get();
+		const bool bWasLoadedFromDisk = Object != nullptr && Object->HasAnyFlags(RF_WasLoaded);
+
 		// These are what we are labeling as "known leaks"
 		const bool bRemove =
+			bWasLoadedFromDisk ||
 			(Entry.Name.Equals(TEXT("/Script/Engine")) && Entry.SerialNumber == 0) ||
 			Entry.Name.Equals(TEXT("/Script/InputCore")) ||
 			Entry.Name.StartsWith(TEXT("ChaosEventRelay")) ||

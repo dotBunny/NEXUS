@@ -3,6 +3,7 @@
 
 #pragma once
 #include "Analytics/NConnectJunctionsAnalytics.h"
+#include "Analytics/NEvaluateGraphsAnalytics.h"
 #include "Analytics/NOrganGraphBuilderAnalytics.h"
 #include "Analytics/NProcessPassAnalytics.h"
 #include "Analytics/NWorldAssemblyTaskTimer.h"
@@ -243,6 +244,40 @@ public:
 	/** Increment the counter for pairs saved by a straighter variant. */
 	void ConnectJunctions_StraighteningSuccess();
 
+	/** Start the timer for the graph-evaluation stage. */
+	void EvaluateGraphsStart();
+	/** Stop the timer for the graph-evaluation stage. */
+	void EvaluateGraphsFinish();
+
+	/** Start the timer for hot path resolution within the graph-evaluation stage. */
+	void EvaluateGraphs_HotPathStart();
+	/** Stop the timer for hot path resolution. */
+	void EvaluateGraphs_HotPathFinish();
+
+	/** Start the timer for proximity scoring within the graph-evaluation stage. */
+	void EvaluateGraphs_ProximityStart();
+	/** Stop the timer for proximity scoring. */
+	void EvaluateGraphs_ProximityFinish();
+
+	/** Start the timer for link-detail generation within the graph-evaluation stage. */
+	void EvaluateGraphs_LinkDetailsStart();
+	/** Stop the timer for link-detail generation. */
+	void EvaluateGraphs_LinkDetailsFinish();
+
+	/**
+	 * Record what the graph-evaluation stage walked.
+	 * @param GraphCount Graphs evaluated.
+	 * @param CellCount Cell nodes across those graphs.
+	 */
+	void EvaluateGraphs_SetCounts(int32 GraphCount, int32 CellCount);
+
+	/**
+	 * Record what seeded each of the stage's scoring sweeps.
+	 * @param HotPathGoalCount Cells tagged Hotpath, which drive hot path cost.
+	 * @param ImportantCellCount Cells tagged Important.
+	 */
+	void EvaluateGraphs_SetSeedCounts(int32 HotPathGoalCount, int32 ImportantCellCount);
+
 	/** Start the timer for the create-spawn-cells-context stage. */
 	void CreateSpawnCellsContextStart();
 	/** Stop the timer for the create-spawn-cells-context stage. */
@@ -275,6 +310,9 @@ private:
 	FNWorldAssemblyTaskTimer CreateVirtualWorldContextTimer = FNWorldAssemblyTaskTimer();
 	/** Timer for the process-virtual-world stage. */
 	FNWorldAssemblyTaskTimer ProcessVirtualWorldContextTimer = FNWorldAssemblyTaskTimer();
+
+	/** Timers and counters for the graph-evaluation stage; a single record, since the stage runs once. */
+	FNEvaluateGraphsAnalytics EvaluateGraphsAnalytics;
 
 	/** Timer for the create-spawn-cells-context stage. */
 	FNWorldAssemblyTaskTimer CreateSpawnCellsContextTimer = FNWorldAssemblyTaskTimer();

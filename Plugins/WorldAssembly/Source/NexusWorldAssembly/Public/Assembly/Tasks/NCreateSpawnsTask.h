@@ -14,10 +14,14 @@ class UNAssemblyOperation;
  * Task-graph job that flattens every collected per-organ graph into the spawn context's cell-node
  * list, ready for FNSpawnCellProxiesTask to consume.
  *
+ * Purely a flattening step. Everything a cell carries to runtime that is a property of the graph rather than of the
+ * spawn — hot path membership, proximity scores, per-junction link details — is resolved by FNEvaluateGraphsTask,
+ * which gates this one; by the time this runs each cell node already holds its finished data.
+ *
  * Runs on any worker thread (see GetDesiredThread), and multiple operations may run their own instance
  * concurrently, so any shared state it touches must be thread-safe — e.g. it writes the per-operation
  * context through FNWorldAssemblyContextCache, whose accessors are guarded by a critical section.
- * Acts as the bridge between the world/pass collection stages and the actual proxy-spawning stage.
+ * Acts as the bridge between the graph-evaluation stage and the actual proxy-spawning stage.
  */
 struct FNCreateSpawnsTask
 {

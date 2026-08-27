@@ -71,6 +71,11 @@ public:
 		return AssemblyTags.HasTagExact(NWorldAssembly_Flag_Hotpath);
 	}
 
+	bool IsImportantFlagged() const
+	{
+		return AssemblyTags.HasTagExact(NWorldAssembly_Flag_Important);
+	}
+
 	/**
 	 * Wire Upstream -> Downstream and relax Downstream's NodeDepth (and its subtree) so depth tracks
 	 * the shortest hop-count back to the start node. Safe to call in any order: if Upstream is not yet

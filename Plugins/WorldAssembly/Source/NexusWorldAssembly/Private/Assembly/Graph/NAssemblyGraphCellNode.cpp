@@ -251,6 +251,14 @@ void FNAssemblyGraphCellNode::GenerateLinkDetails()
 		// The junction lies along a hot path when both this cell and the cell it links to are on it.
 		Details.bHotPathShortest = bHotPathShortest && LinkedCellNode->bHotPathShortest;
 		Details.bHotPathSequential = bHotPathSequential && LinkedCellNode->bHotPathSequential;
+
+		// Carry the far cell's proximity scores across, so a junction can tell which way it leads without the cell
+		// on the other side having streamed in. Resolved by FNAssemblyGraph::ScoreCellProximity, which runs before
+		// this pass within FNEvaluateGraphsTask — and across every graph, so these are correct for a connector
+		// pairing reaching into another organ just as they are for a direct mating.
+		Details.ConnectedHotPathShortestScore = LinkedCellNode->HotPathShortestScore;
+		Details.ConnectedHotPathSequentialScore = LinkedCellNode->HotPathSequentialScore;
+		Details.ConnectedImportanceScore = LinkedCellNode->ImportanceScore;
 	}
 }
 

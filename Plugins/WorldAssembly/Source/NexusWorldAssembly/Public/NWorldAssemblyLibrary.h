@@ -387,6 +387,158 @@ public:
 
 	/**
 	 * @param LevelInstance The cell level instance to query.
+	 * @return How many cells separate this one from the hot path, taking whichever variant runs nearer. 0 means the
+	 *         cell is on the hot path; UnreachableScore means no hot path cell reaches it, which is every cell when
+	 *         the assembly has no hot path at all.
+	 * @note Widened to int32 from the byte it is stored as, so it can be compared and scaled in Blueprint without
+	 *       the wrapping that Byte arithmetic would bring.
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Get HotPath Score",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#get-hotpath-score"))
+	static int32 GetHotPathScore(ANCellLevelInstance* LevelInstance)
+	{
+		return IsValid(LevelInstance) ? LevelInstance->GetHotPathScore() : FNCellAssemblyData::UnreachableScore;
+	};
+
+	/**
+	 * @param LevelInstance The cell level instance to query.
+	 * @return How many cells separate this one from the shortest-path hot path (spokes from the start cell).
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Get HotPath Score (Shortest)",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#get-hotpath-score"))
+	static int32 GetHotPathShortestScore(ANCellLevelInstance* LevelInstance)
+	{
+		return IsValid(LevelInstance) ? LevelInstance->GetHotPathShortestScore() : FNCellAssemblyData::UnreachableScore;
+	};
+
+	/**
+	 * @param LevelInstance The cell level instance to query.
+	 * @return How many cells separate this one from the sequential hot path (nearest-first visiting chain).
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Get HotPath Score (Sequential)",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#get-hotpath-score"))
+	static int32 GetHotPathSequentialScore(ANCellLevelInstance* LevelInstance)
+	{
+		return IsValid(LevelInstance) ? LevelInstance->GetHotPathSequentialScore() : FNCellAssemblyData::UnreachableScore;
+	};
+
+	/**
+	 * @param LevelInstance The cell level instance to query.
+	 * @return How many cells separate this one from the nearest cell tagged NEXUS.WorldAssembly.Flag.Important.
+	 *         0 means the cell carries the tag itself; UnreachableScore means none reaches it.
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Get Importance Score",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#get-importance-score"))
+	static int32 GetImportanceScore(ANCellLevelInstance* LevelInstance)
+	{
+		return IsValid(LevelInstance) ? LevelInstance->GetImportanceScore() : FNCellAssemblyData::UnreachableScore;
+	};
+
+	/**
+	 * @param LevelInstance The cell level instance to query.
+	 * @param MaximumScore How many cells away still counts as near. 0 asks whether the cell is on the hot path.
+	 * @return true if this cell is within MaximumScore cells of the hot path, taking whichever variant runs nearer.
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is Near HotPath",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#is-near-hotpath"))
+	static bool IsNearHotPath(ANCellLevelInstance* LevelInstance, const int32 MaximumScore = 1)
+	{
+		return IsValid(LevelInstance) && LevelInstance->GetHotPathScore() <= MaximumScore;
+	};
+
+	/**
+	 * Exec-pin variant of Is Near HotPath; the result drives the True/False execution outputs in Blueprint.
+	 * @param LevelInstance The cell level instance to query.
+	 * @param MaximumScore How many cells away still counts as near. 0 asks whether the cell is on the hot path.
+	 * @return true if this cell is within MaximumScore cells of the hot path.
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is Near HotPath ?",
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#exec-pin-variants", ExpandBoolAsExecs="ReturnValue"))
+	static bool IsNearHotPathExec(ANCellLevelInstance* LevelInstance, const int32 MaximumScore = 1)
+	{
+		return IsValid(LevelInstance) && LevelInstance->GetHotPathScore() <= MaximumScore;
+	};
+
+	/**
+	 * @param LevelInstance The cell level instance to query.
+	 * @param MaximumScore How many cells away still counts as near. 0 asks whether the cell is itself Important.
+	 * @return true if this cell is within MaximumScore cells of an Important-flagged cell.
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is Near Important",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#is-near-important"))
+	static bool IsNearImportant(ANCellLevelInstance* LevelInstance, const int32 MaximumScore = 1)
+	{
+		return IsValid(LevelInstance) && LevelInstance->GetImportanceScore() <= MaximumScore;
+	};
+
+	/**
+	 * Exec-pin variant of Is Near Important; the result drives the True/False execution outputs in Blueprint.
+	 * @param LevelInstance The cell level instance to query.
+	 * @param MaximumScore How many cells away still counts as near. 0 asks whether the cell is itself Important.
+	 * @return true if this cell is within MaximumScore cells of an Important-flagged cell.
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is Near Important ?",
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#exec-pin-variants", ExpandBoolAsExecs="ReturnValue"))
+	static bool IsNearImportantExec(ANCellLevelInstance* LevelInstance, const int32 MaximumScore = 1)
+	{
+		return IsValid(LevelInstance) && LevelInstance->GetImportanceScore() <= MaximumScore;
+	};
+
+	/**
+	 * @param LevelInstance The cell level instance to query.
+	 * @param JunctionIdentifier The junction to test.
+	 * @return true when the cell across that junction sits nearer the hot path than this one — the doorway to take
+	 *         when heading for the route.
+	 * @note Answered from the score baked onto the link, so it works before the far cell has streamed in. A cell
+	 *       already on the route reports false in every direction.
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Does Junction Lead Toward HotPath",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#does-junction-lead-toward-hotpath"))
+	static bool DoesJunctionLeadTowardHotPath(ANCellLevelInstance* LevelInstance, const int32 JunctionIdentifier)
+	{
+		return IsValid(LevelInstance) && LevelInstance->DoesJunctionLeadTowardHotPath(JunctionIdentifier);
+	};
+
+	/**
+	 * Exec-pin variant of Does Junction Lead Toward HotPath; the result drives the True/False execution outputs.
+	 * @param LevelInstance The cell level instance to query.
+	 * @param JunctionIdentifier The junction to test.
+	 * @return true when the cell across that junction sits nearer the hot path than this one.
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Does Junction Lead Toward HotPath ?",
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#exec-pin-variants", ExpandBoolAsExecs="ReturnValue"))
+	static bool DoesJunctionLeadTowardHotPathExec(ANCellLevelInstance* LevelInstance, const int32 JunctionIdentifier)
+	{
+		return IsValid(LevelInstance) && LevelInstance->DoesJunctionLeadTowardHotPath(JunctionIdentifier);
+	};
+
+	/**
+	 * @param LevelInstance The cell level instance to query.
+	 * @param JunctionIdentifier The junction to test.
+	 * @return true when the cell across that junction sits nearer an Important-flagged cell than this one.
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Does Junction Lead Toward Important",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#does-junction-lead-toward-important"))
+	static bool DoesJunctionLeadTowardImportant(ANCellLevelInstance* LevelInstance, const int32 JunctionIdentifier)
+	{
+		return IsValid(LevelInstance) && LevelInstance->DoesJunctionLeadTowardImportant(JunctionIdentifier);
+	};
+
+	/**
+	 * Exec-pin variant of Does Junction Lead Toward Important; the result drives the True/False execution outputs.
+	 * @param LevelInstance The cell level instance to query.
+	 * @param JunctionIdentifier The junction to test.
+	 * @return true when the cell across that junction sits nearer an Important-flagged cell than this one.
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Does Junction Lead Toward Important ?",
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#exec-pin-variants", ExpandBoolAsExecs="ReturnValue"))
+	static bool DoesJunctionLeadTowardImportantExec(ANCellLevelInstance* LevelInstance, const int32 JunctionIdentifier)
+	{
+		return IsValid(LevelInstance) && LevelInstance->DoesJunctionLeadTowardImportant(JunctionIdentifier);
+	};
+
+	/**
+	 * @param LevelInstance The cell level instance to query.
 	 * @param Tag Tag to look for.
 	 * @return true if the cell's final TagCounter contains an entry for Tag.
 	 */
