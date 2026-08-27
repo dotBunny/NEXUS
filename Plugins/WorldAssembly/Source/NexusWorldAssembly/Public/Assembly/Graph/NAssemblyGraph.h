@@ -38,6 +38,23 @@ public:
 	 */
 	void FlagHotPath();
 
+	/**
+	 * Score every cell in Graphs by how many cells separate it from the nearest hot path cell (each variant scored
+	 * independently) and from the nearest Important-flagged cell. A cell that is itself a seed scores 0, its
+	 * neighbours 1, theirs 2, and so on; anything a seed cannot reach keeps FNCellAssemblyData::UnreachableScore,
+	 * which is also what every cell keeps when no cell carries the seed in question.
+	 *
+	 * Takes the whole operation's graphs rather than running per-graph, for two reasons. The junction-connector
+	 * pass wires node-level edges between cells in *different* graphs, so the cell one connector away from another
+	 * organ's important cell is genuinely one hop away and a per-graph pass would leave it unreachable. And a
+	 * single multi-source sweep costs one O(V+E) traversal for the whole operation where per-graph passes each
+	 * re-walk the cross-graph neighbourhoods they reach into.
+	 *
+	 * Must run after FlagHotPath has completed for every graph — two of the three seed sets are its output.
+	 * @param Graphs Every graph in the operation.
+	 */
+	static void ScoreCellProximity(TArrayView<const TUniquePtr<FNAssemblyGraph>> Graphs);
+
 	/** @return All nodes currently in the graph, in registration order. */
 	const TArray<FNAssemblyGraphNode*>& GetNodes() const { return Nodes; }
 

@@ -30,16 +30,9 @@ void FNCreateSpawnsTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphE
 	// We need to prepopulate some data elsewhere
 	FNWorldAssemblyContextCache::AddOperationContext(TaskGraphContextPtr->OperationTicket, TaskGraphContextPtr->TagCounter, TaskGraphContextPtr->ContextTags);
 
-	// Resolve every graph's hot path before generating any link details, so each junction can read its neighbor's
-	// flags. This has to complete across all graphs first, not per graph: the junction-connector pass links cells
-	// that can belong to different graphs, and a link detail generated before the far graph was flagged would bake
-	// in a stale false. Flags are only ever set, never cleared, so the passes compose in any order.
-	for (const TUniquePtr<FNAssemblyGraph>& Graph : TaskGraphContextPtr->Graphs)
-	{
-		Graph->FlagHotPath();
-	}
-
-	// Iterate over all graphs that we have had generate
+	// Iterate over all graphs that we have had generate. Everything each cell carries to runtime — hot path flags,
+	// proximity scores, link details — was resolved by FNEvaluateGraphsTask, which gates this one; all that remains
+	// is to flatten the cells into the list the spawn pass consumes.
 	for (const TUniquePtr<FNAssemblyGraph>& Graph : TaskGraphContextPtr->Graphs)
 	{
 		// Iterate raw nodes of graph and spawn them
@@ -49,9 +42,6 @@ void FNCreateSpawnsTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphE
 			{
 				// Add to our list of things to spawn
 				FNAssemblyGraphCellNode* CellNode = static_cast<FNAssemblyGraphCellNode*>(Node);
-
-				// Build out the data we are going to use
-				CellNode->GenerateLinkDetails();
 
 				// TODO: Figure out junction spawning details right here
 

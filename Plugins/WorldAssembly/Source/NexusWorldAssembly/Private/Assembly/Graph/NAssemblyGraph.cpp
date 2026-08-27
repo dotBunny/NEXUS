@@ -5,6 +5,7 @@
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
 
 #include "Algo/Reverse.h"
+#include "Containers/Deque.h"
 
 /** @return The start cell: Root if it is a cell, otherwise the first cell linked downstream of it. */
 static FNAssemblyGraphCellNode* ResolveStartCell(FNAssemblyGraphNode* Root)
@@ -80,6 +81,79 @@ static TArray<FNAssemblyGraphNode*> BreadthFirstPathTo(FNAssemblyGraphNode* Sour
 	}
 	Algo::Reverse(Path);
 	return Path;
+}
+
+/**
+ * Multi-source shortest-hop sweep from Seeds over the undirected graph (downstream ∪ upstream), assigning each
+ * reachable cell node the number of cells between it and the nearest seed, via Assign. Seeds score 0.
+ *
+ * Only entering a *cell* costs a hop: bones and null terminators are stepped through for free, so the score reads
+ * as "cells away" rather than "nodes away". That makes the edge weights 0 and 1 rather than uniformly 1, which is
+ * why this is a deque sweep (zero-cost steps to the front, one-cost to the back) rather than a plain queue BFS.
+ * As the graph stands the two would agree — a bone owns one socket and a null node caps one junction, so neither
+ * can ever join two cells and shortcut the count — but nothing in the traversal has to rely on that.
+ *
+ * Scores saturate at FNCellAssemblyData::UnreachableScore: a cell that would score there is neither assigned nor
+ * expanded from, so it stays indistinguishable from one no seed reaches. That bound is also what keeps the sweep
+ * from being able to run away on a pathological graph.
+ */
+template <typename TAssign>
+static void ScoreCellHopsFromSeeds(const TArray<FNAssemblyGraphCellNode*>& Seeds, TAssign&& Assign)
+{
+	if (Seeds.IsEmpty()) return;
+
+	// Best score known for each node so far; also the visited set. Non-cell nodes are tracked too, since a cheaper
+	// route can reach one after it has already been stepped through.
+	TMap<FNAssemblyGraphNode*, uint8> Scores;
+	Scores.Reserve(Seeds.Num() * 8);
+
+	TDeque<FNAssemblyGraphNode*> Frontier;
+	for (FNAssemblyGraphCellNode* Seed : Seeds)
+	{
+		if (Scores.Contains(Seed)) continue;
+		Scores.Add(Seed, 0);
+		Assign(Seed, 0);
+		Frontier.EmplaceLast(Seed);
+	}
+
+	while (!Frontier.IsEmpty())
+	{
+		FNAssemblyGraphNode* Current = Frontier.First();
+		Frontier.PopFirst();
+
+		const uint8 CurrentScore = Scores[Current];
+
+		// Treat the graph as undirected: a connector edge and a junction mating are both walkable either way.
+		for (int32 Direction = 0; Direction < 2; Direction++)
+		{
+			const TArray<FNAssemblyGraphNode*>& Neighbours =
+				Direction == 0 ? Current->GetDownstreamNodes() : Current->GetUpstreamNodes();
+			for (FNAssemblyGraphNode* Neighbour : Neighbours)
+			{
+				const bool bIsCell = Neighbour->GetNodeType() == ENAssemblyGraphNodeType::Cell;
+				const int32 Candidate = static_cast<int32>(CurrentScore) + (bIsCell ? 1 : 0);
+
+				// At the saturation point the score stops carrying information, so stop rather than record it.
+				if (Candidate >= FNCellAssemblyData::UnreachableScore) continue;
+
+				const uint8* Known = Scores.Find(Neighbour);
+				if (Known != nullptr && *Known <= Candidate) continue;
+
+				const uint8 NewScore = static_cast<uint8>(Candidate);
+				Scores.Add(Neighbour, NewScore);
+				if (bIsCell)
+				{
+					Assign(static_cast<FNAssemblyGraphCellNode*>(Neighbour), NewScore);
+					Frontier.EmplaceLast(Neighbour);
+				}
+				else
+				{
+					// Free to step through, so it belongs ahead of everything a hop further out.
+					Frontier.EmplaceFirst(Neighbour);
+				}
+			}
+		}
+	}
 }
 
 /** Apply Setter to every cell node in OnPath (non-cell nodes carry no hot path flag). */
@@ -332,6 +406,49 @@ void FNAssemblyGraph::FlagHotPath()
 		BranchToBones(OnPath);
 		FlagCellsOnPath(OnPath, [](FNAssemblyGraphCellNode* Cell) { Cell->SetHotPathSequential(true); });
 	}
+}
+
+void FNAssemblyGraph::ScoreCellProximity(TArrayView<const TUniquePtr<FNAssemblyGraph>> Graphs)
+{
+	// Collected in one pass over every graph, so the sweeps that follow start from the operation's whole seed set
+	// rather than one graph's share of it.
+	TArray<FNAssemblyGraphCellNode*> HotPathShortestSeeds;
+	TArray<FNAssemblyGraphCellNode*> HotPathSequentialSeeds;
+	TArray<FNAssemblyGraphCellNode*> ImportantSeeds;
+
+	for (const TUniquePtr<FNAssemblyGraph>& Graph : Graphs)
+	{
+		if (!Graph.IsValid()) continue;
+		for (FNAssemblyGraphNode* Node : Graph->GetNodes())
+		{
+			if (Node->GetNodeType() != ENAssemblyGraphNodeType::Cell) continue;
+
+			FNAssemblyGraphCellNode* CellNode = static_cast<FNAssemblyGraphCellNode*>(Node);
+			if (CellNode->IsHotPathShortest())
+			{
+				HotPathShortestSeeds.Add(CellNode);
+			}
+			if (CellNode->IsHotPathSequential())
+			{
+				HotPathSequentialSeeds.Add(CellNode);
+			}
+			// Seeded from cells only. The flag is declared on the node base so a bone can carry the tag, but an
+			// importance score counts cells away from an important *cell*, and a bone places no content to be near.
+			if (CellNode->IsImportantFlagged())
+			{
+				ImportantSeeds.Add(CellNode);
+			}
+		}
+	}
+
+	// Three independent sweeps rather than one: the variants disagree wherever the sequential chain and the
+	// shortest spokes route differently, and a cell can be adjacent to one and far from the other.
+	ScoreCellHopsFromSeeds(HotPathShortestSeeds,
+		[](FNAssemblyGraphCellNode* Cell, const uint8 Score) { Cell->SetHotPathShortestScore(Score); });
+	ScoreCellHopsFromSeeds(HotPathSequentialSeeds,
+		[](FNAssemblyGraphCellNode* Cell, const uint8 Score) { Cell->SetHotPathSequentialScore(Score); });
+	ScoreCellHopsFromSeeds(ImportantSeeds,
+		[](FNAssemblyGraphCellNode* Cell, const uint8 Score) { Cell->SetImportanceScore(Score); });
 }
 
 

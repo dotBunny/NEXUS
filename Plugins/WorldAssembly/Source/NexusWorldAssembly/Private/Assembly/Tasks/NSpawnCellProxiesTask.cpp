@@ -84,6 +84,9 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		CellAssemblyData.LinkDetails = CellNode->GetLinkDetails();
 		CellAssemblyData.bHotPathShortest = CellNode->IsHotPathShortest();
 		CellAssemblyData.bHotPathSequential = CellNode->IsHotPathSequential();
+		CellAssemblyData.HotPathShortestScore = CellNode->GetHotPathShortestScore();
+		CellAssemblyData.HotPathSequentialScore = CellNode->GetHotPathSequentialScore();
+		CellAssemblyData.ImportanceScore = CellNode->GetImportanceScore();
 
 		// Convert to basic array
 		CellNode->GetJunctions().GenerateValueArray(CellAssemblyData.JunctionDetails);

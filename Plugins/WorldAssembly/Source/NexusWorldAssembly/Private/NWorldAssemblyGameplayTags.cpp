@@ -35,6 +35,8 @@ UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_Flag_AlwaysRelevant, "NEXUS.WorldA
 
 UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_Flag_Hotpath, "NEXUS.WorldAssembly.Flag.Hotpath",
 	"Cells tagged with Hotpath are treated as goals inside of the cell graph, starting with bone following the shortest path to connect all flagged Hotpath items, and connecting to any other bones. INCellInitialized-implementors have access to determine if they are on the Hotpath.");
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_Flag_Important, "NEXUS.WorldAssembly.Flag.Important",
+	"Cells tagged with Important generate a score in NCellAssemblyData indicative of the number of cells away from an important cell they may be.");
 
 UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_Counter_Alpha, "NEXUS.WorldAssembly.Counter.Alpha", "Built-in counter-based tag (Alpha).");
 UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_Counter_Beta, "NEXUS.WorldAssembly.Counter.Beta", "Built-in counter-based tag (Beta).");

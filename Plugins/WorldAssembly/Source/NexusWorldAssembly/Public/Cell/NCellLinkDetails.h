@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NWorldAssemblyMinimal.h"
 #include "NCellLinkDetails.generated.h"
 
 /**
@@ -62,10 +63,46 @@ struct NEXUSWORLDASSEMBLY_API FNCellLinkDetails
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 ConnectorIdentifier = INDEX_NONE;
 
+	/**
+	 * The proximity scores of the cell on the *far* side of this junction, as they appear on that cell's
+	 * FNCellAssemblyData. Left at UnreachableScore when the junction is unconnected or reaches a bone.
+	 *
+	 * This is the half a junction cannot work out for itself. Its own cell's scores are already reachable through
+	 * the owning ANCellLevelInstance, but they say nothing about *which* of that cell's doorways leads inward —
+	 * and the far cell frequently is not streamed in when INCellJunctionBeginPlay fires, so resolving it at
+	 * runtime is not an option. Compare against the owning cell's score to get direction: lower leads toward the
+	 * route or the landmark, higher leads away.
+	 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	uint8 ConnectedHotPathShortestScore = NEXUS::WorldAssembly::Proximity::UnreachableScore;
+
+	/** As ConnectedHotPathShortestScore, measured against the sequential hot path. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	uint8 ConnectedHotPathSequentialScore = NEXUS::WorldAssembly::Proximity::UnreachableScore;
+
+	/** As ConnectedHotPathShortestScore, measured against the nearest Important-flagged cell. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	uint8 ConnectedImportanceScore = NEXUS::WorldAssembly::Proximity::UnreachableScore;
+
+	/**
+	 * @return true if the cell across this junction is itself on the shortest-path hot path.
+	 * @note Derived rather than stored: proximity scoring seeds `0` from exactly the cells carrying the flag, and
+	 *       nothing else can reach `0` — every other cell is at least one hop from a seed. Distinct from
+	 *       bHotPathShortest, which is true only when *both* cells are on the route: this being true while that is
+	 *       false is precisely a doorway leading onto the route from off it.
+	 */
+	bool IsConnectedOnHotPathShortest() const { return ConnectedHotPathShortestScore == 0; }
+
+	/** @return true if the cell across this junction is itself on the sequential hot path. See IsConnectedOnHotPathShortest. */
+	bool IsConnectedOnHotPathSequential() const { return ConnectedHotPathSequentialScore == 0; }
+
+	/** @return true if the cell across this junction is itself flagged Important. */
+	bool IsConnectedImportant() const { return ConnectedImportanceScore == 0; }
+
 	FString ToString() const
 	{
 		return FString::Printf(
-			TEXT("[%d:%d] Connected: %s > [%d:%d] | HotShort: %s | HotSeq: %s | Connector: %s(%d)"),
+			TEXT("[%d:%d] Connected: %s > [%d:%d] | HotShort: %s | HotSeq: %s | Connector: %s(%d) | Far Scores: %d/%d/%d"),
 			NodeIdentifier,
 			JunctionInstanceIdentifier,
 			bConnected ? TEXT("True") : TEXT("False"),
@@ -74,7 +111,10 @@ struct NEXUSWORLDASSEMBLY_API FNCellLinkDetails
 			bHotPathShortest ? TEXT("True") : TEXT("False"),
 			bHotPathSequential ? TEXT("True") : TEXT("False"),
 			bConnector ? TEXT("True") : TEXT("False"),
-			ConnectorIdentifier
+			ConnectorIdentifier,
+			ConnectedHotPathShortestScore,
+			ConnectedHotPathSequentialScore,
+			ConnectedImportanceScore
 		);
 	}
 };

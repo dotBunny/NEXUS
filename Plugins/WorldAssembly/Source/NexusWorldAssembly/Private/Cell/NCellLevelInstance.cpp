@@ -130,3 +130,19 @@ FNCellLinkDetails ANCellLevelInstance::GetCellLinkDetails(const int32 JunctionId
 	UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Junction(%i) has requested link details that couldn't be found."), JunctionIdentifier);
 	return FNCellLinkDetails();
 }
+
+bool ANCellLevelInstance::DoesJunctionLeadTowardHotPath(const int32 JunctionIdentifier)
+{
+	// Strictly nearer, so a cell already on the route reports false in every direction rather than pointing at
+	// whichever neighbour happens to also be on it. An unconnected junction carries UnreachableScore and so can
+	// only ever be false, which is what an opening onto nothing should report.
+	const FNCellLinkDetails LinkDetails = GetCellLinkDetails(JunctionIdentifier);
+	return FMath::Min(LinkDetails.ConnectedHotPathShortestScore, LinkDetails.ConnectedHotPathSequentialScore)
+		< GetHotPathScore();
+}
+
+bool ANCellLevelInstance::DoesJunctionLeadTowardImportant(const int32 JunctionIdentifier)
+{
+	const FNCellLinkDetails LinkDetails = GetCellLinkDetails(JunctionIdentifier);
+	return LinkDetails.ConnectedImportanceScore < GetImportanceScore();
+}

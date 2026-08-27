@@ -6,6 +6,7 @@
 #include "Assembly/Data/NVirtualCellData.h"
 #include "NAssemblyGraphNode.h"
 #include "Cell/NCell.h"
+#include "Cell/NCellAssemblyData.h"
 #include "Cell/NCellLinkDetails.h"
 #include "Types/NRawMeshUtils.h"
 
@@ -200,6 +201,24 @@ public:
 	/** @return true if this cell lies on either hot path variant. */
 	bool IsHotPath() const { return bHotPathShortest || bHotPathSequential; }
 
+	/** Record how many cells separate this one from the nearest cell on the shortest-path hot path. */
+	void SetHotPathShortestScore(uint8 Value) { HotPathShortestScore = Value; }
+
+	/** Record how many cells separate this one from the nearest cell on the sequential hot path. */
+	void SetHotPathSequentialScore(uint8 Value) { HotPathSequentialScore = Value; }
+
+	/** Record how many cells separate this one from the nearest Important-flagged cell. */
+	void SetImportanceScore(uint8 Value) { ImportanceScore = Value; }
+
+	/** @return Hops in cells to the nearest cell on the shortest-path hot path; 0 when on it. */
+	uint8 GetHotPathShortestScore() const { return HotPathShortestScore; }
+
+	/** @return Hops in cells to the nearest cell on the sequential hot path; 0 when on it. */
+	uint8 GetHotPathSequentialScore() const { return HotPathSequentialScore; }
+
+	/** @return Hops in cells to the nearest Important-flagged cell; 0 when this cell carries the tag. */
+	uint8 GetImportanceScore() const { return ImportanceScore; }
+
 	/** Populate LinkDetails with one entry per junction describing its connection state; no-op once generated. */
 	void GenerateLinkDetails();
 
@@ -258,6 +277,16 @@ private:
 
 	/** Set just before spawning (game thread): does this cell lie on the sequential hot path (nearest-first visiting chain). */
 	bool bHotPathSequential = false;
+
+	/**
+	 * Set just before spawning (game thread), alongside the hot path flags: how many cells separate this one from
+	 * the nearest cell on each hot path variant, and from the nearest Important-flagged cell. Scored by
+	 * FNAssemblyGraph::ScoreCellProximity, which reads the flags above, so these are only meaningful once it has
+	 * run for every graph in the operation.
+	 */
+	uint8 HotPathShortestScore = FNCellAssemblyData::UnreachableScore;
+	uint8 HotPathSequentialScore = FNCellAssemblyData::UnreachableScore;
+	uint8 ImportanceScore = FNCellAssemblyData::UnreachableScore;
 
 	/** Generated just before spawning, before on main thread, traverses graph and generates useful additional data. */
 	TArray<FNCellLinkDetails> LinkDetails;

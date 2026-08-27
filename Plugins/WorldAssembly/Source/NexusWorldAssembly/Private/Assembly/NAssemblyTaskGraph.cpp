@@ -17,6 +17,7 @@
 #include "Assembly/Tasks/NCreateVirtualWorldTask.h"
 #include "Assembly/Tasks/NProcessVirtualWorldTask.h"
 #include "Assembly/Tasks/NConnectJunctionsTask.h"
+#include "Assembly/Tasks/NEvaluateGraphsTask.h"
 #include "Assembly/Tasks/NCreateSpawnsTask.h"
 #include "Assembly/Tasks/NSpawnCellProxiesTask.h"
 #include "Assembly/Tasks/NSpawnJunctionConnectorsTask.h"
@@ -141,8 +142,8 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 
 	// Gated on every pass's collection task: those are what move the built graphs into the task-graph context and
 	// every placed cell hull into the world context, so only once they have all finished does this see the complete
-	// generated output it needs to match against. It in turn gates FNCreateSpawnsTask, so a pairing it makes is
-	// already in place when link details are generated from it.
+	// generated output it needs to match against. It in turn gates FNEvaluateGraphsTask, so a pairing it makes is
+	// already in place when the hot path is resolved and link details are generated from it.
 	//
 	// SocketSize is snapshotted here, on the game thread, because the task runs on a worker and cannot reach the
 	// settings object itself.
@@ -153,6 +154,21 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 	ConnectJunctionsTasks.Add(ConnectJunctionsTask);
 	AllTasks.Add(ConnectJunctionsTask);
 
+	// ----- STEP 4 - EVALUATE THE FINISHED GRAPHS --------------------------------------------------------------------------------------------------
+
+	// Derives everything a cell carries to runtime that is a property of the graph rather than of the spawn: hot
+	// path membership, proximity scores, and per-junction link details. Gated on the connector pass because that is
+	// what creates the cross-graph links all three read through, and it in turn gates FNCreateSpawnsTask, which
+	// only flattens the result.
+	FGraphEventArray EvaluateGraphsTasks;
+	FGraphEventRef EvaluateGraphsTask = TGraphTask<FNEvaluateGraphsTask>::CreateTask(
+		&ConnectJunctionsTasks, FNEvaluateGraphsTask::GetDesiredThread())
+		.ConstructAndHold(TaskGraphContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
+	EvaluateGraphsTasks.Add(EvaluateGraphsTask);
+	AllTasks.Add(EvaluateGraphsTask);
+
+	// ----- STEP 5 - CREATE SPAWNS -----------------------------------------------------------------------------------------------------------------
+
 	const FNAssemblyOperationSettings& OperatingSettings = Context->GetOperationSettings();
 
 	// Create our context of what we are going to need to spawn back on the game-thread
@@ -160,7 +176,7 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 		OperatingSettings.bPreLoadLevelInstances, OperatingSettings.bCreateLevelInstances,
 		(OperatingSettings.CellSpawnTimeSlice * 0.001f)); // Convert to expected timescale
 
-	FGraphEventRef CreateSpawnsTask = TGraphTask<FNCreateSpawnsTask>::CreateTask(&ConnectJunctionsTasks, FNCreateSpawnsTask::GetDesiredThread())
+	FGraphEventRef CreateSpawnsTask = TGraphTask<FNCreateSpawnsTask>::CreateTask(&EvaluateGraphsTasks, FNCreateSpawnsTask::GetDesiredThread())
 		.ConstructAndHold(SpawnContextPtr, TaskGraphContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
 	FinalizerTasks.Add(CreateSpawnsTask);
 	SpawnContextTasks.Add(CreateSpawnsTask);
