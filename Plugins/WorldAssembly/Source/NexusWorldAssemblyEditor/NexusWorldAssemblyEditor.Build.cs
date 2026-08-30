@@ -11,6 +11,7 @@ namespace UnrealBuildTool.Rules
 
 			PublicDependencyModuleNames.AddRange(
 				[
+					"AssetDefinition",
 					"Blutility",
 					"Core",
 					"DataValidation",
@@ -22,7 +23,6 @@ namespace UnrealBuildTool.Rules
 
 			PrivateDependencyModuleNames.AddRange(
 				[
-					"AssetDefinition",
 					"AssetRegistry",
 					"AssetTools",
 					"Chaos",

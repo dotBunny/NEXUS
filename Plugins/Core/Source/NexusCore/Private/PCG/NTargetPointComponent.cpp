@@ -14,6 +14,8 @@ UNTargetPointComponent::UNTargetPointComponent(const FObjectInitializer& ObjectI
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
+
+	USceneComponent::SetMobility(EComponentMobility::Static);
 }
 
 #if WITH_EDITOR
