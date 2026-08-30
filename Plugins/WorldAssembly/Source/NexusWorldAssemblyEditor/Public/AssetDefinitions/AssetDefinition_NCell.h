@@ -8,6 +8,8 @@
 #include "Cell/NCell.h"
 #include "AssetDefinition_NCell.generated.h"
 
+class ANCellActor;
+
 /**
  * Asset definition for UNCell — the on-disk side-car that mirrors a cell actor's authored bounds,
  * hull, and voxel data. Also owns the package-lifecycle hooks that keep the side-car asset in sync
@@ -19,7 +21,7 @@
  * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-types/asset-definitions/asset-definition-cell/">UAssetDefinition_NCell</a>
  */
 UCLASS()
-class UAssetDefinition_NCell : public UAssetDefinitionDefault
+class NEXUSWORLDASSEMBLYEDITOR_API UAssetDefinition_NCell : public UAssetDefinitionDefault
 {
 	GENERATED_BODY()
 
@@ -66,4 +68,39 @@ public:
 
 	/** Data-validation entry point invoked by UNWorldAssemblyEditorValidator for UNCell assets. */
 	static EDataValidationResult ValidateAsset(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context);
+
+	/**
+	 * Data-validation entry point for a cell as it currently stands in a level, rather than as it was last
+	 * written to its side-car.
+	 *
+	 * Holds the actor to the same shape rules ValidateAsset holds the side-car to, for callers asking about
+	 * a level before it is saved. Lives here rather than on the actor because the rules belong with the
+	 * asset they are written for, and because this class is already a friend of ANCellActor and so can
+	 * read the junctions and root details without either being opened up to everybody.
+	 *
+	 * @param CellActor The cell to check. A null actor, or one with no root component, yields NotValidated.
+	 * @param Context Receives one error per rule the cell fails.
+	 * @return Invalid where anything was found, Valid where the cell was checked and nothing was.
+	 * @note Deliberately answers about live state, and so can disagree with ValidateAsset about the same
+	 *       cell. The side-car is only synced from the actor in OnPreSaveWorldWithContext, so between saves
+	 *       it describes an older shape. That divergence is the point: a caller asking this wants to know
+	 *       what would be written, not what was.
+	 */
+	static EDataValidationResult ValidateCellActor(const ANCellActor* CellActor, FDataValidationContext& Context);
+
+private:
+	/**
+	 * The cell shape rules, asked of whichever of the two things carries them.
+	 * @param Name What to call the cell in the messages, which is the side-car's name or its level's.
+	 * @param Root The cell's root details, off the side-car or off the live root component.
+	 * @param JunctionCount How many junctions the cell has.
+	 * @param Context Receives one error per rule failed.
+	 * @return Invalid where anything was found, Valid otherwise.
+	 * @note Everything the two entry points share is here so that a rule added for one is a rule added for
+	 *       both. A rule that exists on the side-car path and not the live one is a rule nobody fails until
+	 *       they are already on their way out the door, which is the whole thing a pre-save check exists to
+	 *       avoid.
+	 */
+	static EDataValidationResult ValidateCellData(const FText& Name, const FNCellRootDetails& Root,
+		int32 JunctionCount, FDataValidationContext& Context);
 };

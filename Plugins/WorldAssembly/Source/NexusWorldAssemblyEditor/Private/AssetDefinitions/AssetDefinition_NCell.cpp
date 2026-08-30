@@ -350,42 +350,70 @@ void UAssetDefinition_NCell::OnPostSaveWorldWithContext(UWorld* World, FObjectPo
 	}
 }
 
-EDataValidationResult UAssetDefinition_NCell::ValidateAsset(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context)
+EDataValidationResult UAssetDefinition_NCell::ValidateCellData(const FText& Name, const FNCellRootDetails& Root,
+	const int32 JunctionCount, FDataValidationContext& Context)
 {
-
-	const UNCell* Cell = Cast<UNCell>(InAsset);
-	if (!Cell) return EDataValidationResult::NotValidated;
 	EDataValidationResult Result = EDataValidationResult::Valid;
 
-	if (Cell->World.IsNull())
+	if (Root.Bounds.GetSize() == FVector::ZeroVector)
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_MissingWorld", "Cell {0} has no World set."), FText::FromString(Cell->GetName())));
+		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_BoundsSizeZero", "Cell {0} has no bounds."), Name));
 	}
 
-	if (Cell->Root.Bounds.GetSize() == FVector::ZeroVector)
+	if (Root.Hull.Vertices.IsEmpty())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_BoundsSizeZero", "Cell {0} has no bounds."), FText::FromString(Cell->GetName())));
+		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_HullNoVertices", "Cell {0} hull has no vertices."), Name));
 	}
 
-	if (Cell->Root.Hull.Vertices.IsEmpty())
+	if (!Root.HullSettings.bAllowNonConvex && !Root.Hull.IsConvex())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_HullNoVertices", "Cell {0} hull has no vertices."), FText::FromString(Cell->GetName())));
+		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_HullNotConvex", "Cell {0} hull is not convex, and not allowed."), Name));
 	}
 
-	if (!Cell->Root.HullSettings.bAllowNonConvex && !Cell->Root.Hull.IsConvex())
+	if (JunctionCount == 0)
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_HullNotConvex", "Cell {0} hull is not convex, and not allowed."), FText::FromString(Cell->GetName())));
-	}
-
-	if (Cell->Junctions.IsEmpty())
-	{
-		Result = EDataValidationResult::Invalid;
-		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_NoJunctions", "Cell {0} has no junctions."), FText::FromString(Cell->GetName())));
+		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_NoJunctions", "Cell {0} has no junctions."), Name));
 	}
 
 	return Result;
+}
+
+EDataValidationResult UAssetDefinition_NCell::ValidateAsset(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context)
+{
+	const UNCell* Cell = Cast<UNCell>(InAsset);
+	if (!Cell) return EDataValidationResult::NotValidated;
+
+	const FText Name = FText::FromString(Cell->GetName());
+	EDataValidationResult Result = EDataValidationResult::Valid;
+
+	// The one rule with no live equivalent, and so the only one left here: a cell actor is in its world by
+	// construction, and only a side-car can be sitting there pointing at nothing.
+	if (Cell->World.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_MissingWorld", "Cell {0} has no World set."), Name));
+	}
+
+	return CombineDataValidationResults(Result, ValidateCellData(Name, Cell->Root, Cell->Junctions.Num(), Context));
+}
+
+EDataValidationResult UAssetDefinition_NCell::ValidateCellActor(const ANCellActor* CellActor, FDataValidationContext& Context)
+{
+	if (CellActor == nullptr) return EDataValidationResult::NotValidated;
+
+	const UNCellRootComponent* CellRoot = CellActor->GetCellRoot();
+	if (CellRoot == nullptr) return EDataValidationResult::NotValidated;
+
+	// Named for the level rather than for the side-car. A cell being checked live is one somebody has open,
+	// and its side-car may not have been written yet — the level is the only name that would mean anything
+	// to whoever is reading the message. Taken off the typed outer rather than the actor's own package,
+	// because a World Partition cell actor lives in an external package named after nothing useful.
+	const UWorld* World = CellActor->GetTypedOuter<UWorld>();
+	const FText Name = FText::FromString(World != nullptr ? World->GetName() : CellActor->GetName());
+
+	return ValidateCellData(Name, CellRoot->Details, CellActor->CellJunctions.Num(), Context);
 }
