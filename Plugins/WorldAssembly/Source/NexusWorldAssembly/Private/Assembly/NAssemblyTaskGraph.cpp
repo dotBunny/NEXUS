@@ -48,6 +48,10 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 	// Create our world context holder
 	VirtualWorldContextPtr = MakeShared<FNVirtualWorldContext, ESPMode::ThreadSafe>(Context->GetTargetWorld(), Context->Bounds, OperationSettings);
 
+	// Handed over after construction rather than through the constructor, which several test harnesses build directly
+	// with no organs at all. The capture phase uses these to consult each organ's own collision cache.
+	VirtualWorldContextPtr->InputOrgans = Context->InputComponents;
+
 	// Create our base world evaluation that builds out the collision-mesh for the world.
 	FGraphEventRef CreateVirtualWorldTask = TGraphTask<FNCreateVirtualWorldTask>::CreateTask(
 				nullptr,

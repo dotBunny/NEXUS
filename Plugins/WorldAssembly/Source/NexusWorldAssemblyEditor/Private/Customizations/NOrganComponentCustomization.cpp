@@ -12,7 +12,11 @@
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyRegistry.h"
 #include "Assembly/NAssemblyOperation.h"
+#include "NWorldAssemblySettings.h"
+#include "NWorldCollisionBaker.h"
+#include "NWorldCollisionFingerprint.h"
 #include "Organ/NOrganComponent.h"
+#include "ScopedTransaction.h"
 
 TSharedRef<IDetailCustomization> FNOrganComponentCustomization::MakeInstance()
 {
@@ -101,6 +105,127 @@ FText::FromString("Organ Component"), ECategoryPriority::Important);
 					.OnClicked(this, &FNOrganComponentCustomization::OnClearClicked, ObjectsBeingCustomized)
 			]
 		];
+
+	// The collision cache is derived state with no editable properties, so it gets a read-only summary rather than a
+	// property row: what it holds, and whether it still matches the world. Without this the only way to know an organ
+	// is quietly gathering fresh every run is to read the log.
+	FDetailWidgetRow& CacheRow = NexusCategory.AddCustomRow(
+		NSLOCTEXT("NexusWorldAssemblyEditor", "OrganCollisionCache", "World Collision Cache"));
+
+	CacheRow.NameContent()
+		[
+			SNew(STextBlock)
+				.Text(NSLOCTEXT("NexusWorldAssemblyEditor", "OrganCollisionCacheLabel", "World Collision Cache"))
+				.Font(IDetailLayoutBuilder::GetDetailFont())
+		];
+	CacheRow.ValueContent()
+		.MinDesiredWidth(500.f)
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
+			.FillWidth(1.0)
+			.VAlign(VAlign_Center)
+			[
+				SNew(STextBlock)
+					.Text(this, &FNOrganComponentCustomization::GetCollisionCacheSummary)
+					.ToolTipText(NSLOCTEXT("NexusWorldAssemblyEditor", "OrganCollisionCacheTooltip",
+						"What world collision this organ has baked, and whether it still matches the level. A stale or empty cache is not an error - the assembly gathers the world fresh instead."))
+					.Font(IDetailLayoutBuilder::GetDetailFont())
+			]
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.Padding(5, 5, 0, 5)
+			[
+				SNew(SButton)
+					.VAlign(VAlign_Center)
+					.HAlign(HAlign_Center)
+					.Text(NSLOCTEXT("NexusWorldAssemblyEditor", "OrganCollisionCacheBake", "Bake"))
+					.ToolTipText(NSLOCTEXT("NexusWorldAssemblyEditor", "OrganCollisionCacheBakeTooltip",
+						"Re-bake this organ's world collision now."))
+					.OnClicked(this, &FNOrganComponentCustomization::OnBakeCollisionCacheClicked, ObjectsBeingCustomized)
+			]
+		];
+}
+
+FText FNOrganComponentCustomization::GetCollisionCacheSummary() const
+{
+	const TArray<UNOrganComponent*> Organs = UNOrganComponent::GetOrganComponents(CustomizedObjects);
+	if (Organs.IsEmpty())
+	{
+		return FText::GetEmpty();
+	}
+
+	// Multi-select reports a count rather than trying to reconcile several organs' states into one line.
+	if (Organs.Num() > 1)
+	{
+		int32 BakedCount = 0;
+		for (const UNOrganComponent* Organ : Organs)
+		{
+			if (IsValid(Organ) && Organ->CollisionCache.HasData())
+			{
+				BakedCount++;
+			}
+		}
+		return FText::FromString(FString::Printf(TEXT("%d of %d organs baked"), BakedCount, Organs.Num()));
+	}
+
+	const UNOrganComponent* Organ = Organs[0];
+	if (!IsValid(Organ) || !Organ->CollisionCache.HasData())
+	{
+		return NSLOCTEXT("NexusWorldAssemblyEditor", "OrganCollisionCacheNone", "Not baked - the world is gathered on every run.");
+	}
+
+	const int32 ElementCount = Organ->CollisionCache.SourceKeys.Num();
+	const FString BakedAt = Organ->CollisionCache.BakeTime.ToString(TEXT("%Y-%m-%d %H:%M"));
+
+	// Two lines: what the cache holds, then when it was made. The status rides the first line because whether a run
+	// can actually use this is the headline, not a footnote to the timestamp.
+	FString Summary = FString::Printf(TEXT("%d element%s"), ElementCount, ElementCount == 1 ? TEXT("") : TEXT("s"));
+
+	// Fingerprinted live so the row answers the question that actually matters — not "was this ever baked" but
+	// "would a run right now be able to use it".
+	const UWorld* World = Organ->GetWorld();
+	if (World != nullptr)
+	{
+		TArray<FBoxSphereBounds> Bounds;
+		const FNWorldCollisionBaker::EOrganBoundsKind BoundsKind = FNWorldCollisionBaker::GetOrganBounds(Organ, Bounds);
+		if (BoundsKind != FNWorldCollisionBaker::EOrganBoundsKind::None)
+		{
+			const uint64 Current = FNWorldCollisionFingerprint::Compute(World, Bounds,
+				UNWorldAssemblySettings::Get()->WorldCollisionSettings);
+
+			Summary += Organ->CollisionCache.IsValidFor(Current)
+				? TEXT(" - current")
+				: TEXT(" - stale, will gather fresh");
+		}
+	}
+
+	Summary += FString::Printf(TEXT("\nBaked on %s"), *BakedAt);
+
+	return FText::FromString(Summary);
+}
+
+FReply FNOrganComponentCustomization::OnBakeCollisionCacheClicked(const TArray<TWeakObjectPtr<UObject>> Objects)
+{
+	const TArray<UNOrganComponent*> Organs = UNOrganComponent::GetOrganComponents(Objects);
+	if (Organs.IsEmpty())
+	{
+		return FReply::Handled();
+	}
+
+	UWorld* World = Organs[0]->GetWorld();
+	if (World == nullptr)
+	{
+		return FReply::Handled();
+	}
+
+	const FScopedTransaction Transaction(
+		NSLOCTEXT("NexusWorldAssemblyEditor", "OrganCollisionCacheBakeTransaction", "Bake Organ World Collision"));
+
+	FNWorldCollisionBaker::BakeOrgans(World, Organs,
+		UNWorldAssemblySettings::Get()->WorldCollisionSettings, true);
+
+	return FReply::Handled();
 }
 
 FReply FNOrganComponentCustomization::OnGenerateClicked(const TArray<TWeakObjectPtr<UObject>> Objects)

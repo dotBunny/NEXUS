@@ -24,10 +24,22 @@ void FNRawMeshUtils::CombineMesh(const FTransform& BaseTransform, FNRawMesh& Bas
 
 	const int32 VertexOffset = BaseMesh.Vertices.Num();
 
+	// Center and bounds are accumulated over the vertices being added, in the same pass that adds them, so that a
+	// merge costs time proportional to what it appends rather than to everything appended so far.
+	//
+	// This used to end in a full CalculateCenterAndBounds, which walks the whole accumulated buffer. That is fine for
+	// a single merge and quadratic for a loop of them — and merging a level's collision is exactly such a loop, where
+	// it cost roughly a hundred million vector adds and stalled the editor for twelve seconds.
+	FVector AddedSum = FVector::ZeroVector;
+	FBox AddedBounds(ForceInit);
+
 	BaseMesh.Vertices.Reserve(VertexOffset + OtherMesh.Vertices.Num());
 	for (const FVector& OtherVertex : OtherMesh.Vertices)
 	{
-		BaseMesh.Vertices.Add(OtherToBase.TransformPosition(OtherVertex));
+		const FVector Transformed = OtherToBase.TransformPosition(OtherVertex);
+		BaseMesh.Vertices.Add(Transformed);
+		AddedSum += Transformed;
+		AddedBounds += Transformed;
 	}
 
 	BaseMesh.Loops.Reserve(BaseMesh.Loops.Num() + OtherMesh.Loops.Num());
@@ -74,7 +86,29 @@ void FNRawMeshUtils::CombineMesh(const FTransform& BaseTransform, FNRawMesh& Bas
 	BaseMesh.bIsChaosGenerated = false;
 	BaseMesh.InvalidateCachedFacePlanes();
 
-	BaseMesh.CalculateCenterAndBounds();
+	// Only fold the new vertices into the existing centre and bounds when those are known to describe the vertices
+	// already present. An empty base has nothing to be wrong about, and a valid box means some earlier pass computed
+	// them; anything else — most often a mesh whose Vertices were populated by hand — falls back to the full walk,
+	// because incremental arithmetic on top of a stale centre would silently drift.
+	const int32 TotalVertexCount = BaseMesh.Vertices.Num();
+	if (VertexOffset == 0)
+	{
+		BaseMesh.Center = AddedSum / TotalVertexCount;
+		BaseMesh.Bounds = AddedBounds;
+		BaseMesh.bHasBounds = BaseMesh.Bounds.IsValid != 0;
+	}
+	else if (BaseMesh.Bounds.IsValid != 0)
+	{
+		// Reconstruct the running total from the mean it was divided into, add the new one, and divide again.
+		BaseMesh.Center = ((BaseMesh.Center * VertexOffset) + AddedSum) / TotalVertexCount;
+		BaseMesh.Bounds += AddedBounds;
+		BaseMesh.bHasBounds = BaseMesh.Bounds.IsValid != 0;
+	}
+	else
+	{
+		BaseMesh.CalculateCenterAndBounds();
+	}
+
 	BaseMesh.InvalidateValidation();
 }
 

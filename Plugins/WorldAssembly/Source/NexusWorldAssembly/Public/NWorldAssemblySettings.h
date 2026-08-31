@@ -77,6 +77,42 @@ struct FNWorldAssemblyWorldCollisionSettings
 
 
 /**
+ * Controls whether world collision is baked into the level and read back, rather than gathered afresh on every run.
+ *
+ * Kept deliberately apart from FNWorldAssemblyWorldCollisionSettings, whose every field is hashed into the
+ * fingerprint that decides whether a bake is still valid. These are policy about the cache rather than inputs to the
+ * geometry it holds, so folding them into that struct would make toggling one of them invalidate every cache in the
+ * project — a rebake of every level for a setting that changed no geometry.
+ */
+USTRUCT(BlueprintType)
+struct FNWorldAssemblyCollisionCacheSettings
+{
+	GENERATED_BODY()
+
+	/** When true, saving a level bakes any organ whose world collision has changed since its last bake. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Cache On Save",
+		meta=(ToolTip="Bake world collision into the level when it is saved. Organs whose geometry has not changed are skipped."))
+	bool bCacheOnSave = true;
+
+	/** When true, an assembly reads a valid cache instead of gathering the world. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Use Cache",
+		meta=(ToolTip="Let an assembly read baked world collision instead of gathering the world again. Turn off to always gather fresh."))
+	bool bUseCache = true;
+
+	/**
+	 * When true, a cache is fingerprinted against the live world before it is trusted.
+	 *
+	 * Leaving this on costs one pass over the filtered actors per organ — real, but the small half of the work, since
+	 * the expensive part is extracting, hull-converting, and merging the geometry that the cache still skips.
+	 * @note Turning it off trusts whatever was baked. Correct only for a level whose geometry is genuinely fixed after
+	 *       load; anything spawned or streamed in before the assembly runs becomes invisible to collision.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Validate Cache",
+		meta=(ToolTip="Check a cache against the live world before trusting it, falling back to a fresh gather when it no longer matches. Turning this off trusts whatever was baked."))
+	bool bValidateCache = true;
+};
+
+/**
  * Tuning for the junction-connector pass, which pairs junctions the graph builders left unmatched and proves a
  * collision-free swept path between each pair.
  *
@@ -289,6 +325,11 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="World Collisions",
 		meta=(ToolTip="Settings used for world collision and avoidance."))
 	FNWorldAssemblyWorldCollisionSettings  WorldCollisionSettings;
+
+	/** Settings controlling whether world collision is baked into the level and read back instead of re-gathered. */
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="World Collision Cache",
+		meta=(ToolTip="Settings for baking world collision into the level so an assembly can read it instead of gathering the world again."))
+	FNWorldAssemblyCollisionCacheSettings CollisionCacheSettings;
 
 	/** Maximum number of full assembly attempts before a space is considered a complete failure. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="Retry Count",

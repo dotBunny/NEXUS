@@ -6,6 +6,7 @@
 #include "NWorldAssemblyMinimal.h"
 #include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
 #include "Math/NBoundsBVH.h"
+#include "NWorldCollisionBaker.h"
 #include "Types/NRawMeshUtils.h"
 
 void FNProcessVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
@@ -19,27 +20,40 @@ void FNProcessVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const 
 	// - Cache the location and the rotation
 	for (int32 i = 0; i < MeshCount; i++)
 	{
-		// Unwind Transform
-		VirtualWorldContextPtr->WorldCollisionMeshes[i].ApplyTransform(VirtualWorldContextPtr->WorldCollisionTransforms[i]);
+		// Unwind the transform, force convexity, and warm the face-plane cache — the last of which matters here
+		// because each FNOrganGraphBuilderTask copies these meshes, so a cache built now propagates through the copy
+		// and spares every organ a lazy rebuild on its first intersection query.
+		//
+		// Shared with the collision cache's bake and the editor's collision visualizer rather than written out here.
+		// This loop was the original definition of "what an assembly collides with", and while it was the only one,
+		// the visualizer drifted into drawing un-convexified geometry that no collision test ever honoured.
+		FNWorldCollisionBaker::BakeElement(VirtualWorldContextPtr->WorldCollisionMeshes[i],
+			VirtualWorldContextPtr->WorldCollisionTransforms[i]);
+	}
 
-		// If the mesh is not convex were going to do it right here
-		if (!VirtualWorldContextPtr->WorldCollisionMeshes[i].IsConvex())
-		{
-			VirtualWorldContextPtr->WorldCollisionMeshes[i] = FNRawMeshUtils::ToConvexHull(VirtualWorldContextPtr->WorldCollisionMeshes[i]);
-		}
-
-		// Warm the face-plane cache now, off the builder thread. Each FNOrganGraphBuilderTask copies these
-		// meshes, so a cache built here propagates through the copy and spares every organ a lazy rebuild on
-		// its first intersection query.
-		VirtualWorldContextPtr->WorldCollisionMeshes[i].EnsureCachedFacePlanes();
+	// Fold in whatever the capture phase resolved from the level's collision cache. These were baked — transform
+	// applied, hull made convex, face planes warmed — at the time they were cached, so they join the array already
+	// in the form the loop above has just produced for everything else.
+	//
+	// Appended here rather than in the capture phase so this task's loop does not re-bake them, and before the
+	// broadphase below so a builder's mesh indices cover the whole set and stay stable for the rest of the run.
+	if (!VirtualWorldContextPtr->CachedWorldCollisionMeshes.IsEmpty())
+	{
+		VirtualWorldContextPtr->WorldCollisionMeshes.Append(MoveTemp(VirtualWorldContextPtr->CachedWorldCollisionMeshes));
+		VirtualWorldContextPtr->CachedWorldCollisionMeshes.Reset();
 	}
 
 	// Build the broadphase now that every mesh is baked into world space, so its bounds are final. Built once here
 	// and never mutated again, which is what lets every organ builder in every pass query it concurrently.
 	{
+		// Counted afresh rather than reusing MeshCount, which was taken before the cached hulls were appended and
+		// covers only the gathered ones. Indexing the broadphase with it would leave every cached hull out of the
+		// tree while the meshes themselves stayed in the array — geometry present but never queried.
+		const int32 TotalMeshCount = VirtualWorldContextPtr->WorldCollisionMeshes.Num();
+
 		TArray<FBox> MeshBounds;
-		MeshBounds.Reserve(MeshCount);
-		for (int32 i = 0; i < MeshCount; i++)
+		MeshBounds.Reserve(TotalMeshCount);
+		for (int32 i = 0; i < TotalMeshCount; i++)
 		{
 			const FNRawMesh& Mesh = VirtualWorldContextPtr->WorldCollisionMeshes[i];
 			const bool bHasBounds = Mesh.HasBounds();

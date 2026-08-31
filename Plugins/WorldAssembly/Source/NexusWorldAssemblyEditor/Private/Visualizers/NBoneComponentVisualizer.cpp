@@ -5,7 +5,7 @@
 
 #include "NWorldAssemblyEditorColors.h"
 #include "NWorldAssemblySettings.h"
-#include "NWorldCollisionCache.h"
+#include "NWorldCollisionPreview.h"
 #include "Math/NMeshBVH.h"
 #include "Organ/NBoneComponent.h"
 #include "Types/NRawMesh.h"
@@ -42,15 +42,23 @@ float FNBoneComponentVisualizer::GetCachedWorldPenetration(const UNBoneComponent
 {
 	const UWorld* World = BoneComponent->GetWorld();
 
-	// Kick a background rebuild if this world's collision changed. This never blocks: the gather + merge + BVH build
-	// happen off the draw (see FNWorldCollisionCache async path), so a viewport redraw is always cheap even right after
-	// an edit. Each world is tracked independently, so this never disturbs another viewport's published data.
-	FNWorldCollisionCache::RequestAsyncRefresh(World);
+	// Read straight from the level's baked collision, which is the geometry an assembly will actually test against.
+	// Nothing is gathered here: a bake does not happen while you work, so the merge and BVH behind this are memoized
+	// and only rebuilt when a geometry edit or a bake invalidates them.
+	//
+	// Notably, moving a bone does not invalidate anything — bones carry no collision and are filtered out of the bake
+	// entirely — so the readout stays live through exactly the edit it exists to support.
+	const FNWorldCollisionPreview::EState PreviewState = FNWorldCollisionPreview::GetState(World);
+	if (PreviewState != FNWorldCollisionPreview::EState::Available)
+	{
+		// Said out loud rather than silently reading zero, which would look like "this bone is clear". Sampling then
+		// continues against the last baked state when there is one — an out-of-date answer the user has been told
+		// about beats no answer at all, and beats a confident wrong zero.
+		FNWorldCollisionPreview::NotifyUnavailable(BoneComponent->GetWorld(), PreviewState);
+	}
 
-	// The memo entry stays valid until NEW results publish for this bone's world (ResultsGeneration bumps only on a
-	// publish, not on invalidation) — so during a rebuild we keep drawing the last-known value, and a rebuild in one
-	// world never invalidates bones drawn for another.
-	const uint32 Generation = FNWorldCollisionCache::GetResultsGeneration(World);
+	// Bumped whenever the preview could differ from a previous read, so the per-bone memo below refreshes with it.
+	const uint32 Generation = FNWorldCollisionPreview::GetGeneration(World);
 
 	// Per-bone inputs that change the result independently of world geometry.
 	const FTransform CurrentTransform = BoneComponent->GetComponentTransform();
@@ -84,28 +92,28 @@ float FNBoneComponentVisualizer::GetCachedWorldPenetration(const UNBoneComponent
 	// has been published yet (first build still running) both are null and we report 0 until results land and bump the
 	// generation above.
 	float WorldPenetration = 0.f;
-	const TSharedPtr<const FNMeshBVH> WorldCollisionBVH = FNWorldCollisionCache::GetPublishedBVH(World);
-	const TSharedPtr<const FNRawMesh> WorldCollisionMesh = FNWorldCollisionCache::GetPublishedMesh(World);
-	if (WorldCollisionBVH.IsValid() && WorldCollisionMesh.IsValid() && WorldCollisionMesh->Loops.Num() > 0)
+	const FNRawMesh& WorldCollisionMesh = FNWorldCollisionPreview::GetMesh(World);
+	if (WorldCollisionMesh.Loops.Num() > 0)
 	{
+		const FNMeshBVH& WorldCollisionBVH = FNWorldCollisionPreview::GetBVH(World);
 		const TArray<FVector> CornerPoints = BoneComponent->GetWorldCornerPoints(Settings->SocketSize);
 
 		// The merged world-collision mesh is non-convex in any real level; sample it through the BVH, which reproduces
 		// FNRawMeshUtils::ComputePointDepthInsideNonConvex exactly but visits only the geometry near each corner. The
 		// convex / non-triangle degenerate cases (trivial single-body test levels) keep the original exact path, whose
 		// convex face-plane metric the BVH does not replicate.
-		if (!FNWorldCollisionCache::IsPublishedMeshConvex(World) && !FNWorldCollisionCache::PublishedMeshHasNonTris(World))
+		if (!WorldCollisionMesh.IsConvex() && !WorldCollisionMesh.HasNonTris())
 		{
 			for (const FVector& Corner : CornerPoints)
 			{
-				WorldPenetration = FMath::Max(WorldPenetration, WorldCollisionBVH->GetPointDepth(Corner));
+				WorldPenetration = FMath::Max(WorldPenetration, WorldCollisionBVH.GetPointDepth(Corner));
 			}
 		}
 		else
 		{
 			for (const FVector& Corner : CornerPoints)
 			{
-				const float Depth = FNRawMeshUtils::GetIntersectDepth(*WorldCollisionMesh, FVector::ZeroVector, FRotator::ZeroRotator, Corner);
+				const float Depth = FNRawMeshUtils::GetIntersectDepth(WorldCollisionMesh, FVector::ZeroVector, FRotator::ZeroRotator, Corner);
 				WorldPenetration = FMath::Max(WorldPenetration, Depth);
 			}
 		}

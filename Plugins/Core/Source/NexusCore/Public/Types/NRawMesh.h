@@ -27,6 +27,10 @@ struct NEXUSCORE_API FNRawMesh
 	friend class UNCellHullVertexTool;
 	friend class FNRawMeshUtils;
 	friend class FNRawMeshFactory;
+	// Persists the validation flags alongside the geometry. They are settled during a bake, and a mesh read back from
+	// a cache loads with its dirty flag clear — so writing them straight back is what stops every cached hull paying
+	// for a fresh convexity check on the first query that touches it.
+	friend struct FNWorldCollisionPool;
 
 	GENERATED_BODY()
 

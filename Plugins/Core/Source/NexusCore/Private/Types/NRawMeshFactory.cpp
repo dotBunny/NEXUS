@@ -24,7 +24,34 @@ namespace NEXUS::Core::RawMeshFactory
 	constexpr double LandscapeTraceMargin = 100.0;
 }
 
-void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const TArray<FBoxSphereBounds>& ContainingBounds, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms)
+namespace
+{
+	/**
+	 * Append one provenance record per mesh emitted since FirstMeshIndex, for callers that asked for provenance.
+	 *
+	 * Recorded by measuring the output array either side of an emit rather than threaded down through the append
+	 * helpers, so the several routes a single body can take (aggregate geometry, render data, cooked tri mesh, and the
+	 * fallbacks between them) all get correct records without any of them having to know provenance exists.
+	 * @param OutSources Destination; a null pointer makes this a no-op, which is the ordinary case.
+	 * @param FirstMeshIndex Size of the mesh array immediately before the emit.
+	 * @param MeshCount Size of the mesh array immediately after it.
+	 * @param Component Primitive that produced the meshes in that range.
+	 * @param InstanceIndex Instance that produced them, or INDEX_NONE for a non-instanced primitive.
+	 */
+	void RecordMeshSources(TArray<FNRawMeshSource>* OutSources, const int32 FirstMeshIndex, const int32 MeshCount,
+		const UPrimitiveComponent* Component, const int32 InstanceIndex)
+	{
+		if (OutSources == nullptr) return;
+
+		OutSources->Reserve(OutSources->Num() + (MeshCount - FirstMeshIndex));
+		for (int32 i = FirstMeshIndex; i < MeshCount; ++i)
+		{
+			OutSources->Add(FNRawMeshSource{ Component, InstanceIndex, i - FirstMeshIndex });
+		}
+	}
+}
+
+void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const TArray<FBoxSphereBounds>& ContainingBounds, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms, TArray<FNRawMeshSource>* OutSources)
 {
 	// Static meshes compile async in editor; force any pending compiles to finish so every BodySetup is populated.
 	FNDeveloperUtils::WaitForStaticMeshCompilation();
@@ -56,6 +83,18 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 		for (UPrimitiveComponent* ActorPrimitive : ActorPrimitives)
 		{
 			if (!ActorPrimitive || !ActorPrimitive->IsRegistered()) continue;
+
+			// A primitive with its collision switched off has no collision representation in the world, whatever its
+			// source asset carries. Without this the check above is the only one made, and it is actor-wide: an actor
+			// that collides at all had every one of its primitives read, no-collision ones included.
+			//
+			// The case that exposed it is a container actor holding PCG-generated instances set to No Collision beside
+			// a separately baked collider — the arrangement whose whole point is that the instances do not collide.
+			// Both were emitted, so the geometry appeared twice and an assembly avoided space nothing occupies.
+			//
+			// GetCollisionEnabled already folds in the owning actor's own flag, so this subsumes the actor-level test
+			// rather than duplicating it.
+			if (ActorPrimitive->GetCollisionEnabled() == ECollisionEnabled::NoCollision) continue;
 			// Single-sourced with the terrain classification in FNActorUtils, so the class-name heuristic behind both
 			// cannot drift — and so an engine rename fails that class's tests rather than silently emptying a mesh here.
 			if (FNActorUtils::IsLandscapeClassName(ActorPrimitive->GetClass()->GetName())) continue;
@@ -86,6 +125,8 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 					FTransform InstanceWorld;
 					InstanceStaticMesh->GetInstanceTransform(i, InstanceWorld,true);
 
+					const int32 MeshCountBeforeInstance = OutMeshes.Num();
+
 					if (!bUseComplexAsSimple)
 					{
 						const int32 MeshCountBeforeAggregate = OutMeshes.Num();
@@ -113,11 +154,14 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 						// cooked Chaos tri mesh, placed at this instance's world transform.
 						FromChaosBodySetup(Body, InstanceWorld, OutMeshes, OutTransforms);
 					}
+
+					RecordMeshSources(OutSources, MeshCountBeforeInstance, OutMeshes.Num(), InstanceStaticMesh, i);
 				}
 				continue;
 			}
 
 			const FTransform CompToWorld = ActorPrimitive->GetComponentTransform();
+			const int32 MeshCountBeforePrimitive = OutMeshes.Num();
 
 			if (bUseComplexAsSimple)
 			{
@@ -133,6 +177,7 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 						{
 							OutMeshes.Add(MoveTemp(InstanceMesh));
 							OutTransforms.Add(CompToWorld);
+							RecordMeshSources(OutSources, MeshCountBeforePrimitive, OutMeshes.Num(), ActorPrimitive, INDEX_NONE);
 							continue;
 						}
 					}
@@ -146,6 +191,7 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 				}
 
 				FromChaosBodySetup(Body, CompToWorld, OutMeshes, OutTransforms);
+				RecordMeshSources(OutSources, MeshCountBeforePrimitive, OutMeshes.Num(), ActorPrimitive, INDEX_NONE);
 				continue;
 			}
 
@@ -170,6 +216,8 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 			{
 				FromChaosBodySetup(Body, CompToWorld, OutMeshes, OutTransforms);
 			}
+
+			RecordMeshSources(OutSources, MeshCountBeforePrimitive, OutMeshes.Num(), ActorPrimitive, INDEX_NONE);
 		}
 	}
 }

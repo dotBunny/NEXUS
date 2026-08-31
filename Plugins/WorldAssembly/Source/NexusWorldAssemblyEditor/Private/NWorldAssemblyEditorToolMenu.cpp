@@ -59,8 +59,17 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 			return EVisibility::Collapsed;
 		});
 
+		// Divides the section from whatever the level editor put before it, so it has to stand while *anything* in the
+		// section does — not only while the mode button does. Keyed to the button alone, entering the edit mode took
+		// the divider away with the button and left the Quick Assembly cluster butted against its neighbour.
+		//
+		// Each half names the predicate its own entries use, rather than a broader test that happens to cover both:
+		// the divider then follows them automatically if either gains a condition.
+		NexusGlobalSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_QuickAssemblySeparator",
+			(FNWorldAssemblyEditorCommands::WorldAssemblyEdMode_CanShow() || FNWorldAssemblyEditorToolMenu::ShowOrganDropdown())
+				? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
+
 		// Add a button that if a NCellActor/Pin is selected and were not in the ToolMode it will show and clicking switches mode
-		NexusGlobalSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_QuickAssemblySeparator", FNWorldAssemblyEditorCommands::WorldAssemblyEdMode_CanShow() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
 
 		const FToolMenuEntry NWorldAssemblyEdMode_Button = FToolMenuEntry::InitToolBarButton(
 					"NWorldAssemblyEdMode_Button",
