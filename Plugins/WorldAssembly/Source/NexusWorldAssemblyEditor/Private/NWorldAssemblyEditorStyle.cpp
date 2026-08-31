@@ -55,6 +55,8 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 	Style.Set("ClassThumbnail.NCell",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NCell"), Icon128x128));
 	Style.Set("ClassIcon.NTissue", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NTissue"), Icon16x16));
 	Style.Set("ClassThumbnail.NTissue",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Classes/ClassIcon_NTissue"), Icon128x128));
+	Style.Set("ClassIcon.NWorldCollisionCacheActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Tools/Tool_CollisionVisualizer"), Icon16x16));
+	Style.Set("ClassThumbnail.NWorldCollisionCacheActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Tools/Tool_CollisionVisualizer"), Icon128x128));
 
 	// TOOLS
 	Style.Set("Tool.CollisionVisualizer", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Tools/Tool_CollisionVisualizer"), Icon20x20));
@@ -69,6 +71,10 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 	Style.Set("Rail.World.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rails/Rail_World"), Icon20x20));
 	Style.Set("Rail.Cell.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rails/Rail_Cell"), Icon20x20));
 	Style.Set("Rail.CellData.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rails/Rail_CellData"), Icon20x20));
+
+	// WORLD RAIL
+	Style.Set("Command.BakeWorldCollision", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_BakeWorldCollision"), Icon20x20));
+
 
 	// JUNCTION RAIL
 	Style.Set("Rail.Junction.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Rails/Rail_Junction"), Icon20x20));

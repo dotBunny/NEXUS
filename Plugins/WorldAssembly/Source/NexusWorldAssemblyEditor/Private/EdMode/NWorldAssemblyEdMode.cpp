@@ -29,6 +29,7 @@
 #include "Tools/NJunctionPlacementTool.h"
 #include "Developer/NPrimitiveFont.h"
 #include "NWorldAssemblyEditorUtils.h"
+#include "NWorldCollisionPreview.h"
 #include "NWorldAssemblySettings.h"
 #include "NWorldAssemblyUtils.h"
 #include "Assembly/Tasks/NCreateVirtualWorldTask.h"
@@ -207,14 +208,14 @@ void UNWorldAssemblyEdMode::OnActorDeleted(AActor* Actor)
 	{
 		// The visualizer itself was removed (e.g. deleted by the user) — stop listening and clear our state.
 		UnbindWorldChangeDelegates();
-		CollisionSourceActors.Reset();
 		bCollisionVisualizerDirty = false;
 		CollisionVisualizer = nullptr;
 	}
-	else if (CollisionVisualizer != nullptr && CollisionSourceActors.Contains(FObjectKey(Actor)))
+	else if (CollisionVisualizer != nullptr)
 	{
-		// A source actor was deleted; it can no longer pass the live filter (it's pending kill), so the source-set
-		// membership is what tells us the visualizer needs rebuilding.
+		// Any deletion re-reads the preview. There is no source-actor set to test membership against any more: what
+		// the visualizer draws comes from the level's baked pool, and FNWorldCollisionPreview decides for itself
+		// whether that pool still matches the world.
 		MarkCollisionVisualizerDirty();
 	}
 }
@@ -246,25 +247,22 @@ TObjectPtr<ANDebugActor> UNWorldAssemblyEdMode::RefreshCollisionVisualizer(UWorl
 		Timer.Emplace(TEXT("World Collision Build Time"));
 	}
 
-	TArray<AActor*> SourceActors;
-	CollisionVisualizer = FNWorldAssemblyEditorUtils::RefreshWorldCollisionVisualizerActor(
-		World, TArray<FBoxSphereBounds>(), CollisionVisualizer, SourceActors);
+	// Nothing baked, or baked and since gone stale — say why rather than drawing an empty visualizer, which would read
+	// as "this level has no collision" when it means "nobody has baked it".
+	const FNWorldCollisionPreview::EState PreviewState = FNWorldCollisionPreview::GetState(World);
+	if (PreviewState != FNWorldCollisionPreview::EState::Available)
+	{
+		FNWorldCollisionPreview::NotifyUnavailable(World, PreviewState);
+	}
+
+	CollisionVisualizer = FNWorldAssemblyEditorUtils::RefreshWorldCollisionVisualizerActor(World, CollisionVisualizer);
 
 	bCollisionVisualizerDirty = false;
 
 	if (CollisionVisualizer == nullptr)
 	{
-		// Nothing was spawned (no geometry / no material) — nothing to track or listen for.
-		CollisionSourceActors.Reset();
+		// Nothing was spawned (nothing baked / no material) — nothing to listen for.
 		return nullptr;
-	}
-
-	// Refresh the source set used to test relevance of future world changes.
-	CollisionSourceActors.Reset();
-	CollisionSourceActors.Reserve(SourceActors.Num());
-	for (const AActor* SourceActor : SourceActors)
-	{
-		CollisionSourceActors.Add(FObjectKey(SourceActor));
 	}
 
 	// Start listening only once a visualizer is actually alive.
@@ -279,7 +277,6 @@ TObjectPtr<ANDebugActor> UNWorldAssemblyEdMode::RefreshCollisionVisualizer(UWorl
 void UNWorldAssemblyEdMode::TearDownCollisionVisualizer()
 {
 	UnbindWorldChangeDelegates();
-	CollisionSourceActors.Reset();
 	bCollisionVisualizerDirty = false;
 
 	if (CollisionVisualizer != nullptr)
@@ -344,10 +341,9 @@ bool UNWorldAssemblyEdMode::ShouldRebuildForActor(const AActor* Actor) const
 {
 	if (Actor == nullptr || CollisionVisualizer == nullptr) return false;
 
-	// Was it part of the geometry we last built? (covers delete / collision-off / ignore-tag-added transitions)
-	if (CollisionSourceActors.Contains(FObjectKey(Actor))) return true;
-
-	// Is it relevant now? (covers add / collision-on transitions) — same predicate the visualizer build uses.
+	// Only "is it collision geometry now". The old half of this test — membership in the set the visualizer was last
+	// built from — went with the gather: the visualizer no longer builds from a set of actors, it reads the level's
+	// baked pool, and the deletion case that set used to catch is handled by refreshing on every deletion instead.
 	return FNActorUtils::PassesFilter(Actor, FNCreateVirtualWorldTask::CreateWorldActorFilterSettings(UNWorldAssemblySettings::Get()->WorldCollisionSettings));
 }
 

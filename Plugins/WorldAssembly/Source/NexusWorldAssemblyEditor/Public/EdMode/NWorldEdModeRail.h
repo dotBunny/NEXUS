@@ -46,6 +46,20 @@ public:
 	/** @return true if an organ volume can be added: the level is not itself a cell. */
 	static bool AddOrganVolume_CanExecute();
 
+	/**
+	 * Bake the world collision the level's organs assemble against into the level's collision cache.
+	 *
+	 * Acts on the selected organs when any are selected, and on every organ in the level otherwise — so the common
+	 * case is one click with nothing selected, and narrowing to a single organ is a matter of selecting it first.
+	 * @note Always a forced re-bake, unlike the save-time pass. Someone reaching for this button has a reason to
+	 *       distrust what is stored, and a button that silently did nothing because a fingerprint still matched
+	 *       would be no way to act on that.
+	 */
+	static void CacheWorldCollision();
+
+	/** @return true if the level holds an organ to bake and the editor is not in a play session. */
+	static bool CacheWorldCollision_CanExecute();
+
 	/** Add or remove the world-collision-ignore tag across the current actor selection. */
 	static void TagCollisionIgnore();
 	/**
@@ -71,6 +85,7 @@ private:
 	static TSharedPtr<FUICommandList> CategoryCommandList;
 
 	static TSharedPtr<FUICommandInfo> CommandInfo_ToggleCollisionVisualizer;
+	static TSharedPtr<FUICommandInfo> CommandInfo_CacheWorldCollision;
 
 	static TSharedPtr<FUICommandInfo> CommandInfo_AddCellActor;
 	static TSharedPtr<FUICommandInfo> CommandInfo_AddOrganVolume;

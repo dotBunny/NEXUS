@@ -10,6 +10,30 @@
 #include "PhysicsEngine/SphylElem.h"
 
 /**
+ * Provenance of one mesh emitted by FNRawMeshFactory::FromActorsInBounds — which primitive produced it, and where in
+ * that primitive's output it sat.
+ *
+ * Emitted only when a caller asks for it, and parallel to that method's OutMeshes / OutTransforms. It exists so a
+ * consumer that persists emitted geometry can name each piece precisely enough to recognize it again in a later
+ * gather: the component identifies the source, InstanceIndex separates the instances of an instanced primitive, and
+ * ElementOrdinal separates the several meshes one body can emit — one per aggregate-geometry element, or per Chaos
+ * tri mesh. Together the three are stable across gathers for as long as the source geometry is unchanged.
+ * @note Holds a borrowed component pointer, valid only while the gather that produced it is on the stack. A consumer
+ *       that outlives the gather must resolve it to something durable (a name, a hash) before the array is discarded.
+ */
+struct FNRawMeshSource
+{
+	/** Primitive that produced the mesh. Never null in an emitted record. */
+	const UPrimitiveComponent* Component = nullptr;
+
+	/** Instance that produced it, for an instanced primitive; INDEX_NONE for every other primitive. */
+	int32 InstanceIndex = INDEX_NONE;
+
+	/** Ordinal of this mesh within the output of that one component/instance, counted from zero. */
+	int32 ElementOrdinal = 0;
+};
+
+/**
  * Builds FNRawMesh instances from Unreal's collision and rendering primitives.
  *
  * Each factory method emits mesh-local vertices plus, where applicable, an accompanying element-to-world
@@ -27,6 +51,10 @@ public:
 	 * representation as FNRawMesh entries, along with parallel world-space transforms.
 	 * - Only actors whose world-space bounds intersect at least one of the
 	 *   supplied ContainingBounds are processed. Passing an empty array skips the overlap test entirely.
+	 * - Primitives whose collision is disabled are skipped. Collision on the source asset is not enough — a component
+	 *   set to No Collision occupies no space in the world, and reading its body setup anyway would report geometry
+	 *   that nothing can hit. This is per primitive rather than per actor, so an actor that collides through one
+	 *   component does not drag in its non-colliding ones.
 	 * - Aggregate-geometry path covers FKConvexElem, FKBoxElem, FKSphereElem and FKSphylElem (capsule).
 	 * - Complex-as-simple falls back to the source static-mesh render data (route 1) or Chaos TriMeshGeometries (route 2).
 	 * - A body that emits no simple geometry falls back to its complex tri mesh, so a mesh whose only collision is
@@ -37,11 +65,14 @@ public:
 	 * @param ContainingBounds Actor-bounds filter; an actor is processed when its bounds overlap any one of these. Skipped when empty.
 	 * @param OutMeshes Each mesh in element-local space, appended to the array.
 	 * @param OutTransforms Matching world-space transform per entry in OutMeshes.
+	 * @param OutSources Optional; when supplied, receives one FNRawMeshSource per emitted mesh, parallel to OutMeshes.
+	 *        Callers that only consume the geometry should leave it null — the records cost an allocation per mesh and
+	 *        are only of use to a consumer that needs to identify the same element in a later gather.
 	 * @note In editor builds, force-flushes any pending async static-mesh compilation (via FNDeveloperUtils::WaitForStaticMeshCompilation)
 	 *       so actor bounds and BodySetups are fully populated before reading.
 	 */
 	static void FromActorsInBounds(const TArray<AActor*>& Actors, const TArray<FBoxSphereBounds>& ContainingBounds,
-		TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms);
+		TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms, TArray<FNRawMeshSource>* OutSources = nullptr);
 
 	/**
 	 * Emits an FKBoxElem as an 8-vertex / 12-triangle FNRawMesh. The element's Center and Rotation are

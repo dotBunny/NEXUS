@@ -42,17 +42,15 @@ public:
 	 * visualizer. When ExistingActor is null a fresh actor is spawned, but only if there is geometry to show and the
 	 * visualizer material is configured.
 	 *
-	 * @param World World to iterate for collision sources and to spawn the visualizer actor into. Must be valid.
-	 * @param Bounds Containment volumes; only actors whose bounds fit inside at least one are visualized.
+	 * @param World World to read the baked collision from and to spawn the visualizer actor into. Must be valid.
 	 * @param ExistingActor Live visualizer to refresh in place, or null to spawn a new one.
-	 * @param OutSourceActors Receives every actor that passed the collision filter — the visualizer's source set, used
-	 *        by callers to decide whether a later world change is relevant to the visualizer.
 	 * @return The visualizer actor (ExistingActor when supplied; otherwise the newly spawned actor, or null when there
 	 *         was nothing to show or no material). Editor-only / diagnostic — do not use in shipping content.
+	 * @note Shows the level's baked collision, so an unbaked level has nothing to draw — ask FNWorldCollisionPreview
+	 *       for the reason and surface it rather than treating an empty result as "no collision here".
 	 * @note Performs a synchronous load of the configured visualizer material.
 	 */
-	static ANDebugActor* RefreshWorldCollisionVisualizerActor(UWorld* World, const TArray<FBoxSphereBounds>& Bounds,
-		ANDebugActor* ExistingActor, TArray<AActor*>& OutSourceActors);
+	static ANDebugActor* RefreshWorldCollisionVisualizerActor(UWorld* World, ANDebugActor* ExistingActor);
 
 	/** @return true if the actor participates in generated cell data (has a cell-root or junction component). */
 	FORCEINLINE static bool EffectsGeneratedData(const AActor* ContextActor)

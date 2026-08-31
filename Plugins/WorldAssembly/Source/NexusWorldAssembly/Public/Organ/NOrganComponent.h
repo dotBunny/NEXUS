@@ -8,6 +8,7 @@
 #include "NWorldAssemblySettings.h"
 #include "Cell/NCellJunctionConnectorEntry.h"
 #include "Math/NMersenneTwister.h"
+#include "Organ/NOrganCollisionCache.h"
 #include "Types/NPositionRotation.h"
 #include "NOrganComponent.generated.h"
 
@@ -197,6 +198,17 @@ public:
 	/** Stable unique identifier for this organ, used to keep generation deterministic across runs. */
 	UPROPERTY(VisibleAnywhere, Category = "Organ Component|Operation")
 	FGuid Identifier = FGuid::NewGuid();
+
+	/**
+	 * What world collision this organ was last baked against, as a fingerprint plus keys into the level's pool.
+	 *
+	 * Not exposed for editing: it is derived state, rebuilt by the ed mode's cache action or at level save, and read
+	 * during assembly to skip gathering geometry that has not changed. An empty or mismatched cache costs nothing but
+	 * a fresh gather. The details customization surfaces a read-only summary of it.
+	 * @see FNOrganCollisionCache
+	 */
+	UPROPERTY()
+	FNOrganCollisionCache CollisionCache;
 
 	//~UActorComponent
 	virtual void BeginPlay() override;

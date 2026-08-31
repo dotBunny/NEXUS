@@ -557,6 +557,98 @@ N_TEST_HIGH(FNRawMeshFactoryTests_FromActorsInBounds_StaticMeshActor_ProducesGeo
 	});
 }
 
+N_TEST_CRITICAL(FNRawMeshFactoryTests_FromActorsInBounds_NoCollisionPrimitiveEmitsNothing,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromActorsInBounds::NoCollisionPrimitiveEmitsNothing",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// A component set to No Collision occupies no space in the world, however much collision its source asset
+	// carries. Reading its body setup anyway reports geometry nothing can hit — which is what made PCG-generated
+	// instances, deliberately set to No Collision beside a separately baked collider, show up as world collision
+	// and made assemblies avoid space nothing occupies.
+	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	{
+		UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube"));
+		if (Cube == nullptr)
+		{
+			ADD_ERROR("Failed to load /Engine/BasicShapes/Cube");
+			return;
+		}
+
+		AStaticMeshActor* MeshActor = World->SpawnActor<AStaticMeshActor>();
+		if (MeshActor == nullptr)
+		{
+			ADD_ERROR("Failed to spawn AStaticMeshActor");
+			return;
+		}
+
+		UStaticMeshComponent* MeshComponent = MeshActor->GetStaticMeshComponent();
+		MeshComponent->SetMobility(EComponentMobility::Movable);
+		MeshComponent->SetStaticMesh(Cube);
+
+		// The actor still collides as far as the actor-level flag is concerned; only the component is switched off.
+		// That combination is the whole point: an actor-scoped test alone would admit this geometry.
+		MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		const TArray<AActor*> Actors = { MeshActor };
+		const TArray<FBoxSphereBounds> NoBounds;
+		TArray<FNRawMesh> OutMeshes;
+		TArray<FTransform> OutTransforms;
+
+		FNRawMeshFactory::FromActorsInBounds(Actors, NoBounds, OutMeshes, OutTransforms);
+
+		CHECK_EQUALS("A No Collision primitive must emit no geometry.", OutMeshes.Num(), 0);
+		CHECK_EQUALS("A No Collision primitive must emit no transforms.", OutTransforms.Num(), 0);
+	});
+}
+
+N_TEST_HIGH(FNRawMeshFactoryTests_FromActorsInBounds_CollidingSiblingStillEmits,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromActorsInBounds::CollidingSiblingStillEmits",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// The other half of the rule, and the one that keeps the fix from over-reaching: switching one component off must
+	// not silence the rest of the actor. A container holding both a baked collider and non-colliding instances has to
+	// keep contributing the collider.
+	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	{
+		UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube"));
+		if (Cube == nullptr)
+		{
+			ADD_ERROR("Failed to load /Engine/BasicShapes/Cube");
+			return;
+		}
+
+		AStaticMeshActor* MeshActor = World->SpawnActor<AStaticMeshActor>();
+		if (MeshActor == nullptr)
+		{
+			ADD_ERROR("Failed to spawn AStaticMeshActor");
+			return;
+		}
+
+		// The root component collides; a second one on the same actor does not.
+		UStaticMeshComponent* Colliding = MeshActor->GetStaticMeshComponent();
+		Colliding->SetMobility(EComponentMobility::Movable);
+		Colliding->SetStaticMesh(Cube);
+		Colliding->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+		UStaticMeshComponent* NonColliding = NewObject<UStaticMeshComponent>(MeshActor);
+		NonColliding->SetupAttachment(MeshActor->GetRootComponent());
+		NonColliding->RegisterComponent();
+		NonColliding->SetMobility(EComponentMobility::Movable);
+		NonColliding->SetStaticMesh(Cube);
+		NonColliding->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		const TArray<AActor*> Actors = { MeshActor };
+		const TArray<FBoxSphereBounds> NoBounds;
+		TArray<FNRawMesh> OutMeshes;
+		TArray<FTransform> OutTransforms;
+
+		FNRawMeshFactory::FromActorsInBounds(Actors, NoBounds, OutMeshes, OutTransforms);
+
+		CHECK_MESSAGE(TEXT("A colliding component must still emit when a sibling has collision switched off."),
+			OutMeshes.Num() > 0);
+	});
+}
+
 /*
  * FromLandscapesInBounds's guards. What it does with a real landscape needs one in a world with an initialized physics
  * scene, which is beyond a unit test — so what is pinned here is that it stays inert everywhere else, since it is

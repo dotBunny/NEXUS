@@ -29,6 +29,7 @@ namespace UnrealBuildTool.Rules
 					"Chaos",
 					"DeveloperSettings",
 					"GeometryFramework",
+					"PhysicsCore",
 					"Projects",
 		]
 			);

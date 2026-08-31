@@ -344,8 +344,6 @@ private:
 	UPROPERTY()
 	TObjectPtr<ANDebugActor> CollisionVisualizer;
 
-	/** Actors that sourced the geometry of the live visualizer; lets change delegates test relevance in O(1). */
-	TSet<FObjectKey> CollisionSourceActors;
 
 	/** Set by the world-change delegates when the visualizer needs rebuilding; consumed (and cleared) in ModeTick. */
 	bool bCollisionVisualizerDirty = false;

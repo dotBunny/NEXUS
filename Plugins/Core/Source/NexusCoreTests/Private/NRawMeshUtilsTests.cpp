@@ -200,6 +200,64 @@ N_TEST_CRITICAL(FNRawMeshUtilsTests_CombineMesh_Identity_AppendsAndShiftsIndices
 	CHECK_EQUALS("Appended loop's third index should be shifted past Base's existing vertices", AppendedLoop.Indices[2], BaseVertexCount + 2);
 }
 
+N_TEST_CRITICAL(FNRawMeshUtilsTests_CombineMesh_CenterAndBoundsMatchAFullRecompute,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::CombineMesh::CenterAndBoundsMatchAFullRecompute",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	using namespace NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness;
+
+	// CombineMesh accumulates centre and bounds over just the vertices it appends, rather than re-walking everything
+	// merged so far — which is what stops a merge loop being quadratic. This pins the arithmetic: after a run of
+	// merges the incremental answer must equal what a full recompute would have produced.
+	FNRawMesh Merged;
+	for (int32 i = 0; i < 8; ++i)
+	{
+		FNRawMesh Piece = MakeCube(10.0);
+		const FTransform PieceTransform(FRotator(0.0, 15.0 * i, 0.0), FVector(100.0 * i, 50.0 * i, -25.0 * i));
+		FNRawMeshUtils::CombineMesh(FTransform::Identity, Merged, PieceTransform, Piece);
+	}
+
+	const FVector IncrementalCenter = Merged.Center;
+	const FBox IncrementalBounds = Merged.Bounds;
+
+	// The reference: the same mesh, measured the slow way.
+	FNRawMesh Reference = Merged;
+	Reference.CalculateCenterAndBounds();
+
+	CHECK_MESSAGE(TEXT("Incrementally accumulated centre must match a full recompute."),
+		IncrementalCenter.Equals(Reference.Center, 0.01));
+	CHECK_MESSAGE(TEXT("Incrementally accumulated bounds minimum must match a full recompute."),
+		IncrementalBounds.Min.Equals(Reference.Bounds.Min, 0.01));
+	CHECK_MESSAGE(TEXT("Incrementally accumulated bounds maximum must match a full recompute."),
+		IncrementalBounds.Max.Equals(Reference.Bounds.Max, 0.01));
+	CHECK_MESSAGE(TEXT("A merged mesh must report having bounds."), Merged.HasBounds());
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_CombineMesh_HandBuiltBaseStillMeasuredCorrectly,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::CombineMesh::HandBuiltBaseStillMeasuredCorrectly",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	using namespace NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness;
+
+	// The case the incremental path must refuse: a base whose Vertices were populated directly, so its centre and
+	// bounds were never computed and cannot be built upon. Folding new vertices into that stale state would drift,
+	// so such a merge falls back to the full walk.
+	FNRawMesh HandBuilt;
+	HandBuilt.Vertices = { { -50, -50, -50 }, { 50, -50, -50 }, { 50, 50, -50 } };
+	HandBuilt.Loops.Add(FNRawMeshLoop(0, 1, 2));
+
+	FNRawMesh Piece = MakeCube(10.0);
+	FNRawMeshUtils::CombineMesh(FTransform::Identity, HandBuilt, FTransform::Identity, Piece);
+
+	FNRawMesh Reference = HandBuilt;
+	Reference.CalculateCenterAndBounds();
+
+	CHECK_MESSAGE(TEXT("A hand-built base must still end up with a correct centre."),
+		HandBuilt.Center.Equals(Reference.Center, 0.01));
+	CHECK_MESSAGE(TEXT("A hand-built base must still end up with correct bounds."),
+		HandBuilt.Bounds.Min.Equals(Reference.Bounds.Min, 0.01) && HandBuilt.Bounds.Max.Equals(Reference.Bounds.Max, 0.01));
+}
+
 N_TEST_CRITICAL(FNRawMeshUtilsTests_CombineMesh_FaceLoops_BothSidesHaveThem_AppendedWithShift,
 	"NEXUS::UnitTests::NCore::FNRawMeshUtils::CombineMesh::FaceLoops_BothSidesHaveThem_AppendedWithShift",
 	N_TEST_CONTEXT_ANYWHERE)

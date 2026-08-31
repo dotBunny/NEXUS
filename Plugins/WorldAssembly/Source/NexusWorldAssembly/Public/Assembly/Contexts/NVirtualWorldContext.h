@@ -8,6 +8,8 @@
 #include "Math/NBoundsBVH.h"
 #include "Types/NRawMesh.h"
 
+class UNOrganComponent;
+
 /**
  * Snapshot of the target world's collision geometry used by graph-builder collision tests.
  *
@@ -43,6 +45,24 @@ public:
 
 	/** Initial captured transforms before baking */
 	TArray<FTransform> WorldCollisionTransforms;
+
+	/**
+	 * Hulls resolved from the level's baked collision cache, already in the finished form the builders consume.
+	 *
+	 * Kept apart from WorldCollisionMeshes because those still need FNProcessVirtualWorldTask to bake them, and these
+	 * were baked when they were cached. That task concatenates the two before building the broadphase, so by the time
+	 * any organ builder runs the distinction is gone and every index is stable.
+	 */
+	TArray<FNRawMesh> CachedWorldCollisionMeshes;
+
+	/**
+	 * Organs taking part in this operation, in the order they were registered.
+	 *
+	 * Present so the capture phase can ask each organ whether its own cache still describes the world, rather than
+	 * having to treat InputBounds — already flattened into a union by then — as one indivisible region. An operation
+	 * assembled without organs (a test harness, say) leaves this empty and captures exactly as it always did.
+	 */
+	TArray<TObjectPtr<UNOrganComponent>> InputOrgans;
 
 	/** Cell nodes already placed by earlier passes; each entry has matching mesh/location/rotation. */
 	TArray<FNAssemblyGraphCellNode*> NodeIndex;

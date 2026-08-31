@@ -30,7 +30,8 @@
 #include "EdMode/NWorldAssemblyEdModeToolCommands.h"
 #include "NWorldAssemblyEditorUndo.h"
 #include "EdMode/NWorldAssemblyEdMode.h"
-#include "NWorldCollisionCache.h"
+#include "NWorldCollisionPreview.h"
+#include "NWorldCollisionCacheSave.h"
 #include "UnrealEdGlobals.h"
 #include "Customizations/NOrganComponentCustomization.h"
 #include "Customizations/NWorldAssemblyEditorUserSettingsCustomization.h"
@@ -57,7 +58,7 @@ void FNWorldAssemblyEditorModule::ShutdownModule()
 
 	// Remove the world-collision cache's async ticker and drain any in-flight background build before the module (and
 	// the static function it ticks into) can be unloaded — otherwise Live Coding / editor shutdown would dangle it.
-	FNWorldCollisionCache::Shutdown();
+	FNWorldCollisionPreview::Unregister();
 
 	// Drop the asset-registry hooks registered in OnPostEngineInit. Use the module pointer so we don't force the
 	// AssetRegistry module to load during shutdown if it's already gone.
@@ -70,6 +71,9 @@ void FNWorldAssemblyEditorModule::ShutdownModule()
 	}
 	AssetRenamedHandle.Reset();
 	AssetRemovedHandle.Reset();
+
+	// Drop the collision cache's own save and geometry-change hooks.
+	FNWorldCollisionCacheSave::Unregister();
 
 	// Drop the world save hooks registered in OnPostEngineInit.
 	FEditorDelegates::PreSaveWorldWithContext.Remove(PreSaveWorldHandle);
@@ -157,6 +161,14 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 
 	PreSaveWorldHandle = FEditorDelegates::PreSaveWorldWithContext.AddStatic(&UAssetDefinition_NCell::OnPreSaveWorldWithContext);
 	PostSaveWorldHandle = FEditorDelegates::PostSaveWorldWithContext.AddStatic(&UAssetDefinition_NCell::OnPostSaveWorldWithContext);
+
+	// Owns its own save hook rather than riding the cell one above: that hook is about a cell level's side-car, this
+	// is about a destination level's baked world collision, and the two never apply to the same level.
+	FNWorldCollisionCacheSave::Register();
+
+	// The preview memoizes the level's baked collision for the visualizer and the bone readout; these hooks are what
+	// tell it a geometry edit has made that memo stale.
+	FNWorldCollisionPreview::Register();
 
 	// Initialize Tool Menu
 	if (FSlateApplication::IsInitialized())

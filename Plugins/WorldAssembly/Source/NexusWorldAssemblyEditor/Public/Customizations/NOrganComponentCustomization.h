@@ -35,6 +35,18 @@ private:
 	/** Remove previously-spawned generated proxies for the selected organ component(s). */
 	FReply OnClearClicked(TArray<TWeakObjectPtr<UObject>> Object);
 
+	/**
+	 * @return A read-only description of the selected organ's baked world collision, and whether it still matches
+	 * the level. Reports a count instead when several organs are selected.
+	 * @note Fingerprints the live world on each poll, so it answers whether a run right now could use the cache
+	 *       rather than merely whether one was ever baked. That costs a pass over the filtered actors while the
+	 *       organ's details are on screen, which is why nothing else in the plugin polls it.
+	 */
+	FText GetCollisionCacheSummary() const;
+
+	/** Re-bake the selected organs' world collision, regardless of whether their fingerprints still match. */
+	FReply OnBakeCollisionCacheClicked(TArray<TWeakObjectPtr<UObject>> Objects);
+
 	/** @return Visible only while an operation is running for the selected component(s). */
 	EVisibility CancelButtonVisible() const;
 

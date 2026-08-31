@@ -4,6 +4,7 @@
 #include "EdMode/NWorldAssemblyModeToolkit.h"
 
 #include "IAssetViewport.h"
+#include "NEditorUtils.h"
 #include "NUIEditorStyle.h"
 #include "NWorldAssemblyEditorStyle.h"
 #include "NWorldAssemblyEditorUserSettings.h"
@@ -116,7 +117,16 @@ void FNWorldAssemblyModeToolkit::CreateOverlays()
 		.InitialAlignmentOffset(FVector2f(RailInset, RailInset))
 		.Cursor(EMouseCursor::Default)
 		.Draggable(false)
-		.Visibility(EVisibility::SelfHitTestInvisible)
+		// Gone entirely during play. The overlay lives on the level viewport, which is what an in-viewport PIE session
+		// draws into, so a static visibility here leaves the strip sitting over the running game. Collapsed rather
+		// than Hidden so it neither draws nor takes space, and it comes back on its own when play ends.
+		//
+		// Bound rather than added and removed around PIE for the same reason the panel below is bound: an overlay can
+		// outlive the toolkit that added it, and this way nothing has to be unwound.
+		.Visibility_Lambda([]()
+		{
+			return FNEditorUtils::IsPlayInEditor() ? EVisibility::Collapsed : EVisibility::SelfHitTestInvisible;
+		})
 		.Content()
 		[
 			SNew(SBorder)
@@ -152,6 +162,11 @@ void FNWorldAssemblyModeToolkit::CreateOverlays()
 		// a bound attribute is read on paint. Both widgets inside hold their own copy the same way.
 		.Visibility_Lambda([State = RailState]()
 		{
+			// Play wins over the category state: the panel draws into the same viewport an in-viewport PIE session
+			// renders to, so it goes for the duration regardless of which category is open, and returns to whatever
+			// was showing when play ends.
+			if (FNEditorUtils::IsPlayInEditor()) return EVisibility::Collapsed;
+
 			const bool bHasCategory = State.IsValid() && State->GetActiveIndex() != INDEX_NONE;
 			return bHasCategory ? EVisibility::SelfHitTestInvisible : EVisibility::Collapsed;
 		})

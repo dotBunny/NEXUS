@@ -31,6 +31,28 @@ public:
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 	/**
+	 * Resolve whatever the level's baked collision cache can answer, and report what is left to gather.
+	 * @param OutResolvedKeys Receives the keys satisfied from the cache, so the gather can skip re-emitting them.
+	 * @param OutMissedBounds Receives the bounds of the organs whose caches could not be used.
+	 * @param bOutMissedUnbounded Set when a missed organ is unbounded, making the remaining gather whole-level.
+	 * @param bOutAnyMissed Set when at least one organ still has to be gathered.
+	 * @param bOutLandscapeResolved Set when the caller need not sample landscape itself — either the cached section
+	 *        was current, or landscape is not being captured at all.
+	 * @return true when the cache was consulted at all; false when there is none, or it is turned off, or it was
+	 *         baked against a different world origin — in which case the caller captures exactly as it always did,
+	 *         over the whole operation's bounds.
+	 */
+	bool TryCaptureFromCache(TSet<uint64>& OutResolvedKeys, TArray<FBoxSphereBounds>& OutMissedBounds,
+		bool& bOutMissedUnbounded, bool& bOutAnyMissed, bool& bOutLandscapeResolved) const;
+
+	/**
+	 * Sample the landscape surface into the capture by tracing the live physics scene.
+	 * @note Only reached when the cached landscape section could not answer. Game-thread only, and the most expensive
+	 *       thing this task does — one downward trace per sample, over the whole landscape.
+	 */
+	void SampleLandscape() const;
+
+	/**
 	 * @return The shared filter settings used to gather collision-source actors from the world.
 	 * @note ExclusionFunction is deliberately left unset. It is the end-user hook, and nothing this filter needs is
 	 *       user policy — everything below is either a project setting or a framework invariant.

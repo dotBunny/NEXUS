@@ -15,7 +15,7 @@
 #include "EdMode/NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyRegistry.h"
 #include "NWorldAssemblyUtils.h"
-#include "NWorldCollisionCache.h"
+#include "NWorldCollisionPreview.h"
 #include "Selection.h"
 #include "Engine/Level.h"
 #include "Misc/ScopedSlowTask.h"
@@ -25,12 +25,14 @@
 #include "Macros/NFlagsMacros.h"
 #include "Organ/NOrganVolume.h"
 
-ANDebugActor* FNWorldAssemblyEditorUtils::RefreshWorldCollisionVisualizerActor(UWorld* World, const TArray<FBoxSphereBounds>& Bounds,
-	ANDebugActor* ExistingActor, TArray<AActor*>& OutSourceActors)
+ANDebugActor* FNWorldAssemblyEditorUtils::RefreshWorldCollisionVisualizerActor(UWorld* World, ANDebugActor* ExistingActor)
 {
-	// Single producer of the merged world-collision mesh: shared with the bone penetration readout via
-	// FNWorldCollisionCache. Build also reports the source actors so the ed mode can track relevance for refreshes.
-	const FNRawMesh MergedMesh = FNWorldCollisionCache::Build(World, Bounds, &OutSourceActors);
+	// The level's baked collision, shared with the bone penetration readout through FNWorldCollisionPreview. Nothing
+	// is gathered: what is drawn is the geometry an assembly will collide against, not a second derivation of it.
+	//
+	// Bounds are gone from this signature along with the gather — the pool is scoped by the organs that reference it,
+	// which is the same thing the caller used to express by passing none.
+	const FNRawMesh& MergedMesh = FNWorldCollisionPreview::GetMesh(World);
 
 	UMaterialInterface* VisualizerMaterial = UNWorldAssemblyEditorSettings::Get()->CollisionVisualizerMaterial.LoadSynchronous();
 
