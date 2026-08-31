@@ -304,9 +304,9 @@ bool FNWorldCollisionBaker::BakeLandscape(const UWorld* World, const FNWorldAsse
 	return true;
 }
 
+#if WITH_EDITOR
 FNWorldCollisionBaker::FNOnWorldCollisionBaked FNWorldCollisionBaker::OnBaked;
 
-#if WITH_EDITOR
 FNWorldCollisionBaker::FBakeResult FNWorldCollisionBaker::BakeWorld(UWorld* World,
 	const FNWorldAssemblyWorldCollisionSettings& Settings, const bool bForce)
 {

@@ -20,12 +20,12 @@ ANWorldCollisionCacheActor::ANWorldCollisionCacheActor(const FObjectInitializer&
 	SetHidden(true);
 	SetCanBeDamaged(false);
 
+#if WITH_EDITORONLY_DATA
 	// Always loaded under World Partition, as ANOrganVolume is. The pool describes the whole level and is asked for by
 	// name rather than found by location, so leaving it spatially loaded ties whether a level appears baked at all to
 	// whether the region around the world origin — where this is spawned — happens to be loaded.
 	bIsSpatiallyLoaded = false;
 
-#if WITH_EDITORONLY_DATA
 	// AInfo builds a billboard and roots the actor on it, which puts an info icon at the world origin of every baked
 	// level. There is nothing to look at or click here — the actor is a container for data nobody edits by hand, found
 	// by name rather than by eye — so the icon is only something to trip over in the viewport. It stays in the Outliner.
