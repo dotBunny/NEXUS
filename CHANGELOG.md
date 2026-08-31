@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.3.5] - ?
+## [0.3.5] - 2026-08-31
 
 > Two changes below alter what counts as world collision — primitives with their collision switched off are no longer
 > read as geometry, and every consumer now measures the convex hulls an assembly actually collides against. Recalculate
@@ -673,6 +673,7 @@
 - `NPicker` *Selection functionality for points and other items.*
 - `NUI` *Components for creating a user interface based on UMG/Slate.*
 
+[0.3.5]: https://github.com/dotBunny/NEXUS/compare/v0.3.2...v0.3.5
 [0.3.2]: https://github.com/dotBunny/NEXUS/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/dotBunny/NEXUS/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/dotBunny/NEXUS/compare/v0.2.7...v0.3.0
