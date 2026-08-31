@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.4.0] - ?
+
 ## [0.3.5] - 2026-08-31
 
 > Two changes below alter what counts as world collision — primitives with their collision switched off are no longer
