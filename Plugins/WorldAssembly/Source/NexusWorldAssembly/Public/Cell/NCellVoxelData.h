@@ -25,7 +25,7 @@ ENUM_CLASS_FLAGS(ENCellVoxel)
  * Stored packed as a flat uint8 array keyed by (X, Y, Z); N_FLAT_3D_ARRAY_BASE provides the
  * indexing helpers. Sized from the cell's unit-bounds / unit-size.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/cell-voxel-data/">FNCellVoxelData</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/cell-voxel-data/">FNCellVoxelData</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSWORLDASSEMBLY_API FNCellVoxelData

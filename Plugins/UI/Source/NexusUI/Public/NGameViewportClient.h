@@ -13,7 +13,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FOnToggleWorldRenderingDelegate, bo
 
 /**
  * A viewport with some base functionality added.
- * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/game-viewport-client/">UNGameViewportClient</a>
+ * @see <a href="https://nexus-framework.com/docs/ui/types/game-viewport-client/">UNGameViewportClient</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Game Viewport Client", BlueprintType)
 class NEXUSUI_API UNGameViewportClient : public UCommonGameViewportClient
@@ -28,7 +28,7 @@ public:
 	 * @param bNewValue Should the world render?
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Toggle World Rendering", Category = "NEXUS|User Interface",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-viewport-client/#toggle-world-rendering"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/game-viewport-client/#toggle-world-rendering"))
 	void ToggleWorldRendering(const bool bNewValue)
 	{
 		OnToggleWorldRendering.Broadcast(bNewValue);

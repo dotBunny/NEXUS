@@ -27,7 +27,7 @@ namespace UE::ToolWidgets
  *       palette is pinned while its details window is not: the strip is a target the user aims at, the window is
  *       something they move out of the way. This class only positions the two, persists where the user put the
  *       movable one, and keeps both attached to whichever viewport is active.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyModeToolkit final : public FModeToolkit
 {

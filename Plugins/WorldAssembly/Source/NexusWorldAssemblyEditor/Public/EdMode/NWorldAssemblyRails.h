@@ -11,7 +11,7 @@
  * and writes the selection, SNWorldAssemblyRailPanel reads it to decide what to show. Neither widget owns the other,
  * and they live in separate viewport overlays, so the state they agree on cannot live in either of them.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyRails
 {

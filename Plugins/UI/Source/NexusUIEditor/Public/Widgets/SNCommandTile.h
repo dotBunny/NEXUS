@@ -26,7 +26,7 @@ class FUICommandList;
  * @remark Sized rather than uniform. Tiles do not negotiate a common size with each other, so a group of them wants a
  *         panel that lays out fixed-size children — an SWrapBox with UseAllottedSize is what the World Assembly edit
  *         mode's rail puts them in, and is the layout the defaults below are tuned for.
- * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/widgets/command-tile/">SNCommandTile</a>
+ * @see <a href="https://nexus-framework.com/docs/ui/editor-types/widgets/command-tile/">SNCommandTile</a>
  */
 class NEXUSUIEDITOR_API SNCommandTile final : public SCompoundWidget
 {

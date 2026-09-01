@@ -12,7 +12,7 @@
  * with respect to AddOperationContext/RemoveOperationContext. No references into the backing maps ever escape the
  * lock, so callers cannot observe a dangling entry.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-library/#operation-context-cache">Operation Context Cache</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/world-assembly-library/#operation-context-cache">Operation Context Cache</a>
  */
 class NEXUSWORLDASSEMBLY_API FNWorldAssemblyContextCache
 {

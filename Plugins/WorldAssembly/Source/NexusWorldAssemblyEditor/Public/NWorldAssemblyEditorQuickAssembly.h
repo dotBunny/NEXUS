@@ -21,7 +21,7 @@ class UNOrganComponent;
  * @note Owns the target organ, the tracked operation ticket and the toolbar progress fill, rather than leaving them
  *       on the tool menu that draws them. The menu, the style's icon attribute and the subsystem all read this;
  *       nothing here reads back out to the menu, which is what keeps the dependency one-way.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/">World Assembly</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/">World Assembly</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyEditorQuickAssembly
 {

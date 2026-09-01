@@ -13,7 +13,7 @@
 /**
  * Provides various functions for generating points in the plane of a circle using different
  * random generation strategies (deterministic, non-deterministic, seeded).
- * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/circle/">UNCirclePickerLibrary</a>
+ * @see <a href="https://nexus-framework.com/docs/picker/distributions/circle/">UNCirclePickerLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Circle Picker Library")
 class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
@@ -29,7 +29,7 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	 * @returns An array of generated points.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Next Point", Category = "NEXUS|Picker|Circle",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/circle/#next-point", WorldContext = "WorldContextObject"))
+		meta=(DocsURL="https://nexus-framework.com/docs/picker/distributions/circle/#next-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> NextPoint(UPARAM(ref) FNCirclePickerParams& Params, UNMersenneTwisterObject* TwisterObject, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
@@ -50,7 +50,7 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	 * @returns An array of generated points.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random Point", Category = "NEXUS|Picker|Circle",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/circle/#random-point", WorldContext = "WorldContextObject"))
+		meta=(DocsURL="https://nexus-framework.com/docs/picker/distributions/circle/#random-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> RandomPoint(UPARAM(ref) FNCirclePickerParams& Params, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
@@ -71,7 +71,7 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	 * @returns An array of generated points.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Tracked Point", Category = "NEXUS|Picker|Circle",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/circle/#tracked-point", WorldContext = "WorldContextObject"))
+		meta=(DocsURL="https://nexus-framework.com/docs/picker/distributions/circle/#tracked-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> TrackedPoint(UPARAM(ref) FNCirclePickerParams& Params, UPARAM(ref) int32& Seed, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
@@ -92,7 +92,7 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	 * @returns An array of generated points.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Circle: One-Shot Point", Category = "NEXUS|Picker|Circle",
-	meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/circle/#one-shot-point", WorldContext = "WorldContextObject"))
+	meta=(DocsURL="https://nexus-framework.com/docs/picker/distributions/circle/#one-shot-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> OneShotPoint(UPARAM(ref) FNCirclePickerParams& Params, const int32 Seed, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;

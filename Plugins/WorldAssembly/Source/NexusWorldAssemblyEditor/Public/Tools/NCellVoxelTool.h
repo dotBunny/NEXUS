@@ -26,7 +26,7 @@ public:
  * Replaces the voxel half of FNCellRootComponentVisualizer's hit-proxy editing. Each toggle is its own transaction,
  * as it was before, and turns off the cell's calculate-on-save so the save pass does not overwrite the hand edit.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 UCLASS()
 class NEXUSWORLDASSEMBLYEDITOR_API UNCellVoxelTool : public UNCellToolBase, public IClickBehaviorTarget

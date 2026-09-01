@@ -36,7 +36,7 @@ public:
  * sub-mode so the existing overlay drawing (UNWorldAssemblyEdMode's cache refresh, and FNCellRootComponentVisualizer's
  * point rendering) follows whichever tool is running.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 UCLASS(Abstract)
 class NEXUSWORLDASSEMBLYEDITOR_API UNCellToolBase : public UInteractiveTool

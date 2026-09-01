@@ -15,7 +15,7 @@
 
 /**
  * A set of functionality made to extend DrawDebug commands.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/draw-debug-helpers/">FNDrawDebugHelpers</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/draw-debug-helpers/">FNDrawDebugHelpers</a>
  */
 class NEXUSCORE_API FNDrawDebugHelpers
 {

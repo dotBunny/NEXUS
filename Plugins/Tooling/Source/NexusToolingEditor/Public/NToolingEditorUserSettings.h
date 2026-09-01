@@ -18,7 +18,7 @@ namespace NEXUS::Tooling::MultiplayerTest
  * keeps their own values (frame-rate cap, visualization colors, graph navigation ergonomics).
  * Property edits re-apply immediately via PostEditChangeProperty.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/tooling/user-settings/">User Settings</a>
+ * @see <a href="https://nexus-framework.com/docs/tooling/user-settings/">User Settings</a>
  */
 UCLASS(config = NexusUserSettings, meta = (DisplayName = "Tooling (User)"))
 class NEXUSTOOLINGEDITOR_API UNToolingEditorUserSettings : public UDeveloperSettings

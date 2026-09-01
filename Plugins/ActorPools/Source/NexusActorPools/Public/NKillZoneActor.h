@@ -9,7 +9,7 @@
 
 /**
  * A specialized AActor base-class designed as a killzone for actors.
- * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/kill-zone-actor/">ANKillZoneActor</a>
+ * @see <a href="https://nexus-framework.com/docs/actor-pools/types/kill-zone-actor/">ANKillZoneActor</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Kill Zone Actor")
 class NEXUSACTORPOOLS_API ANKillZoneActor : public AActor

@@ -27,7 +27,7 @@ struct NEXUSACTORPOOLS_API FNActorPoolDefinition
 
 /**
  * A UDataAsset that serves as a collection of preconfigured FNActorPoolSettings.
- * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-set/">UNActorPoolSet</a>
+ * @see <a href="https://nexus-framework.com/docs/actor-pools/types/actor-pool-set/">UNActorPoolSet</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Pool Set")
 class NEXUSACTORPOOLS_API UNActorPoolSet : public UDataAsset

@@ -10,7 +10,7 @@
 /**
  * Provides various functions for generating points inside or on the surface of the FOrientedBox using different
  * random generation strategies (deterministic, non-deterministic, seeded).
- * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/oriented-box/">FNOrientedBoxPicker</a>
+ * @see <a href="https://nexus-framework.com/docs/picker/distributions/oriented-box/">FNOrientedBoxPicker</a>
  */
 class NEXUSPICKER_API FNOrientedBoxPicker
 {

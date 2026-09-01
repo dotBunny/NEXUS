@@ -27,6 +27,6 @@ class UNLevelBlueprintValidator : public UEditorValidatorBase
 
 	/** Format string for the warning/error message; substitutes in the node count and level name. */
 	FTextFormat TextFormat = NSLOCTEXT("NexusToolingEditor", "LevelScriptBlueprintValidator",
-		"A LevelScriptBlueprint has been detected in use with {0} nodes in the level({1}).\nFor more information visit https://nexus-framework.com/docs/plugins/tooling/validators/level-blueprint-validator/");
+		"A LevelScriptBlueprint has been detected in use with {0} nodes in the level({1}).\nFor more information visit https://nexus-framework.com/docs/tooling/validators/level-blueprint-validator/");
 
 };

@@ -13,7 +13,7 @@ class UNListView;
 
 /**
  * Developer overlay widget that lists every live ENDynamicRef slot and FName bucket in the active world(s).
- * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/developer-overlay/">UNDynamicRefsDeveloperOverlay</a>
+ * @see <a href="https://nexus-framework.com/docs/dynamic-references/developer-overlay/">UNDynamicRefsDeveloperOverlay</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | DynamicRefs Developer Overlay", BlueprintType, Abstract)
 class NEXUSDYNAMICREFS_API UNDynamicRefsDeveloperOverlay : public UNDeveloperOverlay

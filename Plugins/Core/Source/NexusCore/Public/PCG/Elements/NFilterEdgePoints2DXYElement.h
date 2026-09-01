@@ -42,7 +42,7 @@ struct FNFilterEdgePoints2DParams
  * previous ring has been taken away, so a Depth of three returns a band three points thick.
  *
  * @remark The border points are emitted on the OutsideFilter pin; InsideFilter carries the interior fill.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/pcg/elements/filter-edge-points-2d-xy/">UNFilterEdgePoints2DXYSettings</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/pcg/elements/filter-edge-points-2d-xy/">UNFilterEdgePoints2DXYSettings</a>
  */
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
 class UNFilterEdgePoints2DXYSettings : public UPCGSettings

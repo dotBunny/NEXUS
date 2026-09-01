@@ -13,7 +13,7 @@
 /**
  * Provides various functions for generating points the plane of an arc using different
  * random generation strategies (deterministic, non-deterministic, seeded).
- * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/arc/">UNArcPickerLibrary</a>
+ * @see <a href="https://nexus-framework.com/docs/picker/distributions/arc/">UNArcPickerLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Arc Picker Library")
 class NEXUSPICKER_API UNArcPickerLibrary : public UBlueprintFunctionLibrary
@@ -29,7 +29,7 @@ class NEXUSPICKER_API UNArcPickerLibrary : public UBlueprintFunctionLibrary
 	 * @returns An array of generated points.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Arc: Next Point", Category = "NEXUS|Picker|Arc",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/arc/#next-point", WorldContext = "WorldContextObject"))
+		meta=(DocsURL="https://nexus-framework.com/docs/picker/distributions/arc/#next-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> NextPoint(UPARAM(ref) FNArcPickerParams& Params, UNMersenneTwisterObject* TwisterObject, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
@@ -50,7 +50,7 @@ class NEXUSPICKER_API UNArcPickerLibrary : public UBlueprintFunctionLibrary
 	 * @returns An array of generated points.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Arc: Random Point", Category = "NEXUS|Picker|Arc",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/arc/#random-point", WorldContext = "WorldContextObject"))
+		meta=(DocsURL="https://nexus-framework.com/docs/picker/distributions/arc/#random-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> RandomPoint(UPARAM(ref) FNArcPickerParams& Params, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
@@ -71,7 +71,7 @@ class NEXUSPICKER_API UNArcPickerLibrary : public UBlueprintFunctionLibrary
 	 * @returns An array of generated points.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Arc: Tracked Point", Category = "NEXUS|Picker|Arc",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/arc/#tracked-point", WorldContext = "WorldContextObject"))
+		meta=(DocsURL="https://nexus-framework.com/docs/picker/distributions/arc/#tracked-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> TrackedPoint(UPARAM(ref) FNArcPickerParams& Params, UPARAM(ref) int32& Seed, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
@@ -92,7 +92,7 @@ class NEXUSPICKER_API UNArcPickerLibrary : public UBlueprintFunctionLibrary
 	 * @returns An array of generated points.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Arc: One-Shot Point", Category = "NEXUS|Picker|Arc",
-	meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/arc/#one-shot-point", WorldContext = "WorldContextObject"))
+	meta=(DocsURL="https://nexus-framework.com/docs/picker/distributions/arc/#one-shot-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> OneShotPoint(UPARAM(ref) FNArcPickerParams& Params, const int32 Seed, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;

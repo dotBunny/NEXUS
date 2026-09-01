@@ -18,7 +18,7 @@ struct FNCellRootDetails;
  *       FNWorldAssemblyEditorUtils::CanEditCell before invoking, which is also what keeps these out of PIE. AddActor
  *       is the one that runs before there is a cell, so its own gate is the World category's
  *       FNWorldEdModeRail::AddCellActor_CanExecute, which asks the opposite question.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyEditorCellUtils
 {

@@ -14,7 +14,7 @@ class FViewport;
  * output path that lands in Saved/Screenshots rather than beside the executable.
  *
  * While a PIE session is up it captures the game viewport; otherwise the active level viewport.
- * @see <a href="https://nexus-framework.com/docs/plugins/tooling/editor-types/quick-highres-screenshot/">FNQuickHighResScreenshot</a>
+ * @see <a href="https://nexus-framework.com/docs/tooling/editor-types/quick-highres-screenshot/">FNQuickHighResScreenshot</a>
  */
 class NEXUSTOOLINGEDITOR_API FNQuickHighResScreenshot
 {

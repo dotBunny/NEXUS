@@ -16,7 +16,7 @@ class ULevel;
  * whether it is looking at finished geometry or at a build in progress, and these are how it finds out. Both work off
  * the terrain classification in FNActorUtils, so they cover every representation that recognizes.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/terrain-utils/">FNTerrainUtils</a>
+ * @see <a href="https://nexus-framework.com/docs/core/editor-types/terrain-utils/">FNTerrainUtils</a>
  */
 class NEXUSCOREEDITOR_API FNTerrainUtils
 {

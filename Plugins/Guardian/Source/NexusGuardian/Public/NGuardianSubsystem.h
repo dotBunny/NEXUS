@@ -10,7 +10,7 @@
 
 /**
  * A developer-focused subsystem to help monitor specific metrics related to UObject usage.
- * @see <a href="https://nexus-framework.com/docs/plugins/guardian/">Guardian</a>
+ * @see <a href="https://nexus-framework.com/docs/guardian/">Guardian</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Guardian Subsystem")
 class NEXUSGUARDIAN_API UNGuardianSubsystem : public UTickableWorldSubsystem
@@ -37,7 +37,7 @@ public:
 	 * @note Thresholds are relative to this baseline; thresholds are evaluated only after it is set.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Set Baseline", Category = "NEXUS|Developer",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/guardian/types/guardian-subsystem/#setting-a-baseline"))
+		meta=(DocsURL="https://nexus-framework.com/docs/guardian/types/guardian-subsystem/#setting-a-baseline"))
 	void SetBaseline();
 
 	virtual void Tick(float DeltaTime) override;

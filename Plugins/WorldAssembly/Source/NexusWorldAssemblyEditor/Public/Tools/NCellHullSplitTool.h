@@ -27,7 +27,7 @@ public:
  * split point is the point on the edge closest to the click ray, so the vertex lands where the user aimed rather than
  * where the edge happens to be halved.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 UCLASS()
 class NEXUSWORLDASSEMBLYEDITOR_API UNCellHullSplitTool : public UNCellToolBase, public IClickBehaviorTarget, public IHoverBehaviorTarget

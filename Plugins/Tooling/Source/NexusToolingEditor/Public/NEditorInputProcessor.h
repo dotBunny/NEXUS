@@ -7,7 +7,7 @@
 
 /**
  * An editor-focused IInputProcessor tracking the state of standard modifier keys and other defined keys.
- * @see <a href="https://nexus-framework.com/docs/plugins/tooling/editor-types/input-processor/">FNEditorInputProcessor</a>
+ * @see <a href="https://nexus-framework.com/docs/tooling/editor-types/input-processor/">FNEditorInputProcessor</a>
  */
 class NEXUSTOOLINGEDITOR_API FNEditorInputProcessor : public IInputProcessor
 {

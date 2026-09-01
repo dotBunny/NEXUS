@@ -34,7 +34,7 @@ public:
  *
  * @note Adding vertices is UNCellHullSplitTool's job, not this one's. This tool used to carry an edge selection for
  *       the Split Hull Edge action to act on, which is the arrangement that tool replaced.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 UCLASS()
 class NEXUSWORLDASSEMBLYEDITOR_API UNCellHullVertexTool : public UNCellToolBase, public IClickBehaviorTarget

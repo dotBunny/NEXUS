@@ -29,10 +29,10 @@ enum class ENBoneMode : uint8
  * A bone marks a spot where the World Assembly pipeline should emit a cell-to-cell junction — its
  * transform, socket size, and type/requirements determine what fits there. In Automatic mode
  * the editor snaps the bone onto a safe location inside the owning organ.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/bone-component/">UNBoneComponent</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/bone-component/">UNBoneComponent</a>
  */
 UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Bone", meta=(BlueprintSpawnableComponent,
-	DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/bone-component"),
+	DocsURL="https://nexus-framework.com/docs/world-assembly/types/bone-component"),
 	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSWORLDASSEMBLY_API UNBoneComponent : public USceneComponent
 {

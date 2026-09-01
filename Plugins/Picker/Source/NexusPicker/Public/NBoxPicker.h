@@ -10,7 +10,7 @@
 /**
  * Provides various functions for generating points inside or on the surface of the FBox using different
  * random generation strategies (deterministic, non-deterministic, seeded).
- * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/box/">FNBoxPicker</a>
+ * @see <a href="https://nexus-framework.com/docs/picker/distributions/box/">FNBoxPicker</a>
  */
 class NEXUSPICKER_API FNBoxPicker
 {

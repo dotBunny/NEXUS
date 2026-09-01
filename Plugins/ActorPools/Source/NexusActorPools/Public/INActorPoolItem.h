@@ -33,7 +33,7 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnActorOperationalStateChangedDelegate, co
 
 /**
  * An interface to add support to an Actor allowing for it to be pooled more effectively with the ActorPoolSystem.
- * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-item/">UNActorPoolItem</a>
+ * @see <a href="https://nexus-framework.com/docs/actor-pools/types/actor-pool-item/">UNActorPoolItem</a>
  *
  * @note CannotImplementInterfaceInBlueprint is intentional and load-bearing; do not remove it without a full refactor.
  *       INActorPoolItem is a stateful C++ mixin, not a pure Blueprint-style contract: it owns the operational-state
@@ -52,7 +52,7 @@ class NEXUSACTORPOOLS_API UNActorPoolItem : public UInterface
 
 /**
  * An interface to add support to an Actor allowing for it to be pooled more effectively with the ActorPoolSystem.
- * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-item/">INActorPoolItem</a>
+ * @see <a href="https://nexus-framework.com/docs/actor-pools/types/actor-pool-item/">INActorPoolItem</a>
  */
 class NEXUSACTORPOOLS_API INActorPoolItem
 {

@@ -14,7 +14,7 @@
  *
  * @note Which of the two selections a command acts on is the command's decision, not this class's — only the
  *       world-collision tag means anything on a component, so only that command routes. See ToggleTagOnComponentSelection.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/">World Assembly</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/">World Assembly</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyEditorTagUtils
 {

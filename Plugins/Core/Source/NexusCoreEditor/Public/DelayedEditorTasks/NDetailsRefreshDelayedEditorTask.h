@@ -12,7 +12,7 @@
  *
  * Useful after registering or unregistering a detail customization at runtime — the panel
  * needs a refresh tick to pick up the change.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/delayed-editor-tasks/details-refresh-delayed-editor-task/">UNDetailsRefreshDelayedEditorTask</a>
+ * @see <a href="https://nexus-framework.com/docs/core/editor-types/delayed-editor-tasks/details-refresh-delayed-editor-task/">UNDetailsRefreshDelayedEditorTask</a>
  */
 UCLASS()
 class NEXUSCOREEDITOR_API UNDetailsRefreshDelayedEditorTask : public UNDelayedEditorTask

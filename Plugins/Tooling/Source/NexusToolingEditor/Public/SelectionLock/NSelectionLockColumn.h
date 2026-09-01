@@ -19,7 +19,7 @@ template<typename ItemType> class STableRow;
  *
  * Only actor rows get a widget; folder, level and world rows, and unloaded World Partition actors,
  * render blank because there are no primitive components for a lock to act on.
- * @see <a href="https://nexus-framework.com/docs/plugins/tooling/editor-types/selection-lock/selection-lock-column/">FNSelectionLockColumn</a>
+ * @see <a href="https://nexus-framework.com/docs/tooling/editor-types/selection-lock/selection-lock-column/">FNSelectionLockColumn</a>
  */
 class NEXUSTOOLINGEDITOR_API FNSelectionLockColumn : public ISceneOutlinerColumn
 {

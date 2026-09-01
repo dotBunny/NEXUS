@@ -10,7 +10,7 @@ class AActor;
  *
  * Extends LevelEditor.ActorContextMenu, which the Outliner's own context menu is registered as a
  * derived menu of, so the entry appears both on an Outliner row and on a viewport right-click.
- * @see <a href="https://nexus-framework.com/docs/plugins/tooling/editor-types/selection-lock/selection-lock-menu/">FNSelectionLockMenu</a>
+ * @see <a href="https://nexus-framework.com/docs/tooling/editor-types/selection-lock/selection-lock-menu/">FNSelectionLockMenu</a>
  */
 class NEXUSTOOLINGEDITOR_API FNSelectionLockMenu
 {

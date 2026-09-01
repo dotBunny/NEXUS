@@ -18,7 +18,7 @@
  *       (Maximum - Minimum), which overflows to infinity across the full representable span.
  * @note The Random* methods are half-open [Minimum, Maximum); the range itself is inclusive for the
  *       clamping and percentage methods.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/double-range/">FNDoubleRange</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/math/double-range/">FNDoubleRange</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNDoubleRange

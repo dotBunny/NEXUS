@@ -15,7 +15,7 @@ class UNActorPoolSpawnerComponent;
 
 /**
  * A centralized management system that provides UWorld-specific access to AActor pooling functionality, acting as the primary interface for creating, managing, and accessing multiple FNActorPools.
- * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/">UNActorPoolSubsystem</a>
+ * @see <a href="https://nexus-framework.com/docs/actor-pools/types/actor-pool-subsystem/">UNActorPoolSubsystem</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Pool Subsystem")
 class NEXUSACTORPOOLS_API UNActorPoolSubsystem : public UTickableWorldSubsystem
@@ -38,7 +38,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Actor", Category = "NEXUS|Actor Pools",
 		meta = (DeterminesOutputType = "ActorClass", DynamicOutputParam = "ReturnedActor",
-		DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#get-actor"))
+		DocsURL="https://nexus-framework.com/docs/actor-pools/types/actor-pool-subsystem/#get-actor"))
 	bool GetActor(TSubclassOf<AActor> ActorClass, AActor*& ReturnedActor);
 
 	/**
@@ -61,7 +61,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Spawn Actor", Category = "NEXUS|Actor Pools",
 		meta = (DeterminesOutputType = "ActorClass", DynamicOutputParam = "SpawnedActor",
-		DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#spawn-actor"))
+		DocsURL="https://nexus-framework.com/docs/actor-pools/types/actor-pool-subsystem/#spawn-actor"))
 	bool SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation, AActor*& SpawnedActor);
 
 	/**
@@ -82,7 +82,7 @@ public:
 	 * @return true if the Actor was handled (returned to a pool, or destroyed under the Destroy unknown behavior); false otherwise.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Return Actor", Category = "NEXUS|Actor Pools",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#return-actor"))
+		meta=(DocsURL="https://nexus-framework.com/docs/actor-pools/types/actor-pool-subsystem/#return-actor"))
 	bool ReturnActor(AActor* Actor);
 
 	/**
@@ -90,7 +90,7 @@ public:
 	 * @note Only pools whose settings have the ENActorPoolSupportFlags::ReturnAll support flag set are affected; pools without it are left untouched.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Return All Actors", Category = "NEXUS|Actor Pools",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#return-all-actors"))
+		meta=(DocsURL="https://nexus-framework.com/docs/actor-pools/types/actor-pool-subsystem/#return-all-actors"))
 	void ReturnAllActors();
 
 	/**
@@ -123,7 +123,7 @@ public:
 	 * @return true/false if a new pool was created.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Create Actor Pool", Category = "NEXUS|Actor Pools",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#create-actor-pool"))
+		meta=(DocsURL="https://nexus-framework.com/docs/actor-pools/types/actor-pool-subsystem/#create-actor-pool"))
 	bool CreateActorPool(TSubclassOf<AActor> ActorClass, FNActorPoolSettings Settings);
 
 	/**
@@ -132,7 +132,7 @@ public:
 	 * @return true/false if a pool already exists.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Has Actor Pool", Category = "NEXUS|Actor Pools",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#has-actor-pool"))
+		meta=(DocsURL="https://nexus-framework.com/docs/actor-pools/types/actor-pool-subsystem/#has-actor-pool"))
 	bool HasActorPool(const TSubclassOf<AActor>& ActorClass) const { return ActorPools.Contains(ActorClass); }
 
 	/**
@@ -140,7 +140,7 @@ public:
 	 * @param ActorPoolSet  The ActorPoolSet to evaluate.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Apply ActorPoolSet", Category = "NEXUS|Actor Pools",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#apply-actorpoolset"))
+		meta=(DocsURL="https://nexus-framework.com/docs/actor-pools/types/actor-pool-subsystem/#apply-actorpoolset"))
 	void ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet);
 
 	/**
@@ -149,7 +149,7 @@ public:
 	 * @return An FIntVector2 where X is the spawned (in-use) count and Y is the available count; a zeroed vector is returned if no pool exists.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get ActorPool Stats", Category = "NEXUS|Actor Pools",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#get-actorpool-stats"))
+		meta=(DocsURL="https://nexus-framework.com/docs/actor-pools/types/actor-pool-subsystem/#get-actorpool-stats"))
 	FIntVector2 GetActorPoolStats(const TSubclassOf<AActor> ActorClass) const
 	{
 		const TUniquePtr<FNActorPool>* Found = ActorPools.Find(ActorClass);

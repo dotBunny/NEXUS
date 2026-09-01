@@ -91,7 +91,7 @@ struct NEXUSCORE_API FNWorldActorFilterSettings
  * with Actor instances, particularly focusing on component access and manipulation.
  * Unlike UNActorLibrary, these utilities are only accessible from C++ code and not
  * exposed to Blueprints.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/actor-utils/">FNActorUtils</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/actor-utils/">FNActorUtils</a>
  */
 class NEXUSCORE_API FNActorUtils
 {

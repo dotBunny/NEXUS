@@ -17,7 +17,7 @@ struct FNRawMesh;
  * Grab-bag of World Assembly-specific utilities: cell-level side-car calculators, world/level accessors,
  * and small geometry helpers used by the cell and graph builder.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-utils/">FNWorldAssemblyUtils</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/world-assembly-utils/">FNWorldAssemblyUtils</a>
  */
 class NEXUSWORLDASSEMBLY_API FNWorldAssemblyUtils
 {

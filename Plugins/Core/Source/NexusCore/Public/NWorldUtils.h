@@ -8,7 +8,7 @@
 
 /**
  * A collection of native utility methods for working with worlds.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/world-utils/">FNWorldUtils</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/world-utils/">FNWorldUtils</a>
  */
 class FNWorldUtils
 {

@@ -29,7 +29,7 @@ public:
  * selected, leaving the user to position it by hand. Here the click both picks the owner — always the focused cell —
  * and supplies the placement, orienting the junction to face out of the surface it was dropped on.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 UCLASS()
 class NEXUSWORLDASSEMBLYEDITOR_API UNJunctionPlacementTool : public UNCellToolBase, public IClickBehaviorTarget

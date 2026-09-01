@@ -45,7 +45,7 @@
 
 /**
  * A set of utility functions related to accessing meta-information from graphs, nodes, classes, etc. accessed natively.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/meta-utils/">FNMetaUtils</a>
+ * @see <a href="https://nexus-framework.com/docs/core/editor-types/meta-utils/">FNMetaUtils</a>
  */
 class NEXUSCOREEDITOR_API FNMetaUtils
 {

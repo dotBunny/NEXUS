@@ -54,7 +54,7 @@ enum class ENActorPoolSpawnerDistribution : uint8
 
 /**
  * A fundamental spawning component which will interact with the UNActorPoolSubsystem to periodically spawn defined AActors in predefined distributions (shapes).
- * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/">UNActorPoolSpawnerComponent</a>
+ * @see <a href="https://nexus-framework.com/docs/actor-pools/types/actor-pool-spawner-component/">UNActorPoolSpawnerComponent</a>
  */
 UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Actor Pool Spawner", meta = (BlueprintSpawnableComponent),
 	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
@@ -124,12 +124,12 @@ public:
 	 * @param bIgnoreSpawningFlag Should the internal spawning flag state be ignored?
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Spawn", Category = "NEXUS|Actor Pools",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/#spawn"))
+		meta=(DocsURL="https://nexus-framework.com/docs/actor-pools/types/actor-pool-spawner-component/#spawn"))
 	void Spawn(bool bIgnoreSpawningFlag = false);
 
 	/** Disables the component's internal flag to stop any spawning from occurring. */
 	UFUNCTION(BlueprintCallable, DisplayName="Disable Spawning", Category = "NEXUS|Actor Pools",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/#disable-spawning"))
+		meta=(DocsURL="https://nexus-framework.com/docs/actor-pools/types/actor-pool-spawner-component/#disable-spawning"))
 	void DisableSpawning()
 	{
 		bSpawningEnabled = false;
@@ -137,7 +137,7 @@ public:
 
 	/** Enables the component's internal flag to allow spawning to occur (on by default). */
 	UFUNCTION(BlueprintCallable, DisplayName="Enable Spawning", Category = "NEXUS|Actor Pools",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/#enable-spawning"))
+		meta=(DocsURL="https://nexus-framework.com/docs/actor-pools/types/actor-pool-spawner-component/#enable-spawning"))
 	void EnableSpawning()
 	{
 		bSpawningEnabled = true;

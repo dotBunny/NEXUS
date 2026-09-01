@@ -20,7 +20,7 @@ class NEXUSWORLDASSEMBLY_API UNCellJunctionConnector : public UInterface
  *
  * Unlike a junction filler, which caps a single opening, a connector spans two — so it is spawned once per pairing
  * rather than once per junction, and only after both cells have streamed in.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/cell-junction-connector/">INCellJunctionConnector</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/cell-junction-connector/">INCellJunctionConnector</a>
  */
 class NEXUSWORLDASSEMBLY_API INCellJunctionConnector
 {

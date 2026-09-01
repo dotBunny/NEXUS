@@ -12,7 +12,7 @@
  * activating one swaps the content shown beside it. Kept separate from the per-category command classes that hold the
  * actions that content is filled with, so a category and its contents stay independently addressable.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class FNWorldAssemblyEdModePaletteCommands final : public TCommands<FNWorldAssemblyEdModePaletteCommands>
 {

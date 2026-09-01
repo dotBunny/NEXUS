@@ -17,10 +17,10 @@ class UNCell;
 /**
  * A collection of NCells
  * @remark Can think of this as a definition of multiple cell types used with tissue.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/tissue/">UNTissue</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/tissue/">UNTissue</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Tissue",
-	meta = (DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/tissue"))
+	meta = (DocsURL="https://nexus-framework.com/docs/world-assembly/types/tissue"))
 class NEXUSWORLDASSEMBLY_API UNTissue : public UDataAsset
 {
 	GENERATED_BODY()

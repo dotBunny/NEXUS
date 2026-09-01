@@ -28,7 +28,7 @@ public:
  * Replaces the bounds half of FNCellRootComponentVisualizer's hit-proxy editing: rather than clicking a drawn point
  * to arm the legacy transform widget, each corner carries its own translate gizmo for as long as the tool runs.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 UCLASS()
 class NEXUSWORLDASSEMBLYEDITOR_API UNCellBoundsTool : public UNCellToolBase

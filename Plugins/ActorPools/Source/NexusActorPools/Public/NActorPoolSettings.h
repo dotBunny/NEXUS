@@ -8,7 +8,7 @@
 
 /**
  * Strategy used by an FNActorPool when a new Actor is requested but no free Actor is available.
- * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-settings/#creation-strategies">ENActorPoolStrategy</a>
+ * @see <a href="https://nexus-framework.com/docs/actor-pools/types/actor-pool-settings/#creation-strategies">ENActorPoolStrategy</a>
  */
 UENUM(BlueprintType)
 enum class ENActorPoolStrategy : uint8
@@ -82,7 +82,7 @@ namespace NEXUS::ActorPools
 
 /**
  * A Blueprint-compatible struct that defines configuration parameters for managing object pooling inside a FNActorPool.
- * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-settings/">FNActorPoolSettings</a>
+ * @see <a href="https://nexus-framework.com/docs/actor-pools/types/actor-pool-settings/">FNActorPoolSettings</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSACTORPOOLS_API FNActorPoolSettings

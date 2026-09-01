@@ -12,7 +12,7 @@
  * them in an FNDynamicRefCollection in registration order, so a slot is a bucket rather than a single seat.
  * Slots are grouped by conceptual role (Location, Objective, Target, Secret, Spawn, Enemy, Pickup, Item)
  * to make manually assigning them in the editor ergonomic.
- * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref/">ENDynamicRef</a>
+ * @see <a href="https://nexus-framework.com/docs/dynamic-references/types/dynamic-ref/">ENDynamicRef</a>
  */
 UENUM(BlueprintType)
 enum ENDynamicRef : int32

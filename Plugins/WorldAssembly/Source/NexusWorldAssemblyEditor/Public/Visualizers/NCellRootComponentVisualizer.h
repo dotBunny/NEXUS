@@ -15,7 +15,7 @@ class UNCellRootComponent;
  * edit mode gained interactive tools. What is left is the wireframe pass for when the mode is *not* active, which the
  * tools cannot cover because they only exist while it is.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-types/visualizers/cell-root-component-visualizer/">FNCellRootComponentVisualizer</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-types/visualizers/cell-root-component-visualizer/">FNCellRootComponentVisualizer</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNCellRootComponentVisualizer final : public FComponentVisualizer
 {

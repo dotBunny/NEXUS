@@ -18,7 +18,7 @@
  * UNOrganComponent for every junction the organ places; a junction's own list wins over its organ's, and both win
  * over the project-wide default connector.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/cell-junction-connector-entry/">FNCellJunctionConnectorEntry</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/cell-junction-connector-entry/">FNCellJunctionConnectorEntry</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSWORLDASSEMBLY_API FNCellJunctionConnectorEntry

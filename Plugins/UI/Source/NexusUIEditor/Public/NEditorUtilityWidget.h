@@ -12,7 +12,7 @@
  * and appearance: a custom tab icon, deferred post-construct work via UAsyncEditorDelay, and
  * integration with UNEditorUtilityWidgetSubsystem so widget state survives editor sessions when
  * bIsPersistent / bHasPermanentState are set.
- * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/editor-utility-widget/">UNEditorUtilityWidget</a>
+ * @see <a href="https://nexus-framework.com/docs/ui/editor-types/editor-utility-widget/">UNEditorUtilityWidget</a>
  */
 UCLASS(BlueprintType)
 class NEXUSUIEDITOR_API UNEditorUtilityWidget : public UEditorUtilityWidget
@@ -31,7 +31,7 @@ public:
 
 	/** @return True when the widget opts in to cross-session state persistence via the widget subsystem. */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/editor-types/editor-utility-widget/#is-persistent"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/editor-types/editor-utility-widget/#is-persistent"))
 	bool IsPersistent() const
 	{
 		return bIsPersistent;
@@ -39,7 +39,7 @@ public:
 
 	/** @return The widget's stable identifier used as the key when storing/restoring persistent state. */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/editor-types/editor-utility-widget/#get-unique-identifier"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/editor-types/editor-utility-widget/#get-unique-identifier"))
 	FName GetUniqueIdentifier() const
 	{
 		return UniqueIdentifier;
@@ -47,7 +47,7 @@ public:
 
 	/** @return The tab identifier the widget was most recently hosted under, or NAME_None if not tabbed. */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/editor-types/editor-utility-widget/#get-tab-identifier"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/editor-types/editor-utility-widget/#get-tab-identifier"))
 	FName GetTabIdentifier() const
 	{
 		return CachedTabIdentifier;

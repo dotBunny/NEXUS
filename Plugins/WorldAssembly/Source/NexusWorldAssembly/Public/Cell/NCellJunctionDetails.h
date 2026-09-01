@@ -63,7 +63,7 @@ enum class ENCellJunctionRequirements : uint8
  *
  * Only the routed connector pass reads these. Junctions the graph builder mated, and flush pairs picked up by
  * inverse matching, are aligned by construction and are not gated on angle at all.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/cell-junction-connection-constraints/">FNCellJunctionConnectionConstraints</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/cell-junction-connection-constraints/">FNCellJunctionConnectionConstraints</a>
  */
 USTRUCT(BlueprintType)
 struct FNCellJunctionConnectionConstraints

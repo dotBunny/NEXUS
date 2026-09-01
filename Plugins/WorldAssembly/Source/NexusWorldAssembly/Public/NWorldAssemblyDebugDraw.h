@@ -48,7 +48,7 @@ struct NEXUSWORLDASSEMBLY_API FNDrawSocketSettings
 /**
  * Shared debug-draw helpers for cell/junction/voxel overlays used across editor-mode visualizers.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-debug-draw/">FNWorldAssemblyDebugDraw</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/world-assembly-debug-draw/">FNWorldAssemblyDebugDraw</a>
  */
 class NEXUSWORLDASSEMBLY_API FNWorldAssemblyDebugDraw
 {
@@ -123,7 +123,7 @@ public:
 	 * @param VoxelData Occupancy grid to render; voxel size is read from UNWorldAssemblySettings::VoxelSize.
 	 * @param Offset World-space translation added to the grid's own Origin.
 	 * @param Rotation Currently unused — see #ROTATE-VOXELS.
-	 * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-debug-draw/#drawing-voxels">Drawing Voxels</a>
+	 * @see <a href="https://nexus-framework.com/docs/world-assembly/types/world-assembly-debug-draw/#drawing-voxels">Drawing Voxels</a>
 	 */
 	static void DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation);
 
@@ -134,7 +134,7 @@ public:
 	 * @param VoxelData Occupancy grid to render; voxel size is read from UNWorldAssemblySettings::VoxelSize.
 	 * @param Offset World-space translation added to the grid's own Origin.
 	 * @param Rotation Currently unused — see #ROTATE-VOXELS.
-	 * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/world-assembly-debug-draw/#drawing-voxels">Drawing Voxels</a>
+	 * @see <a href="https://nexus-framework.com/docs/world-assembly/types/world-assembly-debug-draw/#drawing-voxels">Drawing Voxels</a>
 	 */
 	static void DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation);
 };

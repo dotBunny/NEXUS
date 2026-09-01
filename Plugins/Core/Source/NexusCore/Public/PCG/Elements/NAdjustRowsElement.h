@@ -39,7 +39,7 @@ enum class ENRowParity : uint8
  * The row grouping is internal bookkeeping used only to decide which points are adjusted — the output
  * keeps the input's point order, so downstream nodes that index into the data are unaffected.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/pcg/elements/adjust-rows/">UNAdjustRowsSettings</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/pcg/elements/adjust-rows/">UNAdjustRowsSettings</a>
  */
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
 class UNAdjustRowsSettings : public UPCGSettings

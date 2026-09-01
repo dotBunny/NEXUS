@@ -9,7 +9,7 @@
 
 /**
  * An abstract class designed to encompass work to be completed at some level of delay from the time of its creation.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/delayed-editor-task/">UNDelayedEditorTask</a>
+ * @see <a href="https://nexus-framework.com/docs/core/editor-types/delayed-editor-task/">UNDelayedEditorTask</a>
  */
 UCLASS(Abstract)
 class NEXUSCOREEDITOR_API UNDelayedEditorTask : public UObject

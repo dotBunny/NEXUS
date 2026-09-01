@@ -22,7 +22,7 @@ class SWidget;
  *
  * @note GetAvailable asks "is this category relevant to the level", not "can the user act right now" — see its own
  *       note for why a rail button hiding on transient state is worse than one that stays put.
- * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/ed-mode-rail/">FNEdModeRail</a>
+ * @see <a href="https://nexus-framework.com/docs/ui/editor-types/ed-mode-rail/">FNEdModeRail</a>
  */
 class NEXUSUIEDITOR_API FNEdModeRail
 {

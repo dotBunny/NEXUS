@@ -13,7 +13,7 @@ class UNListView;
 
 /**
  * Developer overlay widget that lists every FNActorPool in the active world(s) with live in/out counts.
- * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/developer-overlay/">UNActorPoolsDeveloperOverlay</a>
+ * @see <a href="https://nexus-framework.com/docs/actor-pools/developer-overlay/">UNActorPoolsDeveloperOverlay</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Pools Developer Overlay", BlueprintType, Abstract)
 class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlay : public UNDeveloperOverlay

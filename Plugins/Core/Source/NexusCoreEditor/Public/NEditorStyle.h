@@ -6,7 +6,7 @@
 
 /**
  * Slate style set for the NexusCoreEditor module.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/editor-style/">FNEditorStyle</a>
+ * @see <a href="https://nexus-framework.com/docs/core/editor-types/editor-style/">FNEditorStyle</a>
  */
 class NEXUSCOREEDITOR_API FNEditorStyle
 {

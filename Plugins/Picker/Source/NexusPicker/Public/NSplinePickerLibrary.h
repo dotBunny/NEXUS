@@ -15,7 +15,7 @@
 /**
  * Provides various functions for generating points along a USplineComponent spline using different
  * random generation strategies (deterministic, non-deterministic, seeded).
- * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/spline/">UNSplinePickerLibrary</a>
+ * @see <a href="https://nexus-framework.com/docs/picker/distributions/spline/">UNSplinePickerLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Spline Picker Library")
 class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
@@ -31,7 +31,7 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	 * @returns An array of generated points.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Next Point", Category = "NEXUS|Picker|Spline",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/spline/#next-point", WorldContext = "WorldContextObject"))
+		meta=(DocsURL="https://nexus-framework.com/docs/picker/distributions/spline/#next-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> NextPoint(UPARAM(ref) FNSplinePickerParams& Params, UNMersenneTwisterObject* TwisterObject, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
@@ -52,7 +52,7 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	 * @returns An array of generated points.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random Point", Category = "NEXUS|Picker|Spline",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/spline/#random-point", WorldContext = "WorldContextObject"))
+		meta=(DocsURL="https://nexus-framework.com/docs/picker/distributions/spline/#random-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> RandomPoint(UPARAM(ref) FNSplinePickerParams& Params, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
@@ -73,7 +73,7 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	 * @returns An array of generated points.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Tracked Point", Category = "NEXUS|Picker|Spline",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/spline/#tracked-point", WorldContext = "WorldContextObject"))
+		meta=(DocsURL="https://nexus-framework.com/docs/picker/distributions/spline/#tracked-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> TrackedPoint(UPARAM(ref) FNSplinePickerParams& Params, UPARAM(ref) int32& Seed, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
@@ -94,7 +94,7 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	 * @returns An array of generated points.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Spline: One-Shot Point", Category = "NEXUS|Picker|Spline",
-	meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/spline/#one-shot-point", WorldContext = "WorldContextObject"))
+	meta=(DocsURL="https://nexus-framework.com/docs/picker/distributions/spline/#one-shot-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> OneShotPoint(UPARAM(ref) FNSplinePickerParams& Params, const int32 Seed, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;

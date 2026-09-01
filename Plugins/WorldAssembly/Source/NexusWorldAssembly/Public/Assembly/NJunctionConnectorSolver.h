@@ -72,7 +72,7 @@ struct FNJunctionConnectorRoute
  * decision here has to be reproducible for a given input so two runs of the same seed route identically. Collision
  * testing is not part of this class; it produces the hulls and the caller decides what they intersect.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/junction-connector-solver/">FNJunctionConnectorSolver</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/junction-connector-solver/">FNJunctionConnectorSolver</a>
  */
 class NEXUSWORLDASSEMBLY_API FNJunctionConnectorSolver
 {

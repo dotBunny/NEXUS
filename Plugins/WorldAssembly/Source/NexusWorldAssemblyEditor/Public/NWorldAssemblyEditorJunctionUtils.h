@@ -13,7 +13,7 @@ class UNCellJunctionComponent;
  * Companion to FNWorldAssemblyEditorCellUtils for the junction category: the commands in
  * FNJunctionEdModeRail declares, binds and gates; these do the work.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyEditorJunctionUtils
 {

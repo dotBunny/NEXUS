@@ -37,7 +37,7 @@ struct TWidgetTypeTraits<class SNWorldAssemblyOperations>
  * combined progress and status message, with a bar per open status channel beneath. Subscribes to the same two
  * registry broadcasts the overlay does, so it needs no tick of its own.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API SNWorldAssemblyOperations : public SCompoundWidget
 {

@@ -28,7 +28,7 @@ enum class ENActorPoolUnknownBehavior : uint8
  * Project-wide configuration for the NexusActorPools plugin.
  *
  * Exposed under Project Settings > NEXUS > Actor Pools; stored in DefaultNexusGame.ini.
- * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/project-settings/">UNActorPoolsSettings</a>
+ * @see <a href="https://nexus-framework.com/docs/actor-pools/project-settings/">UNActorPoolsSettings</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pools Settings", Config=NexusGame, defaultconfig)
 class NEXUSACTORPOOLS_API UNActorPoolsSettings : public UDeveloperSettings

@@ -44,7 +44,7 @@ enum class ENOrganDirectionConstraintMode : uint8
  * The organ defines a region of space plus the pool of tissues and cell-count constraints the
  * World Assembly pipeline will use to populate it. The owning actor's transform/bounds drive placement;
  * this component supplies the rules.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/organ-component/">UNOrganComponent</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/organ-component/">UNOrganComponent</a>
  */
 UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Organ", HideCategories=(Tags, Activation, Cooking,
 	AssetUserData, Navigation, Actor, Input))

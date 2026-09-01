@@ -11,7 +11,7 @@
 
 /**
  * A collection of functionality used to interact with a games' IGameLayerManager.
- * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/game-layer-library/">UNGameLayerLibrary</a>
+ * @see <a href="https://nexus-framework.com/docs/ui/types/game-layer-library/">UNGameLayerLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Game Layer Library")
 class UNGameLayerLibrary : public UBlueprintFunctionLibrary
@@ -27,6 +27,6 @@ public:
 	 * @return True if the layer was successfully set, false otherwise.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|User Interface", DisplayName = "Set Layer Visibility",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-layer-library/#set-layer-visibility"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/game-layer-library/#set-layer-visibility"))
 	static bool SetLayerVisibility(UPARAM(ref) ULocalPlayer* LocalPlayer, const FName Name, ESlateVisibility Visibility);
 };

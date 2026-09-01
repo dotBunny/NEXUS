@@ -10,7 +10,7 @@
 
 /**
  * A component which registers and unregisters the owning AActor with the UNDynamicRefSubsystem for future lookup.
- * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-component/">UNDynamicRefComponent</a>
+ * @see <a href="https://nexus-framework.com/docs/dynamic-references/types/dynamic-ref-component/">UNDynamicRefComponent</a>
  */
 UCLASS(BlueprintType,Blueprintable, ClassGroup="NEXUS", DisplayName = "NEXUS | DynamicRef",
 	meta = (BlueprintSpawnableComponent, Tooltip="Reference an Actor without knowing it."),

@@ -41,7 +41,7 @@ EDataValidationResult UNBlueprintValidator::ValidateLoadedAsset_Implementation(c
 					if (IsEmptyTick(EventNode))
 					{
 						FNToolingEditorUtils::AddDataValidationResponse(Context, Settings->ValidatorBlueprintEmptyTick,
-			FText::FromString(TEXT("Empty Tick nodes still produce overhead, please use or remove it.\nFor more information visit https://nexus-framework.com/docs/plugins/tooling/validators/blueprint-validator/#isemptytick")));
+			FText::FromString(TEXT("Empty Tick nodes still produce overhead, please use or remove it.\nFor more information visit https://nexus-framework.com/docs/tooling/validators/blueprint-validator/#isemptytick")));
 						Result = FNToolingEditorUtils::GetDataValidationResult(Settings->ValidatorBlueprintEmptyTick);
 					}
 				}
@@ -56,7 +56,7 @@ EDataValidationResult UNBlueprintValidator::ValidateLoadedAsset_Implementation(c
 					{
 						FNToolingEditorUtils::AddDataValidationResponse(Context, Settings->ValidatorBlueprintMultiPinPureNode,
 						FText::Join(FText::FromString(" "), PureNode->GetNodeTitle(ENodeTitleType::Type::MenuTitle),
-										FText::FromString(TEXT("MultiPin Pure Nodes actually get called for each connected pin output.\nFor more information visit https://nexus-framework.com/docs/plugins/tooling/validators/blueprint-validator/#ismultipinpurenode"))));
+										FText::FromString(TEXT("MultiPin Pure Nodes actually get called for each connected pin output.\nFor more information visit https://nexus-framework.com/docs/tooling/validators/blueprint-validator/#ismultipinpurenode"))));
 						Result = FNToolingEditorUtils::GetDataValidationResult(Settings->ValidatorBlueprintMultiPinPureNode);
 					}
 				}

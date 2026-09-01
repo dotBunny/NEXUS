@@ -25,7 +25,7 @@
  *       visualizers. The sprite is what makes a marker findable outside those windows; see UNTargetPointComponent.
  * @note Accepting a click makes this the active component visualizer, which would block alt-drag duplication;
  *       TrackingStarted gives that status back. Read both comments together before changing either.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/visualizers/target-point-component-visualizer/">FNTargetPointComponentVisualizer</a>
+ * @see <a href="https://nexus-framework.com/docs/core/editor-types/visualizers/target-point-component-visualizer/">FNTargetPointComponentVisualizer</a>
  */
 class NEXUSCOREEDITOR_API FNTargetPointComponentVisualizer final : public FComponentVisualizer
 {

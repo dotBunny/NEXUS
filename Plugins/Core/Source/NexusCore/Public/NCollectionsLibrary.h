@@ -17,7 +17,7 @@
  * and queried from Blueprint graphs. Each entry here is a thin pass-through that exists only because
  * the underlying method is defined on a struct (where UFUNCTION is not available) and therefore
  * cannot be called from Blueprint directly. See the wrapped type's header for the full semantics.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/collections-library/">UNCollectionsLibrary</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/collections-library/">UNCollectionsLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Collections Library")
 class UNCollectionsLibrary : public UBlueprintFunctionLibrary
@@ -37,7 +37,7 @@ public:
 	 * @param PresetValues         Array of FInvVector2 representing Value(X) and Weight(Y).
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Apply Preset",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/collections-library/#apply-preset"))
+		meta=(DocsURL="https://nexus-framework.com/docs/core/types/collections-library/#apply-preset"))
 	static void WeightedIntegerArrayApplyPreset(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray, TArray<FIntVector2> PresetValues)
 	{
 		WeightedIntegerArray.Empty();
@@ -54,7 +54,7 @@ public:
 	 * @param Weight               How many copies of Value to insert (the value's relative likelihood of selection).
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Add Value",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/collections-library/#add-value"))
+		meta=(DocsURL="https://nexus-framework.com/docs/core/types/collections-library/#add-value"))
 	static void WeightedIntegerArrayAddValue(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray, const int32 Value, const int32 Weight)
 	{
 		WeightedIntegerArray.Add(Value, Weight);
@@ -65,7 +65,7 @@ public:
 	 * @param WeightedIntegerArray The target array, emptied in place.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Empty",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/collections-library/#empty"))
+		meta=(DocsURL="https://nexus-framework.com/docs/core/types/collections-library/#empty"))
 	static void WeightedIntegerArrayEmpty(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray)
 	{
 		WeightedIntegerArray.Empty();
@@ -77,7 +77,7 @@ public:
 	 * @param Value                The integer value whose copies should all be removed.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Remove",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/collections-library/#remove"))
+		meta=(DocsURL="https://nexus-framework.com/docs/core/types/collections-library/#remove"))
 	static void WeightedIntegerArrayRemove(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray, const int32 Value)
 	{
 		WeightedIntegerArray.Remove(Value);
@@ -90,7 +90,7 @@ public:
 	 * @param Limit                The maximum number of copies to remove. Defaults to 1.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Remove Some",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/collections-library/#remove-some"))
+		meta=(DocsURL="https://nexus-framework.com/docs/core/types/collections-library/#remove-some"))
 	static void WeightedIntegerArrayRemoveSome(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray, const int32 Value, const int32 Limit = 1)
 	{
 		WeightedIntegerArray.RemoveSome(Value, Limit);

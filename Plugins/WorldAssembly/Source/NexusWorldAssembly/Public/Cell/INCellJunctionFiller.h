@@ -21,7 +21,7 @@ class NEXUSWORLDASSEMBLY_API UNCellJunctionFiller : public UInterface
  * (or falls back to the project-wide default filler) and spawns it at the junction. If the spawned actor implements
  * this interface, OnInitializedFromJunction is invoked so the filler can read its placement context — the owning cell's
  * level instance and the junction it was spawned for.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/cell-junction-filler/">INCellJunctionFiller</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/cell-junction-filler/">INCellJunctionFiller</a>
  */
 class NEXUSWORLDASSEMBLY_API INCellJunctionFiller
 {

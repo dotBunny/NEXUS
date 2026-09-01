@@ -26,10 +26,10 @@ struct FNRawMesh;
  *
  * Carries the junction's shape (FNCellJunctionDetails) and provides derived data (corner points, color) used by
  * the graph builder and debug visualizers to reason about cell connectivity.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/junction-component/">UNCellJunctionComponent</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/junction-component/">UNCellJunctionComponent</a>
  */
 UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Cell Junction", meta=(BlueprintSpawnableComponent,
-	DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/junction-component"),
+	DocsURL="https://nexus-framework.com/docs/world-assembly/types/junction-component"),
 	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSWORLDASSEMBLY_API UNCellJunctionComponent : public USceneComponent
 {

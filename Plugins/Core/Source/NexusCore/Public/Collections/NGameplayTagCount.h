@@ -11,7 +11,7 @@
  *
  * Flat, Blueprint-friendly representation of one entry in an FNGameplayTagCounter, used to serialize
  * or pass counts across boundaries where the underlying map is inconvenient.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/collections/gameplay-tag-count/">FNGameplayTagCount</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/collections/gameplay-tag-count/">FNGameplayTagCount</a>
  */
 USTRUCT(BlueprintType)
 struct FNGameplayTagCount

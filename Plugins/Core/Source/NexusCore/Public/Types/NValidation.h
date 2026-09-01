@@ -13,7 +13,7 @@
  * the one a tri-state enum would collapse into "not up to date".
  * @note UseEnumValuesAsMaskValuesInEditor makes these literal masks rather than bit indices, so a third flag
  *       continues 4, 8, ... Without it Unreal would read UpToDate = 2 as bit 2 and disagree with any C++ that did not.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/validation/">ENBakedValidation</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/types/validation/">ENBakedValidation</a>
  */
 UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
 enum class ENBakedValidation : uint8
@@ -35,7 +35,7 @@ ENUM_CLASS_FLAGS(ENBakedValidation)
  *
  * The same shape as ENBakedValidation, differing only in what the first flag is called; kept as its own type so a
  * property cannot be handed the wrong vocabulary.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/types/validation/">ENGeneratedValidation</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/types/validation/">ENGeneratedValidation</a>
  */
 UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
 enum class ENGeneratedValidation : uint8

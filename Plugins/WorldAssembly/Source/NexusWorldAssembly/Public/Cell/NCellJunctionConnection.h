@@ -35,7 +35,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionConnectorCurve
  * end to end — Corners[k] starts at the start junction's corner k and ends at the end junction's matching corner —
  * so a consumer can build quads directly across the array without solving the correspondence itself.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/cell-junction-connection/">FNCellJunctionConnectorPath</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/cell-junction-connection/">FNCellJunctionConnectorPath</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSWORLDASSEMBLY_API FNCellJunctionConnectorPath
@@ -79,7 +79,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionConnectorPath
  * ConnectorIdentifier — not the node identifiers — is the key that rejoins the two ends at runtime: it is stamped
  * into both junctions' FNCellLinkDetails, which replicates with the cell, and pairs can span graphs.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/cell-junction-connection/">FNCellJunctionConnection</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/cell-junction-connection/">FNCellJunctionConnection</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSWORLDASSEMBLY_API FNCellJunctionConnection

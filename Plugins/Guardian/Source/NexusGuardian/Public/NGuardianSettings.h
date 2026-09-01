@@ -13,7 +13,7 @@
  *
  * Exposes which build configurations the subsystem is active in, plus the three thresholds that
  * drive the warn/snapshot/compare ladder as UObject counts grow.
- * @see <a href="https://nexus-framework.com/docs/plugins/guardian/project-settings/">UNGuardianSettings</a>
+ * @see <a href="https://nexus-framework.com/docs/guardian/project-settings/">UNGuardianSettings</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "Guardian Settings", Config=NexusGame, defaultconfig)
 class NEXUSGUARDIAN_API UNGuardianSettings : public UDeveloperSettings

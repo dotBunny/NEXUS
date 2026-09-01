@@ -32,7 +32,7 @@
  *       the NEXUS actors use — a marker is a Blueprint-spawnable component, and a default subobject of a component
  *       carries a serialized AttachParent that points at the component template rather than the instance. See the
  *       warning on N_WORLD_ICON_SCENE_COMPONENT.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/pcg/target-point-component/">UNTargetPointComponent</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/pcg/target-point-component/">UNTargetPointComponent</a>
  */
 // Tags is deliberately left visible: Get Component Points filters on this component's own tags, so hiding
 // the category the way the other NEXUS marker components do would put that filter out of reach.

@@ -13,7 +13,7 @@ class FBindingContext;
  *       level — so the palette is split along that line rather than by what the commands do.
  * @note Add Organ Volume is not here but on FNWorldEdModeRail: this category is off the rail until the
  *       level has an organ, so the command that puts one there cannot be the one that needs it to already exist.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNOrganEdModeRail final : public FNEdModeRail
 {

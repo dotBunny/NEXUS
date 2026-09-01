@@ -27,7 +27,7 @@ enum class ENKillZoneBehavior : uint8
 
 /**
  * A kill plane implementation built to automatically pool properly configured AActor upon overlap.
- * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/kill-zone-component/">UNKillZoneComponent</a>
+ * @see <a href="https://nexus-framework.com/docs/actor-pools/types/kill-zone-component/">UNKillZoneComponent</a>
  */
 UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Kill Zone", meta = (BlueprintSpawnableComponent))
 class NEXUSACTORPOOLS_API UNKillZoneComponent : public UBoxComponent
@@ -53,7 +53,7 @@ public:
 	 * @return The kill count.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Kill Count", Category = "NEXUS|Actor Pools",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/kill-zone-component/#get-kill-count"))
+		meta=(DocsURL="https://nexus-framework.com/docs/actor-pools/types/kill-zone-component/#get-kill-count"))
 	int32 GetKillCount() const { return KillCount; }
 
 	/**
@@ -61,12 +61,12 @@ public:
 	 * @param NewKillCount The new value to use as the kill count.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Set Kill Count", Category = "NEXUS|Actor Pools",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/kill-zone-component/#set-kill-count"))
+		meta=(DocsURL="https://nexus-framework.com/docs/actor-pools/types/kill-zone-component/#set-kill-count"))
 	void SetKillCount(const int32 NewKillCount) { KillCount = NewKillCount; }
 
 	/** Resets the internal counter tracking the number of AActors the component has killed to 0. */
 	UFUNCTION(BlueprintCallable, DisplayName="Reset Kill Count", Category = "NEXUS|Actor Pools",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/kill-zone-component/#reset-kill-count"))
+		meta=(DocsURL="https://nexus-framework.com/docs/actor-pools/types/kill-zone-component/#reset-kill-count"))
 	void ResetKillCount() { KillCount = 0; }
 
 	/**

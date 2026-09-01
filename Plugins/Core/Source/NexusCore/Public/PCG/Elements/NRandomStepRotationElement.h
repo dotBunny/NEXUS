@@ -31,7 +31,7 @@ enum class ENRotationSpace : uint8
  * space, to bring a mesh that was authored at some other angle into a state the step can work from. It
  * applies whether or not the step does anything.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/pcg/elements/random-step-rotation/">UNRandomStepRotationSettings</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/pcg/elements/random-step-rotation/">UNRandomStepRotationSettings</a>
  */
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
 class UNRandomStepRotationSettings : public UPCGSettings

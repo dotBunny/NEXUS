@@ -17,7 +17,7 @@ class SWidgetSwitcher;
  *
  * @note Deliberately untitled. Each category's own header names what it acts on, and the strip's lit icon says which
  *       category is showing — a heading repeating the category name on top of both was noise.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API SNWorldAssemblyRailPanel final : public SCompoundWidget
 {

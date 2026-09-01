@@ -10,7 +10,7 @@
 /**
  * Provides various functions for generating points as part of an arc using different
  * random generation strategies (deterministic, non-deterministic, seeded).
- * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/arc/">FNArcPicker</a>
+ * @see <a href="https://nexus-framework.com/docs/picker/distributions/arc/">FNArcPicker</a>
  */
 class NEXUSPICKER_API FNArcPicker
 {

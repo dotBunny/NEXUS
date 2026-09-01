@@ -11,7 +11,7 @@
  * PCG settings node that orders a 2D point cloud into a nearest-neighbour chain along XY and
  * optionally annotates every point with turn direction, cardinal facing, and segment metadata.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/pcg/elements/sort-line-2d-xy/">UNSortLine2DXYSettings</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/pcg/elements/sort-line-2d-xy/">UNSortLine2DXYSettings</a>
  */
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
 class UNSortLine2DXYSettings : public UPCGSettings

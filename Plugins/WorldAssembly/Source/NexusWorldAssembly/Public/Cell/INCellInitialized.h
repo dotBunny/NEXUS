@@ -21,7 +21,7 @@ class NEXUSWORLDASSEMBLY_API UNCellInitialized : public UInterface
  * actors. When the ANCellActor finishes applying data from its proxy via InitializeFromProxy, it invokes
  * OnInitializedFromProxy on each registered actor, handing over the spawned ANCellLevelInstance. This is the entry
  * point for gameplay actors to read post-assembly context (for example the accumulated ContextTags) from the cell.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/cell-initialized/">INCellInitialized</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/cell-initialized/">INCellInitialized</a>
  */
 class NEXUSWORLDASSEMBLY_API INCellInitialized
 {

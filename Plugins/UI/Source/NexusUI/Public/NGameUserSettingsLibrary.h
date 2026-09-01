@@ -12,7 +12,7 @@ class UNComboBoxString;
 
 /**
  * A collection of functionality used to interact with a games' UGameUserSettings helping build UI components around them.
- * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/">UNGameUserSettingsLibrary</a>
+ * @see <a href="https://nexus-framework.com/docs/ui/types/game-user-settings-library/">UNGameUserSettingsLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Game User Settings Library")
 class UNGameUserSettingsLibrary : public UBlueprintFunctionLibrary
@@ -27,7 +27,7 @@ public:
 	 * @return The corresponding EWindowMode::Type.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get WindowMode From Selection (String)", Category = "NEXUS|User Interface|Game User Settings|Video",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-windowmode-from-selection-string"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/game-user-settings-library/#get-windowmode-from-selection-string"))
 	static EWindowMode::Type GetWindowModeFromString(const FString& Selection);
 
 	/**
@@ -37,7 +37,7 @@ public:
 	 * @return The corresponding EWindowMode::Type.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get WindowMode From Selection (Text)", Category = "NEXUS|User Interface|Game User Settings|Video",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-windowmode-from-selection-text"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/game-user-settings-library/#get-windowmode-from-selection-text"))
 	static EWindowMode::Type GetWindowModeFromText(const FText& Selection);
 
 	/**
@@ -45,7 +45,7 @@ public:
 	 * @return The FString representing the current EWindowMode::Type.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Current WindowMode (String)", Category = "NEXUS|User Interface|Game User Settings|Video",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-current-windowmode-string"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/game-user-settings-library/#get-current-windowmode-string"))
 	static FString GetSelectionStringFromCurrentWindowMode();
 
 	/**
@@ -53,7 +53,7 @@ public:
 	 * @return The cached FText representing the current EWindowMode::Type.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Current WindowMode (Text)", Category = "NEXUS|User Interface|Game User Settings|Video",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-current-windowmode-text"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/game-user-settings-library/#get-current-windowmode-text"))
 	static FText GetSelectionTextFromCurrentWindowMode();
 
 	/**
@@ -62,7 +62,7 @@ public:
 	 * @return The FString representing the target EWindowMode::Type.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Selection From WindowMode (String)", Category = "NEXUS|User Interface|Game User Settings|Video",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-selection-from-windowmode-string"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/game-user-settings-library/#get-selection-from-windowmode-string"))
 	static FString GetSelectionStringFromWindowMode(EWindowMode::Type Mode);
 
 	/**
@@ -71,7 +71,7 @@ public:
 	 * @return The cached FText representing the target EWindowMode::Type.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Selection From WindowMode (Text)", Category = "NEXUS|User Interface|Game User Settings|Video",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-selection-from-windowmode-text"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/game-user-settings-library/#get-selection-from-windowmode-text"))
 	static FText GetSelectionTextFromWindowMode(EWindowMode::Type Mode);
 
 	/**
@@ -79,7 +79,7 @@ public:
 	 * @return The FString array holding the different selection strings.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get WindowMode Selections (String)", Category = "NEXUS|User Interface|Game User Settings|Video",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-windowmode-selections-string"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/game-user-settings-library/#get-windowmode-selections-string"))
 	static TArray<FString> GetWindowModeStringSelections();
 
 	/**
@@ -87,7 +87,7 @@ public:
 	 * @return A copy of the FText array holding the different cached selection labels.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get WindowMode Selections (Text)", Category = "NEXUS|User Interface|Game User Settings|Video",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-windowmode-selections-text"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/game-user-settings-library/#get-windowmode-selections-text"))
 	static TArray<FText> GetWindowModeTextSelections() { return DisplayModeTexts; };
 
 	/**
@@ -95,7 +95,7 @@ public:
 	 * @return A FString representing the resolution.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Selection From Current Display Resolution", Category = "NEXUS|User Interface|Game User Settings|Video",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-selection-from-current-display-resolution"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/game-user-settings-library/#get-selection-from-current-display-resolution"))
 	static FString GetSelectionFromCurrentDisplayResolution();
 
 	/**
@@ -103,7 +103,7 @@ public:
 	 * @return A FString representing the resolution.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Selection From Display Resolution", Category = "NEXUS|User Interface|Game User Settings|Video",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-selection-from-display-resolution"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/game-user-settings-library/#get-selection-from-display-resolution"))
 	static FString GetSelectionFromDisplayResolution(FIntPoint Resolution);
 
 	/**
@@ -112,7 +112,7 @@ public:
 	 * @return A display resolution as a FIntPoint.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Display Resolution From Selection", Category = "NEXUS|User Interface|Game User Settings|Video",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-display-resolution-from-selection"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/game-user-settings-library/#get-display-resolution-from-selection"))
 	static FIntPoint GetDisplayResolutionFromSelection(const FString& Selection);
 
 	/**
@@ -120,7 +120,7 @@ public:
 	 * @return An array of FStrings containing all supported resolutions.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Supported Display Resolutions", Category = "NEXUS|User Interface|Game User Settings|Video",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-supported-display-resolutions"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/game-user-settings-library/#get-supported-display-resolutions"))
 	static TArray<FString> GetSupportedDisplayResolutions();
 
 	/**
@@ -129,7 +129,7 @@ public:
 	 * @param bSelectCurrent Should the currently used WindowMode be selected?
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Initialize WindowMode Selector (NComboBoxString)", Category = "NEXUS|User Interface|Game User Settings|Initialize",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#initialize-windowmode-selector-ncomboboxstring"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/game-user-settings-library/#initialize-windowmode-selector-ncomboboxstring"))
 	static void InitializeWindowModeComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent = true);
 
 	/**
@@ -138,7 +138,7 @@ public:
 	* @param bSelectCurrent Should the current display resolution be selected?
 	*/
 	UFUNCTION(BlueprintCallable, DisplayName="Initialize Display Resolution Selector (NComboBoxString)", Category = "NEXUS|User Interface|Game User Settings|Initialize",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#initialize-display-resolution-selector-ncomboboxstring"))
+		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/game-user-settings-library/#initialize-display-resolution-selector-ncomboboxstring"))
 	static void InitializeDisplayResolutionComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent = true);
 
 private:

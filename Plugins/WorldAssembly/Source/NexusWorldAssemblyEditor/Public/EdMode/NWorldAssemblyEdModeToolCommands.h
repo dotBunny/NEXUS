@@ -12,7 +12,7 @@
  * rail categories) because these are handed to UEdMode::RegisterTool, which maps each one to the start/stop of a
  * tool rather than to a delegate of its own.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class FNWorldAssemblyEdModeToolCommands final : public TCommands<FNWorldAssemblyEdModeToolCommands>
 {

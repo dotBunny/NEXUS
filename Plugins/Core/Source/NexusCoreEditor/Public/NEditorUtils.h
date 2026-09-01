@@ -12,7 +12,7 @@ class UAsyncEditorDelay;
 
 /**
  * A utility methods collection for the Unreal Editor.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/editor-utils/">FNEditorUtils</a>
+ * @see <a href="https://nexus-framework.com/docs/core/editor-types/editor-utils/">FNEditorUtils</a>
  */
 class NEXUSCOREEDITOR_API FNEditorUtils
 {

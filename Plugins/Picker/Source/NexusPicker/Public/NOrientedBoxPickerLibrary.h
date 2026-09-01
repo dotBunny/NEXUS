@@ -13,7 +13,7 @@
 /**
  * Provides various functions for generating points the plane of a FOrientedBox using different
  * random generation strategies (deterministic, non-deterministic, seeded).
- * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/oriented-box/">UNOrientedBoxPickerLibrary</a>
+ * @see <a href="https://nexus-framework.com/docs/picker/distributions/oriented-box/">UNOrientedBoxPickerLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | OrientedBox Picker Library")
 class NEXUSPICKER_API UNOrientedBoxPickerLibrary : public UBlueprintFunctionLibrary
@@ -29,7 +29,7 @@ class NEXUSPICKER_API UNOrientedBoxPickerLibrary : public UBlueprintFunctionLibr
 	 * @returns An array of generated points.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "OrientedBox: Next Point", Category = "NEXUS|Picker|OrientedBox",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/oriented-box/#next-point", WorldContext = "WorldContextObject"))
+		meta=(DocsURL="https://nexus-framework.com/docs/picker/distributions/oriented-box/#next-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> NextPoint(UPARAM(ref) FNOrientedBoxPickerParams& Params, UNMersenneTwisterObject* TwisterObject, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
@@ -50,7 +50,7 @@ class NEXUSPICKER_API UNOrientedBoxPickerLibrary : public UBlueprintFunctionLibr
 	 * @returns An array of generated points.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "OrientedBox: Random Point", Category = "NEXUS|Picker|OrientedBox",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/oriented-box/#random-point", WorldContext = "WorldContextObject"))
+		meta=(DocsURL="https://nexus-framework.com/docs/picker/distributions/oriented-box/#random-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> RandomPoint(UPARAM(ref) FNOrientedBoxPickerParams& Params, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
@@ -71,7 +71,7 @@ class NEXUSPICKER_API UNOrientedBoxPickerLibrary : public UBlueprintFunctionLibr
 	 * @returns An array of generated points.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "OrientedBox: Tracked Point", Category = "NEXUS|Picker|OrientedBox",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/oriented-box/#tracked-point", WorldContext = "WorldContextObject"))
+		meta=(DocsURL="https://nexus-framework.com/docs/picker/distributions/oriented-box/#tracked-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> TrackedPoint(UPARAM(ref) FNOrientedBoxPickerParams& Params, UPARAM(ref) int32& Seed, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
@@ -92,7 +92,7 @@ class NEXUSPICKER_API UNOrientedBoxPickerLibrary : public UBlueprintFunctionLibr
 	 * @returns An array of generated points.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "OrientedBox: One-Shot Point", Category = "NEXUS|Picker|OrientedBox",
-	meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/oriented-box/#one-shot-point", WorldContext = "WorldContextObject"))
+	meta=(DocsURL="https://nexus-framework.com/docs/picker/distributions/oriented-box/#one-shot-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> OneShotPoint(UPARAM(ref) FNOrientedBoxPickerParams& Params, const int32 Seed, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;

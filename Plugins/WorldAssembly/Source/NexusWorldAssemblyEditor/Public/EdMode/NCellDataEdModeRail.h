@@ -16,7 +16,7 @@ class FBindingContext;
  *
  * @note Add Cell Actor is not here but on FNWorldEdModeRail: this category is off the rail until the
  *       level has a cell, so the command that puts one there cannot be the one that needs it to already exist.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNCellDataEdModeRail final : public FNEdModeRail
 {

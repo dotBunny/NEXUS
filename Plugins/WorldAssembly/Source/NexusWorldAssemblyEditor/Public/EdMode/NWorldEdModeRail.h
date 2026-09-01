@@ -19,7 +19,7 @@ class FBindingContext;
  * @note The only rail with no availability predicate, and deliberately so. Every other category leaves the strip
  *       until the thing it edits exists, so this one carries both Add commands — it is what stays reachable in an
  *       empty level, and what FNWorldAssemblyRailState falls back to when the selected category disappears.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNWorldEdModeRail final : public FNEdModeRail
 {

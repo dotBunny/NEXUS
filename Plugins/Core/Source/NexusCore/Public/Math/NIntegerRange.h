@@ -15,7 +15,7 @@
  * The member API (NextValue, RandomValue, PercentageValue, etc.) is supplied by N_RANGE_BASE.
  * @note The Random* methods cannot sample the full default span: FRandomStream::RandRange evaluates
  *       (Maximum - Minimum) + 1, which overflows int32. Narrow the bounds before sampling.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/integer-range/">FNIntegerRange</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/math/integer-range/">FNIntegerRange</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNIntegerRange

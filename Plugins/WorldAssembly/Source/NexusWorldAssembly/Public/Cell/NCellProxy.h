@@ -17,7 +17,7 @@ class UDynamicMeshComponent;
 
 /**
  * A light-weight representation of the NCell+Level spawned into the world during generation.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/cell-proxy/">ANCellProxy</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/cell-proxy/">ANCellProxy</a>
  */
 UCLASS(NotPlaceable, HideDropdown, Hidden, Transient, ClassGroup = "NEXUS", DisplayName = "NEXUS | Cell Proxy")
 class NEXUSWORLDASSEMBLY_API ANCellProxy : public AActor

@@ -9,7 +9,7 @@ class FBindingContext;
 /**
  * The Junction category: placing and managing the focused cell's junctions.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNJunctionEdModeRail final : public FNEdModeRail
 {

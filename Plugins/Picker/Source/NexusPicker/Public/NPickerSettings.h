@@ -16,7 +16,7 @@
  * DefaultNexusGame.ini. Replaces the previous FNPickerUtils static configuration members so projection
  * defaults are discoverable, editor-editable, and persisted per-project rather than reset every launch.
  * @note Resolved on the Game-thread during point generation; see FNPickerProjection::Emit.
- * @see <a href="https://nexus-framework.com/docs/plugins/picker/project-settings/">UNPickerSettings</a>
+ * @see <a href="https://nexus-framework.com/docs/picker/project-settings/">UNPickerSettings</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "Picker Settings", Config=NexusGame, defaultconfig)
 class NEXUSPICKER_API UNPickerSettings : public UDeveloperSettings

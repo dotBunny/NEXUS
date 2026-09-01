@@ -14,7 +14,7 @@
  * for working with Actors in Unreal Engine. These functions are designed to be
  * callable from both C++ and Blueprint contexts, providing common operations
  * related to Actor manipulation, comparison, and management.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/actor-library/">UNActorLibrary</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/actor-library/">UNActorLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Library")
 class NEXUSCORE_API UNActorLibrary : public UBlueprintFunctionLibrary
@@ -33,7 +33,7 @@ public:
 	 *       actor in array B, and vice versa.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor", DisplayName = "Is Same Actors",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/actor-library/#is-same-actors"))
+		meta=(DocsURL="https://nexus-framework.com/docs/core/types/actor-library/#is-same-actors"))
 	static bool IsSameActors(const TArray<AActor*>& A, const TArray<AActor*>& B);
 
 	/**
@@ -44,6 +44,6 @@ public:
 	 *       Only valid AActor pointers are added to the output array.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor", DisplayName = "To Actor Array",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/actor-library/#to-actor-array"))
+		meta=(DocsURL="https://nexus-framework.com/docs/core/types/actor-library/#to-actor-array"))
 	static TArray<AActor*> ToActorArray(const TArray<UObject*> InObjects);
 };

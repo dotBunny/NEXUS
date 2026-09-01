@@ -16,7 +16,7 @@
  * @note Fixed in place, matching how Mesh Terrain mode pins its submode palette. The strip is the mode's anchor — it
  *       is what the user aims at to change category, so it staying put is worth more than being able to move it. The
  *       panel it drives is the draggable half.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API SNWorldAssemblyRail final : public SCompoundWidget
 {

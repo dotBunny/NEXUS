@@ -5,7 +5,7 @@
 
 /**
  * A collection of non-cryptographic hashing utilities.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/hash-utils/">FNHashUtils</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/math/hash-utils/">FNHashUtils</a>
  */
 class NEXUSCORE_API FNHashUtils
 {

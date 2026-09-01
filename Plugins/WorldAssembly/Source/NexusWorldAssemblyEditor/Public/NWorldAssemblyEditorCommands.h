@@ -16,7 +16,7 @@ class FUICommandList;
  * FUICommandList, and map their own actions. One context rather than one per category, so every command lands in a
  * single Editor Preferences > Keyboard Shortcuts section and saved chords stay keyed to the same name.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class FNWorldAssemblyEditorCommands final : public TCommands<FNWorldAssemblyEditorCommands>
 {

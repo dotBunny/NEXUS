@@ -21,7 +21,7 @@ class NEXUSWORLDASSEMBLY_API UNCellJunctionBeginPlay : public UInterface
  * during the junction component's BeginPlay: for each assigned actor that implements this interface, OnJunctionBeginPlay
  * is invoked with the junction's resolved link details. This lets gameplay actors react to how the junction was wired up
  * during assembly — in particular whether it connected to another cell and which cell and junction it links to.
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/types/cell-junction-begin-play/">INCellJunctionBeginPlay</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/cell-junction-begin-play/">INCellJunctionBeginPlay</a>
  */
 class NEXUSWORLDASSEMBLY_API INCellJunctionBeginPlay
 {

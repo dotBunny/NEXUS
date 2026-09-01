@@ -13,7 +13,7 @@
  *
  * Thin passthroughs so that Blueprint authors can reach the same NextValue / RandomValue /
  * PercentageValue helpers that native code uses via N_RANGE_BASE.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/double-range-library/">UNDoubleRangeLibrary</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/math/double-range-library/">UNDoubleRangeLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Double Range Library")
 class NEXUSCORE_API UNDoubleRangeLibrary : public UBlueprintFunctionLibrary

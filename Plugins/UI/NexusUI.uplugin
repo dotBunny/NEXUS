@@ -7,7 +7,7 @@
 	"Category": "NEXUS",
 	"CreatedBy": "dotBunny Inc.",
 	"CreatedByURL": "https://dotbunny.com",
-	"DocsURL": "https://nexus-framework.com/docs/plugins/ui/",
+	"DocsURL": "https://nexus-framework.com/docs/ui/",
 	"MarketplaceURL": "",
 	"SupportURL": "https://github.com/dotBunny/NEXUS/issues/new/choose",
 	"EnabledByDefault": false,

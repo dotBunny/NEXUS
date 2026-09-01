@@ -44,7 +44,7 @@ struct NEXUSCORE_API FNMersenneTwisterState
  * Mersenne Twister based FRandomStream-like API with some extras!
  * Implements the std::mt19937_64 engine to produce high-quality uint64 random numbers.
  * Guaranteed behavior across platforms/compilers by avoiding using std::*_distribution.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/math/mersenne-twister/">FNMersenneTwister</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/math/mersenne-twister/">FNMersenneTwister</a>
  */
 class NEXUSCORE_API FNMersenneTwister
 {

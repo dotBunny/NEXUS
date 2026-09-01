@@ -13,7 +13,7 @@
  * Rather than storing explicit weight tables, each value is inserted Weight times. Picking an
  * entry then becomes a uniform random index lookup while still honoring the relative weights.
  * This keeps selection fast at the cost of a larger memory footprint for heavily weighted entries.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/collections/weighted-integer-array/">FNWeightedIntegerArray</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/collections/weighted-integer-array/">FNWeightedIntegerArray</a>
  */
 USTRUCT(BlueprintType)
 struct FNWeightedIntegerArray

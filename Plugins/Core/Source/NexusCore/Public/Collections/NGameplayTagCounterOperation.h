@@ -11,7 +11,7 @@
  *
  * Authored in the editor to describe how a tag's running total should change (e.g. add, subtract)
  * when the operation is evaluated.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/collections/gameplay-tag-counter-operation/">FNGameplayTagCounterOperation</a>
+ * @see <a href="https://nexus-framework.com/docs/core/types/collections/gameplay-tag-counter-operation/">FNGameplayTagCounterOperation</a>
  */
 USTRUCT(BlueprintType)
 struct FNGameplayTagCounterOperation

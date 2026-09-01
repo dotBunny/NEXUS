@@ -14,7 +14,7 @@ class FBindingContext;
  * does. Commands are declared against the module's shared binding context by FNWorldAssemblyEditorCommands, which is
  * the only TCommands in the module — every category registers into it so they share one Keyboard Shortcuts section.
  *
- * @see <a href="https://nexus-framework.com/docs/plugins/world-assembly/editor-mode/">World Assembly Editor Mode</a>
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-mode/">World Assembly Editor Mode</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNCellEdModeRail final : public FNEdModeRail
 {
