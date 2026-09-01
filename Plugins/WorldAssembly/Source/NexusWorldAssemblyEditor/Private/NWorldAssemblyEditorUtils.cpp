@@ -14,11 +14,17 @@
 #include "NWorldAssemblyEditorSubsystem.h"
 #include "EdMode/NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyRegistry.h"
+#include "NWorldAssemblySettings.h"
+#include "NWorldAssemblyMinimal.h"
 #include "NWorldAssemblyUtils.h"
+#include "NWorldCollisionBaker.h"
+#include "NWorldCollisionCacheSave.h"
 #include "NWorldCollisionPreview.h"
+#include "ScopedTransaction.h"
 #include "Selection.h"
 #include "Engine/Level.h"
 #include "Misc/ScopedSlowTask.h"
+#include "Organ/NOrganComponent.h"
 
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetRegistry/IAssetRegistry.h"
@@ -59,6 +65,37 @@ ANDebugActor* FNWorldAssemblyEditorUtils::RefreshWorldCollisionVisualizerActor(U
 
 	DebugActor->OverrideWithDynamicMesh(MergedMesh.CreateDynamicMesh(false), VisualizerMaterial);
 	return DebugActor;
+}
+
+void FNWorldAssemblyEditorUtils::CacheWorldCollision(UWorld* World, const TArray<UNOrganComponent*>& Organs)
+{
+	if (World == nullptr) return;
+
+	const FNWorldAssemblyWorldCollisionSettings& Settings = UNWorldAssemblySettings::Get()->WorldCollisionSettings;
+
+	// The bake writes to the organ components and to the level's cache actor, so it is transacted like any other
+	// authoring action.
+	const FScopedTransaction Transaction(
+		NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorUtils_CacheWorldCollision", "Cache World Collision"));
+
+	const FNWorldCollisionBaker::FBakeResult Result = Organs.IsEmpty()
+		? FNWorldCollisionBaker::BakeWorld(World, Settings, true)
+		: FNWorldCollisionBaker::BakeOrgans(World, Organs, Settings, true);
+
+	// Every organ has just been fingerprinted against the live world, so the save-time pass has nothing left to find.
+	// Only sound for a whole-level bake that ran to completion — a selected-organ bake leaves the rest of the level
+	// unexamined, and a cancelled one leaves the organs it never reached unexamined too.
+	if (Organs.IsEmpty() && !Result.bCancelled)
+	{
+		FNWorldCollisionCacheSave::MarkClean(World);
+	}
+
+	// Reported rather than silent: the bake's whole value is that it moves work off the assembly, and the only way to
+	// see it happened is to say so. A run that changed nothing is worth saying too — it means the level is unchanged.
+	UE_LOG(LogNexusWorldAssembly, Log, TEXT("World collision cache: baked %d organ(s)%s%s."),
+		Result.OrgansBaked,
+		Result.bChanged ? TEXT("") : TEXT(" (nothing changed)"),
+		Result.bCancelled ? TEXT(" - cancelled before finishing") : TEXT(""));
 }
 
 bool FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld()

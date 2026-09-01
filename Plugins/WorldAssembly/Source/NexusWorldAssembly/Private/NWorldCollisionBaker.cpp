@@ -321,10 +321,24 @@ FNWorldCollisionBaker::FBakeResult FNWorldCollisionBaker::BakeOrgans(UWorld* Wor
 	FBakeResult Result;
 	if (World == nullptr) return Result;
 
-	ANWorldCollisionCacheActor* CacheActor = ANWorldCollisionCacheActor::FindOrCreate(World);
+	// Created only for a level that has something to cache. A level with no organs is not a destination level — a cell
+	// level, or one open for level-instance editing — and it will never read a pool, because the pool is addressed
+	// through organs. Creating one anyway wrote an empty cache actor into every such level that happened to be saved.
+	//
+	// An existing cache actor is still resolved when the organ list is empty, so a destination level whose organs have
+	// all since been deleted still reaches the orphan collection below and gives its pool up.
+	ANWorldCollisionCacheActor* CacheActor = Organs.IsEmpty()
+		? ANWorldCollisionCacheActor::Find(World)
+		: ANWorldCollisionCacheActor::FindOrCreate(World);
+
 	if (CacheActor == nullptr)
 	{
-		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Could not create a world collision cache actor; nothing cached."));
+		// Only a failure when there was something to store. Nothing to cache and nothing cached is the ordinary
+		// outcome for any level that holds no organs, and saying so on every save of one would be noise.
+		if (!Organs.IsEmpty())
+		{
+			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Could not create a world collision cache actor; nothing cached."));
+		}
 		return Result;
 	}
 

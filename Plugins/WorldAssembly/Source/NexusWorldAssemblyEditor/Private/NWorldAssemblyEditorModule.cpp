@@ -35,6 +35,8 @@
 #include "UnrealEdGlobals.h"
 #include "Customizations/NOrganComponentCustomization.h"
 #include "Customizations/NWorldAssemblyEditorUserSettingsCustomization.h"
+#include "Customizations/NWorldCollisionCacheActorCustomization.h"
+#include "NWorldCollisionCacheActor.h"
 #include "NWorldAssemblyEditorUserSettings.h"
 #include "PropertyEditorModule.h"
 #include "ToolMenus.h"
@@ -220,6 +222,9 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 	PropertyModule.RegisterCustomClassLayout(UNOrganComponent::StaticClass()->GetFName(),
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNOrganComponentCustomization::MakeInstance));
 
+	PropertyModule.RegisterCustomClassLayout(ANWorldCollisionCacheActor::StaticClass()->GetFName(),
+		FOnGetDetailCustomizationInstance::CreateStatic(&FNWorldCollisionCacheActorCustomization::MakeInstance));
+
 	PropertyModule.RegisterCustomClassLayout(UNWorldAssemblyEditorUserSettings::StaticClass()->GetFName(),
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNWorldAssemblyEditorUserSettingsCustomization::MakeInstance));
 
@@ -251,6 +256,7 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 	FNPropertySections::AddActorCategory("Cell Actor");
 	FNPropertySections::AddActorCategory("Cell Proxy");
 	FNPropertySections::AddActorCategory("Organ Volume");
+	FNPropertySections::AddActorCategory("World Collision Cache");
 	FNPropertySections::AddActorComponentCategory("Organ Component");
 	FNPropertySections::AddSceneComponentCategory("Cell Root");
 	FNPropertySections::AddSceneComponentCategory("Cell Junction");

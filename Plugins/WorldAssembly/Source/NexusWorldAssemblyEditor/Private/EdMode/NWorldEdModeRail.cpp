@@ -18,12 +18,9 @@
 #include "Framework/Commands/UICommandList.h"
 #include "NWorldAssemblyEditorCellUtils.h"
 #include "NWorldAssemblyEditorOrganUtils.h"
+#include "NWorldAssemblyEditorSubsystem.h"
 #include "NWorldAssemblyEditorTagUtils.h"
-#include "NWorldAssemblySettings.h"
-#include "NWorldCollisionBaker.h"
-#include "NWorldCollisionCacheSave.h"
 #include "Organ/NOrganComponent.h"
-#include "ScopedTransaction.h"
 #include "Widgets/SBoxPanel.h"
 
 #define LOCTEXT_NAMESPACE "NexusWorldAssemblyEditor"
@@ -92,13 +89,16 @@ TSharedRef<FUICommandList> FNWorldEdModeRail::GetCommandList()
 
 void FNWorldEdModeRail::ToggleCollisionVisualizer()
 {
-	if (UNWorldAssemblyEdMode::HasCollisionVisualizer())
+	UNWorldAssemblyEditorSubsystem* Subsystem = UNWorldAssemblyEditorSubsystem::Get();
+	if (Subsystem == nullptr) return;
+
+	if (Subsystem->HasCollisionVisualizer())
 	{
-		UNWorldAssemblyEdMode::DestroyCollisionVisualizer();
+		Subsystem->DestroyCollisionVisualizer();
 		return;
 	}
 
-	if (const TObjectPtr<ANDebugActor> NewVisualizer = UNWorldAssemblyEdMode::CreateCollisionVisualizer(FNEditorUtils::GetCurrentWorld()))
+	if (ANDebugActor* NewVisualizer = Subsystem->CreateCollisionVisualizer(FNEditorUtils::GetCurrentWorld()))
 	{
 		// Exclusively, rather than added to whatever the user had selected when they hit the button. The visualizer is
 		// one actor standing in for the whole level's collision, and it is built from the actors most likely to be
@@ -114,7 +114,8 @@ void FNWorldEdModeRail::ToggleCollisionVisualizer()
 
 bool FNWorldEdModeRail::ToggleCollisionVisualizer_IsActionChecked()
 {
-	return UNWorldAssemblyEdMode::HasCollisionVisualizer();
+	const UNWorldAssemblyEditorSubsystem* Subsystem = UNWorldAssemblyEditorSubsystem::Get();
+	return Subsystem != nullptr && Subsystem->HasCollisionVisualizer();
 }
 
 bool FNWorldEdModeRail::AddCellActor_CanExecute()
@@ -143,36 +144,10 @@ bool FNWorldEdModeRail::AddOrganVolume_CanExecute()
 
 void FNWorldEdModeRail::CacheWorldCollision()
 {
-	UWorld* World = FNEditorUtils::GetCurrentWorld();
-	if (World == nullptr) return;
-
-	const FNWorldAssemblyWorldCollisionSettings& Settings = UNWorldAssemblySettings::Get()->WorldCollisionSettings;
-
-	// Selection narrows the bake; an empty selection means the whole level. The bake writes to the organ components
-	// and to the level's cache actor, so it is transacted like any other authoring action.
-	const TArray<UNOrganComponent*> SelectedOrgans = FNWorldAssemblyEditorUtils::GetSelectedOrganComponents();
-
-	const FScopedTransaction Transaction(
-		LOCTEXT("FNWorldAssemblyEdModeWorldRail_CacheWorldCollision", "Cache World Collision"));
-
-	const FNWorldCollisionBaker::FBakeResult Result = SelectedOrgans.IsEmpty()
-		? FNWorldCollisionBaker::BakeWorld(World, Settings, true)
-		: FNWorldCollisionBaker::BakeOrgans(World, SelectedOrgans, Settings, true);
-
-	// Every organ has just been fingerprinted against the live world, so the save-time pass has nothing left to find.
-	// Only sound for a whole-level bake that ran to completion — a selected-organ bake leaves the rest of the level
-	// unexamined, and a cancelled one leaves the organs it never reached unexamined too.
-	if (SelectedOrgans.IsEmpty() && !Result.bCancelled)
-	{
-		FNWorldCollisionCacheSave::MarkClean(World);
-	}
-
-	// Reported rather than silent: the bake's whole value is that it moves work off the assembly, and the only way to
-	// see it happened is to say so. A run that changed nothing is worth saying too — it means the level is unchanged.
-	UE_LOG(LogNexusWorldAssembly, Log, TEXT("World collision cache: baked %d organ(s)%s%s."),
-		Result.OrgansBaked,
-		Result.bChanged ? TEXT("") : TEXT(" (nothing changed)"),
-		Result.bCancelled ? TEXT(" - cancelled before finishing") : TEXT(""));
+	// Selection narrows the bake; an empty selection means the whole level. The work itself lives in
+	// FNWorldAssemblyEditorUtils, shared with the cache actor's details panel, so both bake the same way.
+	FNWorldAssemblyEditorUtils::CacheWorldCollision(
+		FNEditorUtils::GetCurrentWorld(), FNWorldAssemblyEditorUtils::GetSelectedOrganComponents());
 }
 
 bool FNWorldEdModeRail::CacheWorldCollision_CanExecute()

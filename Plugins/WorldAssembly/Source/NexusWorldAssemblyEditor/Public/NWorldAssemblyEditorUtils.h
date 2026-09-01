@@ -52,6 +52,20 @@ public:
 	 */
 	static ANDebugActor* RefreshWorldCollisionVisualizerActor(UWorld* World, ANDebugActor* ExistingActor);
 
+	/**
+	 * Bake the world collision the level's organs assemble against into the level's collision cache.
+	 *
+	 * The single implementation behind every button that bakes — the World rail's Cache World Collision and the cache
+	 * actor's own details panel — so the two cannot drift on what a bake transacts, marks clean, or reports.
+	 * @param World World to bake. Null does nothing.
+	 * @param Organs Organs to bake, or empty to bake every organ in the level.
+	 * @note Always a forced re-bake. Someone reaching for one of these buttons has a reason to distrust what is
+	 *       stored, and a bake that silently did nothing because a fingerprint still matched would be no way to act
+	 *       on that.
+	 * @note Game-thread only, and synchronous — see FNWorldCollisionBaker. Runs inside its own transaction.
+	 */
+	static void CacheWorldCollision(UWorld* World, const TArray<UNOrganComponent*>& Organs);
+
 	/** @return true if the actor participates in generated cell data (has a cell-root or junction component). */
 	FORCEINLINE static bool EffectsGeneratedData(const AActor* ContextActor)
 	{

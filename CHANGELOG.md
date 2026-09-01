@@ -2,6 +2,19 @@
 
 ## [0.4.0] - ?
 
+### Added
+
+- A `World Collision Cache` category on `ANWorldCollisionCacheActor`'s details panel, giving the level's baked collision the three actions you would want while looking at it: a `Create Visualizer` / `Remove Visualizer` toggle, `Select Visualizer`, and `Bake World Collision`. Above them sits a read-only status line reporting how many elements the pool holds and whether it is current, stale, or never baked — asked of `FNWorldCollisionPreview`, so the row and the visualizer always agree about whether the level is showable. The actor holds one property and it is not editable, so the panel was otherwise blank.
+- `FNWorldAssemblyEditorUtils::CacheWorldCollision`, the single implementation behind every button that bakes. The World rail's `Cache World Collision` and the cache actor's panel both route through it, so the two cannot drift on what a bake transacts, marks clean, or reports. The rail narrows to the selected organs; the cache actor's panel always bakes the whole level, since that actor stands for the level's entire pool.
+
+### Changed
+
+- The world-collision visualizer is owned by `UNWorldAssemblyEditorSubsystem` rather than by `UNWorldAssemblyEdMode`. It could previously only exist while the World Assembly edit mode was the active mode — every accessor resolved through the mode — which made the visualizer unreachable from anywhere else, including an Outliner selection of the cache actor. Leaving the mode still takes it down, and so do PIE, a map change, and editor shutdown.
+
+### Fixed
+
+- Saving a level that holds no organs no longer creates an `ANWorldCollisionCacheActor` in it. `FNWorldCollisionBaker::BakeOrgans` resolved the cache actor before it looked at what it had been asked to bake, so the save-time pass wrote an empty cache into any level it touched — most visibly a cell level, or one open for level-instance editing, neither of which will ever read a pool. A level that already has a cache actor still reaches orphan collection when its organ list is empty, so a destination level whose organs have all been deleted gives its pool up as before.
+
 ## [0.3.5] - 2026-08-31
 
 > Two changes below alter what counts as world collision — primitives with their collision switched off are no longer

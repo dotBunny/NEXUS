@@ -145,9 +145,6 @@ public:
 	/** @return true if this editor mode is not the active level-editor mode. */
 	static bool IsNotActive() { return !GLevelEditorModeTools().IsModeActive(Identifier); }
 
-	/** @return true when a world-collision visualizer actor is currently alive for the focused world. */
-	static bool HasCollisionVisualizer();
-
 	/** Set the active render mode used to draw World Assembly debug geometry. No-op when the mode is not active. */
 	static void SetRenderMode(ENWorldAssemblyEdModeRenderMode InRenderMode);
 
@@ -159,27 +156,6 @@ public:
 	 *         scene or has to be suppressed for screenshots.
 	 */
 	static FText GetWarningText();
-
-	/**
-	 * Builds — or refreshes in place — the world-collision visualizer: a single merged ANDebugActor whose mesh is the
-	 * union of the simple-collision geometry of every world actor that passes the World Assembly world-actor filter
-	 * (FNCreateVirtualWorldTask::CreateWorldActorFilterSettings), shaded with
-	 * UNWorldAssemblyEditorSettings::CollisionVisualizerMaterial, and caches it on the mode.
-	 *
-	 * When no visualizer is cached this spawns one and starts listening for world changes; when one already exists its
-	 * geometry is swapped in place (preserving actor identity and selection). The cached set of source actors is
-	 * refreshed and the dirty flag cleared each call. Editor-only / diagnostic; the actor is transient and will not be
-	 * saved with the level.
-	 * @param World World to iterate for collision sources and to spawn the visualizer into. Must be valid.
-	 * @return The cached visualizer actor, or nullptr if none exists and no collision geometry was extracted.
-	 */
-	static TObjectPtr<ANDebugActor> CreateCollisionVisualizer(UWorld* World);
-	/**
-	 * Destroys the cached world-collision visualizer actor if one exists. No-op when none is alive, or when the mode is
-	 * not active. Called automatically from CreateCollisionVisualizer (refresh) and during Exit() so the visualizer
-	 * doesn't outlive the editor mode.
-	 */
-	static void DestroyCollisionVisualizer();
 
 	/** Unique identifier registered with the editor-mode manager. */
 	const static FEditorModeID Identifier;
@@ -274,45 +250,8 @@ private:
 	void RegisterToggleableTool(const TSharedPtr<FUICommandInfo>& UICommand, const FString& ToolIdentifier, UInteractiveToolBuilder* Builder);
 
 private:
-	/** Instance half of CreateCollisionVisualizer; see that overload for the contract. */
-	TObjectPtr<ANDebugActor> RefreshCollisionVisualizer(UWorld* World);
-
-	/** Instance half of DestroyCollisionVisualizer; see that overload for the contract. */
-	void TearDownCollisionVisualizer();
-
-	/** Subscribe to the editor world-change delegates that drive live visualizer refreshes. Called when one is spawned. */
-	void BindWorldChangeDelegates();
-
-	/** Unsubscribe from the editor world-change delegates. Called when the visualizer is destroyed or the mode exits. */
-	void UnbindWorldChangeDelegates();
-
-	/** Flag the cached visualizer for a rebuild on the next ModeTick. Bursts of changes coalesce into a single rebuild. */
-	void MarkCollisionVisualizerDirty() { bCollisionVisualizerDirty = true; }
-
-	/**
-	 * @return true when a change to Actor could alter the cached visualizer — i.e. Actor currently passes the collision
-	 *         filter, or it was part of the source set the live visualizer was last built from (so a delete / collision
-	 *         toggle / ignore-tag still forces it to drop out). Always false while no visualizer is alive.
-	 */
-	bool ShouldRebuildForActor(const AActor* Actor) const;
-
-	/** @return The actor affected by a change delegate payload — the object itself, or its owner when it is a component. */
-	static AActor* ResolveAffectedActor(UObject* Object);
-
-	/** Delegate: an actor was removed from the level — drop it from our state, or flag a refresh when it sourced one. */
+	/** Delegate: an actor was removed from the level — drop it from our state when it was the focused cell. */
 	void OnActorDeleted(AActor* Actor);
-
-	/** Delegate: a relevant actor was added to the level — flag a refresh. */
-	void OnLevelActorAdded(AActor* Actor);
-
-	/** Delegate: a transform gizmo drag ended on Object — flag a refresh when it is relevant. */
-	void OnObjectMoved(UObject& Object);
-
-	/** Delegate: a finalized (non-interactive) property edit landed on Object — flag a refresh when it is relevant. */
-	void OnObjectPropertyChanged(UObject* Object, FPropertyChangedEvent& PropertyChangedEvent);
-
-	/** Delegate: an undo/redo transaction completed — geometry can't be cheaply diffed, so always flag a refresh. */
-	void OnUndoRedo();
 
 	TArray<FVector> CachedHullVertices;
 	TArray<FIntVector2> CachedHullEdges;
@@ -334,24 +273,6 @@ private:
 	ENCellEdMode CellEdMode = ENCellEdMode::Bounds;
 	ENCellVoxelMode CellVoxelMode = ENCellVoxelMode::None;
 	ENWorldAssemblyEdModeRenderMode RenderMode = ENWorldAssemblyEdModeRenderMode::All;
-
-	/**
-	 * The live world-collision visualizer, or nullptr when none is spawned.
-	 * @note A real UPROPERTY now that this is instance state, which is what roots it. As a static TObjectPtr it could
-	 *       not be one — statics are invisible to the property system — so the actor was reachable only through its
-	 *       world's actor list.
-	 */
-	UPROPERTY()
-	TObjectPtr<ANDebugActor> CollisionVisualizer;
-
-
-	/** Set by the world-change delegates when the visualizer needs rebuilding; consumed (and cleared) in ModeTick. */
-	bool bCollisionVisualizerDirty = false;
-
-	FDelegateHandle OnLevelActorAddedHandle;
-	FDelegateHandle OnObjectMovedHandle;
-	FDelegateHandle OnObjectPropertyChangedHandle;
-	FDelegateHandle OnUndoRedoHandle;
 
 	/**
 	 * Editor-side operation used to preview organ generation.

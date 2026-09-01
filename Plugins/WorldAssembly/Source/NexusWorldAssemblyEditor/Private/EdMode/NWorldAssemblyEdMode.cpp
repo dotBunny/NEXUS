@@ -126,12 +126,6 @@ void UNWorldAssemblyEdMode::SetCellVoxelMode(const ENCellVoxelMode InCellVoxelMo
 	}
 }
 
-bool UNWorldAssemblyEdMode::HasCollisionVisualizer()
-{
-	const UNWorldAssemblyEdMode* Mode = Get();
-	return Mode != nullptr && Mode->CollisionVisualizer != nullptr;
-}
-
 void UNWorldAssemblyEdMode::SetRenderMode(const ENWorldAssemblyEdModeRenderMode InRenderMode)
 {
 	if (UNWorldAssemblyEdMode* Mode = Get())
@@ -203,190 +197,6 @@ void UNWorldAssemblyEdMode::OnActorDeleted(AActor* Actor)
 	if (Actor == CellActor.Get())
 	{
 		CellActor.Reset();
-	}
-	if (Actor == CollisionVisualizer)
-	{
-		// The visualizer itself was removed (e.g. deleted by the user) — stop listening and clear our state.
-		UnbindWorldChangeDelegates();
-		bCollisionVisualizerDirty = false;
-		CollisionVisualizer = nullptr;
-	}
-	else if (CollisionVisualizer != nullptr)
-	{
-		// Any deletion re-reads the preview. There is no source-actor set to test membership against any more: what
-		// the visualizer draws comes from the level's baked pool, and FNWorldCollisionPreview decides for itself
-		// whether that pool still matches the world.
-		MarkCollisionVisualizerDirty();
-	}
-}
-
-TObjectPtr<ANDebugActor> UNWorldAssemblyEdMode::CreateCollisionVisualizer(UWorld* World)
-{
-	UNWorldAssemblyEdMode* Mode = Get();
-	if (Mode == nullptr) return nullptr;
-
-	return Mode->RefreshCollisionVisualizer(World);
-}
-
-void UNWorldAssemblyEdMode::DestroyCollisionVisualizer()
-{
-	if (UNWorldAssemblyEdMode* Mode = Get())
-	{
-		Mode->TearDownCollisionVisualizer();
-	}
-}
-
-TObjectPtr<ANDebugActor> UNWorldAssemblyEdMode::RefreshCollisionVisualizer(UWorld* World)
-{
-	const bool bWasAlive = CollisionVisualizer != nullptr;
-
-	// Only time the initial build; in-place refreshes are frequent and would otherwise spam the log.
-	TOptional<FNMethodScopeTimer> Timer;
-	if (!bWasAlive)
-	{
-		Timer.Emplace(TEXT("World Collision Build Time"));
-	}
-
-	// Nothing baked, or baked and since gone stale — say why rather than drawing an empty visualizer, which would read
-	// as "this level has no collision" when it means "nobody has baked it".
-	const FNWorldCollisionPreview::EState PreviewState = FNWorldCollisionPreview::GetState(World);
-	if (PreviewState != FNWorldCollisionPreview::EState::Available)
-	{
-		FNWorldCollisionPreview::NotifyUnavailable(World, PreviewState);
-	}
-
-	CollisionVisualizer = FNWorldAssemblyEditorUtils::RefreshWorldCollisionVisualizerActor(World, CollisionVisualizer);
-
-	bCollisionVisualizerDirty = false;
-
-	if (CollisionVisualizer == nullptr)
-	{
-		// Nothing was spawned (nothing baked / no material) — nothing to listen for.
-		return nullptr;
-	}
-
-	// Start listening only once a visualizer is actually alive.
-	if (!bWasAlive)
-	{
-		BindWorldChangeDelegates();
-	}
-
-	return CollisionVisualizer;
-}
-
-void UNWorldAssemblyEdMode::TearDownCollisionVisualizer()
-{
-	UnbindWorldChangeDelegates();
-	bCollisionVisualizerDirty = false;
-
-	if (CollisionVisualizer != nullptr)
-	{
-		if (CollisionVisualizer->IsSelected())
-		{
-			GEditor->SelectActor(CollisionVisualizer, false, false);
-		}
-		CollisionVisualizer->GetWorld()->DestroyActor(CollisionVisualizer, false, false);
-		CollisionVisualizer = nullptr;
-	}
-}
-
-void UNWorldAssemblyEdMode::BindWorldChangeDelegates()
-{
-	// AddUObject rather than the AddStatic these used while the handlers were static: the binding is now tied to this
-	// mode's lifetime, so a mode torn down without reaching UnbindWorldChangeDelegates unbinds itself rather than
-	// leaving a delegate pointing at a dead object.
-	if (!OnLevelActorAddedHandle.IsValid())
-	{
-		OnLevelActorAddedHandle = GEngine->OnLevelActorAdded().AddUObject(this, &UNWorldAssemblyEdMode::OnLevelActorAdded);
-	}
-	if (!OnObjectMovedHandle.IsValid())
-	{
-		OnObjectMovedHandle = GEditor->OnEndObjectMovement().AddUObject(this, &UNWorldAssemblyEdMode::OnObjectMoved);
-	}
-	if (!OnObjectPropertyChangedHandle.IsValid())
-	{
-		OnObjectPropertyChangedHandle = FCoreUObjectDelegates::OnObjectPropertyChanged.AddUObject(this, &UNWorldAssemblyEdMode::OnObjectPropertyChanged);
-	}
-	if (!OnUndoRedoHandle.IsValid())
-	{
-		OnUndoRedoHandle = FEditorDelegates::PostUndoRedo.AddUObject(this, &UNWorldAssemblyEdMode::OnUndoRedo);
-	}
-}
-
-void UNWorldAssemblyEdMode::UnbindWorldChangeDelegates()
-{
-	if (OnLevelActorAddedHandle.IsValid())
-	{
-		GEngine->OnLevelActorAdded().Remove(OnLevelActorAddedHandle);
-		OnLevelActorAddedHandle.Reset();
-	}
-	if (OnObjectMovedHandle.IsValid())
-	{
-		GEditor->OnEndObjectMovement().Remove(OnObjectMovedHandle);
-		OnObjectMovedHandle.Reset();
-	}
-	if (OnObjectPropertyChangedHandle.IsValid())
-	{
-		FCoreUObjectDelegates::OnObjectPropertyChanged.Remove(OnObjectPropertyChangedHandle);
-		OnObjectPropertyChangedHandle.Reset();
-	}
-	if (OnUndoRedoHandle.IsValid())
-	{
-		FEditorDelegates::PostUndoRedo.Remove(OnUndoRedoHandle);
-		OnUndoRedoHandle.Reset();
-	}
-}
-
-bool UNWorldAssemblyEdMode::ShouldRebuildForActor(const AActor* Actor) const
-{
-	if (Actor == nullptr || CollisionVisualizer == nullptr) return false;
-
-	// Only "is it collision geometry now". The old half of this test — membership in the set the visualizer was last
-	// built from — went with the gather: the visualizer no longer builds from a set of actors, it reads the level's
-	// baked pool, and the deletion case that set used to catch is handled by refreshing on every deletion instead.
-	return FNActorUtils::PassesFilter(Actor, FNCreateVirtualWorldTask::CreateWorldActorFilterSettings(UNWorldAssemblySettings::Get()->WorldCollisionSettings));
-}
-
-AActor* UNWorldAssemblyEdMode::ResolveAffectedActor(UObject* Object)
-{
-	if (Object == nullptr) return nullptr;
-	if (AActor* Actor = Cast<AActor>(Object)) return Actor;
-	if (const UActorComponent* Component = Cast<UActorComponent>(Object)) return Component->GetOwner();
-	return nullptr;
-}
-
-void UNWorldAssemblyEdMode::OnLevelActorAdded(AActor* Actor)
-{
-	if (ShouldRebuildForActor(Actor))
-	{
-		MarkCollisionVisualizerDirty();
-	}
-}
-
-void UNWorldAssemblyEdMode::OnObjectMoved(UObject& Object)
-{
-	if (ShouldRebuildForActor(ResolveAffectedActor(&Object)))
-	{
-		MarkCollisionVisualizerDirty();
-	}
-}
-
-void UNWorldAssemblyEdMode::OnObjectPropertyChanged(UObject* Object, FPropertyChangedEvent& PropertyChangedEvent)
-{
-	// Ignore the continuous mid-edit stream (slider scrubs, gizmo drags); we rebuild on the finalizing change instead.
-	if (PropertyChangedEvent.ChangeType == EPropertyChangeType::Interactive) return;
-
-	if (ShouldRebuildForActor(ResolveAffectedActor(Object)))
-	{
-		MarkCollisionVisualizerDirty();
-	}
-}
-
-void UNWorldAssemblyEdMode::OnUndoRedo()
-{
-	if (CollisionVisualizer != nullptr)
-	{
-		MarkCollisionVisualizerDirty();
 	}
 }
 
@@ -561,10 +371,16 @@ void UNWorldAssemblyEdMode::Exit()
 		UE::TransformGizmoUtil::DeregisterTransformGizmoContextObject(ToolsContext);
 	}
 
-	// Destroy any visualizer kicking around. Deliberately the instance method rather than the static facade: the mode
-	// manager drops us from its active list before calling Exit, so Get() would already return nullptr here and the
-	// facade would quietly no-op, leaking the visualizer actor into the level.
-	TearDownCollisionVisualizer();
+	// Destroy any visualizer kicking around. It is owned by the editor subsystem now — which is what lets the cache
+	// actor's details panel offer it with the mode closed — but leaving the mode still takes it down: it is a
+	// diagnostic overlay on this mode's workflow, and the mode's own tiles are how it was most likely put up.
+	//
+	// Safe to reach through the subsystem here, unlike the mode's own accessors: the mode manager drops us from its
+	// active list before calling Exit, so anything routed through UNWorldAssemblyEdMode::Get() would no-op.
+	if (UNWorldAssemblyEditorSubsystem* Subsystem = UNWorldAssemblyEditorSubsystem::Get())
+	{
+		Subsystem->DestroyCollisionVisualizer();
+	}
 
 	// Remove our temp organ generator
 	if (OrganGenerator != nullptr)
@@ -579,17 +395,6 @@ void UNWorldAssemblyEdMode::Exit()
 void UNWorldAssemblyEdMode::ModeTick(float DeltaTime)
 {
 	if (bCanTick == false) return;
-
-
-	// Coalesce any world changes flagged since the last tick into a single in-place rebuild of the visualizer.
-	if (bCollisionVisualizerDirty && CollisionVisualizer != nullptr)
-	{
-		if (UWorld* VisualizerWorld = CollisionVisualizer->GetWorld())
-		{
-			RefreshCollisionVisualizer(VisualizerWorld);
-		}
-		bCollisionVisualizerDirty = false;
-	}
 
 	// Resolve the cell actor for the active world. Reuse the cached pointer while it's still alive and belongs to
 	// that world; only fall back to the full GetCellActorFromWorld level/actor scan when it's gone. Deletion of the

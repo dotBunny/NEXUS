@@ -8,11 +8,13 @@
 #include "NEditorUtils.h"
 #include "Assembly/NAssemblyOperation.h"
 #include "Cell/NCellJunctionConnection.h"
+#include "Developer/NDebugActor.h"
 #include "Macros/NEditorSubsystemMacros.h"
 #include "NWorldAssemblyEditorSubsystem.generated.h"
 
 class ANCellProxy;
 class UNAssemblyOperation;
+struct FPropertyChangedEvent;
 
 /**
  * What the Operations panel reports about an assembly run once it has finished.
@@ -79,6 +81,9 @@ class NEXUSWORLDASSEMBLYEDITOR_API UNWorldAssemblyEditorSubsystem : public UEdit
 		// bar from the inter-run timer's countdown instead (no-op when no loop is waiting).
 		UpdateAutoAssemblyCountdownBar();
 
+		// Coalesce any world changes flagged since the last tick into a single in-place rebuild of the visualizer.
+		TickCollisionVisualizer();
+
 		LastFrameNumberWeTicked = GFrameCounter;
 	}
 
@@ -90,9 +95,10 @@ class NEXUSWORLDASSEMBLYEDITOR_API UNWorldAssemblyEditorSubsystem : public UEdit
 			return false;
 		}
 
-		// Tick while operations run, or while an auto-assembly loop is waiting between runs so the toolbar
-		// countdown bar keeps advancing.
-		return HasKnownOperation() || (bAutoAssemblyLoopActive && AutoAssemblyTimerHandle.IsValid());
+		// Tick while operations run, while an auto-assembly loop is waiting between runs so the toolbar countdown
+		// bar keeps advancing, or while a world edit has left the collision visualizer needing a rebuild.
+		return HasKnownOperation() || (bAutoAssemblyLoopActive && AutoAssemblyTimerHandle.IsValid()) ||
+			bCollisionVisualizerDirty;
 	}
 	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Conditional; }
 	virtual TStatId GetStatId() const override
@@ -169,6 +175,39 @@ class NEXUSWORLDASSEMBLYEDITOR_API UNWorldAssemblyEditorSubsystem : public UEdit
 	/** Unload the level instances for proxies from the given operation. */
 	void UnloadGeneratedProxies(const int32& OperationTicket);
 
+	/**
+	 * Builds — or refreshes in place — the world-collision visualizer: a single merged ANDebugActor whose mesh is the
+	 * level's baked collision pool as FNWorldCollisionPreview reads it, shaded with
+	 * UNWorldAssemblyEditorSettings::CollisionVisualizerMaterial.
+	 *
+	 * When no visualizer is alive this spawns one and starts listening for world changes; when one already exists its
+	 * geometry is swapped in place, preserving actor identity and selection. Diagnostic — the actor is transient and
+	 * is not saved with the level.
+	 * @param World World to read the pool from and to spawn the visualizer into. Must be valid.
+	 * @return The live visualizer actor, or nullptr when the level has nothing baked to show.
+	 * @note Owned here rather than by UNWorldAssemblyEdMode, which held it until this moved. The mode is only one of
+	 *       the places that offers the visualizer — ANWorldCollisionCacheActor's details panel is another, and that
+	 *       panel is reachable from the Outliner whether or not the mode is up. A mode-owned visualizer could not
+	 *       exist while the mode was closed, which made every button outside the mode a no-op.
+	 */
+	ANDebugActor* CreateCollisionVisualizer(UWorld* World);
+
+	/** Destroy the live world-collision visualizer, if there is one. No-op when there is not. */
+	void DestroyCollisionVisualizer();
+
+	/** @return true while a world-collision visualizer actor is alive. */
+	bool HasCollisionVisualizer() const { return CollisionVisualizer != nullptr; }
+
+	/** @return The live world-collision visualizer, or nullptr when none is alive. */
+	ANDebugActor* GetCollisionVisualizer() const { return CollisionVisualizer; }
+
+	/**
+	 * Fires whenever the visualizer is spawned or destroyed.
+	 * @note What lets a UI showing its state track a toggle it did not make itself — the ed mode rail and the cache
+	 *       actor's details panel both drive the same visualizer, and either can act while the other is on screen.
+	 */
+	FSimpleMulticastDelegate OnCollisionVisualizerChanged;
+
 protected:
 	/** Editor callback: drops proxies before PIE starts so transient actors don't leak into play. */
 	void OnPreBeginPIE(bool bArg);
@@ -214,6 +253,47 @@ private:
 	/** Push the inter-run countdown (0..1) onto the toolbar progress bar while waiting between auto-assembly runs. Game thread only. */
 	void UpdateAutoAssemblyCountdownBar();
 
+	/** Rebuild the visualizer in place when a world change has flagged it. Called every Tick; no-op while clean. */
+	void TickCollisionVisualizer();
+
+	/** Subscribe to the editor world-change delegates that drive live visualizer refreshes. Called when one is spawned. */
+	void BindWorldChangeDelegates();
+
+	/** Unsubscribe from the editor world-change delegates. Called when the visualizer is destroyed. */
+	void UnbindWorldChangeDelegates();
+
+	/** Flag the visualizer for a rebuild on the next Tick. Bursts of changes coalesce into a single rebuild. */
+	void MarkCollisionVisualizerDirty() { bCollisionVisualizerDirty = true; }
+
+	/**
+	 * @return true when a change to Actor could alter what the visualizer draws — i.e. Actor passes the world
+	 *         collision filter. Always false while no visualizer is alive.
+	 */
+	bool ShouldRebuildForActor(const AActor* Actor) const;
+
+	/** @return The actor affected by a change delegate payload — the object itself, or its owner when it is a component. */
+	static AActor* ResolveAffectedActor(UObject* Object);
+
+	/** Delegate: a relevant actor was added to the level — flag a refresh. */
+	void OnLevelActorAdded(AActor* Actor);
+
+	/**
+	 * Delegate: an actor was removed from the level — clear our state when it was the visualizer, flag a refresh
+	 * otherwise.
+	 * @note Every deletion refreshes, not just a relevant one: what the visualizer draws comes from the level's baked
+	 *       pool, and FNWorldCollisionPreview decides for itself whether that pool still matches the world.
+	 */
+	void OnLevelActorDeleted(AActor* Actor);
+
+	/** Delegate: a transform gizmo drag ended on Object — flag a refresh when it is relevant. */
+	void OnObjectMoved(UObject& Object);
+
+	/** Delegate: a finalized (non-interactive) property edit landed on Object — flag a refresh when it is relevant. */
+	void OnObjectPropertyChanged(UObject* Object, FPropertyChangedEvent& PropertyChangedEvent);
+
+	/** Delegate: an undo/redo transaction completed — geometry can't be cheaply diffed, so always flag a refresh. */
+	void OnUndoRedo();
+
 	/** Operations currently owned by this subsystem. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	UPROPERTY()
@@ -230,6 +310,23 @@ private:
 	 */
 	UPROPERTY()
 	TArray<TObjectPtr<ANCellProxy>> KnownProxies;
+
+	/**
+	 * The live world-collision visualizer, or nullptr when none is spawned.
+	 * @note A UPROPERTY because that is what roots it — the actor is transient, so its world's actor list is not
+	 *       enough to keep it from being collected.
+	 */
+	UPROPERTY()
+	TObjectPtr<ANDebugActor> CollisionVisualizer;
+
+	/** Set by the world-change delegates when the visualizer needs rebuilding; consumed (and cleared) in Tick. */
+	bool bCollisionVisualizerDirty = false;
+
+	FDelegateHandle OnLevelActorAddedHandle;
+	FDelegateHandle OnLevelActorDeletedHandle;
+	FDelegateHandle OnObjectMovedHandle;
+	FDelegateHandle OnObjectPropertyChangedHandle;
+	FDelegateHandle OnUndoRedoHandle;
 
 public:
 	/** One operation's accepted junction pairings, retained so the ed mode can draw the routes it proved clear. */

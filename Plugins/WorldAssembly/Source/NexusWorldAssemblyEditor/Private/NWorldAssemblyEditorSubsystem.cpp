@@ -8,12 +8,19 @@
 #include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
 #include "Cell/NCellProxy.h"
 #include "Editor.h"
+#include "NActorUtils.h"
 #include "TimerManager.h"
 #include "NWorldAssemblyContextCache.h"
 #include "NWorldAssemblyEditorQuickAssembly.h"
 #include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEditorUserSettings.h"
+#include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyMinimal.h"
+#include "NWorldAssemblySettings.h"
+#include "NWorldCollisionPreview.h"
+#include "Assembly/Tasks/NCreateVirtualWorldTask.h"
+#include "Components/ActorComponent.h"
+#include "Developer/NMethodScopeTimer.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "Organ/NOrganComponent.h"
 #include "Widgets/Notifications/SNotificationList.h"
@@ -42,6 +49,9 @@ void UNWorldAssemblyEditorSubsystem::Deinitialize()
 	{
 		ClearAllProxies();
 	}
+
+	// Transient like the proxies, and holding editor delegate subscriptions besides, so it goes the same way they do.
+	DestroyCollisionVisualizer();
 
 	if (OnMapLoadHandle.IsValid())
 	{
@@ -353,6 +363,10 @@ void UNWorldAssemblyEditorSubsystem::OnPreBeginPIE([[maybe_unused]] bool bArg)
 	// Entering PIE invalidates the editor-world organs the loop runs against, so disengage it before clearing proxies.
 	StopAutoAssemblyLoop();
 	ClearAllProxies();
+
+	// The visualizer is an editor-world diagnostic actor; leaving it up would put merged collision geometry in front
+	// of the running game.
+	DestroyCollisionVisualizer();
 }
 
 void UNWorldAssemblyEditorSubsystem::OnMapLoad(const FString& String, FCanLoadMap& CanLoadMap)
@@ -360,6 +374,9 @@ void UNWorldAssemblyEditorSubsystem::OnMapLoad(const FString& String, FCanLoadMa
 	// A map change invalidates the loop's target organs; disengage it before clearing proxies.
 	StopAutoAssemblyLoop();
 	ClearAllProxies();
+
+	// Belongs to the map being left — its geometry is that level's baked pool, and the actor lives in that world.
+	DestroyCollisionVisualizer();
 
 	// The summary describes organs and cells in the map being left, and the proxies it counted have just been
 	// destroyed above — carrying it into the next map would report someone else's run as this one's last.
@@ -544,5 +561,202 @@ void UNWorldAssemblyEditorSubsystem::UpdateAutoAssemblyCountdownBar()
 	{
 		const float Remaining = TimerManager.GetTimerRemaining(AutoAssemblyTimerHandle);
 		FNWorldAssemblyEditorQuickAssembly::SetProgress(1.0f - (Remaining / Rate));
+	}
+}
+
+ANDebugActor* UNWorldAssemblyEditorSubsystem::CreateCollisionVisualizer(UWorld* World)
+{
+	const bool bWasAlive = CollisionVisualizer != nullptr;
+
+	// Only time the initial build; in-place refreshes are frequent and would otherwise spam the log.
+	TOptional<FNMethodScopeTimer> Timer;
+	if (!bWasAlive)
+	{
+		Timer.Emplace(TEXT("World Collision Build Time"));
+	}
+
+	// Nothing baked, or baked and since gone stale — say why rather than drawing an empty visualizer, which would read
+	// as "this level has no collision" when it means "nobody has baked it".
+	const FNWorldCollisionPreview::EState PreviewState = FNWorldCollisionPreview::GetState(World);
+	if (PreviewState != FNWorldCollisionPreview::EState::Available)
+	{
+		FNWorldCollisionPreview::NotifyUnavailable(World, PreviewState);
+	}
+
+	CollisionVisualizer = FNWorldAssemblyEditorUtils::RefreshWorldCollisionVisualizerActor(World, CollisionVisualizer);
+
+	bCollisionVisualizerDirty = false;
+
+	if (CollisionVisualizer == nullptr)
+	{
+		// Nothing was spawned (nothing baked / no material) — nothing to listen for. Still announced when this call
+		// took a live visualizer away, so anything showing its state does not keep reporting one that is gone.
+		if (bWasAlive)
+		{
+			UnbindWorldChangeDelegates();
+			OnCollisionVisualizerChanged.Broadcast();
+		}
+		return nullptr;
+	}
+
+	// Start listening only once a visualizer is actually alive.
+	if (!bWasAlive)
+	{
+		BindWorldChangeDelegates();
+		OnCollisionVisualizerChanged.Broadcast();
+	}
+
+	return CollisionVisualizer;
+}
+
+void UNWorldAssemblyEditorSubsystem::DestroyCollisionVisualizer()
+{
+	UnbindWorldChangeDelegates();
+	bCollisionVisualizerDirty = false;
+
+	if (CollisionVisualizer == nullptr) return;
+
+	if (CollisionVisualizer->IsSelected())
+	{
+		GEditor->SelectActor(CollisionVisualizer, false, false);
+	}
+	if (UWorld* VisualizerWorld = CollisionVisualizer->GetWorld())
+	{
+		VisualizerWorld->DestroyActor(CollisionVisualizer, false, false);
+	}
+	CollisionVisualizer = nullptr;
+
+	OnCollisionVisualizerChanged.Broadcast();
+}
+
+void UNWorldAssemblyEditorSubsystem::TickCollisionVisualizer()
+{
+	if (!bCollisionVisualizerDirty || CollisionVisualizer == nullptr) return;
+
+	if (UWorld* VisualizerWorld = CollisionVisualizer->GetWorld())
+	{
+		CreateCollisionVisualizer(VisualizerWorld);
+	}
+	bCollisionVisualizerDirty = false;
+}
+
+void UNWorldAssemblyEditorSubsystem::BindWorldChangeDelegates()
+{
+	if (!OnLevelActorAddedHandle.IsValid())
+	{
+		OnLevelActorAddedHandle = GEngine->OnLevelActorAdded().AddUObject(this, &UNWorldAssemblyEditorSubsystem::OnLevelActorAdded);
+	}
+	if (!OnLevelActorDeletedHandle.IsValid())
+	{
+		OnLevelActorDeletedHandle = GEngine->OnLevelActorDeleted().AddUObject(this, &UNWorldAssemblyEditorSubsystem::OnLevelActorDeleted);
+	}
+	if (!OnObjectMovedHandle.IsValid())
+	{
+		OnObjectMovedHandle = GEditor->OnEndObjectMovement().AddUObject(this, &UNWorldAssemblyEditorSubsystem::OnObjectMoved);
+	}
+	if (!OnObjectPropertyChangedHandle.IsValid())
+	{
+		OnObjectPropertyChangedHandle = FCoreUObjectDelegates::OnObjectPropertyChanged.AddUObject(this, &UNWorldAssemblyEditorSubsystem::OnObjectPropertyChanged);
+	}
+	if (!OnUndoRedoHandle.IsValid())
+	{
+		OnUndoRedoHandle = FEditorDelegates::PostUndoRedo.AddUObject(this, &UNWorldAssemblyEditorSubsystem::OnUndoRedo);
+	}
+}
+
+void UNWorldAssemblyEditorSubsystem::UnbindWorldChangeDelegates()
+{
+	if (OnLevelActorAddedHandle.IsValid())
+	{
+		GEngine->OnLevelActorAdded().Remove(OnLevelActorAddedHandle);
+		OnLevelActorAddedHandle.Reset();
+	}
+	if (OnLevelActorDeletedHandle.IsValid())
+	{
+		GEngine->OnLevelActorDeleted().Remove(OnLevelActorDeletedHandle);
+		OnLevelActorDeletedHandle.Reset();
+	}
+	if (OnObjectMovedHandle.IsValid())
+	{
+		GEditor->OnEndObjectMovement().Remove(OnObjectMovedHandle);
+		OnObjectMovedHandle.Reset();
+	}
+	if (OnObjectPropertyChangedHandle.IsValid())
+	{
+		FCoreUObjectDelegates::OnObjectPropertyChanged.Remove(OnObjectPropertyChangedHandle);
+		OnObjectPropertyChangedHandle.Reset();
+	}
+	if (OnUndoRedoHandle.IsValid())
+	{
+		FEditorDelegates::PostUndoRedo.Remove(OnUndoRedoHandle);
+		OnUndoRedoHandle.Reset();
+	}
+}
+
+bool UNWorldAssemblyEditorSubsystem::ShouldRebuildForActor(const AActor* Actor) const
+{
+	if (Actor == nullptr || CollisionVisualizer == nullptr) return false;
+
+	// Only "is it collision geometry now". The visualizer no longer builds from a set of actors — it reads the level's
+	// baked pool — and the deletion case a source set used to catch is handled by refreshing on every deletion.
+	return FNActorUtils::PassesFilter(Actor, FNCreateVirtualWorldTask::CreateWorldActorFilterSettings(UNWorldAssemblySettings::Get()->WorldCollisionSettings));
+}
+
+AActor* UNWorldAssemblyEditorSubsystem::ResolveAffectedActor(UObject* Object)
+{
+	if (Object == nullptr) return nullptr;
+	if (AActor* Actor = Cast<AActor>(Object)) return Actor;
+	if (const UActorComponent* Component = Cast<UActorComponent>(Object)) return Component->GetOwner();
+	return nullptr;
+}
+
+void UNWorldAssemblyEditorSubsystem::OnLevelActorAdded(AActor* Actor)
+{
+	if (ShouldRebuildForActor(Actor))
+	{
+		MarkCollisionVisualizerDirty();
+	}
+}
+
+void UNWorldAssemblyEditorSubsystem::OnLevelActorDeleted(AActor* Actor)
+{
+	if (Actor == CollisionVisualizer)
+	{
+		// The visualizer itself was removed (e.g. deleted by the user) — stop listening and clear our state.
+		UnbindWorldChangeDelegates();
+		bCollisionVisualizerDirty = false;
+		CollisionVisualizer = nullptr;
+		OnCollisionVisualizerChanged.Broadcast();
+	}
+	else if (CollisionVisualizer != nullptr)
+	{
+		MarkCollisionVisualizerDirty();
+	}
+}
+
+void UNWorldAssemblyEditorSubsystem::OnObjectMoved(UObject& Object)
+{
+	if (ShouldRebuildForActor(ResolveAffectedActor(&Object)))
+	{
+		MarkCollisionVisualizerDirty();
+	}
+}
+
+void UNWorldAssemblyEditorSubsystem::OnObjectPropertyChanged(UObject* Object, FPropertyChangedEvent& PropertyChangedEvent)
+{
+	// Ignore the continuous mid-edit stream (slider scrubs, gizmo drags); we rebuild on the finalizing change instead.
+	if (PropertyChangedEvent.ChangeType == EPropertyChangeType::Interactive) return;
+
+	if (ShouldRebuildForActor(ResolveAffectedActor(Object)))
+	{
+		MarkCollisionVisualizerDirty();
+	}
+}
+
+void UNWorldAssemblyEditorSubsystem::OnUndoRedo()
+{
+	if (CollisionVisualizer != nullptr)
+	{
+		MarkCollisionVisualizerDirty();
 	}
 }
