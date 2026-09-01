@@ -113,8 +113,9 @@ FNWorldCollisionBaker::FPooledCollision FNWorldCollisionBaker::ResolvePooled(con
 		{
 			// Skipping the fingerprint is the "trust what was baked" setting: the cache is taken at its word, which is
 			// only right for a world whose geometry is fixed by the time anything reads it.
+			int32 Contributors = 0;
 			const uint64 Current = bValidate
-				? FNWorldCollisionFingerprint::Compute(World, Bounds, Settings)
+				? FNWorldCollisionFingerprint::Compute(World, Bounds, Settings, &Contributors)
 				: Organ->CollisionCache.Fingerprint;
 
 			if (Organ->CollisionCache.IsValidFor(Current))
@@ -147,9 +148,19 @@ FNWorldCollisionBaker::FPooledCollision FNWorldCollisionBaker::ResolvePooled(con
 			}
 			else
 			{
+				// The actor count is what tells the two causes of a rejection apart, and it is why this reports more
+				// than the two fingerprints. A count that differs from the one the bake saw means the walk covered a
+				// different world rather than a changed one — it visits only loaded actors, so in a World Partition
+				// level it reports whichever regions and data layers happen to be up. A matching count with differing
+				// fingerprints means the geometry itself moved.
 				UE_LOG(LogNexusWorldAssembly, Warning,
-					TEXT("Organ '%s' world collision cache is stale (baked %llu, world is %llu); gathering fresh for it."),
-					*Organ->GetName(), Organ->CollisionCache.Fingerprint, Current);
+					TEXT("Organ '%s' world collision cache is stale (baked %llu, world is %llu over %d actors in %d bounds); gathering fresh for it."),
+					*Organ->GetDebugLabel(), Organ->CollisionCache.Fingerprint, Current, Contributors, Bounds.Num());
+
+				// The fingerprint is one number and any change scrambles all of it, so it can say that something
+				// moved but never what. Captured from two sessions, the first layer below whose value differs names
+				// the ingredient responsible.
+				FNWorldCollisionFingerprint::LogLayers(World, Bounds, Settings);
 			}
 		}
 
@@ -394,10 +405,20 @@ FNWorldCollisionBaker::FBakeResult FNWorldCollisionBaker::BakeOrgans(UWorld* Wor
 
 		// The cheap half: an organ whose world has not changed keeps the cache it has, and the whole bake costs one
 		// fingerprint pass. This is what makes baking on every level save affordable.
-		const uint64 Fingerprint = FNWorldCollisionFingerprint::Compute(World, Bounds, Settings);
+		int32 Contributors = 0;
+		const uint64 Fingerprint = FNWorldCollisionFingerprint::Compute(World, Bounds, Settings, &Contributors);
 		if (!bForce && Organ->CollisionCache.IsValidFor(Fingerprint))
 		{
 			continue;
+		}
+
+		// The save-time counterpart of the rejection reported in ResolvePooled. A forced bake says nothing here,
+		// because it did not consult the fingerprint to decide.
+		if (!bForce && Organ->CollisionCache.HasData())
+		{
+			UE_LOG(LogNexusWorldAssembly, Verbose,
+				TEXT("World collision re-bake for organ '%s': stored %llu, computed %llu over %d actors in %d bounds."),
+				*Organ->GetDebugLabel(), Organ->CollisionCache.Fingerprint, Fingerprint, Contributors, Bounds.Num());
 		}
 
 		FOrganResult OrganResult;

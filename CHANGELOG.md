@@ -2,9 +2,10 @@
 
 ## [0.4.0] - ?
 
-> Every world collision cache reads as stale once after upgrading and re-bakes, because a component's tags now reach
-> the fingerprint. Nothing is required of you — an organ whose cache no longer matches falls back to a live gather as
-> it always has — but the first save or bake per level will do more work than usual.
+> Every world collision cache reads as stale once after upgrading and re-bakes, because the fingerprint now covers
+> whether each component is excluded from the gather. Nothing is required of you — an organ whose cache no longer
+> matches falls back to a live gather as it always has — but the first save or bake per level will do more work than
+> usual.
 
 ### Added
 
@@ -21,7 +22,7 @@
 
 ### Changed
 
-- `FNWorldCollisionFingerprint::HashActor` folds each primitive's `ComponentTags` into its summary, so tagging or untagging a component invalidates the caches guarding it. Without this, excluding a component would change what a bake emits without changing the fingerprint, and the stored cache would go on reporting itself current while holding the geometry that was just excluded. Hashed rather than acted on, exactly as the primitive's collision setting already is: the fingerprint summarizes what a gather would see without re-deciding it, so the ignore lists never have to be threaded into it.
+- `FNWorldCollisionFingerprint::HashActor` folds in whether each primitive is excluded by the gather's component ignore list, and contributes nothing else for one that is — an excluded component emits no geometry, so a cache guarded against where it sits would be guarding against something it does not contain. That is most of the value of tagging a component out: a generator that rewrites its output on every load stops invalidating the level's cache forever. Tagging or untagging a component still invalidates the caches guarding it. Without this, excluding a component would change what a bake emits without changing the fingerprint, and the stored cache would go on reporting itself current while holding the geometry that was just excluded. It takes the ignore list as a parameter for this, and summarizes the *decision* rather than the tags behind it — hashing the tag list itself would make the fingerprint sensitive to every tag anything writes, and generators rewrite component tags as part of normal operation (PCG stamps each component it spawns on every generate), which would leave any level holding generated content unable to validate its cache across editor sessions.
 - The world-collision visualizer is owned by `UNWorldAssemblyEditorSubsystem` rather than by `UNWorldAssemblyEdMode`. It could previously only exist while the World Assembly edit mode was the active mode — every accessor resolved through the mode — which made the visualizer unreachable from anywhere else, including an Outliner selection of the cache actor. Leaving the mode still takes it down, and so do PIE, a map change, and editor shutdown.
 
 ### Fixed

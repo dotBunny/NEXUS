@@ -159,15 +159,18 @@ N_TEST_HIGH(FNWorldCollisionFingerprintTests_OverlapsBounds_EmptyBoundsAcceptEve
 		FNWorldCollisionFingerprint::OverlapsBounds(nullptr, {}));
 }
 
-N_TEST_CRITICAL(FNWorldCollisionFingerprintTests_HashActor_ComponentTagsChangeIt,
-	"NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionFingerprint::HashActor::ComponentTagsChangeIt",
+N_TEST_CRITICAL(FNWorldCollisionFingerprintTests_HashActor_ExclusionChangesItAndNothingElseDoes,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionFingerprint::HashActor::ExclusionChangesItAndNothingElseDoes",
 	N_TEST_CONTEXT_EDITOR)
 {
-	// The pairing that keeps component-level exclusion honest. A component tag decides whether the gather emits that
-	// component's geometry, so the fingerprint guarding the cache has to move when the tag does — otherwise tagging a
-	// component changes what a bake would produce while the stored cache goes on reporting itself current, and the
-	// geometry the author just excluded stays in the pool. Silent, and the only failure here that serves wrong
-	// geometry rather than merely re-baking too often.
+	// Two halves that have to hold together, and holding only the first is what caused a real bug.
+	//
+	// A component tagged out of the gather must move the fingerprint, or the cache would go on reporting itself
+	// current while holding geometry that is no longer emitted. But *only* the exclusion may move it: hashing the
+	// whole tag list also worked for the first half, and made the fingerprint sensitive to every tag anything
+	// writes. Generators rewrite component tags on each generate — PCG stamps its spawned components with its own
+	// marker and the source component's name — so a level holding generated content hashed differently every
+	// session and its cache could never validate, however untouched the level was.
 	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
 	{
 		UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube"));
@@ -189,25 +192,51 @@ N_TEST_CRITICAL(FNWorldCollisionFingerprintTests_HashActor_ComponentTagsChangeIt
 		MeshComponent->SetStaticMesh(Cube);
 		MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
-		const uint64 Untagged = FNWorldCollisionFingerprint::HashActor(MeshActor);
+		const TArray<FName> IgnoreTags = { NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore };
 
+		const uint64 Untagged = FNWorldCollisionFingerprint::HashActor(MeshActor, IgnoreTags);
+
+		// Tags nothing is looking for must be invisible. This is the half the bug broke.
+		MeshComponent->ComponentTags.Add(FName(TEXT("PCG.GeneratedThisSession_0")));
+		CHECK_MESSAGE(TEXT("A tag outside the ignore list must not move the fingerprint."),
+			FNWorldCollisionFingerprint::HashActor(MeshActor, IgnoreTags) == Untagged);
+
+		MeshComponent->ComponentTags.Add(FName(TEXT("PCG.GeneratedThisSession_1")));
+		CHECK_MESSAGE(TEXT("Nor must a second one, however many accumulate."),
+			FNWorldCollisionFingerprint::HashActor(MeshActor, IgnoreTags) == Untagged);
+
+		// The exclusion itself must still register, or the cache could outlive the geometry it describes.
 		MeshComponent->ComponentTags.Add(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
-		const uint64 Tagged = FNWorldCollisionFingerprint::HashActor(MeshActor);
-
-		CHECK_MESSAGE(TEXT("Tagging a component must change the actor's fingerprint."), Tagged != Untagged);
+		const uint64 Excluded = FNWorldCollisionFingerprint::HashActor(MeshActor, IgnoreTags);
+		CHECK_MESSAGE(TEXT("Tagging a component out of the gather must move the fingerprint."),
+			Excluded != Untagged);
 
 		MeshComponent->ComponentTags.RemoveSwap(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
-		CHECK_MESSAGE(TEXT("Removing the tag again must return the actor's fingerprint to what it was."),
-			FNWorldCollisionFingerprint::HashActor(MeshActor) == Untagged);
+		CHECK_MESSAGE(TEXT("Untagging it again must return the fingerprint to what it was."),
+			FNWorldCollisionFingerprint::HashActor(MeshActor, IgnoreTags) == Untagged);
 
-		// Order-independent, matching the ignore lists: whatever wrote a component's tags is free to write them in a
-		// different order, and that must not invalidate a level's caches.
-		MeshComponent->ComponentTags = { FName(TEXT("Alpha")), FName(TEXT("Beta")) };
-		const uint64 OneOrder = FNWorldCollisionFingerprint::HashActor(MeshActor);
-		MeshComponent->ComponentTags = { FName(TEXT("Beta")), FName(TEXT("Alpha")) };
-		CHECK_MESSAGE(TEXT("Re-ordering a component's tags must not change the fingerprint."),
-			FNWorldCollisionFingerprint::HashActor(MeshActor) == OneOrder);
+		// And an empty ignore list excludes nothing, so the same component reads as it did before it was tagged.
+		MeshComponent->ComponentTags.Add(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
+		CHECK_MESSAGE(TEXT("With nothing on the ignore list, the ignore tag is just another tag."),
+			FNWorldCollisionFingerprint::HashActor(MeshActor, {}) ==
+			FNWorldCollisionFingerprint::HashActor(MeshActor, { FName(TEXT("SomethingElse")) }));
+
+		// Once excluded, the component's placement stops being the cache's business — the gather emits nothing for
+		// it, so a cache guarded against where it sits would be guarding against something it does not contain.
+		// This is most of the point of tagging a component out: a generator that rewrites its output on every load
+		// otherwise goes on invalidating the level's cache forever, however little the level itself changed.
+		const uint64 ExcludedBeforeMove = FNWorldCollisionFingerprint::HashActor(MeshActor, IgnoreTags);
+		MeshActor->SetActorLocation(FVector(1234.0, 567.0, 89.0));
+		CHECK_MESSAGE(TEXT("Moving an excluded component must not move the fingerprint."),
+			FNWorldCollisionFingerprint::HashActor(MeshActor, IgnoreTags) == ExcludedBeforeMove);
+
+		// The same move must register the moment the component is back in the gather, or the exclusion would be
+		// buying its silence by making the fingerprint permanently deaf to that component.
+		MeshComponent->ComponentTags.RemoveSwap(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
+		const uint64 IncludedAfterMove = FNWorldCollisionFingerprint::HashActor(MeshActor, IgnoreTags);
+		MeshActor->SetActorLocation(FVector::ZeroVector);
+		CHECK_MESSAGE(TEXT("Moving an included component must still move the fingerprint."),
+			FNWorldCollisionFingerprint::HashActor(MeshActor, IgnoreTags) != IncludedAfterMove);
 	});
 }
-
 #endif //WITH_TESTS
