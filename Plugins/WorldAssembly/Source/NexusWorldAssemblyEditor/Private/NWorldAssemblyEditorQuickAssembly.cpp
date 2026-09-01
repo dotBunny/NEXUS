@@ -129,6 +129,28 @@ void FNWorldAssemblyEditorQuickAssembly::Cancel()
 	}
 }
 
+void FNWorldAssemblyEditorQuickAssembly::ClearProxies()
+{
+	// Straight to the subsystem that owns the proxies, the same call the Organ rail's Clear All Proxies makes. There
+	// is nothing of Quick Assembly's own to reset alongside it: the tracked ticket belongs to the operation, not to
+	// what it produced, and an organ's last-operation ticket is re-read rather than cached.
+	UNWorldAssemblyEditorSubsystem::Get()->ClearAllProxies();
+}
+
+bool FNWorldAssemblyEditorQuickAssembly::ClearProxies_CanExecute()
+{
+	if (FNEditorUtils::IsPlayInEditor()) return false;
+
+	// Never mid-loop. The build button beside this one stays live while running so it can cancel; this one must not,
+	// or it would strip proxies out from under an operation that is still spawning them.
+	if (IsActive()) return false;
+
+	// Greyed out rather than hidden when there is nothing to clear. The three entries here are drawn as one backplated
+	// run — left button, this, right combo — and a member that came and went would break the run apart under the
+	// cursor every time a level was assembled or cleared.
+	return UNWorldAssemblyEditorSubsystem::Get()->HasGeneratedCellProxies();
+}
+
 void FNWorldAssemblyEditorQuickAssembly::ToggleLoadInstances()
 {
 	UNWorldAssemblyEditorUserSettings* Settings = UNWorldAssemblyEditorUserSettings::GetMutable();

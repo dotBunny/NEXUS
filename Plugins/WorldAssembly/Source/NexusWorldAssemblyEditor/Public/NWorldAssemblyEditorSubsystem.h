@@ -294,6 +294,13 @@ private:
 	/** Delegate: an undo/redo transaction completed — geometry can't be cheaply diffed, so always flag a refresh. */
 	void OnUndoRedo();
 
+	/**
+	 * Delegate: a bake rewrote World's pool — flag a refresh when it is the world the live visualizer is drawing.
+	 * @note The only change to what the visualizer draws that no other delegate here can see, since a bake touches
+	 *       no actor. It is also what clears the stale marking a refresh puts on.
+	 */
+	void OnWorldCollisionBaked(const UWorld* World);
+
 	/** Operations currently owned by this subsystem. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	UPROPERTY()
@@ -327,6 +334,7 @@ private:
 	FDelegateHandle OnObjectMovedHandle;
 	FDelegateHandle OnObjectPropertyChangedHandle;
 	FDelegateHandle OnUndoRedoHandle;
+	FDelegateHandle OnWorldCollisionBakedHandle;
 
 public:
 	/** One operation's accepted junction pairings, retained so the ed mode can draw the routes it proved clear. */

@@ -17,6 +17,7 @@
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyMinimal.h"
 #include "NWorldAssemblySettings.h"
+#include "NWorldCollisionBaker.h"
 #include "NWorldCollisionPreview.h"
 #include "Assembly/Tasks/NCreateVirtualWorldTask.h"
 #include "Components/ActorComponent.h"
@@ -662,6 +663,11 @@ void UNWorldAssemblyEditorSubsystem::BindWorldChangeDelegates()
 	{
 		OnUndoRedoHandle = FEditorDelegates::PostUndoRedo.AddUObject(this, &UNWorldAssemblyEditorSubsystem::OnUndoRedo);
 	}
+	if (!OnWorldCollisionBakedHandle.IsValid())
+	{
+		OnWorldCollisionBakedHandle = FNWorldCollisionBaker::OnBaked.AddUObject(
+			this, &UNWorldAssemblyEditorSubsystem::OnWorldCollisionBaked);
+	}
 }
 
 void UNWorldAssemblyEditorSubsystem::UnbindWorldChangeDelegates()
@@ -690,6 +696,11 @@ void UNWorldAssemblyEditorSubsystem::UnbindWorldChangeDelegates()
 	{
 		FEditorDelegates::PostUndoRedo.Remove(OnUndoRedoHandle);
 		OnUndoRedoHandle.Reset();
+	}
+	if (OnWorldCollisionBakedHandle.IsValid())
+	{
+		FNWorldCollisionBaker::OnBaked.Remove(OnWorldCollisionBakedHandle);
+		OnWorldCollisionBakedHandle.Reset();
 	}
 }
 
@@ -756,6 +767,17 @@ void UNWorldAssemblyEditorSubsystem::OnObjectPropertyChanged(UObject* Object, FP
 void UNWorldAssemblyEditorSubsystem::OnUndoRedo()
 {
 	if (CollisionVisualizer != nullptr)
+	{
+		MarkCollisionVisualizerDirty();
+	}
+}
+
+void UNWorldAssemblyEditorSubsystem::OnWorldCollisionBaked(const UWorld* World)
+{
+	// The one change to what the visualizer draws that arrives through none of the delegates above, because a bake
+	// touches no actor. Without this the visualizer went on drawing the pre-bake merge — and, now that a stale one
+	// says so, went on saying it was stale — until some unrelated edit happened to dirty it.
+	if (CollisionVisualizer != nullptr && CollisionVisualizer->GetWorld() == World)
 	{
 		MarkCollisionVisualizerDirty();
 	}

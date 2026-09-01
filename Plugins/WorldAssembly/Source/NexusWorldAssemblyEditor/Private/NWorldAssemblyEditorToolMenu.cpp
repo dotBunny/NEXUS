@@ -122,6 +122,25 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		QuickAssemblyButton.StyleNameOverride = "Toolbar.BackplateLeft";
 		NexusGlobalSection.AddEntry(QuickAssemblyButton);
 
+		// Sits beside the button that made them, because "clear what I just generated" is the other half of the same
+		// thought and was otherwise only reachable by entering the edit mode and finding the Organ rail. Level-wide
+		// rather than scoped to the targeted organ: the toolbar knows nothing of which runs came before, and a clear
+		// that left an earlier organ's proxies standing would read as not having worked.
+		FToolMenuEntry QuickAssemblyClearButton = FToolMenuEntry::InitToolBarButton(
+					"NWorldAssemblyEdMode_QuickAssemblyClearButton",
+					FUIAction(
+						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorQuickAssembly::ClearProxies),
+						FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorQuickAssembly::ClearProxies_CanExecute),
+						FIsActionChecked(),
+						// Comes and goes with the rest of the cluster, so the backplated run stays whole.
+						FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorToolMenu::ShowOrganDropdown)),
+						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_QuickAssemblyClearButton", "Clear Generated Proxies"),
+						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_QuickAssemblyClearButton_Tooltip", "Destroy every generated NCellProxy in the level, and the Cell Instances loaded from them, whichever Organ produced them. Unavailable while an operation is running — cancel it first."),
+						FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Toolbar.ClearAllProxies"));
+
+		QuickAssemblyClearButton.StyleNameOverride = "Toolbar.BackplateCenter";
+		NexusGlobalSection.AddEntry(QuickAssemblyClearButton);
+
 		// Quick Assembly Quick Options for Quick People
 		FToolMenuEntry QuickAssemblyOptionsButton = FToolMenuEntry::InitComboButton(
 			"NWorldAssemblyEdMode_QuickAssemblyOptions",

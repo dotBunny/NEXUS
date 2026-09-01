@@ -11,6 +11,27 @@
 #include "GameFramework/Actor.h"
 #include "PhysicsEngine/BodySetup.h"
 
+namespace
+{
+	/**
+	 * @return An order-independent summary of a list of names, plus its length.
+	 * @param Names Names to summarize.
+	 * @note Order-independent because the same set of tags in a different order describes the same thing, whether it
+	 *       is an ignore list re-ordered in the details panel or a component's own tags rebuilt by whatever wrote
+	 *       them. Neither should invalidate a level's caches. The count is folded in separately so that a list and a
+	 *       longer one summing to the same accumulator are still told apart.
+	 */
+	uint64 HashNameSet(const TArray<FName>& Names)
+	{
+		uint64 Accumulator = 0;
+		for (const FName& Name : Names)
+		{
+			Accumulator += FNWorldCollisionSourceKey::Mix(FNWorldCollisionSourceKey::HashName(Name));
+		}
+		return FNWorldCollisionSourceKey::Combine(Accumulator, static_cast<uint64>(Names.Num()));
+	}
+}
+
 uint64 FNWorldCollisionFingerprint::Compute(const UWorld* World, const TArray<FBoxSphereBounds>& Bounds,
 	const FNWorldAssemblyWorldCollisionSettings& Settings)
 {
@@ -120,6 +141,14 @@ uint64 FNWorldCollisionFingerprint::HashActor(const AActor* Actor)
 		Hash = FNWorldCollisionSourceKey::Combine(Hash, static_cast<uint64>(Body->GetCollisionTraceFlag()));
 		Hash = FNWorldCollisionSourceKey::Combine(Hash, static_cast<uint64>(ActorPrimitive->GetCollisionEnabled()));
 
+		// The component's own tags, because one of them may be what excludes it from the gather. Hashed rather than
+		// acted on — exactly as GetCollisionEnabled above is, and for the same reason: this summarizes what a gather
+		// would see without re-deciding it, so the ignore list does not have to be threaded down here to stay correct.
+		// Leaving them out is the one omission that would be silently wrong rather than merely conservative: tagging a
+		// component would change the geometry a bake emits without changing the fingerprint guarding it, and the cache
+		// would go on reporting itself current while holding the geometry that was just excluded.
+		Hash = FNWorldCollisionSourceKey::Combine(Hash, HashNameSet(ActorPrimitive->ComponentTags));
+
 		if (const UInstancedStaticMeshComponent* InstanceStaticMesh = Cast<UInstancedStaticMeshComponent>(ActorPrimitive))
 		{
 			const int32 InstanceCount = InstanceStaticMesh->GetInstanceCount();
@@ -149,15 +178,8 @@ uint64 FNWorldCollisionFingerprint::HashSettings(const FNWorldAssemblyWorldColli
 	Hash = FNWorldCollisionSourceKey::Combine(Hash,
 		static_cast<uint64>(FMath::RoundToInt64(Settings.LandscapeSampleSpacing * NEXUS::WorldAssembly::CollisionKey::LocationQuantum)));
 
-	// Order-independent over the tag list: the same set of ignore tags entered in a different order describes the
-	// same filter, and re-ordering an array in the details panel should not invalidate a level's caches.
-	uint64 TagAccumulator = 0;
-	for (const FName& Tag : Settings.ActorIgnoreTags)
-	{
-		TagAccumulator += FNWorldCollisionSourceKey::Mix(FNWorldCollisionSourceKey::HashName(Tag));
-	}
-	Hash = FNWorldCollisionSourceKey::Combine(Hash, TagAccumulator);
-	Hash = FNWorldCollisionSourceKey::Combine(Hash, static_cast<uint64>(Settings.ActorIgnoreTags.Num()));
+	Hash = FNWorldCollisionSourceKey::Combine(Hash, HashNameSet(Settings.ActorIgnoreTags));
+	Hash = FNWorldCollisionSourceKey::Combine(Hash, HashNameSet(Settings.ComponentIgnoreTags));
 
 	return Hash;
 }

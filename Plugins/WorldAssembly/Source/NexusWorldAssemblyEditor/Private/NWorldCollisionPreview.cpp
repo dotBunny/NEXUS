@@ -6,6 +6,7 @@
 #include "Editor.h"
 #include "NActorUtils.h"
 #include "NWorldAssemblyEditorMinimal.h"
+#include "NWorldAssemblyEditorUserSettings.h"
 #include "NWorldAssemblySettings.h"
 #include "NWorldCollisionBaker.h"
 #include "Assembly/Tasks/NCreateVirtualWorldTask.h"
@@ -14,15 +15,8 @@
 #include "Engine/World.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "GameFramework/Actor.h"
-#include "HAL/PlatformTime.h"
 #include "Types/NRawMeshUtils.h"
 #include "Widgets/Notifications/SNotificationList.h"
-
-namespace NEXUS::WorldAssembly::CollisionPreview
-{
-	/** Shortest gap between two "cannot preview" notifications for the same world. */
-	constexpr double NotifyCooldownSeconds = 10.0;
-}
 
 TMap<TWeakObjectPtr<const UWorld>, FNWorldCollisionPreview::FWorldPreview> FNWorldCollisionPreview::Previews;
 
@@ -62,7 +56,7 @@ void FNWorldCollisionPreview::Register()
 	// above see it. Subscribed here rather than invalidating from each bake site, which is what let a freshly baked
 	// level keep reporting the pre-bake answer: the rail, the details panel and the save hook all bake, and each was
 	// a separate place to remember.
-	BakedHandle = FNWorldCollisionBaker::OnBaked.AddStatic(&FNWorldCollisionPreview::Invalidate);
+	BakedHandle = FNWorldCollisionBaker::OnBaked.AddStatic(&FNWorldCollisionPreview::OnWorldBaked);
 }
 
 void FNWorldCollisionPreview::Unregister()
@@ -121,6 +115,33 @@ void FNWorldCollisionPreview::OnObjectPropertyChanged(UObject* Object, FProperty
 	if (PropertyChangedEvent.ChangeType == EPropertyChangeType::Interactive) return;
 
 	InvalidateForActor(ResolveActor(Object));
+}
+
+void FNWorldCollisionPreview::OnWorldBaked(const UWorld* World)
+{
+	Invalidate(World);
+
+	if (World == nullptr) return;
+
+	FWorldPreview& Preview = Previews.FindOrAdd(World);
+
+	// Whatever is on screen describes a level that has just been baked, so it goes now rather than spending the rest
+	// of its expiry contradicting the button the user pressed to make it wrong.
+	DismissNotification(Preview);
+
+	// Re-armed rather than set to whatever this bake produced, which is not known here — the next query decides that.
+	// A bake that failed, was cancelled, or reached only some of the level leaves it unavailable still, and that is
+	// worth hearing once more.
+	Preview.LastNotifiedState = EState::Available;
+}
+
+void FNWorldCollisionPreview::DismissNotification(FWorldPreview& Preview)
+{
+	if (const TSharedPtr<SNotificationItem> Item = Preview.Notification.Pin())
+	{
+		Item->Fadeout();
+	}
+	Preview.Notification.Reset();
 }
 
 void FNWorldCollisionPreview::Invalidate(const UWorld* World)
@@ -232,20 +253,34 @@ uint32 FNWorldCollisionPreview::GetGeneration(const UWorld* World)
 	return Previews.FindOrAdd(World).Generation;
 }
 
-void FNWorldCollisionPreview::NotifyUnavailable(UWorld* World, const EState State)
+bool FNWorldCollisionPreview::ShouldNotify(const UWorld* World, const EState State)
 {
-	if (World == nullptr || State == EState::Available) return;
+	if (World == nullptr || State == EState::Available) return false;
 
 	FWorldPreview& Preview = Previews.FindOrAdd(World);
 
-	// Rate-limited because the bone readout asks on every redraw. Without this, an unbaked level with a bone selected
-	// would stack a notification per frame.
-	const double Now = FPlatformTime::Seconds();
-	if (Now - Preview.LastNotifyTime < NEXUS::WorldAssembly::CollisionPreview::NotifyCooldownSeconds)
-	{
-		return;
-	}
-	Preview.LastNotifyTime = Now;
+	// The whole gate. Callers ask on every viewport redraw and after every completed edit, and all but the first of
+	// those are re-observations of a condition the user already knows about — a stale cache stays stale until it is
+	// baked, so saying it again tells them nothing they did not act on the first time.
+	//
+	// Deliberately not reset by Invalidate, which runs on every move: the state re-derived after an edit to an
+	// already-stale level is stale again, and treating that as news is what made this a per-edit notification.
+	if (Preview.LastNotifiedState == State) return false;
+
+	Preview.LastNotifiedState = State;
+	return true;
+}
+
+void FNWorldCollisionPreview::NotifyUnavailable(UWorld* World, const EState State)
+{
+	if (!UNWorldAssemblyEditorUserSettings::Get()->bNotificationsWorldCollisionUnavailable) return;
+	if (!ShouldNotify(World, State)) return;
+
+	FWorldPreview& Preview = Previews.FindOrAdd(World);
+
+	// One notice per world at a time. Getting here means the state just changed, so anything still on screen is
+	// describing the level as it was before that and would sit beneath the new one contradicting it.
+	DismissNotification(Preview);
 
 	FNotificationInfo Info(State == EState::Stale
 		? NSLOCTEXT("NexusWorldAssemblyEditor", "CollisionPreviewStale", "World collision cache is out of date")
@@ -272,8 +307,10 @@ void FNWorldCollisionPreview::NotifyUnavailable(UWorld* World, const EState Stat
 			if (BakeWorld == nullptr) return;
 
 			FNWorldCollisionBaker::BakeWorld(BakeWorld, UNWorldAssemblySettings::Get()->WorldCollisionSettings, true);
-			Invalidate(BakeWorld);
 		})));
 
-	FSlateNotificationManager::Get().AddNotification(Info);
+	// Held weakly so a bake can take this down the moment it is answered, rather than leaving the user reading a
+	// complaint they have already dealt with. Nothing keeps it alive — the manager owns it, and it still expires on
+	// its own if it is simply ignored.
+	Preview.Notification = FSlateNotificationManager::Get().AddNotification(Info);
 }

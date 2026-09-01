@@ -148,4 +148,85 @@ N_TEST_HIGH(FNWorldCollisionPreviewTests_GetState_WorldWithNoOrgansReportsNotBak
 	});
 }
 
+N_TEST_HIGH(FNWorldCollisionPreviewTests_ShouldNotify_AnnouncesOncePerTransition,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionPreview::ShouldNotify::AnnouncesOncePerTransition",
+	N_TEST_CONTEXT_EDITOR)
+{
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionPreviewHarness;
+
+	// What keeps a standing condition from being reported as a stream of events. The visualizer asks after every
+	// completed edit and the bone readout asks on every viewport redraw, so all but the first of those are the same
+	// answer to the same question — and answering them all is what put a notification on screen every ten seconds.
+	FNTestUtils::WorldTest(EWorldType::Editor, [](UWorld* World)
+	{
+		SpawnCoveringOrgan(World);
+		FNWorldCollisionPreview::Invalidate(World);
+
+		CHECK_MESSAGE(TEXT("The first observation of an unavailable state must notify."),
+			FNWorldCollisionPreview::ShouldNotify(World, FNWorldCollisionPreview::EState::NotBaked));
+		CHECK_FALSE_MESSAGE(TEXT("Re-observing the same state must not notify again."),
+			FNWorldCollisionPreview::ShouldNotify(World, FNWorldCollisionPreview::EState::NotBaked));
+
+		// Invalidation runs on every move of every collision-relevant actor. It drops the memo; it must not re-arm
+		// the notification, or this is back to speaking once per edit.
+		FNWorldCollisionPreview::Invalidate(World);
+		CHECK_FALSE_MESSAGE(TEXT("Invalidating must not re-arm the notification."),
+			FNWorldCollisionPreview::ShouldNotify(World, FNWorldCollisionPreview::EState::NotBaked));
+
+		// A different unavailable state is a different thing to say, so it gets said.
+		CHECK_MESSAGE(TEXT("Moving to a different unavailable state must notify."),
+			FNWorldCollisionPreview::ShouldNotify(World, FNWorldCollisionPreview::EState::Stale));
+	});
+}
+
+N_TEST_MEDIUM(FNWorldCollisionPreviewTests_ShouldNotify_SaysNothingWhenThereIsNothingToSay,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionPreview::ShouldNotify::SaysNothingWhenThereIsNothingToSay",
+	N_TEST_CONTEXT_EDITOR)
+{
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionPreviewHarness;
+
+	CHECK_FALSE_MESSAGE(TEXT("A null world must never notify."),
+		FNWorldCollisionPreview::ShouldNotify(nullptr, FNWorldCollisionPreview::EState::Stale));
+
+	FNTestUtils::WorldTest(EWorldType::Editor, [](UWorld* World)
+	{
+		SpawnCoveringOrgan(World);
+
+		CHECK_FALSE_MESSAGE(TEXT("An available world has no complaint to make."),
+			FNWorldCollisionPreview::ShouldNotify(World, FNWorldCollisionPreview::EState::Available));
+	});
+}
+
+N_TEST_HIGH(FNWorldCollisionPreviewTests_ShouldNotify_BakingReArmsTheNotification,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionPreview::ShouldNotify::BakingReArmsTheNotification",
+	N_TEST_CONTEXT_EDITOR)
+{
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionPreviewHarness;
+
+	// The other half of the edge trigger. Having said it once, the preview still has to be able to say it again once
+	// the user has acted — otherwise a level would be told about its collision exactly once per editor session. A
+	// bake is the only thing that resolves the condition, so it is what re-arms the notification, through the OnBaked
+	// subscription the module registers.
+	FNTestUtils::WorldTest(EWorldType::Editor, [](UWorld* World)
+	{
+		if (SpawnCoveringOrgan(World) == nullptr)
+		{
+			ADD_ERROR("Could not spawn an organ volume to bake against.");
+			return;
+		}
+
+		FNWorldCollisionPreview::Invalidate(World);
+
+		CHECK_MESSAGE(TEXT("The first staleness must be announced."),
+			FNWorldCollisionPreview::ShouldNotify(World, FNWorldCollisionPreview::EState::Stale));
+		CHECK_FALSE_MESSAGE(TEXT("The same staleness must not be announced twice."),
+			FNWorldCollisionPreview::ShouldNotify(World, FNWorldCollisionPreview::EState::Stale));
+
+		FNWorldCollisionBaker::BakeWorld(World, UNWorldAssemblySettings::Get()->WorldCollisionSettings, true);
+
+		CHECK_MESSAGE(TEXT("Staleness found after a bake must be announced again."),
+			FNWorldCollisionPreview::ShouldNotify(World, FNWorldCollisionPreview::EState::Stale));
+	});
+}
+
 #endif //WITH_TESTS

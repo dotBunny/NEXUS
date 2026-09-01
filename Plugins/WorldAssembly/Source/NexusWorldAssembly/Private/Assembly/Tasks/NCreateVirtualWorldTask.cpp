@@ -100,6 +100,10 @@ void FNCreateVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const F
 		const TArray<AActor*> WorldActors = FNActorUtils::GetWorldActors(VirtualWorldContextPtr->InputWorld,
 			CreateWorldActorFilterSettings(VirtualWorldContextPtr->WorldCollisionSettings));
 
+		// The per-primitive half of the same opt-out, built once for both branches below.
+		const TArray<FName> ComponentIgnoreTags =
+			CreateWorldComponentIgnoreTags(VirtualWorldContextPtr->WorldCollisionSettings);
+
 		// With no usable cache this is the whole operation's region, exactly as before. With a partly usable one it is
 		// the union of just the organs that missed, so a level where one organ moved does not re-gather for the rest.
 		static const TArray<FBoxSphereBounds> Unbounded;
@@ -111,9 +115,11 @@ void FNCreateVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const F
 		// to actors whose bounds fall inside one of the input organs' volume bounds.
 		if (!bUsedCache)
 		{
+			// No provenance asked for — we'll bake the meshes off thread in the process phase.
 			FNRawMeshFactory::FromActorsInBounds(WorldActors, GatherBounds,
 				VirtualWorldContextPtr->WorldCollisionMeshes,
-				VirtualWorldContextPtr->WorldCollisionTransforms); // We'll bake the meshes off thread in the process phase
+				VirtualWorldContextPtr->WorldCollisionTransforms,
+				nullptr, ComponentIgnoreTags);
 		}
 		else
 		{
@@ -123,7 +129,8 @@ void FNCreateVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const F
 			TArray<FNRawMesh> Meshes;
 			TArray<FTransform> Transforms;
 			TArray<FNRawMeshSource> Sources;
-			FNRawMeshFactory::FromActorsInBounds(WorldActors, GatherBounds, Meshes, Transforms, &Sources);
+			FNRawMeshFactory::FromActorsInBounds(WorldActors, GatherBounds, Meshes, Transforms, &Sources,
+				ComponentIgnoreTags);
 
 			const bool bHaveSources = Sources.Num() == Meshes.Num();
 			for (int32 i = 0; i < Meshes.Num(); ++i)

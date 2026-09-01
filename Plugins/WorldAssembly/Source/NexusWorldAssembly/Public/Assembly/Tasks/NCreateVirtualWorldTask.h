@@ -91,6 +91,22 @@ public:
 		return ActorFilterSettings;
 	}
 
+	/**
+	 * @return The component tags that exclude an individual primitive from a world-collision gather.
+	 * @param Settings Collision-capture settings supplying the user's list.
+	 * @note Handed to FNRawMeshFactory::FromActorsInBounds, and shaped exactly like the actor list built above: the
+	 *       markup tag rides along with the user's entries rather than getting a check of its own.
+	 * @remark Shared so the bake and the live gather it falls back to cannot disagree about what is excluded. They
+	 *         already share their actor filter for the same reason — a gather that saw different geometry from the
+	 *         bake would make every cached organ read as stale forever.
+	 */
+	static TArray<FName> CreateWorldComponentIgnoreTags(const FNWorldAssemblyWorldCollisionSettings& Settings)
+	{
+		TArray<FName> ComponentIgnoreTags = Settings.ComponentIgnoreTags;
+		ComponentIgnoreTags.AddUnique(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
+		return ComponentIgnoreTags;
+	}
+
 private:
 	/** Virtual-world context being populated. */
 	TSharedRef<FNVirtualWorldContext> VirtualWorldContextPtr;

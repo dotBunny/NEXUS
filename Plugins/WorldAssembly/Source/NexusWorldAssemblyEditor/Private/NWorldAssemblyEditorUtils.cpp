@@ -9,6 +9,7 @@
 #include "Cell/NCell.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NEditorUtils.h"
+#include "NWorldAssemblyEditorColors.h"
 #include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEditorSettings.h"
 #include "NWorldAssemblyEditorSubsystem.h"
@@ -42,10 +43,18 @@ ANDebugActor* FNWorldAssemblyEditorUtils::RefreshWorldCollisionVisualizerActor(U
 
 	UMaterialInterface* VisualizerMaterial = UNWorldAssemblyEditorSettings::Get()->CollisionVisualizerMaterial.LoadSynchronous();
 
+	// A stale preview keeps drawing the last baked state, which is the right call while authoring but leaves the
+	// visualizer looking exactly like a current one — the single most dangerous thing it can do, because the whole
+	// reason to spawn it is to trust what it shows. The wireframe overlay is the difference, and it is on the actor
+	// itself rather than in a notification: it is true for as long as it is true, and it is visible from wherever the
+	// user is already looking.
+	const bool bStale = FNWorldCollisionPreview::GetState(World) != FNWorldCollisionPreview::EState::Available;
+
 	// Refresh path: swap the merged geometry onto the live actor (possibly emptying it) without re-spawning.
 	if (ExistingActor != nullptr)
 	{
 		ExistingActor->OverrideWithDynamicMesh(MergedMesh.CreateDynamicMesh(false), VisualizerMaterial);
+		MarkWorldCollisionVisualizerStale(ExistingActor, bStale);
 		return ExistingActor;
 	}
 
@@ -64,7 +73,21 @@ ANDebugActor* FNWorldAssemblyEditorUtils::RefreshWorldCollisionVisualizerActor(U
 	if (DebugActor == nullptr) return nullptr;
 
 	DebugActor->OverrideWithDynamicMesh(MergedMesh.CreateDynamicMesh(false), VisualizerMaterial);
+	MarkWorldCollisionVisualizerStale(DebugActor, bStale);
 	return DebugActor;
+}
+
+void FNWorldAssemblyEditorUtils::MarkWorldCollisionVisualizerStale(const ANDebugActor* VisualizerActor, const bool bStale)
+{
+	UDynamicMeshComponent* DynamicMesh = VisualizerActor->GetDynamicMeshComponent();
+	if (DynamicMesh == nullptr) return;
+
+	// The component's own wireframe pass rather than a second material, so this needs no art and cannot fall back to
+	// an unlit magenta the way a missing asset would. Set unconditionally so that clearing it is the same code path
+	// as setting it, and a bake takes the overlay away without anyone having to remember to.
+	DynamicMesh->WireframeColor = FNWorldAssemblyEditorColors::GetWorldCollisionStale();
+	DynamicMesh->SetEnableWireframeRenderPass(bStale);
+	DynamicMesh->MarkRenderStateDirty();
 }
 
 void FNWorldAssemblyEditorUtils::CacheWorldCollision(UWorld* World, const TArray<UNOrganComponent*>& Organs)

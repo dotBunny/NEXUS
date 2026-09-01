@@ -13,6 +13,8 @@ FLinearColor FNWorldAssemblyEditorColors::JunctionUnfilled = NEXUS::WorldAssembl
 FLinearColor FNWorldAssemblyEditorColors::JunctionConnectorCorners = NEXUS::WorldAssembly::DefaultColors::JunctionConnectorCorners;
 FLinearColor FNWorldAssemblyEditorColors::BoneValid = NEXUS::WorldAssembly::DefaultColors::BoneValid;
 FLinearColor FNWorldAssemblyEditorColors::BoneInvalid = NEXUS::WorldAssembly::DefaultColors::BoneInvalid;
+FLinearColor FNWorldAssemblyEditorColors::BoneUnverified = NEXUS::WorldAssembly::DefaultColors::BoneUnverified;
+FLinearColor FNWorldAssemblyEditorColors::WorldCollisionStale = NEXUS::WorldAssembly::DefaultColors::WorldCollisionStale;
 
 void FNWorldAssemblyEditorColors::Refresh()
 {
@@ -31,4 +33,7 @@ void FNWorldAssemblyEditorColors::Refresh()
 	// the editor. The mode's own Render reads the settings directly, so the two disagreed once a bone color was changed.
 	BoneValid = Settings->ColorPaletteBonesValid;
 	BoneInvalid = Settings->ColorPaletteBonesInvalid;
+	BoneUnverified = Settings->ColorPaletteBonesUnverified;
+
+	WorldCollisionStale = Settings->ColorPaletteWorldCollisionStale;
 }

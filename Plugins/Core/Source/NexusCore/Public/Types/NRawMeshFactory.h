@@ -61,6 +61,8 @@ public:
 	 *   the complex one — the default for a sculpted or imported asset — is not silently skipped.
 	 * - UInstancedStaticMeshComponent emits one FNRawMesh entry per instance.
 	 * - Landscape-based primitives are skipped; FromLandscape is the way to obtain their surface.
+	 * - Primitives carrying any of ComponentIgnoreTags are skipped, so part of an actor can be left out without
+	 *   leaving out the actor.
 	 * @param Actors Candidate actors to process. Pre-filter at the call site (e.g. via FNActorUtils::GetWorldActors).
 	 * @param ContainingBounds Actor-bounds filter; an actor is processed when its bounds overlap any one of these. Skipped when empty.
 	 * @param OutMeshes Each mesh in element-local space, appended to the array.
@@ -68,11 +70,20 @@ public:
 	 * @param OutSources Optional; when supplied, receives one FNRawMeshSource per emitted mesh, parallel to OutMeshes.
 	 *        Callers that only consume the geometry should leave it null — the records cost an allocation per mesh and
 	 *        are only of use to a consumer that needs to identify the same element in a later gather.
+	 * @param ComponentIgnoreTags Component tags (UActorComponent::ComponentTags) that exclude a primitive. Empty by
+	 *        default, which reads every primitive as before.
+	 * @note Component-level rather than actor-level, because the actor is frequently not the author's unit of choice:
+	 *       a generator writes many primitives onto one container actor, and excluding it would take the whole
+	 *       generated result with it. Tested per primitive, so an actor can contribute some of its geometry and
+	 *       withhold the rest.
+	 * @note Does not narrow the ContainingBounds test, which is still made against the whole actor. An actor made
+	 *       entirely of ignored primitives is still walked; it simply emits nothing.
 	 * @note In editor builds, force-flushes any pending async static-mesh compilation (via FNDeveloperUtils::WaitForStaticMeshCompilation)
 	 *       so actor bounds and BodySetups are fully populated before reading.
 	 */
 	static void FromActorsInBounds(const TArray<AActor*>& Actors, const TArray<FBoxSphereBounds>& ContainingBounds,
-		TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms, TArray<FNRawMeshSource>* OutSources = nullptr);
+		TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms, TArray<FNRawMeshSource>* OutSources = nullptr,
+		const TArray<FName>& ComponentIgnoreTags = TArray<FName>());
 
 	/**
 	 * Emits an FKBoxElem as an 8-vertex / 12-triangle FNRawMesh. The element's Center and Rotation are

@@ -3,8 +3,14 @@
 
 #if WITH_TESTS
 
+#include "NWorldAssemblyMinimal.h"
 #include "NWorldAssemblySettings.h"
 #include "NWorldCollisionFingerprint.h"
+#include "Developer/NTestUtils.h"
+#include "Engine/StaticMesh.h"
+#include "Engine/StaticMeshActor.h"
+#include "Engine/World.h"
+#include "Components/StaticMeshComponent.h"
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
@@ -20,6 +26,7 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionFingerprintHarness
 		Settings.bIncludeMeshTerrains = true;
 		Settings.LandscapeSampleSpacing = 250.0f;
 		Settings.ActorIgnoreTags = { FName(TEXT("Alpha")), FName(TEXT("Beta")) };
+		Settings.ComponentIgnoreTags = { FName(TEXT("Delta")), FName(TEXT("Epsilon")) };
 		return Settings;
 	}
 }
@@ -68,6 +75,24 @@ N_TEST_CRITICAL(FNWorldCollisionFingerprintTests_HashSettings_EveryGatherFieldCh
 	Changed.ActorIgnoreTags = { FName(TEXT("Alpha")) };
 	CHECK_MESSAGE(TEXT("A removed ignore tag must reach the hash."),
 		FNWorldCollisionFingerprint::HashSettings(Changed) != Baseline);
+
+	Changed = MakeBaseline();
+	Changed.ComponentIgnoreTags.Add(FName(TEXT("Zeta")));
+	CHECK_MESSAGE(TEXT("An added component ignore tag must reach the hash."),
+		FNWorldCollisionFingerprint::HashSettings(Changed) != Baseline);
+
+	Changed = MakeBaseline();
+	Changed.ComponentIgnoreTags = { FName(TEXT("Delta")) };
+	CHECK_MESSAGE(TEXT("A removed component ignore tag must reach the hash."),
+		FNWorldCollisionFingerprint::HashSettings(Changed) != Baseline);
+
+	// The two lists are separate filters and must not collapse into one another: moving a tag from the actor list to
+	// the component list changes which things it excludes, so it has to change the hash.
+	Changed = MakeBaseline();
+	Changed.ActorIgnoreTags = { FName(TEXT("Alpha")), FName(TEXT("Beta")), FName(TEXT("Delta")), FName(TEXT("Epsilon")) };
+	Changed.ComponentIgnoreTags.Reset();
+	CHECK_MESSAGE(TEXT("Folding the component ignore tags into the actor list must change the hash."),
+		FNWorldCollisionFingerprint::HashSettings(Changed) != Baseline);
 }
 
 N_TEST_HIGH(FNWorldCollisionFingerprintTests_HashSettings_IgnoresIgnoreTagOrder,
@@ -80,6 +105,7 @@ N_TEST_HIGH(FNWorldCollisionFingerprintTests_HashSettings_IgnoresIgnoreTagOrder,
 	// details panel must not invalidate every cache in the level.
 	FNWorldAssemblyWorldCollisionSettings Reordered = MakeBaseline();
 	Reordered.ActorIgnoreTags = { FName(TEXT("Beta")), FName(TEXT("Alpha")) };
+	Reordered.ComponentIgnoreTags = { FName(TEXT("Epsilon")), FName(TEXT("Delta")) };
 
 	CHECK_MESSAGE(TEXT("Ignore-tag order must not affect the settings hash."),
 		FNWorldCollisionFingerprint::HashSettings(Reordered) ==
@@ -131,6 +157,57 @@ N_TEST_HIGH(FNWorldCollisionFingerprintTests_OverlapsBounds_EmptyBoundsAcceptEve
 	// unbounded organ empties the array, so getting this backwards would cache an empty world for it.
 	CHECK_MESSAGE(TEXT("Empty bounds must accept even a null actor's test, matching the factory's skip-the-filter path."),
 		FNWorldCollisionFingerprint::OverlapsBounds(nullptr, {}));
+}
+
+N_TEST_CRITICAL(FNWorldCollisionFingerprintTests_HashActor_ComponentTagsChangeIt,
+	"NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionFingerprint::HashActor::ComponentTagsChangeIt",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// The pairing that keeps component-level exclusion honest. A component tag decides whether the gather emits that
+	// component's geometry, so the fingerprint guarding the cache has to move when the tag does — otherwise tagging a
+	// component changes what a bake would produce while the stored cache goes on reporting itself current, and the
+	// geometry the author just excluded stays in the pool. Silent, and the only failure here that serves wrong
+	// geometry rather than merely re-baking too often.
+	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	{
+		UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube"));
+		if (Cube == nullptr)
+		{
+			ADD_ERROR("Failed to load /Engine/BasicShapes/Cube");
+			return;
+		}
+
+		AStaticMeshActor* MeshActor = World->SpawnActor<AStaticMeshActor>();
+		if (MeshActor == nullptr)
+		{
+			ADD_ERROR("Failed to spawn AStaticMeshActor");
+			return;
+		}
+
+		UStaticMeshComponent* MeshComponent = MeshActor->GetStaticMeshComponent();
+		MeshComponent->SetMobility(EComponentMobility::Movable);
+		MeshComponent->SetStaticMesh(Cube);
+		MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+		const uint64 Untagged = FNWorldCollisionFingerprint::HashActor(MeshActor);
+
+		MeshComponent->ComponentTags.Add(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
+		const uint64 Tagged = FNWorldCollisionFingerprint::HashActor(MeshActor);
+
+		CHECK_MESSAGE(TEXT("Tagging a component must change the actor's fingerprint."), Tagged != Untagged);
+
+		MeshComponent->ComponentTags.RemoveSwap(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
+		CHECK_MESSAGE(TEXT("Removing the tag again must return the actor's fingerprint to what it was."),
+			FNWorldCollisionFingerprint::HashActor(MeshActor) == Untagged);
+
+		// Order-independent, matching the ignore lists: whatever wrote a component's tags is free to write them in a
+		// different order, and that must not invalidate a level's caches.
+		MeshComponent->ComponentTags = { FName(TEXT("Alpha")), FName(TEXT("Beta")) };
+		const uint64 OneOrder = FNWorldCollisionFingerprint::HashActor(MeshActor);
+		MeshComponent->ComponentTags = { FName(TEXT("Beta")), FName(TEXT("Alpha")) };
+		CHECK_MESSAGE(TEXT("Re-ordering a component's tags must not change the fingerprint."),
+			FNWorldCollisionFingerprint::HashActor(MeshActor) == OneOrder);
+	});
 }
 
 #endif //WITH_TESTS

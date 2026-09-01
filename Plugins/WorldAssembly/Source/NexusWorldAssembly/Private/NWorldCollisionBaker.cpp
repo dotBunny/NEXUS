@@ -202,7 +202,8 @@ bool FNWorldCollisionBaker::BakeOrgan(const UWorld* World, const TArray<FBoxSphe
 	TArray<FNRawMesh> Meshes;
 	TArray<FTransform> Transforms;
 	TArray<FNRawMeshSource> Sources;
-	FNRawMeshFactory::FromActorsInBounds(WorldActors, Bounds, Meshes, Transforms, &Sources);
+	FNRawMeshFactory::FromActorsInBounds(WorldActors, Bounds, Meshes, Transforms, &Sources,
+		FNCreateVirtualWorldTask::CreateWorldComponentIgnoreTags(Settings));
 
 	if (Sources.Num() != Meshes.Num())
 	{

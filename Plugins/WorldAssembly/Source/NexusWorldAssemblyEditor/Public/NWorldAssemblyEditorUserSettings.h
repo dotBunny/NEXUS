@@ -31,6 +31,16 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Color Palette|Bones", DisplayName="Invalid")
 	FLinearColor ColorPaletteBonesInvalid = NEXUS::WorldAssembly::DefaultColors::BoneInvalid;
 
+	/** Color used to draw bones the penetration readout has no baked world collision to measure against. */
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Color Palette|Bones", DisplayName="Unverified",
+		meta=(Tooltip="Color of a bone while the level's world collision is unbaked or out of date, so nothing can vouch for the penetration readout."))
+	FLinearColor ColorPaletteBonesUnverified = NEXUS::WorldAssembly::DefaultColors::BoneUnverified;
+
+	/** Wireframe color the world-collision visualizer wears while the geometry it is drawing is out of date. */
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Color Palette|World Collision", DisplayName="Stale",
+		meta=(Tooltip="Wireframe color overlaid on the world collision visualizer while it is drawing a cache the level has since moved on from."))
+	FLinearColor ColorPaletteWorldCollisionStale = NEXUS::WorldAssembly::DefaultColors::WorldCollisionStale;
+
 	/** Color used to draw the bounding box of a cell in the world preview. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Color Palette|Cell", DisplayName="Bounds")
 	FLinearColor ColorPaletteCellBounds = NEXUS::WorldAssembly::DefaultColors::CellBounds;
@@ -83,6 +93,16 @@ public:
 	UPROPERTY(EditAnywhere, config,  Category="Notifications", DisplayName="Toast Editor Assembly Operations", meta=(Tooltip="Show a toast notification when an editor-triggered Assembly Operation completes and/or summarize Quick Assembly operations."))
 	bool bNotificationsToastEditorAssemblyOperations = true;
 
+	/**
+	 * Show a notification the first time a level's world collision is found unbaked or out of date.
+	 *
+	 * Raised once on entering that state, never repeated while it lasts, and taken down by a bake. Turn it off if you
+	 * bake by habit — the World rail's badged bake button and the visualizer's stale wireframe still report it.
+	 */
+	UPROPERTY(EditAnywhere, config, Category="Notifications", DisplayName="World Collision Unavailable",
+		meta=(Tooltip="Show a notification the first time a level's world collision is found unbaked or out of date."))
+	bool bNotificationsWorldCollisionUnavailable = true;
+
 	/** Create and load the level instances from the ANCellProxy(s) produced by a Quick Assembly. */
 	UPROPERTY(EditAnywhere, config,  Category="Quick Assembly", DisplayName="Load Level Instances", meta=(Tooltip="Create and load the level instances from the ANCellProxy(s)."))
 	bool bQuickAssemblyLoadLevelInstances = true;
@@ -125,6 +145,8 @@ public:
 		// Is this a cached property needing to be cached
 		if (PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteBonesValid) ||
 			PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteBonesInvalid) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteBonesUnverified) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteWorldCollisionStale) ||
 			PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteCellBounds) ||
 			PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteCellHull) ||
 			PropertyName == GET_MEMBER_NAME_CHECKED(UNWorldAssemblyEditorUserSettings, ColorPaletteJunctionsUnfilled) ||

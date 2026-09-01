@@ -48,9 +48,21 @@ public:
 	 *         was nothing to show or no material). Editor-only / diagnostic — do not use in shipping content.
 	 * @note Shows the level's baked collision, so an unbaked level has nothing to draw — ask FNWorldCollisionPreview
 	 *       for the reason and surface it rather than treating an empty result as "no collision here".
+	 * @note A visualizer drawing a stale cache is marked as such — see MarkWorldCollisionVisualizerStale — because it
+	 *       keeps showing the last baked state and would otherwise be indistinguishable from a current one.
 	 * @note Performs a synchronous load of the configured visualizer material.
 	 */
 	static ANDebugActor* RefreshWorldCollisionVisualizerActor(UWorld* World, ANDebugActor* ExistingActor);
+
+	/**
+	 * Show or clear the stale marking on a world-collision visualizer.
+	 *
+	 * @param VisualizerActor The visualizer to mark. Must be valid.
+	 * @param bStale Whether the geometry it is drawing is out of date.
+	 * @note Drawn as the dynamic-mesh component's wireframe overlay in the palette's World Collision > Stale color,
+	 *       which needs no material of its own and so cannot fail to an unshaded fallback.
+	 */
+	static void MarkWorldCollisionVisualizerStale(const ANDebugActor* VisualizerActor, bool bStale);
 
 	/**
 	 * Bake the world collision the level's organs assemble against into the level's collision cache.

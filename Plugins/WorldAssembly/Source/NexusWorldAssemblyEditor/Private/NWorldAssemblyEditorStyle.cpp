@@ -8,9 +8,11 @@
 #include "Brushes/SlateImageBrush.h"
 #include "Brushes/SlateNoResource.h"
 #include "Brushes/SlateRoundedBoxBrush.h"
+#include "Misc/Paths.h"
 #include "Styling/AppStyle.h"
 #include "Styling/SlateStyle.h"
 #include "Styling/SlateTypes.h"
+#include "Styling/StyleColors.h"
 
 N_EDITOR_STYLE(FNWorldAssemblyEditorStyle)
 
@@ -74,6 +76,12 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 
 	// WORLD RAIL
 	Style.Set("Command.BakeWorldCollision", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Commands/Command_BakeWorldCollision"), Icon20x20));
+	// The badge a toolbar button wears over its own icon to report a warning, taken from the engine's own so the rail
+	// says "needs attention" in the shape the rest of the editor uses for it. Not a bake icon of its own: the command
+	// is unchanged, and only the level's answer to it is.
+	Style.Set("Command.BakeWorldCollision.Stale", new FSlateVectorImageBrush(
+		FPaths::EngineContentDir() / TEXT("Slate/Starship/Common/alert-triangle-badge.svg"), Icon16x16,
+		FStyleColors::Warning));
 
 
 	// JUNCTION RAIL
@@ -101,6 +109,7 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 	// QUICK ASSEMBLY
 	Style.Set("Command.WorldAssemblyEd.QuickAssemblyOperation", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_QuickAssemblyOperation"), Icon128x128));
 	Style.Set("Command.WorldAssemblyEd.CancelQuickAssemblyOperation", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CancelQuickAssemblyOperation"), Icon128x128));
+	Style.Set("Toolbar.ClearAllProxies", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Toolbar/Toolbar_ClearAllProxies"), Icon20x20));
 
 	return StyleRef;
 }

@@ -35,6 +35,19 @@ struct FNWorldAssemblyWorldCollisionSettings
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Actor Ignore Tags", meta=(ToolTip="Additional tags to query for when ignoring actors from world collision detection."))
 	TArray<FName> ActorIgnoreTags;
 
+	/**
+	 * Additional component tags that exclude a single primitive from world collision, on top of the
+	 * NWorldCollision_Ignore markup tag.
+	 *
+	 * The finer-grained half of ActorIgnoreTags, for the case where the actor is not the unit the author can choose.
+	 * A generator writes its whole result onto one container actor, so an actor tag takes all of it — where tagging
+	 * the spawner's components individually keeps some of what it produced as collision and leaves the rest as
+	 * dressing. PCG's mesh-spawner descriptors carry a Component Tags list for exactly this.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Component Ignore Tags",
+		meta=(ToolTip="Additional component tags that exclude an individual component (an instanced static mesh, say) from world collision, without excluding the actor holding it."))
+	TArray<FName> ComponentIgnoreTags;
+
 	/** When true, actors with collision disabled are excluded from world collision capture. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Exclude Non-Collision Enabled Actors", meta=(ToolTip="Do not include Actors who have their collision turned off."))
 	bool bExcludeNonCollisionEnabledActors = true;

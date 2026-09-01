@@ -9,6 +9,7 @@
 #include "UObject/WeakObjectPtrTemplates.h"
 
 class AActor;
+class SNotificationItem;
 class UObject;
 class UWorld;
 struct FPropertyChangedEvent;
@@ -90,9 +91,25 @@ public:
 	 * Show a notification explaining that collision cannot be previewed, offering to bake.
 	 * @param World World the notification is about.
 	 * @param State Why it is unavailable; Available shows nothing.
-	 * @note Rate-limited per world, so a bone drawing every frame cannot spam the corner of the screen.
+	 * @note Speaks once per transition into an unavailable state — see ShouldNotify — and at most one notice per world
+	 *       is on screen at a time. Staleness lasts until the level is baked, so this is the opening announcement of a
+	 *       condition rather than a report of an event; the rail's bake button and the visualizer carry it from there.
 	 */
 	static void NotifyUnavailable(UWorld* World, EState State);
+
+	/**
+	 * @return Whether NotifyUnavailable should speak for World being in State, recording the answer as it goes.
+	 * @param World World about to be reported on; null never notifies.
+	 * @param State The state observed; Available never notifies.
+	 * @note The gate NotifyUnavailable is built on, kept apart from the Slate it raises so it can be tested. Edge
+	 *       triggered rather than rate limited: true on the transition into an unavailable state, false for every
+	 *       re-observation of the same one. A wall-clock cooldown cannot express that, because a stale level is
+	 *       re-observed on every viewport redraw with nothing having changed — the ten-second one this replaced put
+	 *       an eight-second notification on screen for as long as the level stayed stale, whether or not the user was
+	 *       editing anything.
+	 * @remark A bake re-arms it through OnWorldBaked, so the next edit that invalidates the cache speaks up again.
+	 */
+	static bool ShouldNotify(const UWorld* World, EState State);
 
 private:
 	/** Everything memoized for one world. */
@@ -104,7 +121,10 @@ private:
 		bool bMeshValid = false;
 		bool bBVHValid = false;
 		uint32 Generation = 0;
-		double LastNotifyTime = 0.0;
+		/** The state the user was last told about, so a condition is announced on entry rather than re-announced. */
+		EState LastNotifiedState = EState::Available;
+		/** The notice currently on screen for this world, held so a bake can take it down instead of leaving it. */
+		TWeakPtr<SNotificationItem> Notification;
 	};
 
 	/** @return The entry for World, rebuilding the mesh and state if either is stale. */
@@ -121,6 +141,17 @@ private:
 
 	/** Property-change handler; ignores the continuous mid-edit stream and acts on the finalizing change. */
 	static void OnObjectPropertyChanged(UObject* Object, FPropertyChangedEvent& PropertyChangedEvent);
+
+	/**
+	 * Bake handler: invalidates World's memo, takes down any notice still on screen, and re-arms ShouldNotify.
+	 * @note Subscribed to OnBaked in place of Invalidate so the re-arm cannot be missed. Doing it wherever a query
+	 *       next resolves to Available instead would leave a level that was baked and never re-queried permanently
+	 *       unable to complain again.
+	 */
+	static void OnWorldBaked(const UWorld* World);
+
+	/** Fade out Preview's notice now, if one is still up, and forget it. */
+	static void DismissNotification(FWorldPreview& Preview);
 
 	static TMap<TWeakObjectPtr<const UWorld>, FWorldPreview> Previews;
 

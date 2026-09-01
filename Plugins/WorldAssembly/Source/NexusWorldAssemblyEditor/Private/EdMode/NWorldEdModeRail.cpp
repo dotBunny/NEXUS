@@ -20,6 +20,7 @@
 #include "NWorldAssemblyEditorOrganUtils.h"
 #include "NWorldAssemblyEditorSubsystem.h"
 #include "NWorldAssemblyEditorTagUtils.h"
+#include "NWorldCollisionPreview.h"
 #include "Organ/NOrganComponent.h"
 #include "Widgets/SBoxPanel.h"
 
@@ -66,7 +67,7 @@ void FNWorldEdModeRail::RegisterCommands(const TSharedRef<FBindingContext>& Cont
 	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_TagCollisionIgnore,
 		"NWorldAssembly.World.TagCollisionIgnore",
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_TagCollisionIgnore", "World Collision"),
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_TagCollisionIgnore_Tooltip", "Toggles the necessary tag to have the selected actors ignored in the world collision system when placing Cells during assembly."),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_World_TagCollisionIgnore_Tooltip", "Toggles the necessary tag to have the selection ignored in the world collision system when placing Cells during assembly. Acts on the selected components when any are selected, and on the selected actors otherwise."),
 		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Tag"),
 		EUserInterfaceActionType::Button, FInputChord());
 
@@ -150,6 +151,18 @@ void FNWorldEdModeRail::CacheWorldCollision()
 		FNEditorUtils::GetCurrentWorld(), FNWorldAssemblyEditorUtils::GetSelectedOrganComponents());
 }
 
+FSlateIcon FNWorldEdModeRail::CacheWorldCollisionIcon()
+{
+	// Asked of FNWorldCollisionPreview, like the cache actor's status row and the visualizer, so the three cannot
+	// disagree about whether the level is showable. The answer is memoized and only recomputed when an edit or a bake
+	// invalidates it, which is what lets an icon attribute — re-read on every paint — ask it at all.
+	const bool bStale = FNWorldCollisionPreview::GetState(FNEditorUtils::GetCurrentWorld())
+		!= FNWorldCollisionPreview::EState::Available;
+
+	return FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.BakeWorldCollision", NAME_None,
+		bStale ? FName("Command.BakeWorldCollision.Stale") : NAME_None);
+}
+
 bool FNWorldEdModeRail::CacheWorldCollision_CanExecute()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
@@ -162,6 +175,21 @@ bool FNWorldEdModeRail::CacheWorldCollision_CanExecute()
 
 void FNWorldEdModeRail::TagCollisionIgnore()
 {
+	// Components when any are selected, actors otherwise. World collision is gathered per primitive, so the tag means
+	// the same thing at either level — and the finer one is what a generated actor needs, since its whole output
+	// hangs off a single container actor that an actor tag would take all of.
+	//
+	// Selecting a component leaves its owning actor selected too, so the component question has to be asked first or
+	// this would never see anything but the actor.
+	if (FNWorldAssemblyEditorTagUtils::HasComponentsSelected())
+	{
+		FNWorldAssemblyEditorTagUtils::ToggleTagOnComponentSelection(
+			NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore,
+			NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEdModeWorldRail_TagCollisionIgnoreComponent_Add", "Add WorldCollisionIgnore Component Tags"),
+			NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEdModeWorldRail_TagCollisionIgnoreComponent_Remove", "Remove WorldCollisionIgnore Component Tags"));
+		return;
+	}
+
 	FNWorldAssemblyEditorTagUtils::ToggleTagOnSelection(
 		NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore,
 		NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEdModeWorldRail_TagCollisionIgnore_Add", "Add WorldCollisionIgnore Tags"),
@@ -170,10 +198,12 @@ void FNWorldEdModeRail::TagCollisionIgnore()
 
 FSlateIcon FNWorldEdModeRail::TagCollisionIgnoreIcon()
 {
-	// Asks the same question ToggleTagOnSelection asks to pick its transaction, so the button cannot promise one thing
-	// and do the other: any tagged actor in the selection means the next click strips the tag from all of them.
-	const bool bWouldRemove = FNWorldAssemblyEditorTagUtils::IsTagOnAnySelectedActor(
-		NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
+	// Asks the same question TagCollisionIgnore asks, on the same selection it would act on, so the button cannot
+	// promise one thing and do the other: any tagged entry in the selection means the next click strips the tag from
+	// all of them.
+	const bool bWouldRemove = FNWorldAssemblyEditorTagUtils::HasComponentsSelected()
+		? FNWorldAssemblyEditorTagUtils::IsTagOnAnySelectedComponent(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore)
+		: FNWorldAssemblyEditorTagUtils::IsTagOnAnySelectedActor(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
 
 	return FSlateIcon(FNUIEditorStyle::GetStyleSetName(), bWouldRemove ? "Command.ToggleOn" : "Command.ToggleOff");
 }
@@ -208,8 +238,11 @@ TSharedPtr<SWidget> FNWorldEdModeRail::CreateContent() const
 		[
 			// Sits with the visualizer rather than with the Add commands: both act on the level's world collision,
 			// one showing it and one storing it.
+			//
+			// Icon bound rather than taken from the command: it badges itself while the level's collision is out of
+			// date, which the registered icon cannot do.
 			CreateCommandList(
-				{ CommandInfo_CacheWorldCollision })
+				{ { CommandInfo_CacheWorldCollision, TAttribute<FSlateIcon>::CreateStatic(&CacheWorldCollisionIcon) } })
 		]
 
 		+ SVerticalBox::Slot()

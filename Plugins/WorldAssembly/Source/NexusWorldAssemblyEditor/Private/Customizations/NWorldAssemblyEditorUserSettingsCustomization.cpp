@@ -21,6 +21,9 @@ void FNWorldAssemblyEditorUserSettingsCustomization::CustomizeDetails(IDetailLay
 
 	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, ColorPaletteBonesValid), NEXUS::WorldAssembly::DefaultColors::BoneValid);
 	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, ColorPaletteBonesInvalid), NEXUS::WorldAssembly::DefaultColors::BoneInvalid);
+	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, ColorPaletteBonesUnverified), NEXUS::WorldAssembly::DefaultColors::BoneUnverified);
+
+	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, ColorPaletteWorldCollisionStale), NEXUS::WorldAssembly::DefaultColors::WorldCollisionStale);
 
 	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, ColorPaletteCellBounds), NEXUS::WorldAssembly::DefaultColors::CellBounds);
 	OverrideColorReset(DetailBuilder, GET_MEMBER_NAME_CHECKED(Settings, ColorPaletteCellHull), NEXUS::WorldAssembly::DefaultColors::CellHull);

@@ -10,6 +10,9 @@ namespace NEXUS::WorldAssembly::DefaultColors
 {
 	static constexpr FLinearColor BoneValid = FLinearColor(0.061246f,1.f,1.f, 1.f); // #46FFFFFF
 	static constexpr FLinearColor BoneInvalid = FLinearColor(0.254152f,0.012983f,1.f, 1.f); // #8A1EFFFF
+	static constexpr FLinearColor BoneUnverified = FLinearColor(0.246201f,0.246201f,0.246201f, 1.f); // #8A8A8AFF
+
+	static constexpr FLinearColor WorldCollisionStale = FLinearColor(1.f,0.246201f,0.f, 1.f); // #FF8A00FF
 
 	static constexpr FLinearColor JunctionValid = FLinearColor(0.010330f,1.f,0.391573f, 1.f); // #1AFFA8FF
 	static constexpr FLinearColor JunctionInvalid = FLinearColor(1.f,0.097587f,1.f, 1.f); // #FF58FFFF
@@ -63,6 +66,16 @@ public:
 	/** @return Cached color for a bone that failed to resolve. */
 	static const FLinearColor& GetBoneInvalid() { return BoneInvalid; }
 
+	/**
+	 * @return Cached color for a bone drawn with no baked world collision to measure against.
+	 * @note Stands in for both the valid and the invalid color in that case, so a bone the readout cannot vouch for
+	 *       never wears the color that means "clear" — which is the one thing an unmeasured bone must not claim.
+	 */
+	static const FLinearColor& GetBoneUnverified() { return BoneUnverified; }
+
+	/** @return Cached wireframe color the world-collision visualizer wears while what it draws is out of date. */
+	static const FLinearColor& GetWorldCollisionStale() { return WorldCollisionStale; }
+
 private:
 	static FLinearColor CellBounds;
 	static FLinearColor CellHull;
@@ -72,4 +85,6 @@ private:
 	static FLinearColor JunctionConnectorCorners;
 	static FLinearColor BoneValid;
 	static FLinearColor BoneInvalid;
+	static FLinearColor BoneUnverified;
+	static FLinearColor WorldCollisionStale;
 };

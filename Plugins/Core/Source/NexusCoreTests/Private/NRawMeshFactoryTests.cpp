@@ -6,6 +6,7 @@
 #include "Types/NRawMeshFactory.h"
 #include "Chaos/Convex.h"
 #include "Chaos/TriangleMeshImplicitObject.h"
+#include "Components/InstancedStaticMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Developer/NTestUtils.h"
 #include "Engine/StaticMesh.h"
@@ -646,6 +647,217 @@ N_TEST_HIGH(FNRawMeshFactoryTests_FromActorsInBounds_CollidingSiblingStillEmits,
 
 		CHECK_MESSAGE(TEXT("A colliding component must still emit when a sibling has collision switched off."),
 			OutMeshes.Num() > 0);
+	});
+}
+
+namespace NEXUS::UnitTests::NCore::FNRawMeshFactoryHarness
+{
+	/** The tag the component-exclusion tests mark geometry with; any name does, the factory only compares. */
+	static const FName IgnoreTag = FName("NRawMeshFactoryTests_Ignore");
+}
+
+N_TEST_CRITICAL(FNRawMeshFactoryTests_FromActorsInBounds_TaggedComponentEmitsNothing,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromActorsInBounds::TaggedComponentEmitsNothing",
+	N_TEST_CONTEXT_EDITOR)
+{
+	using namespace NEXUS::UnitTests::NCore::FNRawMeshFactoryHarness;
+
+	// The author's own opt-out, at the level the actor filter cannot reach. A fully colliding component with nothing
+	// else wrong with it must still be left out when it carries one of the caller's ignore tags.
+	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	{
+		UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube"));
+		if (Cube == nullptr)
+		{
+			ADD_ERROR("Failed to load /Engine/BasicShapes/Cube");
+			return;
+		}
+
+		AStaticMeshActor* MeshActor = World->SpawnActor<AStaticMeshActor>();
+		if (MeshActor == nullptr)
+		{
+			ADD_ERROR("Failed to spawn AStaticMeshActor");
+			return;
+		}
+
+		UStaticMeshComponent* MeshComponent = MeshActor->GetStaticMeshComponent();
+		MeshComponent->SetMobility(EComponentMobility::Movable);
+		MeshComponent->SetStaticMesh(Cube);
+		MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		MeshComponent->ComponentTags.Add(IgnoreTag);
+
+		const TArray<AActor*> Actors = { MeshActor };
+		const TArray<FBoxSphereBounds> NoBounds;
+		TArray<FNRawMesh> OutMeshes;
+		TArray<FTransform> OutTransforms;
+
+		FNRawMeshFactory::FromActorsInBounds(Actors, NoBounds, OutMeshes, OutTransforms, nullptr, { IgnoreTag });
+
+		CHECK_EQUALS("A component carrying an ignore tag must emit no geometry.", OutMeshes.Num(), 0);
+		CHECK_EQUALS("A component carrying an ignore tag must emit no transforms.", OutTransforms.Num(), 0);
+	});
+}
+
+N_TEST_CRITICAL(FNRawMeshFactoryTests_FromActorsInBounds_TaggedInstancedComponentEmitsNothing,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromActorsInBounds::TaggedInstancedComponentEmitsNothing",
+	N_TEST_CONTEXT_EDITOR)
+{
+	using namespace NEXUS::UnitTests::NCore::FNRawMeshFactoryHarness;
+
+	// The shape this exists for. A generator writes its output as instanced components on one container actor, so
+	// every instance has to go with the tag — not merely the component's own body. Covered apart from the plain case
+	// because the instanced path emits per instance through a branch of its own.
+	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	{
+		UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube"));
+		if (Cube == nullptr)
+		{
+			ADD_ERROR("Failed to load /Engine/BasicShapes/Cube");
+			return;
+		}
+
+		AStaticMeshActor* MeshActor = World->SpawnActor<AStaticMeshActor>();
+		if (MeshActor == nullptr)
+		{
+			ADD_ERROR("Failed to spawn AStaticMeshActor");
+			return;
+		}
+
+		// The actor's own root emits nothing, so anything gathered here came from the instances.
+		MeshActor->GetStaticMeshComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		UInstancedStaticMeshComponent* Instances = NewObject<UInstancedStaticMeshComponent>(MeshActor);
+		Instances->SetupAttachment(MeshActor->GetRootComponent());
+		Instances->RegisterComponent();
+		Instances->SetMobility(EComponentMobility::Movable);
+		Instances->SetStaticMesh(Cube);
+		Instances->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		Instances->AddInstance(FTransform::Identity);
+		Instances->AddInstance(FTransform(FVector(500.0, 0.0, 0.0)));
+
+		const TArray<AActor*> Actors = { MeshActor };
+		const TArray<FBoxSphereBounds> NoBounds;
+
+		// Gathered untagged first, so the assertion below is known to be the tag's doing rather than the instances
+		// never having emitted at all.
+		TArray<FNRawMesh> BaselineMeshes;
+		TArray<FTransform> BaselineTransforms;
+		FNRawMeshFactory::FromActorsInBounds(Actors, NoBounds, BaselineMeshes, BaselineTransforms);
+		CHECK_MESSAGE(TEXT("An untagged instanced component must emit its instances."), BaselineMeshes.Num() > 0);
+
+		Instances->ComponentTags.Add(IgnoreTag);
+
+		TArray<FNRawMesh> OutMeshes;
+		TArray<FTransform> OutTransforms;
+		FNRawMeshFactory::FromActorsInBounds(Actors, NoBounds, OutMeshes, OutTransforms, nullptr, { IgnoreTag });
+
+		CHECK_EQUALS("A tagged instanced component must emit no instances at all.", OutMeshes.Num(), 0);
+	});
+}
+
+N_TEST_HIGH(FNRawMeshFactoryTests_FromActorsInBounds_UntaggedSiblingStillEmits,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromActorsInBounds::UntaggedSiblingStillEmits",
+	N_TEST_CONTEXT_EDITOR)
+{
+	using namespace NEXUS::UnitTests::NCore::FNRawMeshFactoryHarness;
+
+	// What separates this from the actor tag it complements: tagging one component must leave the rest of the actor
+	// contributing. A generated actor keeping some of its output as collision and dropping the rest is the case.
+	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	{
+		UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube"));
+		if (Cube == nullptr)
+		{
+			ADD_ERROR("Failed to load /Engine/BasicShapes/Cube");
+			return;
+		}
+
+		AStaticMeshActor* MeshActor = World->SpawnActor<AStaticMeshActor>();
+		if (MeshActor == nullptr)
+		{
+			ADD_ERROR("Failed to spawn AStaticMeshActor");
+			return;
+		}
+
+		UStaticMeshComponent* Kept = MeshActor->GetStaticMeshComponent();
+		Kept->SetMobility(EComponentMobility::Movable);
+		Kept->SetStaticMesh(Cube);
+		Kept->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+		UStaticMeshComponent* Ignored = NewObject<UStaticMeshComponent>(MeshActor);
+		Ignored->SetupAttachment(MeshActor->GetRootComponent());
+		Ignored->RegisterComponent();
+		Ignored->SetMobility(EComponentMobility::Movable);
+		Ignored->SetStaticMesh(Cube);
+		Ignored->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		Ignored->ComponentTags.Add(IgnoreTag);
+
+		const TArray<AActor*> Actors = { MeshActor };
+		const TArray<FBoxSphereBounds> NoBounds;
+
+		TArray<FNRawMesh> BothMeshes;
+		TArray<FTransform> BothTransforms;
+		FNRawMeshFactory::FromActorsInBounds(Actors, NoBounds, BothMeshes, BothTransforms);
+
+		TArray<FNRawMesh> KeptMeshes;
+		TArray<FTransform> KeptTransforms;
+		FNRawMeshFactory::FromActorsInBounds(Actors, NoBounds, KeptMeshes, KeptTransforms, nullptr, { IgnoreTag });
+
+		CHECK_MESSAGE(TEXT("An untagged component must still emit when a sibling carries the ignore tag."),
+			KeptMeshes.Num() > 0);
+		CHECK_MESSAGE(TEXT("Excluding the tagged sibling must emit strictly less than gathering both."),
+			KeptMeshes.Num() < BothMeshes.Num());
+	});
+}
+
+N_TEST_HIGH(FNRawMeshFactoryTests_FromActorsInBounds_NoIgnoreTagsReadsEveryComponent,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromActorsInBounds::NoIgnoreTagsReadsEveryComponent",
+	N_TEST_CONTEXT_EDITOR)
+{
+	using namespace NEXUS::UnitTests::NCore::FNRawMeshFactoryHarness;
+
+	// The parameter is defaulted, and every caller that does not pass one has to keep behaving exactly as it did. A
+	// tagged component is only special to a caller that asked about that tag.
+	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	{
+		UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube"));
+		if (Cube == nullptr)
+		{
+			ADD_ERROR("Failed to load /Engine/BasicShapes/Cube");
+			return;
+		}
+
+		AStaticMeshActor* MeshActor = World->SpawnActor<AStaticMeshActor>();
+		if (MeshActor == nullptr)
+		{
+			ADD_ERROR("Failed to spawn AStaticMeshActor");
+			return;
+		}
+
+		UStaticMeshComponent* MeshComponent = MeshActor->GetStaticMeshComponent();
+		MeshComponent->SetMobility(EComponentMobility::Movable);
+		MeshComponent->SetStaticMesh(Cube);
+		MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		MeshComponent->ComponentTags.Add(IgnoreTag);
+
+		const TArray<AActor*> Actors = { MeshActor };
+		const TArray<FBoxSphereBounds> NoBounds;
+		TArray<FNRawMesh> OutMeshes;
+		TArray<FTransform> OutTransforms;
+
+		FNRawMeshFactory::FromActorsInBounds(Actors, NoBounds, OutMeshes, OutTransforms);
+
+		CHECK_MESSAGE(TEXT("A tagged component must still emit when no ignore tags were supplied."),
+			OutMeshes.Num() > 0);
+
+		// And a list that does not name its tag is the same as no list.
+		TArray<FNRawMesh> OtherMeshes;
+		TArray<FTransform> OtherTransforms;
+		FNRawMeshFactory::FromActorsInBounds(Actors, NoBounds, OtherMeshes, OtherTransforms, nullptr,
+			{ FName("NRawMeshFactoryTests_SomeOtherTag") });
+
+		CHECK_MESSAGE(TEXT("A component must still emit when the ignore list names a tag it does not carry."),
+			OtherMeshes.Num() > 0);
 	});
 }
 

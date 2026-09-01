@@ -33,9 +33,22 @@ void FNBoneComponentVisualizer::DrawVisualization(const UActorComponent* Compone
 		WorldPenetration = GetCachedWorldPenetration(BoneComponent, Settings);
 	}
 
+	// Said in the drawing rather than in a notification. This runs per bone, per viewport, per redraw, and what it
+	// has to report is a standing condition of the level — so a toast raised from here was both the wrong shape for
+	// the message and the loudest possible way to deliver it. The bone wearing its own "nothing measured this" color
+	// says the same thing, only to the person looking at the bone, and for exactly as long as it stays true.
+	const bool bMeasured = FNWorldCollisionPreview::GetState(BoneComponent->GetWorld())
+		== FNWorldCollisionPreview::EState::Available;
+
+	// Both colors, not just the valid one: an unmeasured bone reads zero penetration, and zero wearing the valid
+	// color is a bone claiming to be clear on the strength of a measurement nobody took.
+	const FLinearColor& ValidColor = bMeasured
+		? FNWorldAssemblyEditorColors::GetBoneValid() : FNWorldAssemblyEditorColors::GetBoneUnverified();
+	const FLinearColor& InvalidColor = bMeasured
+		? FNWorldAssemblyEditorColors::GetBoneInvalid() : FNWorldAssemblyEditorColors::GetBoneUnverified();
+
 	// We are always going to draw this
-	BoneComponent->DrawDebugPDI(PDI, FNWorldAssemblyEditorColors::GetBoneValid(), FNWorldAssemblyEditorColors::GetBoneInvalid(),
-		true,  true, Settings, WorldPenetration);
+	BoneComponent->DrawDebugPDI(PDI, ValidColor, InvalidColor, true,  true, Settings, WorldPenetration);
 }
 
 float FNBoneComponentVisualizer::GetCachedWorldPenetration(const UNBoneComponent* BoneComponent, const UNWorldAssemblySettings* Settings)
@@ -48,14 +61,10 @@ float FNBoneComponentVisualizer::GetCachedWorldPenetration(const UNBoneComponent
 	//
 	// Notably, moving a bone does not invalidate anything — bones carry no collision and are filtered out of the bake
 	// entirely — so the readout stays live through exactly the edit it exists to support.
-	const FNWorldCollisionPreview::EState PreviewState = FNWorldCollisionPreview::GetState(World);
-	if (PreviewState != FNWorldCollisionPreview::EState::Available)
-	{
-		// Said out loud rather than silently reading zero, which would look like "this bone is clear". Sampling then
-		// continues against the last baked state when there is one — an out-of-date answer the user has been told
-		// about beats no answer at all, and beats a confident wrong zero.
-		FNWorldCollisionPreview::NotifyUnavailable(BoneComponent->GetWorld(), PreviewState);
-	}
+	//
+	// Sampling continues against the last baked state when there is one, rather than refusing to answer: an
+	// out-of-date reading beats no reading, so long as the bone is drawn in a color that says which it is. That is
+	// DrawVisualization's job — see its note on why this stopped raising a notification of its own.
 
 	// Bumped whenever the preview could differ from a previous read, so the per-bone memo below refreshes with it.
 	const uint32 Generation = FNWorldCollisionPreview::GetGeneration(World);

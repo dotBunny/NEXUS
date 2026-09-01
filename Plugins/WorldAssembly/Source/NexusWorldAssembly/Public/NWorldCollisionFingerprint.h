@@ -70,6 +70,9 @@ public:
 	 * @param Actor Actor to summarize.
 	 * @note Instanced primitives contribute every instance transform, because moving one instance changes the
 	 *       emitted geometry exactly as moving a whole actor does.
+	 * @note Summarizes a superset of what a gather emits, rather than reproducing its exclusions. A primitive the
+	 *       gather would skip still contributes the state that got it skipped — its collision setting and its tags —
+	 *       so changing either shows up here without this having to know the ignore lists at all.
 	 */
 	static uint64 HashActor(const AActor* Actor);
 

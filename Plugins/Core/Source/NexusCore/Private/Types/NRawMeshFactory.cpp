@@ -49,9 +49,26 @@ namespace
 			OutSources->Add(FNRawMeshSource{ Component, InstanceIndex, i - FirstMeshIndex });
 		}
 	}
+
+	/**
+	 * @return true when Component carries any of Tags.
+	 * @param Component Primitive to test.
+	 * @param Tags Tags to look for; an empty list matches nothing, which is what makes the check free by default.
+	 */
+	bool HasAnyComponentTag(const UPrimitiveComponent* Component, const TArray<FName>& Tags)
+	{
+		for (const FName& Tag : Tags)
+		{
+			if (Component->ComponentHasTag(Tag))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 }
 
-void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const TArray<FBoxSphereBounds>& ContainingBounds, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms, TArray<FNRawMeshSource>* OutSources)
+void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const TArray<FBoxSphereBounds>& ContainingBounds, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms, TArray<FNRawMeshSource>* OutSources, const TArray<FName>& ComponentIgnoreTags)
 {
 	// Static meshes compile async in editor; force any pending compiles to finish so every BodySetup is populated.
 	FNDeveloperUtils::WaitForStaticMeshCompilation();
@@ -95,6 +112,13 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 			// GetCollisionEnabled already folds in the owning actor's own flag, so this subsumes the actor-level test
 			// rather than duplicating it.
 			if (ActorPrimitive->GetCollisionEnabled() == ECollisionEnabled::NoCollision) continue;
+
+			// The author's own opt-out, and per primitive because the actor is often not the unit they can choose.
+			// A generator writes its whole result onto one container actor, so excluding the actor excludes all of it;
+			// the case this exists for is a PCG graph whose spawner components are tagged individually, keeping some
+			// of what it produced as collision and leaving the rest as dressing.
+			if (HasAnyComponentTag(ActorPrimitive, ComponentIgnoreTags)) continue;
+
 			// Single-sourced with the terrain classification in FNActorUtils, so the class-name heuristic behind both
 			// cannot drift — and so an engine rename fails that class's tests rather than silently emptying a mesh here.
 			if (FNActorUtils::IsLandscapeClassName(ActorPrimitive->GetClass()->GetName())) continue;

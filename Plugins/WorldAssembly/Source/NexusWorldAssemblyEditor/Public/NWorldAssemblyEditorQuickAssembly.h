@@ -48,6 +48,22 @@ public:
 	/** Cancel the tracked Quick Assembly operation if it is still running. */
 	static void Cancel();
 
+	/**
+	 * Destroy every generated cell proxy in the level, whichever organ or run produced it.
+	 * @note Level-wide, not scoped to the targeted organ, because it is the undo for "what is all this" rather than
+	 *       for one run — the toolbar has no notion of which runs came before, and a clear that left another organ's
+	 *       proxies standing would read as having failed. Per-organ clears live on the edit mode's Organ rail.
+	 */
+	static void ClearProxies();
+
+	/**
+	 * @return true when there are generated proxies to clear and it is safe to do so.
+	 * @note Refuses while the loop is active, unlike the build button beside it, which stays enabled so it can cancel.
+	 *       A clear mid-run would take away proxies the running operation is still adding to, leaving a level holding
+	 *       half of one run and none of what came before.
+	 */
+	static bool ClearProxies_CanExecute();
+
 	/** Toggle UNWorldAssemblyEditorUserSettings::bQuickAssemblyLoadLevelInstances and persist it. */
 	static void ToggleLoadInstances();
 	/** @return checked state of the load-level-instances toggle for UI binding. */

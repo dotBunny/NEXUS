@@ -60,6 +60,15 @@ public:
 	/** @return true if the level holds an organ to bake and the editor is not in a play session. */
 	static bool CacheWorldCollision_CanExecute();
 
+	/**
+	 * @return The bake icon, wearing a warning badge while the level's world collision is unbaked or out of date.
+	 * @note Bound as the rail button's icon rather than resolved once, so it tracks the level changing under it. This
+	 *       is where staleness lives now that it is announced only once: it is a condition of the level rather than
+	 *       an event, and the button that fixes it is the honest place to report it — visible for as long as it is
+	 *       true, and gone the moment it is not.
+	 */
+	static FSlateIcon CacheWorldCollisionIcon();
+
 	/** Add or remove the world-collision-ignore tag across the current actor selection. */
 	static void TagCollisionIgnore();
 	/**
