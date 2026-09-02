@@ -150,12 +150,12 @@ void FNCellEdModeRail::RegisterCommands(const TSharedRef<FBindingContext>& Conte
 		FSlateIcon(),
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 
-	// Cell-scoped despite acting on the actor selection: the tag it toggles only means anything to a cell's
+	// Cell-scoped despite acting on the level selection: the tag it toggles only means anything to a cell's
 	// bounds/hull/voxel calculations, which is why it sits with the Cell actions rather than the world ones.
 	FUICommandInfo::MakeCommandInfo(Context, CommandInfo_TagIgnore,
 		"NWorldAssembly.NCell.TagIgnore",
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_TagIgnore", "Cell Collision"),
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_TagIgnore_Tooltip", "Toggles the necessary tag to have the selected actors ignored when calculating the bounds/hull/etc for a Cell."),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_TagIgnore_Tooltip", "Toggles the necessary tag to have the selected components — or the selected actors, when no component is selected — ignored when calculating the bounds/hull/etc for a Cell."),
 		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Tag"),
 		EUserInterfaceActionType::Button, FInputChord());
 
@@ -217,6 +217,21 @@ bool FNCellEdModeRail::CalculateVoxelData_CanExecute()
 
 void FNCellEdModeRail::TagIgnore()
 {
+	// Components when any are selected, actors otherwise — the same rule the World rail's collision tag follows. The
+	// cell calculations read this tag at either level, and the finer one is what a generated actor needs, since its
+	// whole output hangs off a single container actor that an actor tag would take all of.
+	//
+	// Selecting a component leaves its owning actor selected too, so the component question has to be asked first or
+	// this would never see anything but the actor.
+	if (FNWorldAssemblyEditorTagUtils::HasComponentsSelected())
+	{
+		FNWorldAssemblyEditorTagUtils::ToggleTagOnComponentSelection(
+			NEXUS::WorldAssembly::ActorTags::CellIgnore,
+			NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEdModeCellRail_TagIgnoreComponent_Add", "Add CellIgnore Component Tags"),
+			NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEdModeCellRail_TagIgnoreComponent_Remove", "Remove CellIgnore Component Tags"));
+		return;
+	}
+
 	FNWorldAssemblyEditorTagUtils::ToggleTagOnSelection(
 		NEXUS::WorldAssembly::ActorTags::CellIgnore,
 		NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEdModeCellRail_TagIgnore_Add", "Add CellIgnore Tags"),
@@ -225,10 +240,11 @@ void FNCellEdModeRail::TagIgnore()
 
 FSlateIcon FNCellEdModeRail::TagIgnoreIcon()
 {
-	// Asks the same question ToggleTagOnSelection asks to pick its transaction, so the button cannot promise one thing
-	// and do the other: any tagged actor in the selection means the next click strips the tag from all of them.
-	const bool bWouldRemove = FNWorldAssemblyEditorTagUtils::IsTagOnAnySelectedActor(
-		NEXUS::WorldAssembly::ActorTags::CellIgnore);
+	// Asks the same question TagIgnore asks, on the same selection it would act on, so the button cannot promise one
+	// thing and do the other: any tagged entry in the selection means the next click strips the tag from all of them.
+	const bool bWouldRemove = FNWorldAssemblyEditorTagUtils::HasComponentsSelected()
+		? FNWorldAssemblyEditorTagUtils::IsTagOnAnySelectedComponent(NEXUS::WorldAssembly::ActorTags::CellIgnore)
+		: FNWorldAssemblyEditorTagUtils::IsTagOnAnySelectedActor(NEXUS::WorldAssembly::ActorTags::CellIgnore);
 
 	return FSlateIcon(FNUIEditorStyle::GetStyleSetName(), bWouldRemove ? "Command.ToggleOn" : "Command.ToggleOff");
 }

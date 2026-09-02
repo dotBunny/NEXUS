@@ -317,20 +317,42 @@ bool FNActorUtils::HasBuiltGeometry(const UPrimitiveComponent* Primitive)
 		|| Extent.Z > NEXUS::Core::Terrain::MinimumBuiltHalfExtent;
 }
 
+bool FNActorUtils::HasAnyComponentTag(const UActorComponent* Component, const TArray<FName>& Tags)
+{
+	if (Component == nullptr) return false;
+
+	for (const FName& Tag : Tags)
+	{
+		if (Component->ComponentHasTag(Tag))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 FBox FNActorUtils::GetBuiltComponentsBoundingBox(const AActor* Actor, const bool bIncludeNonColliding)
+{
+	return GetFilteredComponentsBoundingBox(Actor, bIncludeNonColliding, TArray<FName>(), true);
+}
+
+FBox FNActorUtils::GetFilteredComponentsBoundingBox(const AActor* Actor, const bool bIncludeNonColliding,
+	const TArray<FName>& ComponentIgnoreTags, const bool bRejectPlaceholderBounds)
 {
 	FBox Box(ForceInit);
 	if (!IsValid(Actor)) return Box;
 
-	// Mirrors AActor::GetComponentsBoundingBox's registration and collision gates so the only behavioral difference
-	// is the placeholder rejection. Child-actor components are left out for the same reason that function omits them
-	// by default — they belong to an actor of their own.
+	// Mirrors AActor::GetComponentsBoundingBox's registration and collision gates so the only behavioral differences
+	// are the two opt-in filters below. Child-actor components are left out for the same reason that function omits
+	// them by default — they belong to an actor of their own.
 	TInlineComponentArray<UPrimitiveComponent*> Primitives(Actor);
 	for (const UPrimitiveComponent* Primitive : Primitives)
 	{
 		if (Primitive == nullptr || !Primitive->IsRegistered()) continue;
 		if (!bIncludeNonColliding && !Primitive->IsCollisionEnabled()) continue;
-		if (!HasBuiltGeometry(Primitive)) continue;
+		if (bRejectPlaceholderBounds && !HasBuiltGeometry(Primitive)) continue;
+		if (HasAnyComponentTag(Primitive, ComponentIgnoreTags)) continue;
 
 		Box += Primitive->Bounds.GetBox();
 	}

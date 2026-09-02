@@ -298,6 +298,15 @@ public:
 	static bool HasBuiltGeometry(const UPrimitiveComponent* Primitive);
 
 	/**
+	 * Test whether a component carries any of a set of tags.
+	 * @param Component Component to test. A null component carries nothing.
+	 * @param Tags Tags to look for.
+	 * @return true when the component carries at least one of Tags.
+	 * @note An empty tag list matches nothing, which is what makes the check free for a caller that does not filter.
+	 */
+	static bool HasAnyComponentTag(const UActorComponent* Component, const TArray<FName>& Tags);
+
+	/**
 	 * Union of an actor's registered primitive bounds, skipping any primitive still reporting placeholder bounds.
 	 * @param Actor Actor whose primitives should be measured. A null actor returns an invalid box.
 	 * @param bIncludeNonColliding When true, primitives with collision disabled also contribute.
@@ -306,4 +315,25 @@ public:
 	 *         as a valid point and folds in — pulling the result out to wherever the empty component happens to sit.
 	 */
 	static FBox GetBuiltComponentsBoundingBox(const AActor* Actor, bool bIncludeNonColliding);
+
+	/**
+	 * Union of an actor's registered primitive bounds, with tagged primitives left out.
+	 *
+	 * The implementation behind GetBuiltComponentsBoundingBox, and the one to reach for when the caller filters on
+	 * component tags. Both mirror AActor::GetComponentsBoundingBox's registration and collision gates, so an actor
+	 * holding nothing tagged measures identically to that function when bRejectPlaceholderBounds is false.
+	 * @param Actor Actor whose primitives should be measured. A null actor returns an invalid box.
+	 * @param bIncludeNonColliding When true, primitives with collision disabled also contribute.
+	 * @param ComponentIgnoreTags Component tags (UActorComponent::ComponentTags) that exclude a primitive. Empty
+	 *        measures every primitive.
+	 * @param bRejectPlaceholderBounds When true, primitives still reporting the engine's placeholder bounds are
+	 *        dropped rather than folded in as a valid point.
+	 * @return The combined bounds, or an invalid box when nothing qualified.
+	 * @note Component-level rather than actor-level, because the actor is frequently not the author's unit of choice:
+	 *       a generator writes many primitives onto one container actor, and excluding it would take the whole
+	 *       generated result with it. Tested per primitive, so an actor can contribute part of its bounds and
+	 *       withhold the rest.
+	 */
+	static FBox GetFilteredComponentsBoundingBox(const AActor* Actor, bool bIncludeNonColliding,
+		const TArray<FName>& ComponentIgnoreTags, bool bRejectPlaceholderBounds);
 };

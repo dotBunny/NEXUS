@@ -158,13 +158,13 @@ void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray
 				continue;
 			}
 
-			// Terrain goes through the placeholder-rejecting variant. A section that has not finished building reports
-			// a near-zero box rather than an invalid one, and folding that in as a valid point drags the result out to
-			// wherever the unbuilt component sits — which is what inflates bounds calculated moments after a terrain
-			// edit, and why the same calculation is correct again once the level is reloaded.
-			const FBox ActorBox = bIsTerrain
-				? FNActorUtils::GetBuiltComponentsBoundingBox(Actor, Filter.bIncludeNonColliding)
-				: Actor->GetComponentsBoundingBox(Filter.bIncludeNonColliding);
+			// Terrain asks for the placeholder rejection. A section that has not finished building reports a near-zero
+			// box rather than an invalid one, and folding that in as a valid point drags the result out to wherever
+			// the unbuilt component sits — which is what inflates bounds calculated moments after a terrain edit, and
+			// why the same calculation is correct again once the level is reloaded. Everything else measures exactly
+			// as AActor::GetComponentsBoundingBox would, less any primitive the caller tagged out.
+			const FBox ActorBox = FNActorUtils::GetFilteredComponentsBoundingBox(Actor, Filter.bIncludeNonColliding,
+				Filter.ComponentIgnoreTags, bIsTerrain);
 			if (ActorBox.IsValid)
 			{
 				OutBounds += ActorBox;

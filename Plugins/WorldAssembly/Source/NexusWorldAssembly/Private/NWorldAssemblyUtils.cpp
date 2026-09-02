@@ -84,7 +84,10 @@ FBox FNWorldAssemblyUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCell
 	}
 
 	FNLevelBoundsFilter Filter;
+	// One list, read at both levels: a cell markup tag excludes an actor, or an individual component of one, so an
+	// author who tags a generator's components rather than its container actor is honored either way.
 	Filter.ActorIgnoreTags = Settings.ActorIgnoreTags;
+	Filter.ComponentIgnoreTags = Settings.ActorIgnoreTags;
 	Filter.bIncludeEditorOnly = Settings.bIncludeEditorOnly;
 	Filter.bIncludeNonColliding = Settings.bIncludeNonColliding;
 	Filter.bIncludeLandscapes = Settings.bIncludeLandscapes;
@@ -191,14 +194,16 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 	}
 
 	// STEP 2 - Pull each qualifying actor's collision geometry (convex/box/sphere/capsule, or the
-	// complex-as-simple tri-mesh) and flatten every vertex into world space for the hull builder.
+	// complex-as-simple tri-mesh) and flatten every vertex into world space for the hull builder. The ignore tags the
+	// actor filter above ran on are handed down per primitive as well, so an actor that survived it can still withhold
+	// whichever part of itself was tagged out.
 	TArray<FNRawMesh> CollisionMeshes;
 	TArray<FTransform> CollisionTransforms;
-	FNRawMeshFactory::FromActorsInBounds(HullActors, {}, CollisionMeshes, CollisionTransforms);
+	FNRawMeshFactory::FromActorsInBounds(HullActors, {}, CollisionMeshes, CollisionTransforms, nullptr, Settings.ActorIgnoreTags);
 
 	TArray<FNRawMesh> TerrainMeshes;
 	TArray<FTransform> TerrainTransforms;
-	FNRawMeshFactory::FromActorsInBounds(TerrainActors, {}, TerrainMeshes, TerrainTransforms);
+	FNRawMeshFactory::FromActorsInBounds(TerrainActors, {}, TerrainMeshes, TerrainTransforms, nullptr, Settings.ActorIgnoreTags);
 
 	int32 CollisionVertexCount = 0;
 	int32 CollisionTriangleCount = 0;
@@ -274,8 +279,8 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 		TerrainVertexCount, VerticesAfterTerrain - VerticesBeforeTerrain, LandscapeVertexCount);
 
 	// STEP 3 - Non-colliding actors yield no collision geometry, so (when requested) fall back to their
-	// bounding-box corners. A registered primitive with a BodySetup is the same gate FNRawMeshFactory uses
-	// to emit geometry, so its absence means the factory produced nothing for this actor.
+	// bounding-box corners. A registered primitive with a BodySetup that the ignore tags did not exclude is the same
+	// gate FNRawMeshFactory was handed above, so its absence means the factory produced nothing for this actor.
 	if (Settings.bIncludeNonColliding)
 	{
 		FVector BoxVertices[8];
@@ -283,17 +288,23 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 		{
 			bool bHasCollisionGeometry = false;
 			TInlineComponentArray<UPrimitiveComponent*> ActorPrimitives(Actor);
+			// Not const: UPrimitiveComponent::GetBodySetup is a non-const accessor.
 			for (UPrimitiveComponent* ActorPrimitive : ActorPrimitives)
 			{
-				if (ActorPrimitive != nullptr && ActorPrimitive->IsRegistered() && ActorPrimitive->GetBodySetup() != nullptr)
-				{
-					bHasCollisionGeometry = true;
-					break;
-				}
+				if (ActorPrimitive == nullptr || !ActorPrimitive->IsRegistered()) continue;
+				if (ActorPrimitive->GetBodySetup() == nullptr) continue;
+
+				// An ignored primitive emitted nothing above, so it cannot be what makes this actor count as already
+				// covered — otherwise tagging out the one collider on an actor would suppress the fallback box for
+				// every untagged primitive standing beside it.
+				if (FNActorUtils::HasAnyComponentTag(ActorPrimitive, Settings.ActorIgnoreTags)) continue;
+
+				bHasCollisionGeometry = true;
+				break;
 			}
 			if (bHasCollisionGeometry) continue;
 
-			FBox ActorBox = Actor->GetComponentsBoundingBox(true);
+			FBox ActorBox = FNActorUtils::GetFilteredComponentsBoundingBox(Actor, true, Settings.ActorIgnoreTags, false);
 			if (ActorBox.IsValid &&
 				(ActorBox.GetExtent().X > 0 && ActorBox.GetExtent().Y > 0 && ActorBox.GetExtent().Z > 0))
 			{
@@ -398,7 +409,10 @@ FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const 
 	// The ignored-actor list this fills is handed to the sweep below, so one filter settles both the grid extents and
 	// what the sweep is allowed to hit.
 	FNLevelBoundsFilter Filter;
+	// One list, read at both levels — see FNCellVoxelGenerationSettings. The component half only settles the grid
+	// extents here; the sweep is given its own ignores below.
 	Filter.ActorIgnoreTags = Settings.ActorIgnoreTags;
+	Filter.ComponentIgnoreTags = Settings.ActorIgnoreTags;
 	Filter.bIncludeEditorOnly = Settings.bIncludeEditorOnly;
 	Filter.bIncludeNonColliding = Settings.bIncludeNonColliding;
 	Filter.bIncludeLandscapes = Settings.bIncludeLandscapes;
@@ -425,6 +439,27 @@ FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const 
 
 	FCollisionQueryParams Params = FCollisionQueryParams(TEXT("CalculateVoxelData"), true);
 	Params.AddIgnoredActors(IgnoredActors);
+
+	// A tagged primitive on an otherwise contributing actor has to be withheld from the sweep as well. It was already
+	// kept out of the bounds the grid was sized from, and a sweep still able to hit it would mark cells occupied by
+	// geometry the cell does not claim. Actors already on the ignore list are skipped — the sweep cannot reach any of
+	// their primitives, so naming them individually would only lengthen the list the trace is issued with.
+	const TSet<const AActor*> IgnoredActorSet(IgnoredActors);
+	const int32 LevelActorCount = InLevel->Actors.Num();
+	for (int32 ActorIndex = 0; ActorIndex < LevelActorCount; ++ActorIndex)
+	{
+		const AActor* LevelActor = InLevel->Actors[ActorIndex];
+		if (!IsValid(LevelActor) || IgnoredActorSet.Contains(LevelActor)) continue;
+
+		TInlineComponentArray<UPrimitiveComponent*> LevelActorPrimitives(LevelActor);
+		for (const UPrimitiveComponent* LevelActorPrimitive : LevelActorPrimitives)
+		{
+			if (FNActorUtils::HasAnyComponentTag(LevelActorPrimitive, Settings.ActorIgnoreTags))
+			{
+				Params.AddIgnoredComponent(LevelActorPrimitive);
+			}
+		}
+	}
 
 	// STEP 2 - Broad Trace
 	FScopedSlowTask BroadTraceTask = FScopedSlowTask(Count, NSLOCTEXT("NexusWorldAssembly", "Task_CalculateVoxelData_BroadTrace", "Broad Trace"));

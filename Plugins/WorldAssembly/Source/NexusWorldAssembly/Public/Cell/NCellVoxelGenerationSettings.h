@@ -60,8 +60,20 @@ struct NEXUSWORLDASSEMBLY_API FNCellVoxelGenerationSettings
 	UPROPERTY(EditAnywhere, DisplayName = "Include Foliage")
 	bool bIncludeFoliage = false;
 
-	/** Actors carrying any of these tags are excluded from the voxel calculation. */
-	UPROPERTY(EditAnywhere)
+	/**
+	 * Actors, and individual components, carrying any of these tags are excluded from the voxel calculation.
+	 *
+	 * One list covering both levels rather than a pair: a cell markup tag means the same thing wherever it is placed,
+	 * so a tag an author adds here is honored on an actor and on a component without having to be added twice.
+	 * @note Governs both halves of the calculation, as the terrain and foliage flags above do: whether the excluded
+	 *       geometry grows the voxel grid's extents, and whether the occupancy sweep can hit it. A component left out
+	 *       of the extents but still reachable by the sweep would register as occupied outside the grid it sized.
+	 * @note Component granularity matters because the actor is frequently not the author's unit of choice — a
+	 *       generator writes its whole result onto one container actor, so an actor tag takes all of it, where tagging
+	 *       the spawner's components individually keeps some of what it produced and leaves the rest out.
+	 */
+	UPROPERTY(EditAnywhere, DisplayName = "Ignore Tags",
+		meta=(ToolTip="Tags that exclude an actor, or an individual component of one, from the voxel calculation."))
 	TArray<FName> ActorIgnoreTags = { NEXUS::WorldAssembly::ActorTags::CellIgnore, NEXUS::WorldAssembly::ActorTags::CellVoxelIgnore };
 
 	/** Collision channel used when tracing against the cell to determine occupancy. */

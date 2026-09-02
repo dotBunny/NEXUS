@@ -94,8 +94,17 @@ struct NEXUSWORLDASSEMBLY_API FNCellHullGenerationSettings
 	UPROPERTY(VisibleAnywhere)
 	ENullBuildMethod BuildMethod = ENullBuildMethod::Original;
 
-	/** Actors carrying any of these tags are excluded from the hull calculation. */
-	UPROPERTY(EditAnywhere)
+	/**
+	 * Actors, and individual components, carrying any of these tags are excluded from the hull calculation.
+	 *
+	 * One list covering both levels rather than a pair: a cell markup tag means the same thing wherever it is placed,
+	 * so a tag an author adds here is honored on an actor and on a component without having to be added twice.
+	 * @note Component granularity matters because the actor is frequently not the author's unit of choice — a
+	 *       generator writes its whole result onto one container actor, so an actor tag takes all of it, where tagging
+	 *       the spawner's components individually keeps some of what it produced and leaves the rest out.
+	 */
+	UPROPERTY(EditAnywhere, DisplayName = "Ignore Tags",
+		meta=(ToolTip="Tags that exclude an actor, or an individual component of one, from the hull calculation."))
 	TArray<FName> ActorIgnoreTags = { NEXUS::WorldAssembly::ActorTags::CellIgnore, NEXUS::WorldAssembly::ActorTags::CellHullIgnore };
 
 	/** @return The Chaos enum matching BuildMethod. */

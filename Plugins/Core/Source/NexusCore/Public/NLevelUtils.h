@@ -17,6 +17,16 @@ struct NEXUSCORE_API FNLevelBoundsFilter
 	/** Any actor carrying one of these tags is ignored. */
 	TArray<FName> ActorIgnoreTags;
 
+	/**
+	 * Any individual primitive carrying one of these tags is left out of its actor's contribution.
+	 *
+	 * The finer-grained half of ActorIgnoreTags, for the case where the actor is not the unit the author can choose:
+	 * a generator writes its whole result onto one container actor, so an actor tag takes all of it.
+	 * @note Does not exclude the actor. An actor made entirely of ignored primitives is still walked; it simply
+	 *       contributes nothing, and is not reported in OutIgnoredActors.
+	 */
+	TArray<FName> ComponentIgnoreTags;
+
 	/** When true, editor-only actors contribute to the bounds. */
 	bool bIncludeEditorOnly = false;
 
