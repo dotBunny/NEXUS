@@ -48,7 +48,10 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionFillerEntry
 	int32 Weighting = 1;
 
 	/**
-	 * Should this filler skip the additional filled actors being toggled (still hides additional unfilled actors).
+	 * Leave the junction's AdditionalFilledActors hidden when this entry is the filler that spawns, for a filler
+	 * that already occupies the opening on its own. Only ever hides them — it cannot show actors the junction's
+	 * outcome says should be hidden — and the junction's AdditionalConnectedActors are unaffected either way,
+	 * being hidden on an unconnected junction regardless of what fills it.
 	 */
 	UPROPERTY(EditAnywhere)
 	bool bSkipAdditionalActors = false;

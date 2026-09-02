@@ -90,10 +90,23 @@ public:
 		meta=(ToolTip="Override timeslicing support and immediately spawn this filler in BeginPlay", EditCondition="!bDisableFill"))
 	bool bSpawnFillerImmediately = false;
 
+	/**
+	 * Actors shown when this junction ends up filled (that is, unconnected), and hidden when it does not.
+	 *
+	 * Driven exactly once per junction, from ResolveConnectionState, so the state holds for every junction however
+	 * it resolved — including ones that never fill because their requirements allow an empty opening, and ones whose
+	 * fill finds no eligible filler.
+	 */
 	UPROPERTY(EditInstanceOnly, DisplayName="Additional Filled Actors", Category = "Cell Junction|Fill",
 		meta=(ToolTip="Any actors that should be enabled when this Junction is filled (not connected), will be disabled otherwise."))
 	TArray<TObjectPtr<AActor>> AdditionalFilledActors;
 
+	/**
+	 * Actors shown when this junction ends up connected to another, and hidden when it does not.
+	 *
+	 * Applied after AdditionalFilledActors, so an actor named in both lists takes its state from this one.
+	 * @see AdditionalFilledActors for when the pair is driven.
+	 */
 	UPROPERTY(EditInstanceOnly, DisplayName="Additional Connected Actors", Category = "Cell Junction|Fill",
 		meta=(ToolTip="Any actors that should be enabled when this Junction is connected (not filled), will be disabled otherwise. Runs after the AdditionalFilledActors are processed which means it can override those Actor settings."))
 	TArray<TObjectPtr<AActor>> AdditionalConnectedActors;
@@ -188,6 +201,15 @@ public:
 	 */
 	void Fill();
 
+	/**
+	 * Re-read this junction's link details from its owning cell, and resolve the junction if it began play before
+	 * that cell's assembly data had replicated.
+	 *
+	 * Called by ANCellLevelInstance::UpdateFromAssemblyData for every junction in the cell. A junction that already
+	 * resolved is left alone — its details are refreshed, but nothing is re-driven or unwound.
+	 */
+	void OnAssemblyDataUpdated();
+
 protected:
 	UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, Category = "Assembly Operation")
 	TWeakObjectPtr<AActor> FillerActor;
@@ -222,7 +244,31 @@ private:
 	 */
 	void FinalizeFillerSpawn(AActor* SpawnedActor, ANCellLevelInstance* CellLevelInstance);
 
+	/**
+	 * Act on this junction's resolved connection state: drive the additional-actor lists, notify OnBeginPlayTargets,
+	 * report a connector endpoint, and fill an unconnected junction according to its requirements.
+	 *
+	 * Split out of BeginPlay because a junction cannot always answer "am I connected?" at that point — see
+	 * BeginPlay for the assembly-data race that defers this to OnAssemblyDataUpdated. Guarded so it runs once.
+	 */
+	void ResolveConnectionState();
+
+	/**
+	 * Drive both additional-actor lists to the visibility this junction's outcome calls for.
+	 *
+	 * Filled actors are shown only on an unconnected junction, connected actors only on a connected one, and the
+	 * connected pass runs second so an actor named in both lists takes its state from AdditionalConnectedActors.
+	 * @param bConnected Whether the junction resolved as connected to another junction.
+	 * @param bSkipAdditionalFilledActors Hide the filled actors regardless, for a filler entry that opted out of
+	 *        the toggle via bSkipAdditionalActors. Never shows them; only ever narrows what bConnected would do.
+	 */
 	void ProcessAdditionalActors(bool bConnected, bool bSkipAdditionalFilledActors = false);
+
+	/** Guards ResolveConnectionState so BeginPlay and a late OnAssemblyDataUpdated cannot both run it. */
+	bool bConnectionStateResolved = false;
+
+	/** Set when BeginPlay found the owning cell's assembly data missing and left the resolve to that cell. */
+	bool bAwaitingAssemblyData = false;
 
 	/** One junction's memoized hull penetration plus the inputs it was computed for; reused while those are unchanged. */
 	struct FCachedHullPenetration

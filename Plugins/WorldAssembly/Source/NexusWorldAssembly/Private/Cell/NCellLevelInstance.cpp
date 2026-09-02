@@ -108,6 +108,17 @@ void ANCellLevelInstance::UpdateFromAssemblyData()
 	{
 		JunctionData.Add(AssemblyData.JunctionDetails[i].InstanceIdentifier, AssemblyData.JunctionDetails[i]);
 	}
+
+	// Junctions that began play before this data arrived could not tell connected from unconnected and deferred
+	// their whole resolve to here. Ones that have not begun play yet are refreshed and left to resolve for
+	// themselves; ones that already resolved from real data are refreshed and otherwise untouched.
+	if (const ULevel* LoadedLevel = GetLoadedLevel())
+	{
+		for (UNCellJunctionComponent* Junction : FNWorldAssemblyRegistry::GetCellJunctionsComponentsFromLevel(LoadedLevel, false))
+		{
+			Junction->OnAssemblyDataUpdated();
+		}
+	}
 }
 
 FNCellLinkDetails ANCellLevelInstance::GetCellLinkDetails(const int32 JunctionIdentifier)

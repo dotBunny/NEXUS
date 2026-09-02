@@ -88,11 +88,33 @@ void UNCellJunctionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Early enable/disable based on connection
-	if (LinkDetails.bConnected)
+	// A cell's assembly data is replicated, and on a client it can arrive after its junctions have registered and
+	// begun play. Until it does, GetCellLinkDetails has nothing to answer from and hands back a default — which
+	// reads as unconnected, and is indistinguishable from a junction that genuinely resolved that way. Acting on it
+	// would hide a connected junction's additional actors and spawn a filler into an opening another cell is about
+	// to meet, so wait: ANCellLevelInstance::UpdateFromAssemblyData resolves this junction once the data lands.
+	if (const ANCellLevelInstance* CellLevelInstance = Cast<ANCellLevelInstance>(LevelInstance.Get());
+		CellLevelInstance != nullptr && !CellLevelInstance->HasAssemblyData())
 	{
-		ProcessAdditionalActors(true, bDisableFill);
+		bAwaitingAssemblyData = true;
+		return;
 	}
+
+	ResolveConnectionState();
+}
+
+void UNCellJunctionComponent::ResolveConnectionState()
+{
+	if (bConnectionStateResolved) return;
+	bConnectionStateResolved = true;
+	bAwaitingAssemblyData = false;
+
+	// Drive both additional-actor lists to match how this junction resolved. Unconditional and first, because every
+	// path out of this function below is conditional — a connector endpoint returns early, a Required or AllowEmpty
+	// junction never calls Fill(), and Fill() itself returns before doing anything when the junction has no eligible
+	// filler and the project sets no default. A junction routed through any of those would otherwise never have its
+	// additional actors touched at all, and would show them at whatever visibility they were authored with.
+	ProcessAdditionalActors(LinkDetails.bConnected);
 
 	// Send out calls to anything linked to it
 	if (OnBeginPlayTargets.Num() > 0)
@@ -149,6 +171,22 @@ void UNCellJunctionComponent::BeginPlay()
 	}
 
 
+}
+
+void UNCellJunctionComponent::OnAssemblyDataUpdated()
+{
+	ANCellLevelInstance* CellLevelInstance = Cast<ANCellLevelInstance>(LevelInstance.Get());
+	if (CellLevelInstance == nullptr) return;
+
+	LinkDetails = CellLevelInstance->GetCellLinkDetails(Details.InstanceIdentifier);
+
+	// Only a junction that deferred in BeginPlay is waiting on this. One that has not begun play yet resolves for
+	// itself off the data now present, and one that already resolved is deliberately left standing rather than
+	// unwound — it read real data, so a later update describes the same outcome.
+	if (bAwaitingAssemblyData && HasBegunPlay())
+	{
+		ResolveConnectionState();
+	}
 }
 
 void UNCellJunctionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -362,7 +400,29 @@ void UNCellJunctionComponent::OnRegister()
 			// It might be related --- I don't know --- hopefully this information might be useful in the future.
 			SetWorldRotation(Details.WorldRotation, false, nullptr, ETeleportType::ResetPhysics);
 		}
-		LinkDetails = CellLevelInstance->GetCellLinkDetails(Details.InstanceIdentifier);
+		// Skipped when the cell's replicated assembly data has not landed yet: GetCellLinkDetails would only warn
+		// and hand back a default. BeginPlay detects the same condition and defers this junction's resolve to
+		// OnAssemblyDataUpdated, which is where LinkDetails is filled in for that case.
+		if (CellLevelInstance->HasAssemblyData())
+		{
+			LinkDetails = CellLevelInstance->GetCellLinkDetails(Details.InstanceIdentifier);
+
+#if WITH_EDITOR
+			// AUTHOR-TIME PREVIEW — BeginPlay never runs in an editor world, so this is the only point at which a
+			// generated junction knows how it resolved. Visibility of the additional actors is all that is driven
+			// here: filling, connector registration and the OnBeginPlayTargets callbacks all route through the
+			// game-only UNWorldAssemblySubsystem, which does not exist in an editor world.
+			//
+			// Safe this early even though the actors named in those lists may not have registered their components
+			// yet — FPrimitiveSceneProxy reads IsHiddenEd() when the proxy is built, so one registering after this
+			// still comes up hidden. The enclosing WasSpawnedFromProxy() test is what keeps this off a cell opened
+			// for authoring, where hiding the author's own actors would be wrong.
+			if (const UWorld* World = GetWorld(); World != nullptr && !World->IsGameWorld())
+			{
+				ProcessAdditionalActors(LinkDetails.bConnected);
+			}
+#endif // WITH_EDITOR
+		}
 	}
 
 	FNWorldAssemblyRegistry::RegisterCellJunctionComponent(this);
@@ -517,11 +577,9 @@ TArray<FVector> UNCellJunctionComponent::GetWorldCornerPoints(const FVector2D& S
 
 void UNCellJunctionComponent::Fill()
 {
-	if (bDisableFill)
-	{
-		ProcessAdditionalActors(false);
-		return;
-	}
+	// ResolveConnectionState has already shown this unconnected junction's filled actors, which is the point of
+	// disabling the fill: the opening is dressed by hand instead of by a spawned filler.
+	if (bDisableFill) return;
 
 	ALevelInstance* LocalLevelInstance = LevelInstance.Get();
 	if (LocalLevelInstance == nullptr) return;
@@ -554,8 +612,6 @@ void UNCellJunctionComponent::Fill()
 		const int32 FillerIndex = WeightedAvailableIndices.TwistedValue(RandomGenerator);
 		if (FillerIndex != INDEX_NONE)
 		{
-			ProcessAdditionalActors(false, Fillers[FillerIndex].bSkipAdditionalActors);
-
 			// Location offset is authored in the junction's frame, so rotate it by the junction's orientation before
 			// nudging; the rotation offset then spins the filler in place at that spot.
 			AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Fillers[FillerIndex].Actor,
@@ -566,6 +622,16 @@ void UNCellJunctionComponent::Fill()
 			if (SpawnedActor != nullptr)
 			{
 				SpawnedActor->SetActorScale3D(SpawnedActor->GetActorScale3D() * Fillers[FillerIndex].Offset.GetScale3D());
+
+				// The entry's opt-out is the one input ResolveConnectionState could not have had, so it is applied
+				// here — and only once this filler is the one that actually spawned. A selected filler that fails to
+				// spawn falls through to the default-filler path below with the junction's state left as it was,
+				// rather than having been narrowed on behalf of a filler that never arrived.
+				if (Fillers[FillerIndex].bSkipAdditionalActors)
+				{
+					ProcessAdditionalActors(false, true);
+				}
+
 				FinalizeFillerSpawn(SpawnedActor, CellLevelInstance);
 				return;
 			}
@@ -584,14 +650,12 @@ void UNCellJunctionComponent::Fill()
 	// Already resident: spawn immediately to keep the synchronous fast path.
 	if (UClass* LoadedFiller = DefaultFiller.Get())
 	{
-		ProcessAdditionalActors(false);
 		SpawnDefaultFiller(LoadedFiller, CellLevelInstance);
 		return;
 	}
 
 	// Not resident: stream it in, then spawn once it lands. Weak captures bail if the junction or its cell were
 	// destroyed (e.g. the cell streamed back out) while the load was in flight.
-	ProcessAdditionalActors(false);
 	TWeakObjectPtr<UNCellJunctionComponent> WeakThis(this);
 	TWeakObjectPtr<ANCellLevelInstance> WeakCell(CellLevelInstance);
 	UAssetManager::GetStreamableManager().RequestAsyncLoad(DefaultFiller.ToSoftObjectPath(),
@@ -641,40 +705,56 @@ void UNCellJunctionComponent::FinalizeFillerSpawn(AActor* SpawnedActor, ANCellLe
 	FillerActor = SpawnedActor;
 }
 
+namespace
+{
+	/**
+	 * Show or hide one of a junction's additional actors.
+	 *
+	 * The game and editor visibility flags are separate: bHidden gates rendering only in a game world and
+	 * bHiddenEdTemporary only in an editor viewport, so a junction resolved at author time has to set the editor
+	 * one to show anything at all. Neither is saved, and SetIsTemporarilyHiddenInEditor neither transacts nor
+	 * dirties, which suits actors that exist only inside a generated cell's level instance.
+	 * @param Actor The additional actor to drive.
+	 * @param bVisible Whether this junction's outcome calls for the actor to be shown.
+	 * @note Author time drives visibility only. The world-collision gather skips primitives whose collision is
+	 *       switched off, so toggling collision here would make a level's baked pool depend on which junctions
+	 *       happened to connect, and invalidate the cache on every regeneration.
+	 */
+	void ApplyAdditionalActorVisibility(AActor* Actor, const bool bVisible)
+	{
+#if WITH_EDITOR
+		if (const UWorld* World = Actor->GetWorld(); World != nullptr && !World->IsGameWorld())
+		{
+			Actor->SetIsTemporarilyHiddenInEditor(!bVisible);
+			return;
+		}
+#endif // WITH_EDITOR
+
+		Actor->SetActorEnableCollision(bVisible);
+		Actor->SetActorHiddenInGame(!bVisible);
+	}
+}
+
 void UNCellJunctionComponent::ProcessAdditionalActors(const bool bConnected, const bool bSkipAdditionalFilledActors)
 {
-	if (!bSkipAdditionalFilledActors)
+	// The skip flag only ever narrows: a filler that occupies the opening on its own hides the filled actors that
+	// would otherwise have been shown, and can never show ones a connected junction hides.
+	const bool bShowFilledActors = !bConnected && !bSkipAdditionalFilledActors;
+	for (int i = 0; i < AdditionalFilledActors.Num(); i++)
 	{
-		const bool bShowFilledActors = !bConnected;
-		for (int i = 0; i < AdditionalFilledActors.Num(); i++)
-		{
-			AActor* FilledActor = AdditionalFilledActors[i];
-			if (FilledActor == nullptr) continue;
+		AActor* FilledActor = AdditionalFilledActors[i];
+		if (FilledActor == nullptr) continue;
 
-			FilledActor->SetActorEnableCollision(bShowFilledActors);
-			FilledActor->SetActorHiddenInGame(!bShowFilledActors);
-		}
-	}
-	else
-	{
-		for (int i = 0; i < AdditionalFilledActors.Num(); i++)
-		{
-			AActor* FilledActor = AdditionalFilledActors[i];
-			if (FilledActor == nullptr) continue;
-
-			FilledActor->SetActorEnableCollision(false);
-			FilledActor->SetActorHiddenInGame(true);
-		}
+		ApplyAdditionalActorVisibility(FilledActor, bShowFilledActors);
 	}
 
-	const bool bShowConnectedActors = bConnected;
+	// Second, so an actor named in both lists ends up in the state this one asks for.
 	for (int i = 0; i < AdditionalConnectedActors.Num(); i++)
 	{
 		AActor* ConnectedActor = AdditionalConnectedActors[i];
 		if (ConnectedActor == nullptr) continue;
 
-		ConnectedActor->SetActorEnableCollision(bShowConnectedActors);
-		ConnectedActor->SetActorHiddenInGame(!bShowConnectedActors);
+		ApplyAdditionalActorVisibility(ConnectedActor, bConnected);
 	}
 }
 

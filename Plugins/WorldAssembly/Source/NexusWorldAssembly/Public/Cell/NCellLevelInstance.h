@@ -170,6 +170,15 @@ public:
 
 	void UpdateFromAssemblyData();
 
+	/**
+	 * @return true once this cell's assembly data is present, so its junctions can resolve their links from it.
+	 * @note AssemblyData is replicated, and on a client it can arrive after the cell's junctions have registered and
+	 *       begun play. Until it does, GetCellLinkDetails can only answer with a default — which reads as
+	 *       unconnected and is indistinguishable from a junction that genuinely resolved that way. Junctions test
+	 *       this to tell the two apart and wait for UpdateFromAssemblyData rather than acting on the default.
+	 */
+	bool HasAssemblyData() const { return AssemblyData.LinkDetails.Num() > 0; }
+
 	FNCellLinkDetails GetCellLinkDetails(int32 JunctionIdentifier);
 
 protected:
