@@ -18,6 +18,7 @@ TSharedRef<FSlateStyleSet> FNToolingEditorStyle::Create()
 	Style.Set("Command.FindAndFix", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_FindAndFix"), Icon16x16));
 	Style.Set("Command.FindAndFix.Item", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_FindAndFix_Item"), Icon16x16));
 	Style.Set("Command.ProjectLevels", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_ProjectLevels"), Icon16x16));
+	Style.Set("Command.TexturePacker", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_TexturePacker"), Icon16x16));
 
 	// Multiplayer Test
 	Style.Set("Command.Multiplayer.StartMultiplayerTest.On", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_StartMultiplayerTest_On"), Icon16x16));

@@ -16,6 +16,8 @@
 #include "SelectionLock/NSelectionLock.h"
 #include "SelectionLock/NSelectionLockColumn.h"
 #include "SelectionLock/NSelectionLockMenu.h"
+#include "TexturePacker/NTexturePackerAssetActions.h"
+#include "TexturePacker/NTexturePackerTab.h"
 #include "Brushes/SlateImageBrush.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
@@ -46,6 +48,8 @@ void FNToolingEditorModule::ShutdownModule()
 	}
 
 	FNToolingEditorCommands::RemoveMenuEntries();
+	FNTexturePackerAssetActions::Unregister();
+	FNTexturePackerTab::Unregister();
 	FNMultiplayerTestToolbarSection::RemoveSection();
 	FNSelectionLockMenu::RemoveMenuEntries();
 	FNSelectionLockColumn::Unregister();
@@ -99,6 +103,14 @@ void FNToolingEditorModule::OnPostEngineInit()
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNToolingEditorCommands::AddMenuEntries));
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNMultiplayerTestToolbarSection::AddSection));
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNSelectionLockMenu::AddMenuEntries));
+
+		// The Content Browser's texture context menu, deferred like everything else that extends a menu.
+		UToolMenus::RegisterStartupCallback(
+			FSimpleMulticastDelegate::FDelegate::CreateStatic(FNTexturePackerAssetActions::Register));
+
+		// Not deferred: a nomad tab spawner is registered with the tab manager rather than with a menu, and
+		// the Tools menu entry goes into FNToolsMenu's registry, which is read when the menu is generated.
+		FNTexturePackerTab::Register();
 
 		// Apply Starship style override of AppIcon
 		ApplyAppIcon(Settings->ProjectAppIconPath);

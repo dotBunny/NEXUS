@@ -24,6 +24,16 @@
 				"Linux",
 				"Win64"
 			]
+		},
+		{
+			"Name": "NexusToolingEditorTests",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
 		}
 	],
 	"Plugins": [

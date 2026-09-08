@@ -101,6 +101,8 @@ public:
 		return BuildWatermark;
 	}
 
+
+
 	/**
 	 * Indicates whether the engine reports real build information (a non-default changelist).
 	 * @return false when running an unsubmitted local build ("UE5-CL-0"), true otherwise.
@@ -133,4 +135,46 @@ public:
 		}
 #endif // WITH_EDITOR
 	}
+
+	static FString GetProjectVersion()
+	{
+		static FString ProjectVersion;
+		if (!ProjectVersion.IsEmpty())
+		{
+			return ProjectVersion;
+		}
+
+		if (ProjectVersion.IsEmpty())
+		{
+			if (GConfig)
+			{
+				GConfig->GetString(
+					TEXT("/Script/EngineSettings.GeneralProjectSettings"),
+					TEXT("ProjectVersion"),
+					ProjectVersion,
+					GGameIni
+				);
+			}
+		}
+
+		return ProjectVersion;
+	}
+
+	static FString GetBuildCommit()
+	{
+		static FString CL;
+		if (!CL.IsEmpty())
+		{
+			return CL;
+		}
+
+		FString Branch;
+		if (FString(FApp::GetBuildVersion()).Split(TEXT("-"), &Branch, &CL, ESearchCase::IgnoreCase, ESearchDir::FromEnd))
+		{
+			return CL;
+		}
+
+		return TEXT("0");
+	}
+
 };
