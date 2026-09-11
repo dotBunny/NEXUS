@@ -5,6 +5,7 @@
 
 #include "Assembly/INAssemblyOperationOwner.h"
 #include "Macros/NSubsystemMacros.h"
+#include "Assembly/NAssemblyOperation.h"
 #include "Assembly/NAssemblyOperationSettings.h"
 #include "Cell/NCellJunctionConnection.h"
 #include "Cell/NCellJunctionConnectorEntry.h"
@@ -75,6 +76,22 @@ public:
 	/** @return The ANCellLevelInstances around the local player still to sync, as (Remaining, Total); zero where there is no local relay (a dedicated server, or before the relay spawns). */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Remaining Status", Category = "NEXUS|WorldAssembly", meta=(ToolTip="Gets the Cell Level Instances around the local player still to sync (Remaining/Total), on a client or a host with a local player. Zero where there is no local relay, such as a dedicated server."))
 	FIntVector2 GetRemainingStatus();
+
+	/**
+	 * @return Combined progress (0..1) of the operations in flight — on a client, as the server last reported them through
+	 *         its relay — or -1 when none is running.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Get Operation Progress", Category = "NEXUS|WorldAssembly")
+	float GetOperationProgress() const;
+
+	/**
+	 * Report whether an operation has finished without success — a required organ left unsatisfied — since this world
+	 * began play or was last cleared; on a client, as the server reported it through the relay.
+	 * @param OutResult Set to the latest such result. On a client only its title and message are carried.
+	 * @return true if there has been such a failure.
+	 * @note A cancelled operation is not a failure: cancelling is deliberate (Clear(), a world ending).
+	 */
+	bool GetFailedOperationResult(FNAssemblyOperationResult& OutResult) const;
 
 	/**
 	 * Track an externally-owned actor under an Operation Ticket so it will be destroyed by the next Clear() pass, or
@@ -202,6 +219,23 @@ private:
 
 	/** Seconds between seamless-travel relay polls; a frame-accurate response is unnecessary since SpawnRelay is idempotent. */
 	static constexpr float SeamlessTravelMonitorInterval = 0.5f;
+
+	/** Seconds between progress updates sent to relays, and the least change worth sending. */
+	static constexpr float ProgressBroadcastInterval = 0.25f;
+	static constexpr float ProgressBroadcastMinimumStep = 0.01f;
+
+	/** Time accumulated toward the next progress update; advanced in Tick on the authority while operations run. */
+	float ProgressBroadcastAccumulator = 0.f;
+
+	/** Progress last sent to relays, per operation ticket. */
+	TMap<int32, float> LastBroadcastProgress;
+
+	/** Send relays the progress of each running operation that has moved since it was last sent. Authority only. */
+	void BroadcastOperationProgress(float DeltaTime);
+
+	/** Whether an operation has finished without success since world begin play or the last Clear(), and the latest such result. */
+	bool bHasFailedOperation = false;
+	FNAssemblyOperationResult FailedOperationResult;
 
 	/** Time accumulated toward the next seamless-travel relay poll; advanced in Tick while bCachedSeamlessTravelMonitor is set. */
 	float SeamlessTravelMonitorAccumulator = 0.f;

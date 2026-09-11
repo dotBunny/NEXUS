@@ -105,6 +105,11 @@ void UNWorldAssemblySubsystem::Clear()
 		}
 	}
 
+	// A clean slate: what failed before a Clear says nothing about what gets generated next.
+	bHasFailedOperation = false;
+	FailedOperationResult.Reset();
+	LastBroadcastProgress.Empty();
+
 #if WITH_EDITOR
 	// Bulk clears can tear down streamed sublevel actors the user may have selected; drop the entire
 	// selection so the typed-element registry does not assert on a stale handle next mouse-move.
@@ -184,6 +189,73 @@ FIntVector2 UNWorldAssemblySubsystem::GetRemainingStatus()
 	return LocalRelay->GetRemainingStatus();
 }
 
+float UNWorldAssemblySubsystem::GetOperationProgress() const
+{
+	if (!FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
+	{
+		return LocalRelay != nullptr ? LocalRelay->GetOperationProgress() : -1.0f;
+	}
+
+	if (KnownOperations.IsEmpty()) return -1.0f;
+
+	float Total = 0.0f;
+	for (const UNAssemblyOperation* Operation : KnownOperations)
+	{
+		if (Operation != nullptr)
+		{
+			Total += Operation->GetCombinedProgress();
+		}
+	}
+	return Total / static_cast<float>(KnownOperations.Num());
+}
+
+bool UNWorldAssemblySubsystem::GetFailedOperationResult(FNAssemblyOperationResult& OutResult) const
+{
+	if (FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
+	{
+		if (bHasFailedOperation)
+		{
+			OutResult = FailedOperationResult;
+		}
+		return bHasFailedOperation;
+	}
+
+	OutResult.Reset();
+	return LocalRelay != nullptr && LocalRelay->GetFailedResult(OutResult.Title, OutResult.Message);
+}
+
+void UNWorldAssemblySubsystem::BroadcastOperationProgress(const float DeltaTime)
+{
+	ProgressBroadcastAccumulator += DeltaTime;
+	if (ProgressBroadcastAccumulator < ProgressBroadcastInterval || RelayMap.IsEmpty()) return;
+	ProgressBroadcastAccumulator = 0.f;
+
+	// Snapshot to guard against reentrant mutation of RelayMap during the broadcast.
+	TArray<TObjectPtr<ANWorldAssemblyRelay>> Relays;
+	RelayMap.GenerateValueArray(Relays);
+
+	for (const UNAssemblyOperation* Operation : KnownOperations)
+	{
+		if (Operation == nullptr) continue;
+
+		const int32 Ticket = Operation->GetTicket();
+		const float Progress = Operation->GetCombinedProgress();
+
+		// Progress only moves forward, so a step smaller than this is not worth a packet.
+		float& LastSent = LastBroadcastProgress.FindOrAdd(Ticket, -1.0f);
+		if (Progress < LastSent + ProgressBroadcastMinimumStep) continue;
+		LastSent = Progress;
+
+		for (ANWorldAssemblyRelay* Relay : Relays)
+		{
+			if (IsValid(Relay))
+			{
+				Relay->Client_OperationProgress(Ticket, Progress);
+			}
+		}
+	}
+}
+
 void UNWorldAssemblySubsystem::DestroyTrackedActors(const TArray<TWeakObjectPtr<AActor>>& Actors)
 {
 	for (const TWeakObjectPtr<AActor>& Actor : Actors)
@@ -259,6 +331,12 @@ void UNWorldAssemblySubsystem::Tick(float DeltaTime)
 		for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
 		{
 			KnownOperations[i]->Tick();
+		}
+
+		// Clients otherwise only hear tickets; this is what gives them real progress while the host generates.
+		if (FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
+		{
+			BroadcastOperationProgress(DeltaTime);
 		}
 	}
 
@@ -362,6 +440,17 @@ void UNWorldAssemblySubsystem::StartOperation(UNAssemblyOperation* Operation)
 
 void UNWorldAssemblySubsystem::OnOperationFinished(UNAssemblyOperation* Operation, TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContext)
 {
+	// Captured now: the operation is torn down as soon as this returns, and its result with it.
+	const FNAssemblyOperationResult& Result = Operation->GetResult();
+	if (!Result.bSuccess)
+	{
+		bHasFailedOperation = true;
+		FailedOperationResult = Result;
+		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Operation(%i) finished without success: %s (%s)."), Operation->GetTicket(),
+			*Result.Title.ToString(), *Result.Message.ToString());
+	}
+	LastBroadcastProgress.Remove(Operation->GetTicket());
+
 	const int RemoveCount = KnownOperations.Remove(Operation);
 	if (RemoveCount > 0 && KnownOperations.IsEmpty())
 	{
@@ -375,6 +464,8 @@ void UNWorldAssemblySubsystem::OnOperationFinished(UNAssemblyOperation* Operatio
 	{
 		if (IsValid(Relay))
 		{
+			// Ahead of the finished notice, so a client knows the outcome by the time it hears the operation is done.
+			Relay->Client_OperationResult(Operation->GetTicket(), Result.bSuccess, Result.Title, Result.Message);
 			Relay->Client_OperationFinished(Operation->GetTicket());
 		}
 	}
@@ -382,6 +473,8 @@ void UNWorldAssemblySubsystem::OnOperationFinished(UNAssemblyOperation* Operatio
 
 void UNWorldAssemblySubsystem::OnOperationDestroyed(UNAssemblyOperation* Operation)
 {
+	LastBroadcastProgress.Remove(Operation->GetTicket());
+
 	const int RemoveCount = KnownOperations.Remove(Operation);
 	if (RemoveCount > 0 && KnownOperations.IsEmpty())
 	{
@@ -703,6 +796,9 @@ void UNWorldAssemblySubsystem::OnWorldEndPlay(UWorld& InWorld)
 	RelayMap.Reset();
 	TrackedOperationActors.Empty();
 	LocalRelay = nullptr;
+	bHasFailedOperation = false;
+	FailedOperationResult.Reset();
+	LastBroadcastProgress.Empty();
 
 	// Stop all known operations
 	for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)

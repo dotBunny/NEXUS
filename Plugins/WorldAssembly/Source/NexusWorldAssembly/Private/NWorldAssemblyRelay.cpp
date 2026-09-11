@@ -137,6 +137,7 @@ void ANWorldAssemblyRelay::Client_OperationFinished_Implementation(const int32 O
 {
 	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Received finished notification for operation(%i)."), OperationTicket);
 	KnownOperations.RemoveSwap(OperationTicket);
+	KnownOperationProgress.Remove(OperationTicket);
 
 	UpdateNearbyCells(true);
 }
@@ -145,12 +146,56 @@ void ANWorldAssemblyRelay::Client_OperationStarted_Implementation(const int32 Op
 {
 	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Received starting notification for operation(%i)."), OperationTicket);
 	KnownOperations.AddUnique(OperationTicket);
+	KnownOperationProgress.FindOrAdd(OperationTicket, 0.0f);
 }
 
 void ANWorldAssemblyRelay::Client_OperationDestroyed_Implementation(const int32 OperationTicket)
 {
 	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Received destruction notification for operation(%i)."), OperationTicket);
 	KnownOperations.RemoveSwap(OperationTicket);
+	KnownOperationProgress.Remove(OperationTicket);
+}
+
+void ANWorldAssemblyRelay::Client_OperationProgress_Implementation(const int32 OperationTicket, const float Progress)
+{
+	// Only for an operation still known: an unreliable update can land after the operation has finished.
+	if (float* Known = KnownOperationProgress.Find(OperationTicket))
+	{
+		*Known = FMath::Max(*Known, FMath::Clamp(Progress, 0.0f, 1.0f));
+	}
+}
+
+void ANWorldAssemblyRelay::Client_OperationResult_Implementation(const int32 OperationTicket, const bool bSuccess, const FText& Title,
+	const FText& Message)
+{
+	if (bSuccess) return;
+
+	UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Received failed result for operation(%i): %s (%s)."), OperationTicket,
+		*Title.ToString(), *Message.ToString());
+	bHasFailedResult = true;
+	FailedResultTitle = Title;
+	FailedResultMessage = Message;
+}
+
+float ANWorldAssemblyRelay::GetOperationProgress() const
+{
+	if (KnownOperationProgress.IsEmpty()) return -1.0f;
+
+	float Total = 0.0f;
+	for (const TPair<int32, float>& Entry : KnownOperationProgress)
+	{
+		Total += Entry.Value;
+	}
+	return Total / static_cast<float>(KnownOperationProgress.Num());
+}
+
+bool ANWorldAssemblyRelay::GetFailedResult(FText& OutTitle, FText& OutMessage) const
+{
+	if (!bHasFailedResult) return false;
+
+	OutTitle = FailedResultTitle;
+	OutMessage = FailedResultMessage;
+	return true;
 }
 
 

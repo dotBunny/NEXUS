@@ -49,6 +49,34 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_OperationDestroyed(int32 OperationTicket);
 
+	/**
+	 * Tell the client how far an operation it has been told about has got, 0..1.
+	 * @remark Unreliable and throttled by the server: a lost update is superseded by the next, and one arriving after the
+	 *         operation finished is ignored.
+	 */
+	UFUNCTION(Client, Unreliable)
+	void Client_OperationProgress(int32 OperationTicket, float Progress);
+
+	/**
+	 * Tell the client how an operation turned out. Sent ahead of Client_OperationFinished.
+	 * @param OperationTicket The operation.
+	 * @param bSuccess Whether every required organ was satisfied.
+	 * @param Title The result's short title.
+	 * @param Message The result's detail.
+	 */
+	UFUNCTION(Client, Reliable)
+	void Client_OperationResult(int32 OperationTicket, bool bSuccess, const FText& Title, const FText& Message);
+
+	/** @return Mean progress (0..1) of the operations the server has said are running, or -1 when there are none. */
+	float GetOperationProgress() const;
+
+	/**
+	 * @param OutTitle Set to the failed result's title.
+	 * @param OutMessage Set to the failed result's message.
+	 * @return true if the server has reported an operation finishing without success in this world.
+	 */
+	bool GetFailedResult(FText& OutTitle, FText& OutMessage) const;
+
 protected:
 	//~AActor
 	virtual void BeginPlay() override;
@@ -89,6 +117,14 @@ private:
 
 	/** Operation tickets the client has been informed about. */
 	TArray<int32> KnownOperations;
+
+	/** Latest progress the server reported for each operation in KnownOperations. */
+	TMap<int32, float> KnownOperationProgress;
+
+	/** Whether the server has reported an operation finishing without success in this world, and what it said. */
+	bool bHasFailedResult = false;
+	FText FailedResultTitle;
+	FText FailedResultMessage;
 
 	/** @return true if a nearby-cell payload is currently cached. */
 	bool HasNearbyCellLevelInstances();
