@@ -66,14 +66,14 @@ public:
 	/**
 	 * @param bWaitOnStreaming When true, also report not-ready while any level streaming is still in flight (see FNWorldUtils::IsStreaming). Pass false to ignore streaming and gate purely on operation/relay state.
 	 * @return true when the local WorldAssembly view is settled relative to the server.
-	 * @remark Server path: no operations are currently in flight. Client path: LocalRelay has replicated, the nearby-cell payload has been received, and no operations the client has been notified of are pending.
+	 * @remark Authority path: no organs are queued and no operations are in flight; then, when there is a LocalRelay (a listen server or standalone, whose local player is given one at world begin play in every mode), its nearby cells loaded, as on a client. A dedicated server has none and stops at the first part. Client path: LocalRelay has replicated, its latest nearby-cell request has been answered, those cells are loaded, and no operations the client has been notified of are pending.
 	 * @note Does not gate Generate() — that can be called at any time regardless of this value.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Is Ready?", Category = "NEXUS|WorldAssembly")
 	bool IsReady(bool bWaitOnStreaming = true);
 
-	/** @return On clients, the ANCellLevelInstances still to sync as (Remaining, Total); zero on the server. */
-	UFUNCTION(BlueprintCallable, DisplayName="Get Remaining Status", Category = "NEXUS|WorldAssembly", meta=(ToolTip="Gets the remaining Cell Level Instances to sync (Remaining/Total) on clients. Zero if server."))
+	/** @return The ANCellLevelInstances around the local player still to sync, as (Remaining, Total); zero where there is no local relay (a dedicated server, or before the relay spawns). */
+	UFUNCTION(BlueprintCallable, DisplayName="Get Remaining Status", Category = "NEXUS|WorldAssembly", meta=(ToolTip="Gets the Cell Level Instances around the local player still to sync (Remaining/Total), on a client or a host with a local player. Zero where there is no local relay, such as a dedicated server."))
 	FIntVector2 GetRemainingStatus();
 
 	/**

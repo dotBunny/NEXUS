@@ -146,10 +146,25 @@ bool UNWorldAssemblySubsystem::IsReady(const bool bWaitOnStreaming)
 		return false;
 	}
 
-	// Server always has stuff replicated
 	if (FNMultiplayerUtils::HasWorldAuthority(World))
 	{
-		return KnownOperations.IsEmpty();
+		// Organs queue at BeginPlay and only become an operation on the next tick, so until then nothing reads as in flight.
+		if (!QueuedOrgansForAssembly.IsEmpty() || !KnownOperations.IsEmpty())
+		{
+			return false;
+		}
+
+		// An operation finishes once its cells are spawned and their levels requested, not loaded. A host with a local
+		// player (listen server, standalone) has those cells to wait for exactly as a client does, through its relay.
+		if (LocalRelay != nullptr)
+		{
+			return LocalRelay->IsReady();
+		}
+
+		// No relay means no local player to wait for: a dedicated server. A host's own relay does not hang on Support
+		// Seamless Travel — OnWorldBeginPlay back-fills one for every controller already present, in every mode — so
+		// waiting on a missing one would only wedge this should its spawn ever fail.
+		return true;
 	}
 
 	// Client hasn't spawned the goodness yet

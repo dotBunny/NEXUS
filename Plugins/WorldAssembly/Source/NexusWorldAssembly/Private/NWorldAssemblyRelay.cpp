@@ -33,6 +33,10 @@ FIntVector2 ANWorldAssemblyRelay::GetRemainingStatus() const
 
 bool ANWorldAssemblyRelay::HasNearbyCellLevelInstances()
 {
+	// A request awaiting its reply has left the cache empty, and an empty list passes the registry check vacuously,
+	// so without this the relay reads as ready for the whole round trip.
+	if (bNearbyCellsRequestInFlight) return false;
+
 	// Early out the best we can
 	if (bHasNearbyCellLevelInstances) return true;
 	//if (CachedNearbyCellLevelInstances.IsEmpty())  return false;

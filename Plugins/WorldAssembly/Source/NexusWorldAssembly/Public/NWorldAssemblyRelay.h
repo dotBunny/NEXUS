@@ -26,7 +26,7 @@ class NEXUSWORLDASSEMBLY_API ANWorldAssemblyRelay : public AActor
 
 public:
 
-	/** @return true when the server has answered the nearby-cells RPC at least once and no operations the client has been notified about are pending. */
+	/** @return true when the server has answered the latest nearby-cells request, its cells are loaded, and no operations the client has been notified about are pending. */
 	bool IsReady();
 
 	FIntVector2 GetRemainingStatus() const;
