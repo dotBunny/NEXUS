@@ -83,6 +83,10 @@ void ANCellActor::InitializeFromProxy(ANCellLevelInstance* LevelInstance)
 	// Disable all actors flagged for editor only
 	for (auto Actor : AuthorTimeActors)
 	{
+		// An author-time actor that is also bIsEditorOnlyActor is stripped at cook, and the reference to it here is
+		// serialized as null; there is nothing left to destroy. Only cooked builds see this, never PIE.
+		if (!IsValid(Actor)) continue;
+
 		Actor->Destroy(true, false);
 	}
 
