@@ -11,6 +11,7 @@
  * Project-wide configuration for the NexusUI plugin.
  *
  * Exposed under Project Settings > NEXUS > User Interface; stored in DefaultNexusGame.ini.
+ * @see <a href="https://nexus-framework.com/docs/ui/project-settings/">UNUISettings</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "User Interface Settings", Config=NexusGame, defaultconfig)
 class NEXUSUI_API UNUISettings : public UDeveloperSettings

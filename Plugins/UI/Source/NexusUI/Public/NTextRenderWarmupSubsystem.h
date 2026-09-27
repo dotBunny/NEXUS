@@ -39,6 +39,7 @@ class UTextRenderComponent;
  * registers on the game thread already.
  *
  * Created for Game and PIE worlds on a machine that renders, unless UNUISettings::bWarmTextRenderMaterials is off.
+ * @see <a href="https://nexus-framework.com/docs/ui/types/text-render-warmup-subsystem/">UNTextRenderWarmupSubsystem</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Text Render Warmup Subsystem")
 class NEXUSUI_API UNTextRenderWarmupSubsystem : public UWorldSubsystem
