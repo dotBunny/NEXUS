@@ -103,7 +103,7 @@ struct FNCollisionVisualizerPoints
 	FVector EndPoint = FVector(500,0,0);
 
 	/** World-space rotation applied to the query shape. */
-	UPROPERTY(EditAnywhere, DisplayName="Rotation", meta=(Tooltip="World-space rotation applied to the query shape."))
+	UPROPERTY(EditAnywhere, DisplayName="Rotation")
 	FRotator Rotation = FRotator(0,0,0);
 };
 
@@ -130,23 +130,23 @@ struct FNCollisionVisualizerQuery
 	ENCollisionVisualizerOverlapBlocking QueryOverlapBlocking = ENCollisionVisualizerOverlapBlocking::Any;
 
 	/** How collision is filtered: by trace channel, object type, or collision profile. */
-	UPROPERTY(EditAnywhere, DisplayName="By", meta=(Tooltip="How collision is filtered: by trace channel, object type, or collision profile."))
+	UPROPERTY(EditAnywhere, DisplayName="By")
 	ENCollisionVisualizerBy QueryBy = ENCollisionVisualizerBy::Channel;
 
 	/** Trace channel used when querying by channel. */
 	UPROPERTY(EditAnywhere, DisplayName="Channel",
-		meta=(EditCondition="QueryBy==ENCollisionVisualizerBy::Channel", EditConditionHides, Tooltip="Trace channel used when querying by channel."))
+		meta=(EditCondition="QueryBy==ENCollisionVisualizerBy::Channel", EditConditionHides))
 	TEnumAsByte<ECollisionChannel> Channel = ECC_Pawn;
 
 	/** Object type used when querying by object type. */
 	UPROPERTY(EditAnywhere, DisplayName="Object Type",
-		meta=(EditCondition="QueryBy==ENCollisionVisualizerBy::ObjectType", EditConditionHides, Tooltip="Object type used when querying by object type."))
+		meta=(EditCondition="QueryBy==ENCollisionVisualizerBy::ObjectType", EditConditionHides))
 	TEnumAsByte<EObjectTypeQuery> ObjectType = EObjectTypeQuery::ObjectTypeQuery1;
 
 	/** Collision profile used when querying by profile. */
 	UPROPERTY(EditAnywhere, DisplayName="Collision Profile",
 		meta=(EditCondition="QueryBy==ENCollisionVisualizerBy::Profile", EditConditionHides,
-			GetOptions="GetCollisionProfileNames", Tooltip="Collision profile used when querying by profile."))
+			GetOptions="GetCollisionProfileNames"))
 	FName CollisionProfileName = TEXT("BlockAll");
 
 	/** Primitive shape swept through the world for non-line-trace queries. */
@@ -156,27 +156,27 @@ struct FNCollisionVisualizerQuery
 
 	/** Radius of the capsule query shape. */
 	UPROPERTY(EditAnywhere, DisplayName="Radius",
-	meta=(EditCondition="QueryMethod!=ENCollisionVisualizerMethod::LineTrace&&QueryShape==ENCollisionVisualizerShape::Capsule", EditConditionHides, Tooltip="Radius of the capsule query shape."))
+	meta=(EditCondition="QueryMethod!=ENCollisionVisualizerMethod::LineTrace&&QueryShape==ENCollisionVisualizerShape::Capsule", EditConditionHides))
 	float ShapeCapsuleRadius = 40.f;
 
 	/** Half-height of the capsule query shape. */
 	UPROPERTY(EditAnywhere, DisplayName="Half Height",
-		meta=(EditCondition="QueryMethod!=ENCollisionVisualizerMethod::LineTrace&&QueryShape==ENCollisionVisualizerShape::Capsule", EditConditionHides, Tooltip="Half-height of the capsule query shape."))
+		meta=(EditCondition="QueryMethod!=ENCollisionVisualizerMethod::LineTrace&&QueryShape==ENCollisionVisualizerShape::Capsule", EditConditionHides))
 	float ShapeCapsuleHalfHeight = 80.f;
 
 	/** Half-extents of the box query shape. */
 	UPROPERTY(EditAnywhere, DisplayName="Half Extent",
-		meta=(EditCondition="QueryMethod!=ENCollisionVisualizerMethod::LineTrace&&QueryShape==ENCollisionVisualizerShape::Box", EditConditionHides, Tooltip="Half-extents of the box query shape."))
+		meta=(EditCondition="QueryMethod!=ENCollisionVisualizerMethod::LineTrace&&QueryShape==ENCollisionVisualizerShape::Box", EditConditionHides))
 	FVector ShapeBoxHalfExtents = FVector(25,25,25);
 
 	/** Radius of the sphere query shape. */
 	UPROPERTY(EditAnywhere, DisplayName="Radius",
-		meta=(EditCondition="QueryMethod!=ENCollisionVisualizerMethod::LineTrace&&QueryShape==ENCollisionVisualizerShape::Sphere", EditConditionHides, Tooltip="Radius of the sphere query shape."))
+		meta=(EditCondition="QueryMethod!=ENCollisionVisualizerMethod::LineTrace&&QueryShape==ENCollisionVisualizerShape::Sphere", EditConditionHides))
 	float SphereRadius = 42.f;
 
 	/** Per-channel collision responses applied when querying by channel. */
 	UPROPERTY(EditAnywhere, DisplayName="Collision Responses",
-	meta=(EditCondition="QueryBy==ENCollisionVisualizerBy::Channel", EditConditionHides, Tooltip="Per-channel collision responses applied when querying by channel."))
+	meta=(EditCondition="QueryBy==ENCollisionVisualizerBy::Channel", EditConditionHides))
 	FCollisionResponseContainer CollisionResponses;
 
 	/** @return An FCollisionResponseParams populated from CollisionResponses for use with channel-based queries. */
@@ -236,27 +236,27 @@ struct FNCollisionVisualizerOptions
 	GENERATED_BODY()
 
 	/** Trace against complex (per-poly) collision instead of simple collision. */
-	UPROPERTY(EditAnywhere, DisplayName="Trace Complex", meta=(Tooltip="Trace against complex (per-poly) collision instead of simple collision."))
+	UPROPERTY(EditAnywhere, DisplayName="Trace Complex")
 	bool bTraceComplex = false;
 
 	/** Report overlaps already present at the sweep's start location. */
-	UPROPERTY(EditAnywhere, DisplayName="Find Initial Overlaps", meta=(Tooltip="Report overlaps already present at the sweep's start location."))
+	UPROPERTY(EditAnywhere, DisplayName="Find Initial Overlaps")
 	bool bFindInitialOverlaps = true;
 
 	/** Exclude blocking hits from the results. */
-	UPROPERTY(EditAnywhere, DisplayName="Ignore Blocks", meta=(Tooltip="Exclude blocking hits from the results."))
+	UPROPERTY(EditAnywhere, DisplayName="Ignore Blocks")
 	bool bIgnoreBlocks = false;
 
 	/** Exclude touch/overlap hits from the results. */
-	UPROPERTY(EditAnywhere, DisplayName="Ignore Touches", meta=(Tooltip="Exclude touch/overlap hits from the results."))
+	UPROPERTY(EditAnywhere, DisplayName="Ignore Touches")
 	bool bIgnoreTouches = false;
 
 	/** Skip the narrow phase, returning only broad-phase results. */
-	UPROPERTY(EditAnywhere, DisplayName="Skip Narrow Phase", meta=(Tooltip="Skip the narrow phase, returning only broad-phase results."))
+	UPROPERTY(EditAnywhere, DisplayName="Skip Narrow Phase")
 	bool bSkipNarrowPhase = false;
 
 	/** Restrict results to actors of the given mobility. */
-	UPROPERTY(EditAnywhere, DisplayName="Mobility Type", meta=(Tooltip="Restrict results to actors of the given mobility."))
+	UPROPERTY(EditAnywhere, DisplayName="Mobility Type")
 	ENCollisionVisualizerMobility QueryMobility = ENCollisionVisualizerMobility::Any;
 
 
@@ -307,11 +307,11 @@ struct FNCollisionVisualizerDrawing
 						static_cast<uint8>(ENCollisionVisualizerDrawMode::SimulateInEditor);
 
 	/** Thickness of the drawn query lines. */
-	UPROPERTY(EditAnywhere, DisplayName="Line Thickness", meta=(Tooltip="Thickness of the drawn query lines."))
+	UPROPERTY(EditAnywhere, DisplayName="Line Thickness")
 	float DrawLineThickness = 1.5f;
 
 	/** Size of the drawn impact points. */
-	UPROPERTY(EditAnywhere, DisplayName="Point Size", meta=(Tooltip="Size of the drawn impact points."))
+	UPROPERTY(EditAnywhere, DisplayName="Point Size")
 	float DrawPointSize = 15.f;
 
 	/** Seconds between successive queries/draws (0 = every tick). */
@@ -319,15 +319,15 @@ struct FNCollisionVisualizerDrawing
 	float DrawTimer = 0.f;
 
 	/** Color used to draw blocking hits (the line up to the impact and the impact points). */
-	UPROPERTY(EditAnywhere, DisplayName = "Hit Color", meta=(Tooltip="Color used to draw blocking hits (the line up to the impact and the impact points)."))
+	UPROPERTY(EditAnywhere, DisplayName = "Hit Color")
 	FColor DrawHitColor = FColor(0,255,88);
 
 	/** Color used to draw non-blocking touches and overlaps. */
-	UPROPERTY(EditAnywhere, DisplayName = "Mid Color", meta=(Tooltip="Color used to draw non-blocking touches and overlaps."))
+	UPROPERTY(EditAnywhere, DisplayName = "Mid Color")
 	FColor DrawMidColor = FColor(0,0,200);
 
 	/** Color used to draw queries that hit nothing. */
-	UPROPERTY(EditAnywhere, DisplayName = "Miss Color", meta=(Tooltip="Color used to draw queries that hit nothing."))
+	UPROPERTY(EditAnywhere, DisplayName = "Miss Color")
 	FColor DrawMissColor = FColor(255,0,0);
 };
 

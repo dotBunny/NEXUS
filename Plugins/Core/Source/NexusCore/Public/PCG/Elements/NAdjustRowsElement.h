@@ -63,7 +63,7 @@ public:
 	ENAxis RowAxis = ENAxis::X;
 
 	/** How a point's position along the row axis resolves to the row it belongs to. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Rows", meta = (PCG_Overridable, ToolTip = "How a point's position along the row axis resolves to the row it belongs to."))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Rows", meta = (PCG_Overridable))
 	ENRowDetection RowDetection = ENRowDetection::Tolerance;
 
 	/** Widest spread along the row axis allowed within a single row; a larger gap opens the next row. */
@@ -71,7 +71,7 @@ public:
 	double RowTolerance = 1.0;
 
 	/** Width of each row band along the row axis, measured out from the world origin. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Rows", meta = (ClampMin = "0.0", EditCondition = "RowDetection == ENRowDetection::FixedSize", EditConditionHides, PCG_Overridable, ToolTip = "Width of each row band along the row axis, measured out from the world origin."))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Rows", meta = (ClampMin = "0.0", EditCondition = "RowDetection == ENRowDetection::FixedSize", EditConditionHides, PCG_Overridable))
 	double RowSize = 100.0;
 
 	/** Axis the offset is applied along. */
@@ -79,7 +79,7 @@ public:
 	ENAxis OffsetAxis = ENAxis::Y;
 
 	/** Which half of the rows receives the offset. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Offset", meta = (PCG_Overridable, ToolTip = "Which half of the rows receives the offset."))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Offset", meta = (PCG_Overridable))
 	ENRowParity RowParity = ENRowParity::Even;
 
 	/** Amount added along the offset axis for every point in a matching row. */

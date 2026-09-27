@@ -13,8 +13,8 @@
  *
  * Controls how a generated point is resolved onto geometry (trace) or the navmesh when a picker's
  * ENPickerProjectionMode is set. Exposed under Project Settings > NEXUS > Picker; stored in
- * DefaultNexusGame.ini. Replaces the previous FNPickerUtils static configuration members so projection
- * defaults are discoverable, editor-editable, and persisted per-project rather than reset every launch.
+ * DefaultNexusGame.ini, so projection defaults are discoverable, editor-editable, and persisted per project
+ * rather than held in static members that reset every launch.
  * @note Resolved on the Game-thread during point generation; see FNPickerProjection::Emit.
  * @see <a href="https://nexus-framework.com/docs/picker/project-settings/">UNPickerSettings</a>
  */
@@ -27,23 +27,21 @@ class NEXUSPICKER_API UNPickerSettings : public UDeveloperSettings
 
 public:
 	/** Trace against complex (per-polygon) collision instead of simple collision when projecting points onto geometry. */
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Projection|Trace", DisplayName = "Trace Complex",
-		meta=(ToolTip="Trace against complex (per-polygon) collision instead of simple collision when projecting points onto geometry."))
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Projection|Trace", DisplayName = "Trace Complex")
 	bool bTraceComplex = false;
 
 	/** Half-extent of the box searched when projecting a generated point onto the navmesh; widen if points fail to resolve. */
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Projection|NavMesh", DisplayName = "Nav Query Extent",
-		meta=(ToolTip="Half-extent of the box searched when projecting a generated point onto the navmesh. Widen if points fail to resolve."))
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Projection|NavMesh", DisplayName = "Nav Query Extent")
 	FVector NavQueryExtent = FVector(1500.0, 1500.0, 1500.0);
 
 	/** Radius of the navigation agent used to resolve a navmesh location for a generated point. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Projection|NavMesh", DisplayName = "Nav Agent Radius",
-		meta=(ToolTip="Radius of the navigation agent used to resolve a navmesh location for a generated point.", ClampMin="0.0", UIMin="0.0", Units="cm"))
+		meta=(ClampMin="0.0", UIMin="0.0", Units="cm"))
 	float NavAgentRadius = 42.0f;
 
 	/** Height of the navigation agent used to resolve a navmesh location for a generated point. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Projection|NavMesh", DisplayName = "Nav Agent Height",
-		meta=(ToolTip="Height of the navigation agent used to resolve a navmesh location for a generated point.", ClampMin="0.0", UIMin="0.0", Units="cm"))
+		meta=(ClampMin="0.0", UIMin="0.0", Units="cm"))
 	float NavAgentHeight = 192.0f;
 
 	/**

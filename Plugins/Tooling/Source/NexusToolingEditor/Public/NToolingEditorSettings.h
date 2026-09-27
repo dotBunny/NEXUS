@@ -83,7 +83,7 @@ public:
 	TArray<FSoftObjectPath> ProjectLevels;
 
 	/** Severity reported when a Blueprint contains an empty Tick event. */
-	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Blueprint: Empty Tick", meta=(ToolTip="Severity reported when a Blueprint contains an empty Tick event."))
+	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Blueprint: Empty Tick")
 	ENValidatorSeverity ValidatorBlueprintEmptyTick = ENValidatorSeverity::Error;
 
 	/** Severity reported when a Blueprint pure node feeds multiple output pins (re-evaluated per pin). */
@@ -91,7 +91,7 @@ public:
 	ENValidatorSeverity ValidatorBlueprintMultiPinPureNode = ENValidatorSeverity::Warning;
 
 	/** Severity reported when engine content has been modified. */
-	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Engine: Content Change", meta=(ToolTip="Severity reported when engine content has been modified."))
+	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Engine: Content Change")
 	ENValidatorSeverity ValidatorEngineContentChange = ENValidatorSeverity::Warning;
 
 	/** Severity reported when a level blueprint contains non-ghost logic nodes. */
