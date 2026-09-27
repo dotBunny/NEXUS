@@ -136,6 +136,11 @@ public:
 #endif // WITH_EDITOR
 	}
 
+	/**
+	 * Returns the project's version string, as set under Project Settings > Description.
+	 * @return GeneralProjectSettings' ProjectVersion from the game ini, or an empty string when none is set.
+	 * @note Cached once found; an unset version is looked up again on the next call.
+	 */
 	static FString GetProjectVersion()
 	{
 		static FString ProjectVersion;
@@ -160,6 +165,11 @@ public:
 		return ProjectVersion;
 	}
 
+	/**
+	 * Returns the changelist or commit identifier from the engine build version.
+	 * @return The part of FApp::GetBuildVersion() after its last '-', or "0" when there is none.
+	 * @note Cached after the first successful read.
+	 */
 	static FString GetBuildCommit()
 	{
 		static FString CL;
