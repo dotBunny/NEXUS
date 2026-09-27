@@ -30,21 +30,32 @@ class NEXUSCORE_API UNMersenneTwisterObject : public UObject
 
 public:
 
-	/** Re-seeds the owned twister from a human-friendly seed string. */
+	/**
+	 * Re-seeds the owned twister from a human-friendly seed string.
+	 * @param Seed A friendly seed as produced by FNSeedGenerator::RandomFriendlySeed. Only the letters a-j are read
+	 *        (case-insensitive), as the digits 0-9; see FNSeedGenerator::SeedFromFriendlySeed.
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Seed", Category = "NEXUS|Core|Random")
 	void Seed(const FString Seed) const
 	{
 		Twister.Get()->Initialize(FNSeedGenerator::SeedFromFriendlySeed(Seed));
 	}
 
-	/** Returns a pseudo random uniformly distributed bool value. */
+	/**
+	 * Returns a pseudo random uniformly distributed bool value.
+	 * @return true or false with equal probability; advances the twister by one draw.
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Random Bool", Category = "NEXUS|Core|Random")
 	bool Bool()
 	{
 		return Twister->Bool();
 	}
 
-	/** Returns an array of Count pseudo random bool values based on a coin-flip. */
+	/**
+	 * Returns an array of Count pseudo random bool values based on a coin-flip.
+	 * @param Count How many values to generate.
+	 * @return Count coin-flip results, in draw order.
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Random Bools", Category = "NEXUS|Core|Random")
 	TArray<bool> Bools(int32 Count)
 	{
@@ -54,7 +65,12 @@ public:
 		return Result;
 	}
 
-	/** Generates a pseudo random integer between MinimumValue and MaximumValue (inclusive). */
+	/**
+	 * Generates a pseudo random integer between MinimumValue and MaximumValue (inclusive).
+	 * @param MinimumValue The lowest value that can be returned.
+	 * @param MaximumValue The highest value that can be returned.
+	 * @return An integer in [MinimumValue, MaximumValue].
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Random Integer In Range", Category = "NEXUS|Core|Random")
 	int32 Integer(int32 MinimumValue, int32 MaximumValue)
 	{

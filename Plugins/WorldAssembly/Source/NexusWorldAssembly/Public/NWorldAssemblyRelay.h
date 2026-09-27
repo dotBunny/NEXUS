@@ -37,20 +37,31 @@ public:
 	 */
 	void UpdateNearbyCells(bool bIsLevelLoaded = true);
 
-	/** Notify the client that an operation has started on the server. */
+	/**
+	 * Notify the client that an operation has started on the server.
+	 * @param OperationTicket The operation.
+	 */
 	UFUNCTION(Client, Reliable)
 	void Client_OperationStarted(int32 OperationTicket);
 
-	/** Notify the client that an operation has completed. */
+	/**
+	 * Notify the client that an operation has completed.
+	 * @param OperationTicket The operation.
+	 */
 	UFUNCTION(Client, Reliable)
 	void Client_OperationFinished(int32 OperationTicket);
 
-	/** Notify the client that an operation has been destroyed. */
+	/**
+	 * Notify the client that an operation has been destroyed.
+	 * @param OperationTicket The operation.
+	 */
 	UFUNCTION(Client, Reliable)
 	void Client_OperationDestroyed(int32 OperationTicket);
 
 	/**
 	 * Tell the client how far an operation it has been told about has got, 0..1.
+	 * @param OperationTicket The operation.
+	 * @param Progress Combined progress, 0..1.
 	 * @remark Unreliable and throttled by the server: a lost update is superseded by the next, and one arriving after the
 	 *         operation finished is ignored.
 	 */
@@ -94,7 +105,10 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void Server_RequestNearbyCells(FVector Location, int32 OperationTicket, bool bIsLevelLoaded = true);
 
-	/** Server response payload: cell-instance locators within range of the client's request. */
+	/**
+	 * Server response payload: cell-instance locators within range of the client's request.
+	 * @param Results Locators the client resolves against its own registry.
+	 */
 	UFUNCTION(Client, Reliable)
 	void Client_ReceiveNearbyCells(const TArray<FNCellLevelInstanceLocator>& Results);
 

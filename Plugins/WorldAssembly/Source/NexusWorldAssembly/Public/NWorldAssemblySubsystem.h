@@ -202,7 +202,10 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FNSimpleDynamicMulticastDelegate OnCleared;
 
-	/** Spawn an ANWorldAssemblyRelay bound to PlayerController and store it in RelayMap. */
+	/**
+	 * Spawn an ANWorldAssemblyRelay bound to PlayerController and store it in RelayMap.
+	 * @param PlayerController The controller the relay serves.
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Spawn Relay", Category = "NEXUS|WorldAssembly", meta=(ToolTip="Helpful for seamless travel, on server to spawn relays after a travel."))
 	void SpawnRelay(APlayerController* PlayerController);
 

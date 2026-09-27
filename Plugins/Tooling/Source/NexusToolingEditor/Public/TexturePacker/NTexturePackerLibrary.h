@@ -55,12 +55,20 @@ public:
 		meta = (DocsURL = "https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-library/#unpack-textures"))
 	static FNTexturePackerResult UnpackTextures(const TArray<UTexture2D*>& Textures);
 
-	/** Packs exactly what Request describes, deciding nothing. */
+	/**
+	 * Packs exactly what Request describes, deciding nothing.
+	 * @param Request Four channel slots, the output path and name, and how to write it.
+	 * @return What was produced, or a failure carrying why.
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Pack Textures (Advanced)", Category = "NEXUS|Tooling",
 		meta = (DocsURL = "https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-library/#pack-textures-advanced"))
 	static FNTexturePackerResult PackTexturesAdvanced(const FNTexturePackRequest& Request);
 
-	/** Unpacks exactly what Request describes, deciding nothing. */
+	/**
+	 * Unpacks exactly what Request describes, deciding nothing.
+	 * @param Request The packed texture, the outputs to write from it, and how to write them.
+	 * @return What was produced, or a failure carrying why.
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Unpack Texture (Advanced)", Category = "NEXUS|Tooling",
 		meta = (DocsURL = "https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-library/#unpack-texture-advanced"))
 	static FNTexturePackerResult UnpackTextureAdvanced(const FNTextureUnpackRequest& Request);

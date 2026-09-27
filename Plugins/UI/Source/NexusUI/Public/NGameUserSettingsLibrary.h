@@ -99,7 +99,8 @@ public:
 	static FString GetSelectionFromCurrentDisplayResolution();
 
 	/**
-	 * Get the selection string from the current display resolution.
+	 * Get the selection string for a display resolution.
+	 * @param Resolution The resolution to describe, as width and height.
 	 * @return A FString representing the resolution.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Selection From Display Resolution", Category = "NEXUS|User Interface|Game User Settings|Video",

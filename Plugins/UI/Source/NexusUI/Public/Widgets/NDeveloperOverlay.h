@@ -29,7 +29,12 @@ class NEXUSUI_API UNDeveloperOverlay :  public UCommonUserWidget
 	GENERATED_BODY()
 
 public:
-	/** Display the banner row with Text and the supplied foreground/background color pair. */
+	/**
+	 * Display the banner row with Text and the supplied foreground/background color pair.
+	 * @param Text The message shown in the banner.
+	 * @param MessageColor Color of the message text.
+	 * @param BannerColor Color of the banner behind it.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI",
 		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/widgets/developer-overlay/#show-container-banner"))
 	void ShowContainerBanner(const FText& Text = FText::GetEmpty(),

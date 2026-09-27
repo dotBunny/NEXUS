@@ -94,15 +94,22 @@ protected:
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonTextBlock> RightText;
 
-	/** Left-aligned label (operation display name). */
+	/** Cancels the operation this row shows; only visible while it can still be cancelled. */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UButton> CancelButton;
 
-	/** Delegate callback: the operation's display message changed. */
+	/**
+	 * Delegate callback: the operation's display message changed.
+	 * @param NewDisplayMessage The message now shown in the center label.
+	 */
 	UFUNCTION()
 	void OnOperationDisplayMessageChanged(const FString& NewDisplayMessage);
 
-	/** Delegate callback: the operation's task counts changed. */
+	/**
+	 * Delegate callback: the operation's task counts changed.
+	 * @param CompletedTasks Tasks finished so far.
+	 * @param TotalTasks Tasks in the operation.
+	 */
 	UFUNCTION()
 	void OnOperationTasksChanged(const int32 CompletedTasks, const int32 TotalTasks);
 

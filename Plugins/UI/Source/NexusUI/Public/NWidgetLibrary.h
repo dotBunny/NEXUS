@@ -20,32 +20,59 @@ class UNWidgetLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	/** @return the boolean stored for Key in State, or false when missing. */
+	/**
+	 * @param State The widget state to read.
+	 * @param Key The entry to look up.
+	 * @return the boolean stored for Key in State, or false when missing.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|User Interface|Widget State", DisplayName="Get Boolean",
 		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/widget-library/#get-boolean"))
 	static bool GetWidgetStateBoolean(const FNWidgetState& State, const FName& Key) { return State.GetBoolean(Key);}
 
-	/** @return the float stored for Key in State, or 0 when missing. */
+	/**
+	 * @param State The widget state to read.
+	 * @param Key The entry to look up.
+	 * @return the float stored for Key in State, or 0 when missing.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|User Interface|Widget State", DisplayName="Get Float",
 		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/widget-library/#get-float"))
 	static float GetWidgetStateFloat(const FNWidgetState& State, const FName& Key) { return State.GetFloat(Key);}
 
-	/** @return the string stored for Key in State, or an empty string when missing. */
+	/**
+	 * @param State The widget state to read.
+	 * @param Key The entry to look up.
+	 * @return the string stored for Key in State, or an empty string when missing.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|User Interface|Widget State", DisplayName="Get String",
 		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/widget-library/#get-string"))
 	static FString GetWidgetStateString(const FNWidgetState& State, const FName& Key) { return State.GetString(Key);}
 
-	/** Update or insert the boolean entry for Key on State. */
+	/**
+	 * Update or insert the boolean entry for Key on State.
+	 * @param State The widget state to modify, by reference.
+	 * @param Key The entry to write.
+	 * @param Value The value to store.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|User Interface|Widget State", DisplayName="Set Boolean",
 		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/widget-library/#set-boolean"))
 	static void SetWidgetStateBoolean(UPARAM(ref) FNWidgetState& State, const FName& Key, const bool Value) { State.SetBoolean(Key, Value); }
 
-	/** Update or insert the float entry for Key on State. */
+	/**
+	 * Update or insert the float entry for Key on State.
+	 * @param State The widget state to modify, by reference.
+	 * @param Key The entry to write.
+	 * @param Value The value to store.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|User Interface|Widget State", DisplayName="Set Float",
 		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/widget-library/#set-float"))
 	static void SetWidgetStateFloat(UPARAM(ref) FNWidgetState& State, const FName& Key, const float Value) { State.SetFloat(Key, Value); }
 
-	/** Update or insert the string entry for Key on State. */
+	/**
+	 * Update or insert the string entry for Key on State.
+	 * @param State The widget state to modify, by reference.
+	 * @param Key The entry to write.
+	 * @param Value The value to store.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|User Interface|Widget State", DisplayName="Set String",
 		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/widget-library/#set-string"))
 	static void SetWidgetStateString(UPARAM(ref) FNWidgetState& State, const FName& Key, const FString Value) { State.SetString(Key, Value); }

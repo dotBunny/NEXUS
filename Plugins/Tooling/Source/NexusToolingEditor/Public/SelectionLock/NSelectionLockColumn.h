@@ -63,10 +63,14 @@ private:
 	TWeakPtr<ISceneOutliner> WeakOutliner;
 };
 
-// SNew stamps this trait from the concrete widget type, and the primary template answers false, so
-// deriving from SImage is not enough to inherit its specialization. Without this every Outliner row
-// reports an invalidation-unaware widget inside its invalidation panel. Mirrors what
-// SceneOutlinerGutter.h declares for its own SVisibilityWidget.
+/**
+ * Declares SNSelectionLockWidget invalidation-aware.
+ *
+ * SNew stamps this trait from the concrete widget type, and the primary template answers false, so deriving from
+ * SImage is not enough to inherit its specialization. Without this every Outliner row reports an
+ * invalidation-unaware widget inside its invalidation panel. Mirrors what the engine's Scene Outliner gutter declares
+ * for its own SVisibilityWidget.
+ */
 template<>
 struct TWidgetTypeTraits<class SNSelectionLockWidget>
 {

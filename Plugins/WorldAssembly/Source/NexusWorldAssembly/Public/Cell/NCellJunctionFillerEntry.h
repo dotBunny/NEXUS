@@ -32,7 +32,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionFillerEntry
 	UPROPERTY(EditAnywhere, DisplayName="Offset", Category="Object")
 	FTransform Offset = FTransform::Identity;
 
-	/** Tags required to be found in Context Tags for allowance to place this cell. **/
+	/** Tags required to be found in Context Tags for allowance to place this filler. */
 	UPROPERTY(EditAnywhere, DisplayName="Required Context Tags", Category="Tagging", meta = (ToolTip="Tags required to be found in Context Tags for allowance to place this fill."))
 	FGameplayTagContainer RequiredContextTags;
 

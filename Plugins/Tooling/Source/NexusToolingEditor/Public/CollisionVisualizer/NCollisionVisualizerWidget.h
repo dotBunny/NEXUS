@@ -45,7 +45,10 @@ public:
 
 protected:
 
-	/** Details-view callback that forwards per-property edits into the visualizer actor. */
+	/**
+	 * Details-view callback that forwards per-property edits into the visualizer actor.
+	 * @param Name The property that changed.
+	 */
 	UFUNCTION()
 	void OnPropertyValueChanged(FName Name);
 

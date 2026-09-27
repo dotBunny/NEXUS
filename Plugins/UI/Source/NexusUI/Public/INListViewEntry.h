@@ -31,7 +31,10 @@ public:
 		Execute_OnSetOwnerListView(Widget, Owner);
 	};
 
-	/** Blueprint hook invoked with the owning UNListView; implement to cache the reference. */
+	/**
+	 * Blueprint hook invoked with the owning UNListView; implement to cache the reference.
+	 * @param Owner The list view that generated this entry.
+	 */
 	UFUNCTION(BlueprintImplementableEvent, Category = "NEXUS|UI")
 	// ReSharper disable once CppUEBlueprintImplementableEventNotImplemented
 	void OnSetOwnerListView(UNListView* Owner);

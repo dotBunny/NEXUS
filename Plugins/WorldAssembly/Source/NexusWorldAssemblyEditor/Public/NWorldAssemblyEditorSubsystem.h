@@ -119,6 +119,7 @@ class NEXUSWORLDASSEMBLYEDITOR_API UNWorldAssemblyEditorSubsystem : public UEdit
 	/**
 	 * Forwards an operation's combined task + sub-channel progress to the Quick Assembly toolbar progress bar.
 	 * Bound to UNAssemblyOperation::OnPercentageChanged for the quick-assembly operation in StartQuickAssembly.
+	 * @param Progress The operation's combined progress, 0..1.
 	 */
 	UFUNCTION()
 	void OnQuickAssemblyProgressChanged(float Progress);

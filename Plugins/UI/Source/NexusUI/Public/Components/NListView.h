@@ -25,7 +25,10 @@ public:
 	virtual const FText GetPaletteCategory() override {  return NEXUS::UIEditor::PaletteCategory; }
 #endif // WITH_EDITOR
 
-	/** Stash an arbitrary outer reference on the list so entries can retrieve it during construction. */
+	/**
+	 * Stash an arbitrary outer reference on the list so entries can retrieve it during construction.
+	 * @param Object The object to hold. Held weakly, so it does not keep Object alive.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI",
 		meta=(DocsURL="https://nexus-framework.com/docs/ui/types/components/list-view/#set-reference-object"))
 	void SetReferenceObject(UObject* Object) { ReferenceObject = Object; }
