@@ -3,7 +3,7 @@
 	"Version": 15,
 	"VersionName": "0.3.5",
 	"FriendlyName": "NEXUS: Picker",
-	"Description": "Selection functionality for points and other items.",
+	"Description": "Generates points in and on shapes (circle, arc, rectangle, box, sphere, spline), optionally projected onto collision or the navigation mesh, with seeded determinism.",
 	"Category": "NEXUS",
 	"CreatedBy": "dotBunny Inc.",
 	"CreatedByURL": "https://dotbunny.com",
