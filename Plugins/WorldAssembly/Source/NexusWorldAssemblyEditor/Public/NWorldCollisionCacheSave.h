@@ -27,6 +27,7 @@ struct FPropertyChangedEvent;
  * a commandlet, a script, or an earlier session — costs one fingerprint pass rather than being missed.
  * @note Editor-only, and bound for the editor session. Never runs during a cook save.
  * @see FNWorldCollisionBaker
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-types/world-collision-cache-save/">FNWorldCollisionCacheSave</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNWorldCollisionCacheSave
 {

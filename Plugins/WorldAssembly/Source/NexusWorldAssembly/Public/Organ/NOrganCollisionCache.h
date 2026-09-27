@@ -18,6 +18,7 @@
  * A mismatch is not an error — it means the level changed since the bake, and the assembly gathers afresh.
  * @see FNWorldCollisionPool
  * @see FNWorldCollisionFingerprint
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/organ-collision-cache/">FNOrganCollisionCache</a>
  */
 USTRUCT()
 struct NEXUSWORLDASSEMBLY_API FNOrganCollisionCache
@@ -86,6 +87,7 @@ struct NEXUSWORLDASSEMBLY_API FNOrganCollisionCache
 	}
 };
 
+/** Opts FNOrganCollisionCache into its hand-written Serialize and Identical; both are required, see FNOrganCollisionCache::Identical. */
 template<>
 struct TStructOpsTypeTraits<FNOrganCollisionCache> : TStructOpsTypeTraitsBase2<FNOrganCollisionCache>
 {

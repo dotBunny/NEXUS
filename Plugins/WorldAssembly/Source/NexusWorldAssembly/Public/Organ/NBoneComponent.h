@@ -109,7 +109,7 @@ public:
 	 * @param bShowSocket Draw the socket extents in addition to the bone outline.
 	 * @param Settings Settings supplying socket size and depth thresholds; defaults to the project settings.
 	 * @param WorldPenetration Deepest penetration of the socket corners into world collision (supplied by the
-	 *        visualizer from FNWorldCollisionCache); drives the red threshold and depth readout when bShowDepth.
+	 *        visualizer from FNWorldCollisionPreview); drives the red threshold and depth readout when bShowDepth.
 	 */
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor& ValidColor, const FLinearColor& InvalidColor,  bool bShowDepth = false,
 		const bool bShowSocket = true, const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get(), float WorldPenetration = 0.f) const;

@@ -30,6 +30,7 @@ struct FPropertyChangedEvent;
  *       so what is on screen is never a different answer from what an assembly would get.
  * @see FNWorldCollisionBaker
  * @see FNWorldCollisionPool
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/editor-types/world-collision-preview/">FNWorldCollisionPreview</a>
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNWorldCollisionPreview
 {
@@ -46,7 +47,8 @@ public:
 	};
 
 	/**
-	 * @return World's merged, baked world-collision mesh, or an empty mesh when GetState is not Available.
+	 * @return World's merged, baked world-collision mesh. Empty when GetState is NotBaked; when it is Stale, the last
+	 *         mesh built for World this editor session, which is empty for a level that was already stale when opened.
 	 * @param World World to read; null yields the empty mesh.
 	 */
 	static const FNRawMesh& GetMesh(const UWorld* World);

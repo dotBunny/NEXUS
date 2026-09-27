@@ -28,6 +28,7 @@ struct FNWorldCollisionPool;
  *       compilation in editor builds.
  * @see FNWorldCollisionPool
  * @see FNOrganCollisionCache
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/world-collision-baker/">FNWorldCollisionBaker</a>
  */
 class NEXUSWORLDASSEMBLY_API FNWorldCollisionBaker
 {

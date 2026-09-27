@@ -35,6 +35,7 @@ namespace NEXUS::WorldAssembly::CollisionKey
  *       whether a cache is still valid; a key answers only "which element is this", so that moving an actor updates
  *       its pool entry rather than orphaning it and leaking a new one.
  * @see FNWorldCollisionFingerprint
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/world-collision-source-key/">FNWorldCollisionSourceKey</a>
  */
 class NEXUSWORLDASSEMBLY_API FNWorldCollisionSourceKey
 {

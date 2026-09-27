@@ -18,6 +18,7 @@
  * Nothing places this by hand — the ed mode's cache action and the save-time bake create it on demand, and it holds
  * no authored state, so deleting it costs a rebake and nothing else.
  * @see FNWorldCollisionPool
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/world-collision-cache-actor/">ANWorldCollisionCacheActor</a>
  */
 UCLASS(NotPlaceable, NotBlueprintable, ClassGroup = "NEXUS", DisplayName = "NEXUS | World Collision Cache",
 	HideCategories = (Rendering, Replication, Collision, Input, Actor, LOD, Cooking, HLOD, Physics, Networking))

@@ -26,6 +26,7 @@ struct FNWorldAssemblyWorldCollisionSettings;
  * @note Cheap relative to the gather it guards — it reads transforms and body-setup identity rather than extracting,
  *       hull-converting, and merging geometry — but it is not free, and it is still O(actors).
  * @see FNWorldCollisionSourceKey
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/world-collision-fingerprint/">FNWorldCollisionFingerprint</a>
  */
 class NEXUSWORLDASSEMBLY_API FNWorldCollisionFingerprint
 {

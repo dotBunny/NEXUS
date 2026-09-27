@@ -23,6 +23,7 @@
  * @note Not thread-safe. The lookup index is built lazily on first query and mutated by Add / RemoveUnreferenced.
  * @see FNOrganCollisionCache
  * @see FNWorldCollisionSourceKey
+ * @see <a href="https://nexus-framework.com/docs/world-assembly/types/world-collision-pool/">FNWorldCollisionPool</a>
  */
 USTRUCT()
 struct NEXUSWORLDASSEMBLY_API FNWorldCollisionPool
@@ -134,6 +135,7 @@ private:
 	mutable bool bKeyIndexValid = false;
 };
 
+/** Opts FNWorldCollisionPool into its hand-written Serialize and Identical; both are required, see FNWorldCollisionPool::Identical. */
 template<>
 struct TStructOpsTypeTraits<FNWorldCollisionPool> : TStructOpsTypeTraitsBase2<FNWorldCollisionPool>
 {
