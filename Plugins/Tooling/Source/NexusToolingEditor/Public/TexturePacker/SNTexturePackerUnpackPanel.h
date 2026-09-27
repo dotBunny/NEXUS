@@ -17,6 +17,7 @@ struct FAssetData;
  * What it holds is read from its name and can be overridden, because a texture that was named badly is
  * exactly the one somebody needs to take apart. Channels carrying the same map are shown as one row - a color
  * map packed across RGB is one texture to recover, not three.
+ * @see <a href="https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-unpack-panel/">SNTexturePackerUnpackPanel</a>
  */
 class SNTexturePackerUnpackPanel : public SCompoundWidget
 {

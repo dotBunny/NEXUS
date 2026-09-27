@@ -15,6 +15,7 @@ class UTexture2D;
  *
  * A nomad tab rather than a window of its own, so it docks where it is put and comes back there the next
  * time the editor starts.
+ * @see <a href="https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-tab/">FNTexturePackerTab</a>
  */
 class NEXUSTOOLINGEDITOR_API FNTexturePackerTab
 {

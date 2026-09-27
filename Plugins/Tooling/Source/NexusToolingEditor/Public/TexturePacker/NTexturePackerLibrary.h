@@ -15,11 +15,12 @@ class UTexture2D;
  *
  * The Auto entry points make the same choices the window proposes - roles read from asset names, channels
  * grouped by the layout that matches, outputs named and configured for what each one holds - so a batch run
- * over a folder produces what opening each texture in turn would have. Where a name says nothing the run
- * fails rather than guessing; the window is for that case.
+ * over a folder produces what opening each texture in turn would have. Where a name says nothing an unpack
+ * fails rather than guessing, and a pack falls back to the order the textures were given in (with a
+ * warning); the window is for those cases.
  *
  * @note Generated assets are left dirty rather than saved, exactly as the window leaves them.
- * @see <a href="https://nexus-framework.com/docs/tooling/texture-packer/">Texture Packer</a>
+ * @see <a href="https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-library/">UNTexturePackerLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Texture Packer Library")
 class NEXUSTOOLINGEDITOR_API UNTexturePackerLibrary : public UBlueprintFunctionLibrary
@@ -33,7 +34,7 @@ public:
 	 * @return What was produced, or a failure carrying why.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Pack Textures", Category = "NEXUS|Tooling",
-		meta = (DocsURL = "https://nexus-framework.com/docs/tooling/texture-packer/"))
+		meta = (DocsURL = "https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-library/#pack-textures"))
 	static FNTexturePackerResult PackTextures(const TArray<UTexture2D*>& Textures);
 
 	/**
@@ -42,7 +43,7 @@ public:
 	 * @return What was produced, or a failure carrying why.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Unpack Texture", Category = "NEXUS|Tooling",
-		meta = (DocsURL = "https://nexus-framework.com/docs/tooling/texture-packer/"))
+		meta = (DocsURL = "https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-library/#unpack-texture"))
 	static FNTexturePackerResult UnpackTexture(UTexture2D* Texture);
 
 	/**
@@ -51,16 +52,16 @@ public:
 	 * @return The union of what every run produced; succeeds where at least one texture was unpacked.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Unpack Textures", Category = "NEXUS|Tooling",
-		meta = (DocsURL = "https://nexus-framework.com/docs/tooling/texture-packer/"))
+		meta = (DocsURL = "https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-library/#unpack-textures"))
 	static FNTexturePackerResult UnpackTextures(const TArray<UTexture2D*>& Textures);
 
 	/** Packs exactly what Request describes, deciding nothing. */
 	UFUNCTION(BlueprintCallable, DisplayName = "Pack Textures (Advanced)", Category = "NEXUS|Tooling",
-		meta = (DocsURL = "https://nexus-framework.com/docs/tooling/texture-packer/"))
+		meta = (DocsURL = "https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-library/#pack-textures-advanced"))
 	static FNTexturePackerResult PackTexturesAdvanced(const FNTexturePackRequest& Request);
 
 	/** Unpacks exactly what Request describes, deciding nothing. */
 	UFUNCTION(BlueprintCallable, DisplayName = "Unpack Texture (Advanced)", Category = "NEXUS|Tooling",
-		meta = (DocsURL = "https://nexus-framework.com/docs/tooling/texture-packer/"))
+		meta = (DocsURL = "https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-library/#unpack-texture-advanced"))
 	static FNTexturePackerResult UnpackTextureAdvanced(const FNTextureUnpackRequest& Request);
 };

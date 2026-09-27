@@ -26,6 +26,7 @@ struct FNTextureNameParts
  * for the settings CDO, which is what makes the naming half testable in isolation - a test builds a
  * UNTexturePackerSettings with NewObject to get the shipped defaults without whatever the project's ini has
  * done to them.
+ * @see <a href="https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-utils/">FNTexturePackerUtils</a>
  */
 class NEXUSTOOLINGEDITOR_API FNTexturePackerUtils
 {

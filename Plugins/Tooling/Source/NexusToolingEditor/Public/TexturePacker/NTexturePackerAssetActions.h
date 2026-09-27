@@ -11,6 +11,7 @@ class UToolMenu;
  * Two of the four decide nothing: they read the selection's names, work out the arrangement and write the
  * result, which is what makes unpacking a folder of packed textures one action rather than one per texture.
  * The other two open the window on the selection for the cases where a name says nothing useful.
+ * @see <a href="https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-asset-actions/">FNTexturePackerAssetActions</a>
  */
 class FNTexturePackerAssetActions
 {

@@ -51,6 +51,7 @@ enum class ENTextureChannelSource : uint8
  * from its filename suffix and looks the resulting signature up in the layout table; unpacking reads a
  * layout and writes one asset per role. The whole table is project-editable on UNTexturePackerSettings, so a
  * project with its own naming can retune it without a code change.
+ * @see <a href="https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-types/">FNTextureChannelRole</a>
  */
 USTRUCT()
 struct NEXUSTOOLINGEDITOR_API FNTextureChannelRole
@@ -110,6 +111,7 @@ struct NEXUSTOOLINGEDITOR_API FNTextureChannelRole
  * required to be adjacent, which every convention in practice satisfies.
  *
  * NAME_None means the channel carries nothing - packing leaves it at its constant, unpacking skips it.
+ * @see <a href="https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-types/">FNTexturePackedLayout</a>
  */
 USTRUCT()
 struct NEXUSTOOLINGEDITOR_API FNTexturePackedLayout

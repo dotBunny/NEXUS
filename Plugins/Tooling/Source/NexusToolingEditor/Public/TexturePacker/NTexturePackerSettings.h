@@ -22,7 +22,7 @@
  *       row that matches - put the spelling the project prefers above its synonyms. Lookups by suffix are
  *       unambiguous and unaffected.
  *
- * @see <a href="https://nexus-framework.com/docs/tooling/texture-packer/">Texture Packer</a>
+ * @see <a href="https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-settings/">UNTexturePackerSettings</a>
  */
 UCLASS(config = NexusEditor, defaultconfig)
 class NEXUSTOOLINGEDITOR_API UNTexturePackerSettings : public UDeveloperSettings
@@ -98,7 +98,10 @@ public:
 	 */
 	const FNTexturePackedLayout* FindLayoutByRoles(const TArray<FName>& InRoles) const;
 
-	/** @return Every suffix in the roles and layouts tables, longest first, for greedy suffix matching. */
+	/**
+	 * Collects every suffix in the roles and layouts tables, longest first, for greedy suffix matching.
+	 * @param OutSuffixes Reset, then filled with each suffix once.
+	 */
 	void GetAllSuffixes(TArray<FString>& OutSuffixes) const;
 
 #endif // WITH_EDITORONLY_DATA

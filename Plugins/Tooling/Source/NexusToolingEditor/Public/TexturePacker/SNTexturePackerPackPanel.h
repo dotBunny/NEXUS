@@ -16,6 +16,7 @@ struct FAssetData;
  *
  * The output path and name are proposed from what the assigned textures are called and stop being proposed
  * the moment either is typed into, so the common case takes no typing and an uncommon one is not fought with.
+ * @see <a href="https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-pack-panel/">SNTexturePackerPackPanel</a>
  */
 class SNTexturePackerPackPanel : public SCompoundWidget
 {

@@ -25,6 +25,7 @@ enum class ENTexturePackerMode : uint8
  * The shell owns nothing but the switch. Each panel keeps its own state, so moving between the two modes and
  * back finds the work where it was left - which matters, because packing a set and then checking an existing
  * one is a normal way round to work.
+ * @see <a href="https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-window/">SNTexturePacker</a>
  */
 class SNTexturePacker : public SCompoundWidget
 {

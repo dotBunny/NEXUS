@@ -189,6 +189,7 @@ struct NEXUSTOOLINGEDITOR_API FNTexturePackerResult
  * actions and UNTexturePackerLibrary. Everything that decides anything - what an output is called, what
  * compression it gets, which channels belong together - is in the Build* functions rather than in the UI, so
  * a batch run over a folder makes the same choices a person would see proposed in the window.
+ * @see <a href="https://nexus-framework.com/docs/tooling/editor-types/texture-packer/texture-packer-job/">FNTexturePackerJob</a>
  */
 class NEXUSTOOLINGEDITOR_API FNTexturePackerJob
 {
