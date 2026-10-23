@@ -96,7 +96,7 @@ void FNEditorCommands::OnHelpBugReport()
 
 void FNEditorCommands::OnHelpDiscord()
 {
-	FPlatformProcess::LaunchURL(TEXT("https://discord.gg/2M9HczHanW"),nullptr, nullptr);
+	FPlatformProcess::LaunchURL(TEXT("https://discord.gg/DsTbfQjq3H"),nullptr, nullptr);
 }
 
 void FNEditorCommands::OnHelpRoadmap()
